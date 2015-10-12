@@ -1,0 +1,15 @@
+#!/bin/csh -f
+set platform=`uname`
+switch ($platform)
+case "Darwin":
+	echo "Makefile for Moc OS X"
+	sed -f darwin.sed < Makefile.generic > Makefile
+	breaksw
+case "Linux":
+	echo "Makefile for Linux"
+	sed -f linux.sed < Makefile.generic > Makefile
+	breaksw
+default:
+	echo "Unsupported platform"
+	breaksw
+endsw

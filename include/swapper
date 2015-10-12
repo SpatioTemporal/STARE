@@ -1,0 +1,16 @@
+// swapEndian: Swap endianness for the given buffer that contains <n> items
+//             each <len> bytes in length.
+
+static void
+swapEndian( unsigned char *buff,		// buffer to swap ABAB-->BABA
+	    int len, int n )			// # of bytes and # of items
+{
+   int i, j;
+
+   for( i = 0; i < n*len; i += len ) {
+     for( j = len-1; j >= (len>>1); j-- ) {
+       SWAP( buff[i + len - (j+1)], buff[i+j] );
+     }
+   }
+}
+

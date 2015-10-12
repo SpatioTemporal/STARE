@@ -1,0 +1,27 @@
+# Microsoft Developer Studio Generated Dependency File, included by sqlExample.mak
+
+.\app\sqlExample.cpp : \
+	".\include\BitList.h"\
+	".\include\BitList.hxx"\
+	".\include\SpatialConstraint.h"\
+	".\include\SpatialConstraint.hxx"\
+	".\include\SpatialConvex.h"\
+	".\include\SpatialConvex.hxx"\
+	".\include\SpatialDomain.h"\
+	".\include\SpatialDomain.hxx"\
+	".\include\SpatialEdge.h"\
+	".\include\SpatialException.h"\
+	".\include\SpatialGeneral.h"\
+	".\include\SpatialIndex.h"\
+	".\include\SpatialIndex.hxx"\
+	".\include\SpatialInterface.h"\
+	".\include\SpatialInterface.hxx"\
+	".\include\SpatialVector.h"\
+	".\include\SpatialVector.hxx"\
+	".\include\sqlInterface.h"\
+	".\include\sqlInterface.hxx"\
+	".\include\VarStr.h"\
+	".\include\VarStr.hxx"\
+	".\include\VarVec.h"\
+	".\include\VarVecDef.h"\
+	

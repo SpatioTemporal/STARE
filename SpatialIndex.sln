@@ -1,0 +1,28 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpatialIndex", "SpatialIndex.vcproj", "{A7901A2C-D864-491A-BAFE-F8009136438B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlExample", "sqlExample.vcproj", "{680C76DB-40AE-47CD-9978-EFF268962D88}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+		{680C76DB-40AE-47CD-9978-EFF268962D88}.0 = {A7901A2C-D864-491A-BAFE-F8009136438B}
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A7901A2C-D864-491A-BAFE-F8009136438B}.Debug.ActiveCfg = Debug|Win32
+		{A7901A2C-D864-491A-BAFE-F8009136438B}.Debug.Build.0 = Debug|Win32
+		{A7901A2C-D864-491A-BAFE-F8009136438B}.Release.ActiveCfg = Release|Win32
+		{A7901A2C-D864-491A-BAFE-F8009136438B}.Release.Build.0 = Release|Win32
+		{680C76DB-40AE-47CD-9978-EFF268962D88}.Debug.ActiveCfg = Debug|Win32
+		{680C76DB-40AE-47CD-9978-EFF268962D88}.Debug.Build.0 = Debug|Win32
+		{680C76DB-40AE-47CD-9978-EFF268962D88}.Release.ActiveCfg = Release|Win32
+		{680C76DB-40AE-47CD-9978-EFF268962D88}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
