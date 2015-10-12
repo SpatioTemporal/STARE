@@ -1,0 +1,14 @@
+# shtm
+
+A fork of version 2 of the Hierarchical Triangular Mesh developed for
+the Sloan Digital Sky Survey.
+
+Version 2 is the legacy version: http://www.skyserver.org/HTM/Old_default.aspx
+
+Seminal work on the HTM for indexing the sphere was done by P.Z. Kunszt, A.S. Szalay, I. Csabai, A.R. Thakar, with extended development by J. Gray and G. Fekete (http://www.skyserver.org/HTM/doc/).  See also Kondor et al., 2014, "http://arxiv.org/pdf/1410.0709.pdf".
+
+For more information about SDSS/HTM please visit: http://www.skyserver.org//default.aspx
+
+
+
+
