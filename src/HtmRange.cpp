@@ -1,6 +1,8 @@
-#include <iostream.h> // cout
-#include <iomanip.h>  // setw()
+#include <iostream> // cout
+#include <iomanip>  // setw()
 #include <HtmRange.h>
+
+
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -12,7 +14,9 @@
 #define INTERSECT  0
 #define GAP_HISTO_SIZE 10000
 
-class ostream;
+using namespace std;
+
+// class ostream;
 
 extern "C" {
   uint64 cc_name2ID(const char *name);
@@ -557,7 +561,7 @@ int HtmRange::stats(int desiredSize)
   return bestgap;
 }
 
-ostream& operator<<(ostream& os, const HtmRange& range)
+std::ostream& operator<<(std::ostream& os, const HtmRange& range)
 {
   char tmp_buf[256];
   Key lo, hi;
@@ -613,7 +617,7 @@ int HtmRange::getNext(Key *lo, Key *hi)
 	return 1;
 }
 
-void HtmRange::print(int what, ostream& os, bool symbolic)
+void HtmRange::print(int what, std::ostream& os, bool symbolic)
 {
 
   Key hi, lo;

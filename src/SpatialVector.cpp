@@ -13,6 +13,7 @@
 //#     Oct 18, 2001 : Dennis C. Dinge -- Replaced ValVec with std::vector
 //#
 
+
 #include "SpatialVector.h"
 #include "SpatialException.h"
 
@@ -293,9 +294,9 @@ SpatialVector::show() const
 // print to stdout
 //
 void 
-SpatialVector::read(istream &in)
+SpatialVector::read(std::istream &in)
 {
-  in.setf(ios::skipws);
+  in.setf(std::ios::skipws);
   in >> x_ >> y_ >> z_;
   if(!in.good())
     throw SpatialFailure("SpatialVector:read: Could not read vector");
@@ -305,7 +306,7 @@ SpatialVector::read(istream &in)
 // print to stdout
 //
 void 
-SpatialVector::write(ostream &out) const
+SpatialVector::write(std::ostream &out) const
 {
   out << x_ << ' ' << y_ << ' ' << z_ ;
 }

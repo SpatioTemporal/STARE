@@ -1,6 +1,8 @@
 #ifndef _SkipList_H
 #define _SkipList_H
 
+#include <iostream>
+
 /*
   SkipList.h
 
@@ -15,22 +17,26 @@
 // Was: -1
 
 class SkipListElement;
-class ostream;
+// class ostream;
 
 class LINKAGE SkipList{
 public:
-  SkipList(float probability = 0.5);
-  ~SkipList();
+	/* ITERATOR SUPPRT */
+	void reset() {
+		iter = myHeader->getElement(0);
+	}
 
-  void insert(const Key searchKey, const Value value); // insert new element
-  Value searchAlt(const Key searchKey); // search element with key
-  Value search(const Key searchKey, const int iterator_flag); // search element with key
-  Value search(const Key searchKey); // search element with key
-  Key findMAX(const Key searchKey) const; // search element with key NGT searchKey
-  Key findMIN(const Key searchKey) const; // search element with key NLT searchKey
-  void list(ostream & os);	// List to stream
-				/* ITERATOR SUPPRT */
-  void reset() {iter = myHeader->getElement(0);}
+	SkipList(float probability = 0.5);
+	~SkipList();
+
+	void insert(const Key searchKey, const Value value); // insert new element
+	Value searchAlt(const Key searchKey); // search element with key
+	Value search(const Key searchKey, const int iterator_flag); // search element with key
+	Value search(const Key searchKey); // search element with key
+	Key findMAX(const Key searchKey) const; // search element with key NGT searchKey
+	Key findMIN(const Key searchKey) const; // search element with key NLT searchKey
+	void list(ostream & os);	// List to stream
+
   int step() {
     iter = iter->getElement(0); return (iter != NIL);}
 
@@ -73,9 +79,10 @@ public:
 
   friend ostream& operator<<(ostream& os, const SkipList& list);
 
-private:
-  float myProbability;
   SkipListElement* myHeader; // the header (first) list element
+  float myProbability;
+
+private:
   SkipListElement* iter;
   long myLength;
 };

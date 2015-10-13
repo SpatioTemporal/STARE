@@ -31,12 +31,14 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 
 // begin add dcd
 #include <vector>
 #include <string>
 #include <algorithm>
+
+using namespace std;
 
 /** Dynamic string.
 

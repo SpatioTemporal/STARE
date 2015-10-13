@@ -127,9 +127,9 @@ test2 (int flag) {
 	return showtest("Test2 (constr)\t", nfailed, flag);
 }
 
+/*
 
-int
-test3 (int flag) {
+int test3 (int flag) {
 	//----------------------------------------------
 	// test3: the basic convex  tests
 	//----------------------------------------------
@@ -204,6 +204,7 @@ test4 (int flag) {
 	return showtest("Test4 (domain)\t",nfailed,flag);
 }
 
+*/
 
 int
 main(int argc, char *argv[]) { 	
@@ -216,8 +217,8 @@ main(int argc, char *argv[]) {
 	// debug level verbosity: 0-silent, 1-oneline, 2-more 3-full
 	nfailed += test1(dbglev);
 	nfailed += test2(dbglev);
-	nfailed += test3(dbglev);
-	nfailed += test4(dbglev);
+	// nfailed += test3(dbglev);
+	// nfailed += test4(dbglev);
 
 	showtest("-------------\nAll tests", nfailed, 1);
     return 0;

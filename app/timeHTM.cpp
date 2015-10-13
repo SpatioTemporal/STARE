@@ -28,6 +28,9 @@
 //#
 //#
 // dcdtmp #include <VarVecDef.h>
+
+#include <iostream>
+
 #include "SpatialIndex.h"
 #include <time.h>
 #include "stdlib.h"
@@ -50,11 +53,12 @@
 
 *******************************************************/
 
+int
 main(int argc,char ** argv) {
 
   	// initialize
 	if(argc < 3) {
-	  cout << "Usage: timeHTM level savelevel" << endl;
+	  std::cout << "Usage: timeHTM level savelevel" << std::endl;
 	  return -1;
 	}
 	try {

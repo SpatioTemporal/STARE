@@ -13,13 +13,13 @@
 //#
 //#     Oct 18, 2001 : Dennis C. Dinge -- Replaced ValVec with std::vector
 
-#include <iostream.h>
+#include <iostream>
 #include <HtmRange.h>
 #include "SpatialInterface.h"
 #include "string.h"
 #include "stdlib.h"
 #include "math.h"
-#include <iomanip.h> // setw
+#include <iomanip> // setw
 
 #define MAX_RANGES 100
 
@@ -536,8 +536,8 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			polyCorners_.resize(polyCorners_.size() + 1);
 		else {
 			//was: polyCorners_.insert(polyCorners_.end() - i - 1);
-			polyCorners_.insert(polyCorners_.end() - i - 1);
-			// cerr << "setPolyCorner: the other case" << endl;
+			// cf. AJM: polyCorners_.insert(polyCorners_.end() - i - 1);
+			cerr << "setPolyCorner: the other case" << endl;
 		}
 		polyCorners_[i+1].c_ = v;
 		break;

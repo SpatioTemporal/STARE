@@ -6,7 +6,7 @@ SRC     = trcomp.cpp
 SHELL   = /bin/csh
 APPS    = range2list fillout toid toname par xptest filter lookup
 
-CFLAGS  = @@CFLAGS##
+CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
 
 #
 # Should not have -O3 with debug

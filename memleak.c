@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+// #include <malloc.h>
+#include <stdlib.h>
+// Microsoft memory leak checking dependency.
 #include <crtdbg.h>
 
 // This routine place comments at the head of a section of debug output

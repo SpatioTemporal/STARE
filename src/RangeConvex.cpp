@@ -1265,3 +1265,6 @@ ostream& operator <<( ostream& out, const RangeConvex & c) {
   return(out);
 }
 
+void
+RangeConvex::write(ostream& out) { out << this;};
+

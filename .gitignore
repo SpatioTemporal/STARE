@@ -1,2 +1,9 @@
 # git ignores...
 
+*.o
+# Eclipse/CDT Cevelop configuration
+# Generated code: /Debug/
+#/.settings/
+#.cproject
+#.project
+

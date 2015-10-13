@@ -9,8 +9,8 @@
 
 */
 
-#include <iostream.h> // cout
-#include <iomanip.h> // setw()
+#include <iostream> // cout
+#include <iomanip> // setw()
 #include <stdlib.h> // rand(), drand48()
 
 

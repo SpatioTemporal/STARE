@@ -12,7 +12,9 @@
 
 //* --- VarStr methods ------------------------------------------------------ */
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
+
+using namespace std;
 
 inline
 char *	VarStr::data() const{

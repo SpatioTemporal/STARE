@@ -6,8 +6,8 @@
   13.11.97; Gro; Version 1.0
 */
 
-#include <iostream.h> // cout
-#include <iomanip.h> // setw()
+#include <iostream> // cout
+#include <iomanip> // setw()
 #include <stdlib.h> // rand(), drand48()
 #include <limits.h> // INT_MAX
 

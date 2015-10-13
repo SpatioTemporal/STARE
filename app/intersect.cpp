@@ -26,7 +26,7 @@
 //#
 //#
 
-#include <iostream.h>
+#include <iostream>
 
 #define _INC_IOSTREAM
 
@@ -41,7 +41,7 @@
 #include <HtmRangeIterator.h>
 
 
-#include "fstream.h"
+#include <fstream>
 #include <time.h>
 
 

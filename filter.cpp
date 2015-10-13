@@ -1,6 +1,6 @@
-#include <iostream.h> // cout
-#include <fstream.h> // ifsteram
-#include <iomanip.h>  // setw()
+#include <iostream> // cout
+#include <fstream> // ifsteram
+#include <iomanip>  // setw()
 #include <stdlib.h>   // rand(), drand48() but on the mac osX there
                       // is no drand48 yet
 

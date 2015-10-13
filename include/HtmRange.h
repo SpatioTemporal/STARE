@@ -1,9 +1,11 @@
 #ifndef _HTMHANGE_H_
 #define _HTMHANGE_H_
 
+#include <iostream>
+
 #include <SkipList.h>
 
-class ostream;
+// class ostream;
 
 enum InclusionType {
   InclOutside = 0,
@@ -37,10 +39,14 @@ class LINKAGE HtmRange {
   int nranges();
   void reset();
 
-  void print(int what, ostream& os, bool symbolic); // FIX THIS, so caller does not set symbolic here....
+  void print(int what, std::ostream& os, bool symbolic); // FIX THIS, so caller does not set symbolic here....
 
   int compare(const HtmRange & other) const;
 
+  // Moved here per ajmendez.
+  SkipList *my_los;
+  SkipList *my_his;
+  bool symbolicOutput;
 
   HtmRange();
   ~HtmRange(){
@@ -54,12 +60,10 @@ class LINKAGE HtmRange {
  protected:
   InclusionType tinside(const Key mid) const;
   // const char buffer[256];
-  bool symbolicOutput;
- private:
-
-  
-  SkipList *my_los;
-  SkipList *my_his;
+//  bool symbolicOutput;
+// private:
+//  SkipList *my_los;
+//  SkipList *my_his;
 };
 
 

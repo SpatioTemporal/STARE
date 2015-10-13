@@ -1,6 +1,8 @@
 #ifndef _SkipListElement_H
 #define _SkipListElement_H
 
+#include <iostream>
+
 /*
   File: SkipListElement.h
   Interface for skip list elements
@@ -28,8 +30,10 @@
 typedef int64 Key;            // key type
 typedef int Value;          // value type
 
-class ostream;
+// class ostream;
 class SkipListElement;
+
+using namespace std;
 
 class LINKAGE SkipListElement{
 public:
@@ -44,13 +48,14 @@ public:
 
   long getLevel() const {return(myLevel);}; // get level of element
   void setLevel(long level);
-  static void SkipListElement::prmatrix();
+  // static void SkipListElement::prmatrix();
+  static void prmatrix();
   SkipListElement* getElement(long level); // get next element in level
   void setElement(long level, SkipListElement* element); // set next element in level
   
   friend ostream& operator<<(ostream& os, const SkipListElement& element);
 
-private:
+// private:
   long myLevel; // level of element
   Key myKey; // key of element
   Value myValue; // value of element

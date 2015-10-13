@@ -1,4 +1,3 @@
-#include <iostream.h>
 
 #define _INC_IOSTREAM
 
@@ -10,8 +9,8 @@
 #include <sqlInterface.h>
 #include <HtmRange.h>
 
-
-#include "fstream.h"
+#include <iostream>
+#include <fstream>
 #include <time.h>
 
 #define OK_MSG  "OK"

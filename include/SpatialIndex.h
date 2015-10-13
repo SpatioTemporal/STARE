@@ -145,7 +145,7 @@ public:
 		  size_t & v1, size_t & v2, size_t & v3) const; 
 
   /// print all vertices to output stream
-  void showVertices(ostream & out) const;
+  void showVertices(std::ostream & out) const;
 
   /// set the maximum depth of the layer
   void setMaxlevel(int level);

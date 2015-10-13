@@ -15,6 +15,8 @@
 //#		Jul 25, 2002 : Gyorgy Fekete -- Added pointById()
 //#
 
+#include <iostream>
+
 #include "SpatialIndex.h"
 
 #ifdef _WIN32
@@ -117,10 +119,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
 /////////////SHOWVERTICES/////////////////////////////////
 // showVertices: print every vertex to the output stream
 void
-SpatialIndex::showVertices(ostream & out) const
+SpatialIndex::showVertices(std::ostream & out) const
 {
   for(size_t i = 0; i < vertices_.size()-1; i++)
-	out << vertices_[i] << endl;
+	out << vertices_[i] << std::endl;
 }
 
 /////////////NODEVERTEX///////////////////////////////////
