@@ -21,6 +21,9 @@
 							<builder arguments="" command="make" id="cdt.managedbuild.target.gnu.builder.macosx.base.506672589" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1735233729" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.274799421" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base">
+								<option id="macosx.cpp.link.option.paths.380661082" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/opt/local/lib"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.1864680327" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -31,6 +34,9 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1565662430" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
+								<option id="gnu.cpp.compiler.option.include.paths.359840706" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/opt/local/include/"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1459343189" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.195298465" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base">
@@ -38,6 +44,39 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1474632570" name="/" resourcePath="tests/CUTE">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.base.1377220078" name="MacOSX GCC" superClass="cdt.managedbuild.toolchain.gnu.macosx.base" unusedChildren="">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.MachO64" id="cdt.managedbuild.target.gnu.platform.macosx.base" name="Debug Platform" osList="macosx" superClass="cdt.managedbuild.target.gnu.platform.macosx.base"/>
+							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1411839277" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1735233729"/>
+							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.1726687252" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.274799421"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.macosx.base.1503762154" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.macosx.base.202251179">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1019216619" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1911693881" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base.1565662430"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.1463418017" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519">
+								<option id="gnu.cpp.compiler.option.include.paths.1396276000" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/shtm-1/include}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1873010743" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.1592719156" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.macosx.base.195298465">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.498343798" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1318871472" name="Test.cpp" rcbsApplicability="disable" resourcePath="tests/CUTE/Test.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519.282221697">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519.282221697" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519">
+							<option id="gnu.cpp.compiler.option.include.paths.1617275565" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<listOptionValue builtIn="false" value="&quot;${workspace_loc:/shtm-1/cute}&quot;"/>
+							</option>
+							<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.923419708" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+						</tool>
+					</fileInfo>
+					<sourceEntries>
+						<entry excluding="tests/CUTE|src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="tests/CUTE"/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -60,10 +99,10 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517;cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1399890614;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519;cdt.managedbuild.tool.gnu.cpp.compiler.input.1459343189">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug.1615617621;cdt.managedbuild.tool.gnu.cpp.compiler.input.199834744">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.release.1414249012;cdt.managedbuild.tool.gnu.cpp.compiler.input.1497941015">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.release.1414249012;cdt.managedbuild.tool.gnu.cpp.compiler.input.1497941015">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug.1615617621;cdt.managedbuild.tool.gnu.cpp.compiler.input.199834744">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.debug.1860416933;cdt.managedbuild.tool.gnu.c.compiler.input.1821151337">
@@ -75,9 +114,23 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
-			<target name="testrun" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="CuteTests" path="tests/CUTE" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
 				<buildArguments/>
+				<buildTarget>CuteTests</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="clean-test" path="tests/CUTE" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildTarget>clean-test</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="testrun" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
 				<buildTarget>testrun</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
@@ -85,10 +138,17 @@
 			</target>
 			<target name="example" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>make</buildCommand>
-				<buildArguments/>
 				<buildTarget>example</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>false</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="libs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>libs</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 		</buildTargets>

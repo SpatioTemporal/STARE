@@ -1,8 +1,12 @@
-CXX      = g++
-CC       = gcc
-INCDIR  = ./include
-OBJ     = ./unix
-SRC     = trcomp.cpp
+
+.PHONY: libs
+
+TOPDIR  = /Users/mrilee/git/shtm
+CXX     = g++
+CC      = gcc
+INCDIR  = $(TOPDIR)/include
+OBJ     = $(TOPDIR)/unix
+SRC     = $(TOPDIR)/trcomp.cpp
 SHELL   = /bin/csh
 APPS    = range2list fillout toid toname par xptest filter lookup
 
@@ -38,8 +42,10 @@ OBJECTS = \
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
 
-all: intersect  filter
+all: intersect filter
 # example
+
+
 
 example: ${OBJ}/example.o ${OBJECTS}
 	$(CXX) -o $@  ${OBJ}/example.o ${OBJECTS}
@@ -49,6 +55,13 @@ sqlExample: ${OBJ}/sqlExample.o ${OBJECTS}
 
 intersect: ${OBJ}/intersect.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/intersect.o ${OBJECTS} 
+	
+	
+libs: ${OBJ}/libshtm.a
+
+${OBJ}/libshtm.a: ${OBJECTS}
+	ar -r $@ ${OBJECTS}
+	ar -s $@
 #---------------------------------------------
 ${OBJ}/htmlookup.o: app/htmlookup.c
 	$(CC) $(CFLAGS) app/htmlookup.c -o $@
@@ -83,7 +96,7 @@ filter: filter.o $(SKIPOB)
 
 filter.o: filter.cpp
 	$(CXX) $(CFLAGS) filter.cpp -o $@
-
+	
 testrun:
 	make -f Makefile intersect
 	./intersect  20 testInputIntersect > tmp.out

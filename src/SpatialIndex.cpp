@@ -49,6 +49,7 @@
 #define ICHILD_(x) nodes_[index_].childID_[(x)]
 #define IOFFSET 9
 
+using namespace std;
 
 // ===========================================================================
 //
@@ -137,12 +138,15 @@ SpatialIndex::nodeVertex(const size_t idx,
 
 /////////////NODEVERTEX///////////////////////////////////
 // nodeVertex: return the vectors of the vertices, based on the ID
+// // TODO Note:  Which ID?
 // 
 void 
 SpatialIndex::nodeVertex(const uint64 id,
 			 SpatialVector & v0,
 			 SpatialVector & v1,
 			 SpatialVector & v2) const {
+
+	// TODO Note we need to be very careful about id.
 
   if(buildlevel_ == maxlevel_) {
     uint32 idx = (uint32)id;
@@ -152,11 +156,14 @@ SpatialIndex::nodeVertex(const uint64 id,
     return;
   }
 
+  cout << "NOTE: building vertices..." << endl;
+
+  // TODO Figure out this leaf node indexing and why a depth of 14 is bad.  Seems related to 32 vs. 64 bits.
   // buildlevel < maxlevel
   // get the id of the stored leaf that we are in
   // and get the vertices of the node we want
   uint64 sid = id >> ((maxlevel_ - buildlevel_)*2);
-  uint32 idx = (uint32)(sid - storedleaves_ + IOFFSET);
+  uint32 idx = (uint32)(sid - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
 
   v0 = vertices_[nodes_[idx].v_[0]];
   v1 = vertices_[nodes_[idx].v_[1]];
@@ -372,6 +379,9 @@ SpatialIndex::sortIndex() {
 	}
   }
 }
+
+// TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we got to 64 easy?
+
 //////////////////IDBYNAME/////////////////////////////////////////////////
 // Translate ascii leaf name to a uint32
 //
@@ -507,6 +517,15 @@ SpatialIndex::nameById(uint64 id, char * name){
 //////////////////POINTBYID////////////////////////////////////////////////
 // Find a vector for the leaf node given by its ID
 //
+
+void
+SpatialIndex::pointById_mlr1(SpatialVector &vec, uint64 ID) const {
+// TODO Check out index->nodeVertex for a possibly correct way to get the right point.
+	// TODO The way done below may depend on the bitlist and not correctly handle the dynamically created "leaf" index.
+	uint32 leafID = this->leafNumberById(ID)+IOFFSET;
+//	this->pointById(vec,ID);
+	this->pointById(vec,leafID);
+}
 void
 SpatialIndex::pointById(SpatialVector &vec, uint64 ID) const {
 
@@ -516,9 +535,12 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 ID) const {
 	
 	SpatialVector v0, v1, v2; //
 
+	// TODO nodeVertex is expecting something like a leafId
+	// TODO nodeVertex might not account for an offset.
 	this->nodeVertex(ID, v0, v1, v2);
 		
-	nameById(ID, name);
+	//??? mlr nameById(ID, name);  // TODO Note: None of these are used!
+	// TODO Where is name used?
 /*
     I started to go this way until I discovered nameByID...
 	Some docs would be nice for this

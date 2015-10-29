@@ -65,6 +65,7 @@ public:
      Given a HTM ID, return a vector to the centroid of the triangle (GYF)
   */
   void pointById(SpatialVector &vec, uint64 htmid) const;
+  void pointById_mlr1(SpatialVector &vec, uint64 htmid) const;
 
   /** Look at the given htmid, and adjust the spatialindex object's depth (GYF)
     */
@@ -76,6 +77,8 @@ public:
 
   /** Lookup a node ID from x,y,z.
       Given a certain cartesian vector x,y,z and index depth return its HTM ID.
+      Notice there is no depth referred to in the argument list below.  The depth is
+      implicit--part of the construction of the index.
   */
   uint64 lookupID(float64 x, float64 y, float64 z) const;
 

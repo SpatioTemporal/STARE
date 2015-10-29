@@ -103,10 +103,14 @@ public:
 
   /** find the vector to the centroid of a triangle represented by 
 	  the ID */
+  void pointById_mlr1(SpatialVector & vector, uint64 ID) const;
   void pointById(SpatialVector & vector, uint64 ID) const;
 
   /** find a node by giving a vector. 
-      The ID of the node is returned. */
+      The ID of the node is returned.
+
+      Find the leaf triangle containing the vector.
+      */
   uint64 idByPoint(SpatialVector & vector) const;
 
   /// find a node by giving a ra,dec in degrees.

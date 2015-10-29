@@ -44,6 +44,8 @@
 // ------------------------------------------------------------------------
 //
 
+// TODO Explore using uint64 instead of uint32...
+
 #if !defined(OO_MACHINE_H) && !defined(OO_CONFIG_H) && !defined(SXGENERAL_H)
 typedef char				int8;
 typedef unsigned char		uint8;
@@ -71,6 +73,7 @@ typedef unsigned long long	uint64;
 #define HTMMAXDEPTH        25
 #define MAX_SQL_DEPTH      20
 #define HTMMAXKEEP		   12
+// TODO Try to extend HTMMAXBIT.  Change HTMNAMEMAX etc?  I see maxdepth above is 25... Why is the following 14?
 #define HTMMAXBIT		   14
 
 // emulate the standard bool type where not supported by compiler
