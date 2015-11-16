@@ -1,7 +1,7 @@
 
 .PHONY: libs
 
-TOPDIR  = /Users/mrilee/git/shtm
+TOPDIR  = /Users/mrilee/git/hstm
 CXX     = g++
 CC      = gcc
 INCDIR  = $(TOPDIR)/include
@@ -57,9 +57,9 @@ intersect: ${OBJ}/intersect.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/intersect.o ${OBJECTS} 
 	
 	
-libs: ${OBJ}/libshtm.a
+libs: ${OBJ}/libhstm.a
 
-${OBJ}/libshtm.a: ${OBJECTS}
+${OBJ}/libhstm.a: ${OBJECTS}
 	ar -r $@ ${OBJECTS}
 	ar -s $@
 #---------------------------------------------

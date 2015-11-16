@@ -7,7 +7,7 @@ include ../../Makefile
 
 CFLAGS += -I$(TOPDIR)/cute -I/opt/local/include
 
-LDFLAGS += -L/opt/local/lib -L../../unix -lshtm
+LDFLAGS += -L/opt/local/lib -L../../unix -lhstm
 
 CuteTests: test
 	./test
