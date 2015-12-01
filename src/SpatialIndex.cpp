@@ -62,6 +62,8 @@ using namespace std;
 SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxlevel), 
   buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
 {
+//	debug = false;
+
   size_t nodes,vertices;
 
   vMax(&nodes,&vertices);
@@ -71,6 +73,7 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
 
   N(0).index_ = 0;					// initialize invalid node
 
+  // TODO A better interface is possible by using layers. MLR
   // initialize first layer
   layers_[0].level_ = 0;
   layers_[0].nVert_ = 6;
@@ -81,12 +84,12 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
 
   // set the first 6 vertices
   float64 v[6][3] = {
-    {0.0L,  0.0L,  1.0L}, // 0
-    {1.0L,  0.0L,  0.0L}, // 1
-    {0.0L,  1.0L,  0.0L}, // 2
-   {-1.0L,  0.0L,  0.0L}, // 3
-    {0.0L, -1.0L,  0.0L}, // 4
-    {0.0L,  0.0L, -1.0L}  // 5
+    {0.0L,  0.0L,  1.0L}, // 0 k
+    {1.0L,  0.0L,  0.0L}, // 1 i
+    {0.0L,  1.0L,  0.0L}, // 2 j
+   {-1.0L,  0.0L,  0.0L}, // 3 -i
+    {0.0L, -1.0L,  0.0L}, // 4 -j
+    {0.0L,  0.0L, -1.0L}  // 5 -k
   };
 
   for(int i = 0; i < 6; i++)
@@ -98,10 +101,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
   newNode(2,5,3,9,0);  // S1
   newNode(3,5,4,10,0); // S2
   newNode(4,5,1,11,0); // S3
-  newNode(1,0,4,12,0); // N0
-  newNode(4,0,3,13,0); // N1
-  newNode(3,0,2,14,0); // N2
-  newNode(2,0,1,15,0); // N3
+  newNode(1,0,4,12,0); // N0  i k -j
+  newNode(4,0,3,13,0); // N1 -j k -i
+  newNode(3,0,2,14,0); // N2 -i k  j
+  newNode(2,0,1,15,0); // N3  j k  i
 
   //  loop through buildlevel steps, and build the nodes for each layer
 
@@ -131,6 +134,7 @@ SpatialIndex::showVertices(std::ostream & out) const
 void 
 SpatialIndex::nodeVertex(const size_t idx, 
 			 size_t & v1, size_t & v2, size_t & v3) const {
+//	cout << "nodeVertex-getMemo" << endl << flush;
  v1 = nodes_[idx].v_[0];
  v2 = nodes_[idx].v_[1];
  v3 = nodes_[idx].v_[2];
@@ -140,40 +144,76 @@ SpatialIndex::nodeVertex(const size_t idx,
 // nodeVertex: return the vectors of the vertices, based on the ID
 // // TODO Note:  Which ID?
 // 
-void 
-SpatialIndex::nodeVertex(const uint64 id,
+//void
+//SpatialIndex::nodeVertex(const uint64 id,
+//			 SpatialVector & v0,
+//			 SpatialVector & v1,
+//			 SpatialVector & v2) const {
+//	nodeVertex(id,v0,v1,v2,false);
+//}
+
+void
+SpatialIndex::nodeVertex(const uint64 nodeId64,
 			 SpatialVector & v0,
 			 SpatialVector & v1,
-			 SpatialVector & v2) const {
-
+			 SpatialVector & v2
+//			 ,bool verbose
+			 ) const {
+//	cout << "nodeVertex-1000" << endl << flush;
 	// TODO Note we need to be very careful about id.
 
+	if(nodeId64 > nodes_.size()){
+		cout << "nodeVertex error: id: " << nodeId64 << " nodes_.size: " << nodes_.size() << endl << flush;
+	}
+ // TODO Vertex by leaf number?
   if(buildlevel_ == maxlevel_) {
-    uint32 idx = (uint32)id;
-	v0 = vertices_[nodes_[idx].v_[0]];
-    v1 = vertices_[nodes_[idx].v_[1]];
-    v2 = vertices_[nodes_[idx].v_[2]];
+//	cout << "nodeVertex-1000-LookingUpVertices" << endl << flush;
+    uint32 nodeId32 = (uint32)nodeId64;
+	v0 = vertices_[nodes_[nodeId32].v_[0]];
+    v1 = vertices_[nodes_[nodeId32].v_[1]];
+    v2 = vertices_[nodes_[nodeId32].v_[2]];
     return;
   }
 
-  cout << "NOTE: building vertices..." << endl;
+//  cout << "NOTE: building vertices..." << endl;
 
   // TODO Figure out this leaf node indexing and why a depth of 14 is bad.  Seems related to 32 vs. 64 bits.
   // buildlevel < maxlevel
   // get the id of the stored leaf that we are in
   // and get the vertices of the node we want
-  uint64 sid = id >> ((maxlevel_ - buildlevel_)*2);
-  uint32 idx = (uint32)(sid - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
+  uint64 sid = nodeId64 >> ((maxlevel_ - buildlevel_)*2);
+  uint32 nodeId32 = (uint32)(
+//		  sid
+		  (nodeId64 >> ((maxlevel_ - buildlevel_)*2))
+		  + IOFFSET); // TODO What's the thinking behind going to the non-leaves?
+//		  - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
 
-  v0 = vertices_[nodes_[idx].v_[0]];
-  v1 = vertices_[nodes_[idx].v_[1]];
-  v2 = vertices_[nodes_[idx].v_[2]];
+#define PRINT_(msg,x) {cout << msg << ": " << x << " " << endl << flush;}
+  cout << "nodeVertex" << endl << flush;
+  PRINT_("nodeId64      ",nodeId64);
+  PRINT_("sid          ",sid);
+//  PRINT_("sid - storedleaves_ + IOFFSET",sid - storedleaves_ + IOFFSET);
+  PRINT_("nodeId32     ",nodeId32);
+  PRINT_("maxlevel_    ",maxlevel_);
+  PRINT_("buildlevel_  ",buildlevel_);
+  PRINT_("storedleaves_",storedleaves_);
+  PRINT_("leafCount()  ",leafCount());
+  PRINT_("IOFFSET      ",IOFFSET);
+  PRINT_("nodes_.size  ",nodes_.size());
+#undef PRINT_
 
-  // loop therough additional levels,
+  // TODO What stored leaf are we in?  We should cut the extra off of id to get idx.
+  v0 = vertices_[nodes_[nodeId32].v_[0]];
+  v1 = vertices_[nodes_[nodeId32].v_[1]];
+  v2 = vertices_[nodes_[nodeId32].v_[2]];
+
+  // TODO nodeId64 seems wrong.
+  // loop through additional levels,
   // pick the correct triangle accordingly, storing the
   // vertices in v1,v2,v3
   for(uint32 i = buildlevel_ + 1; i <= maxlevel_; i++) {
-    uint64 j = ( id >> ((maxlevel_ - i)*2) ) & 3;
+    uint64 j = ( nodeId64 >> ((maxlevel_ - i)*2) ) & 3;
+
     SpatialVector w0 = v1 + v2; w0.normalize();
     SpatialVector w1 = v0 + v2; w1.normalize();
     SpatialVector w2 = v1 + v0; w2.normalize();
@@ -380,7 +420,7 @@ SpatialIndex::sortIndex() {
   }
 }
 
-// TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we got to 64 easy?
+// TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we go to 64 easy?
 
 //////////////////IDBYNAME/////////////////////////////////////////////////
 // Translate ascii leaf name to a uint32
@@ -408,32 +448,37 @@ SpatialIndex::sortIndex() {
 uint64
 SpatialIndex::idByName(const char *name) {
 
-  uint64 out=0, i;
-  uint32 size = 0;
+//	cout << "idByName-1000" << endl << flush;
 
-  if(name == 0)              // null pointer-name
-    throw SpatialFailure("SpatialIndex:idByName:no name given");
-  if(name[0] != 'N' && name[0] != 'S')  // invalid name
-    throw SpatialFailure("SpatialIndex:idByName:invalid name",name);
+	uint64 out=0, i;
+	uint32 size = 0;
 
-  size = strlen(name);       // determine string length
-  // at least size-2 required, don't exceed max
-  if(size < 2)
-    throw SpatialFailure("SpatialIndex:idByName:invalid name - too short ",name);
-  if(size > HTMNAMEMAX)
-    throw SpatialFailure("SpatialIndex:idByName:invalid name - too long ",name);
+	if(name == 0)              // null pointer-name
+		throw SpatialFailure("SpatialIndex:idByName:no name given");
+	if(name[0] != 'N' && name[0] != 'S')  // invalid name
+		throw SpatialFailure("SpatialIndex:idByName:invalid name",name);
 
-  for(i = size-1; i > 0; i--) {// set bits starting from the end
-    if(name[i] > '3' || name[i] < '0') // invalid name
-      throw SpatialFailure("SpatialIndex:idByName:invalid name digit ",name);
-    out += (uint64(name[i]-'0') << 2*(size - i -1));
-  }
+	size = strlen(name);       // determine string length
+	/* TODO Note that size contains depth information, but isn't really used beyond
+	   sanity checking.
+	   */
+	// at least size-2 required, don't exceed max
+	if(size < 2)
+		throw SpatialFailure("SpatialIndex:idByName:invalid name - too short ",name);
+	if(size > HTMNAMEMAX)
+		throw SpatialFailure("SpatialIndex:idByName:invalid name - too long ",name);
 
-  i = 2;                     // set first pair of bits, first bit always set
-  if(name[0]=='N') i++;      // for north set second bit too
-  out += (i << (2*size - 2) );
+	for(i = size-1; i > 0; i--) {// set bits starting from the end
+		if(name[i] > '3' || name[i] < '0') // invalid name
+			throw SpatialFailure("SpatialIndex:idByName:invalid name digit ",name);
+		out += (uint64(name[i]-'0') << 2*(size - i -1));
+	}
 
-  /************************
+	i = 2;                     // set first pair of bits, first bit always set
+	if(name[0]=='N') i++;      // for north set second bit too
+	out += (i << (2*size - 2) );
+
+	/************************
   // This code may be used later for hashing !
   if(size==2)out -= 8;
   else {
@@ -445,8 +490,8 @@ SpatialIndex::idByName(const char *name) {
     }
     out -= level4 - offset;
   }
-  **************************/
-  return out;
+	 **************************/
+	return out;
 }
 
 
@@ -521,8 +566,9 @@ SpatialIndex::nameById(uint64 id, char * name){
 void
 SpatialIndex::pointById_mlr1(SpatialVector &vec, uint64 ID) const {
 // TODO Check out index->nodeVertex for a possibly correct way to get the right point.
-	// TODO The way done below may depend on the bitlist and not correctly handle the dynamically created "leaf" index.
+// TODO The way done below may depend on the bitlist and not correctly handle the dynamically created "leaf" index.
 	uint32 leafID = this->leafNumberById(ID)+IOFFSET;
+//	uint32 leafID = ID-leafCount()+IOFFSET;
 //	this->pointById(vec,ID);
 	this->pointById(vec,leafID);
 }
@@ -538,6 +584,7 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 ID) const {
 	// TODO nodeVertex is expecting something like a leafId
 	// TODO nodeVertex might not account for an offset.
 	this->nodeVertex(ID, v0, v1, v2);
+//	this->nodeVertex(ID, v0, v1, v2, debug);
 		
 	//??? mlr nameById(ID, name);  // TODO Note: None of these are used!
 	// TODO Where is name used?
@@ -665,4 +712,17 @@ SpatialIndex::isInside(const SpatialVector & v, const SpatialVector & v0,
   if( (v1 ^ v2) * v < -gEpsilon) return false;
   if( (v2 ^ v0) * v < -gEpsilon) return false;
   return true;
+}
+
+uint64 SpatialIndex::indexAtNodeIndex(uint64 nodeIndex) {
+	return nodes_[nodeIndex].index_;
+}
+uint64 SpatialIndex::idAtNodeIndex(uint64 nodeIndex) {
+	return nodes_[nodeIndex].id_;
+}
+uint64 SpatialIndex::layersSize(){
+	return layers_.size();
+}
+uint64 SpatialIndex::firstIndexOfLayerAtDepth(uint64 depth){
+	return layers_[depth].firstIndex_;
 }
