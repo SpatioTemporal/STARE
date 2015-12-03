@@ -3,10 +3,9 @@
 *.o
 # Eclipse/CDT Cevelop configuration
 # Generated code: /Debug/
-#/.settings/
-.cproject
-.project
-language.settings.xml
+/.settings/
+/.cproject
+/.project
 
 /intersect
 /filter
