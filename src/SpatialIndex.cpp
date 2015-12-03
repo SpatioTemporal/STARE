@@ -57,6 +57,20 @@ using namespace std;
 //
 // ===========================================================================
 
+void SpatialIndex::printNode(int nodeIndex) {
+	cout << "nIdx: " << nodeIndex << " "
+			<< " own-idx, numeric-id-name, parent, children "
+			<< N(nodeIndex).index_ << " "
+			<< N(nodeIndex).id_ << "=(x"
+			<< hex << N(nodeIndex).id_ << ") "
+			<< dec << N(nodeIndex).parent_ << " "
+			<< N(nodeIndex).childID_[0] << " "
+			<< N(nodeIndex).childID_[1] << " "
+			<< N(nodeIndex).childID_[2] << " "
+			<< N(nodeIndex).childID_[3] << " "
+			<< endl << flush;
+}
+
 /////////////CONSTRUCTOR//////////////////////////////////
 //
 SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxlevel), 
@@ -153,7 +167,7 @@ SpatialIndex::nodeVertex(const size_t idx,
 //}
 
 void
-SpatialIndex::nodeVertex(const uint64 nodeId64,
+SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not an external htm index.
 			 SpatialVector & v0,
 			 SpatialVector & v1,
 			 SpatialVector & v2
@@ -165,10 +179,42 @@ SpatialIndex::nodeVertex(const uint64 nodeId64,
 	if(nodeId64 > nodes_.size()){
 		cout << "nodeVertex error: id: " << nodeId64 << " nodes_.size: " << nodes_.size() << endl << flush;
 	}
+
+	  // TODO Figure out this leaf node indexing and why a depth of 14 is bad.
+	  //      Seems related to 32 vs. 64 bits.
+	  // buildlevel < maxlevel
+	  // get the id of the stored leaf that we are in
+	  // and get the vertices of the node we want
+//	  uint64 sid = nodeId64 >> ((maxlevel_ - buildlevel_)*2); // Original
+	// Note shifting screws up the OFFSET--so does nodeId have an embedded offset or not?
+	uint64 sid = (nodeId64 - IOFFSET) >> ((maxlevel_ - buildlevel_)*2);
+	uint64 nodeId32 = (uint64)(
+			sid );
+	// Having an IOFFSET or storedleaves_ here is inconsistent with the table lookup below.
+	// But we still need to get beyond the first 9 anyway...
+	//			+ IOFFSET); // TODO What's the thinking behind going to the non-leaves?
+	//		  - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
+
+	#define PRINT_(msg,x) {cout << msg << ": " << x << " " << endl << flush;}
+	  cout << "nodeVertex" << endl << flush;
+	  PRINT_("nodeId64      ",nodeId64);
+	  PRINT_("sid          ",sid);
+	//  PRINT_("sid - storedleaves_ + IOFFSET",sid - storedleaves_ + IOFFSET);
+	  PRINT_("nodeId32     ",nodeId32);
+	  PRINT_("maxlevel_    ",maxlevel_);
+	  PRINT_("buildlevel_  ",buildlevel_);
+	  PRINT_("storedleaves_",storedleaves_);
+	  PRINT_("leafCount()  ",leafCount());
+	  PRINT_("IOFFSET      ",IOFFSET);
+	  PRINT_("nodes_.size  ",nodes_.size());
+	#undef PRINT_
+
  // TODO Vertex by leaf number?
   if(buildlevel_ == maxlevel_) {
+	  // TODO Note that the in the original code we use id as an index into nodes_ itself.
+	  //
 //	cout << "nodeVertex-1000-LookingUpVertices" << endl << flush;
-    uint32 nodeId32 = (uint32)nodeId64;
+    uint64 nodeId32 = (uint64)nodeId64; // Note no shifting or offsetting.
 	v0 = vertices_[nodes_[nodeId32].v_[0]];
     v1 = vertices_[nodes_[nodeId32].v_[1]];
     v2 = vertices_[nodes_[nodeId32].v_[2]];
@@ -177,42 +223,24 @@ SpatialIndex::nodeVertex(const uint64 nodeId64,
 
 //  cout << "NOTE: building vertices..." << endl;
 
-  // TODO Figure out this leaf node indexing and why a depth of 14 is bad.  Seems related to 32 vs. 64 bits.
-  // buildlevel < maxlevel
-  // get the id of the stored leaf that we are in
-  // and get the vertices of the node we want
-  uint64 sid = nodeId64 >> ((maxlevel_ - buildlevel_)*2);
-  uint32 nodeId32 = (uint32)(
-//		  sid
-		  (nodeId64 >> ((maxlevel_ - buildlevel_)*2))
-		  + IOFFSET); // TODO What's the thinking behind going to the non-leaves?
-//		  - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
-
-#define PRINT_(msg,x) {cout << msg << ": " << x << " " << endl << flush;}
-  cout << "nodeVertex" << endl << flush;
-  PRINT_("nodeId64      ",nodeId64);
-  PRINT_("sid          ",sid);
-//  PRINT_("sid - storedleaves_ + IOFFSET",sid - storedleaves_ + IOFFSET);
-  PRINT_("nodeId32     ",nodeId32);
-  PRINT_("maxlevel_    ",maxlevel_);
-  PRINT_("buildlevel_  ",buildlevel_);
-  PRINT_("storedleaves_",storedleaves_);
-  PRINT_("leafCount()  ",leafCount());
-  PRINT_("IOFFSET      ",IOFFSET);
-  PRINT_("nodes_.size  ",nodes_.size());
-#undef PRINT_
-
   // TODO What stored leaf are we in?  We should cut the extra off of id to get idx.
-  v0 = vertices_[nodes_[nodeId32].v_[0]];
-  v1 = vertices_[nodes_[nodeId32].v_[1]];
-  v2 = vertices_[nodes_[nodeId32].v_[2]];
+  v0 = vertices_[nodes_[nodeId32+IOFFSET].v_[0]];
+  v1 = vertices_[nodes_[nodeId32+IOFFSET].v_[1]];
+  v2 = vertices_[nodes_[nodeId32+IOFFSET].v_[2]];
+
+//  cout << "i,v[]: " << i << " " << ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) )
+//  		<< " [" << v0 << "] [" << v1 << "] [" << v2 << "]" << endl << flush;
 
   // TODO nodeId64 seems wrong.
   // loop through additional levels,
   // pick the correct triangle accordingly, storing the
   // vertices in v1,v2,v3
   for(uint32 i = buildlevel_ + 1; i <= maxlevel_; i++) {
-    uint64 j = ( nodeId64 >> ((maxlevel_ - i)*2) ) & 3;
+//	    uint64 j = ( nodeId64 >> ((maxlevel_ - i)*2) ) & 3; // Original
+    uint64 j = ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) ) & 3;
+//    uint64 j = ( nodeId64 >> ((maxlevel_ - i)*2) ) -1 ;
+//    cout << "  i=" << i << " nv j=ni64 >> (mx-i)*2 " << j << " j&3=" << (j&3) << " " << endl << flush;
+//    j = j & 3;
 
     SpatialVector w0 = v1 + v2; w0.normalize();
     SpatialVector w1 = v0 + v2; w1.normalize();
@@ -239,6 +267,9 @@ SpatialIndex::nodeVertex(const uint64 nodeId64,
       v2 = w2;
       break;
     }
+
+    cout << "i,v[]: " << i << " " << ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) )
+    		<< " [" << v0 << "] [" << v1 << "] [" << v2 << "]" << endl << flush;
   }
 }
 
@@ -248,7 +279,7 @@ SpatialIndex::nodeVertex(const uint64 nodeId64,
 void 
 SpatialIndex::makeNewLayer(size_t oldlayer)
 {
-  uint64 index, id;
+  uint64 index, numericIdName;
   size_t newlayer = oldlayer + 1;
   layers_[newlayer].level_  = layers_[oldlayer].level_+1;
   layers_[newlayer].nVert_  = layers_[oldlayer].nVert_ + 
@@ -264,11 +295,11 @@ SpatialIndex::makeNewLayer(size_t oldlayer)
 
   for(index = ioffset;
       index < ioffset + layers_[oldlayer].nNode_; index++){
-    id = N(index).id_ << 2;
-    ICHILD(0) = newNode(IV(0),IW(2),IW(1),id++,index);
-    ICHILD(1) = newNode(IV(1),IW(0),IW(2),id++,index);
-    ICHILD(2) = newNode(IV(2),IW(1),IW(0),id++,index);
-    ICHILD(3) = newNode(IW(0),IW(1),IW(2),id,index);
+    numericIdName = N(index).id_ << 2;
+    ICHILD(0) = newNode(IV(0),IW(2),IW(1),numericIdName++,index);
+    ICHILD(1) = newNode(IV(1),IW(0),IW(2),numericIdName++,index);
+    ICHILD(2) = newNode(IV(2),IW(1),IW(0),numericIdName++,index);
+    ICHILD(3) = newNode(IW(0),IW(1),IW(2),numericIdName,index);
   }
 }
 
@@ -276,7 +307,7 @@ SpatialIndex::makeNewLayer(size_t oldlayer)
 // newNode: make a new node
 //
 uint64
-SpatialIndex::newNode(size_t v1, size_t v2,size_t v3,uint64 id,uint64 parent)
+SpatialIndex::newNode(size_t v1, size_t v2,size_t v3,uint64 numericIdName,uint64 parent)
 {
   IV_(0) = v1;		// vertex indices
   IV_(1) = v2;
@@ -291,8 +322,8 @@ SpatialIndex::newNode(size_t v1, size_t v2,size_t v3,uint64 id,uint64 parent)
   ICHILD_(2) = 0;
   ICHILD_(3) = 0;
 
-  N(index_).id_ = id;			// set the id
-  N(index_).index_ = index_;	// set the index
+  N(index_).id_ = numericIdName;			// set the id mlr: the numeric-id-name
+  N(index_).index_ = index_;	// set the index (before sorting)
   N(index_).parent_ = parent;	// set the parent
 
   return index_++;
@@ -367,6 +398,7 @@ SpatialIndex::vMax(size_t *nodes, size_t *vertices) {
   while(i-- > 0)
     nf *= 4;
   leaves_ = nf;
+  cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
 }
 
 /////////////SORTINDEX////////////////////////////////////
@@ -447,7 +479,7 @@ SpatialIndex::sortIndex() {
 
 uint64
 SpatialIndex::idByName(const char *name) {
-
+// Return the external HTM index. No offsets or other internal indexing.
 //	cout << "idByName-1000" << endl << flush;
 
 	uint64 out=0, i;
