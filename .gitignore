@@ -6,6 +6,7 @@
 #/.settings/
 .cproject
 .project
+language.settings.xml
 
 /intersect
 /filter
