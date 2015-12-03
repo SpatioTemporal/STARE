@@ -4,8 +4,8 @@
 # Eclipse/CDT Cevelop configuration
 # Generated code: /Debug/
 #/.settings/
-#.cproject
-#.project
+.cproject
+.project
 
 /intersect
 /filter
