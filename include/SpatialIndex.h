@@ -62,6 +62,8 @@
 
 class LINKAGE SpatialIndex {
 public:
+//	bool debug;
+
     size_t getMaxlevel(){return maxlevel_;};		// the depth of the Layer
     size_t getBildLevel(){return buildlevel_;};	// the depth of the Layer storedbuildlevel_;
 
@@ -72,6 +74,11 @@ public:
       is called. */
   SpatialIndex() {};
   SpatialIndex(size_t maxlevel, size_t buildlevel =5);
+
+  uint64 indexAtNodeIndex(uint64 nodeIndex);
+  uint64 idAtNodeIndex(uint64 nodeIndex);
+  uint64 layersSize();
+  uint64 firstIndexOfLayerAtDepth(uint64 depth);
 
   /// NodeName conversion to integer ID
   static uint64 idByName(const char *);
@@ -143,6 +150,11 @@ public:
      		  SpatialVector & v1, 
 		  SpatialVector & v2, 
 		  SpatialVector & v3) const; 
+//  void nodeVertex(const uint64 id,
+//     		  SpatialVector & v1,
+//		  SpatialVector & v2,
+//		  SpatialVector & v3,
+//		  bool verbose) const;
 
   /// return index of vertices for a node
   void nodeVertex(const size_t idx, 

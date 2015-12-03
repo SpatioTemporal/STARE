@@ -28,7 +28,7 @@ SpatialIndex::nVertices() const
 }
 
 //////////////////LEAFNUMBERBYID///////////////////////////////////////////
-//
+// // TODO This just seems wrong.  Maybe for stuff stored after the leaves.
 inline uint32
 SpatialIndex::leafNumberById(uint64 id) const{
   if(maxlevel_ > HTMMAXBIT)

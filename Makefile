@@ -12,8 +12,8 @@ SHELL   = /bin/csh
 APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
-CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
-
+#CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+CFLAGS  = -c -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
 #
 # Should not have -O3 with debug
 # -DHAVE_BITLIST
@@ -196,7 +196,7 @@ cc_intersect.o: ${TOPDIR}/cc_intersect.c
 	cc -c cc_intersect.c
 
 clean:
-	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o 
+	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/libhstm.a
 
 cleanAll:
 	-rm -f $(OBJECTS) ${OBJ}/*.o
