@@ -21,7 +21,7 @@
 							<builder arguments="" command="make" id="cdt.managedbuild.target.gnu.builder.macosx.base.506672589" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.base.1735233729" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base.274799421" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.base">
-								<option id="macosx.cpp.link.option.paths.380661082" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
+								<option id="macosx.cpp.link.option.paths.380661082" name="Library search path (-L)" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/local/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.1864680327" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
@@ -34,7 +34,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.macosx.base.1565662430" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.macosx.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
-								<option id="gnu.cpp.compiler.option.include.paths.359840706" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.359840706" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/local/include/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1459343189" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -90,27 +90,6 @@
 		<configuration configurationName="Default">
 			<resource resourceType="PROJECT" workspacePath="/shtm-1"/>
 		</configuration>
-	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517;cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1399890614;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.195298465;cdt.managedbuild.tool.gnu.c.compiler.input.183400347">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517;cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1399890614;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519;cdt.managedbuild.tool.gnu.cpp.compiler.input.1459343189">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.release.1414249012;cdt.managedbuild.tool.gnu.cpp.compiler.input.1497941015">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug.1615617621;cdt.managedbuild.tool.gnu.cpp.compiler.input.199834744">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.debug.1860416933;cdt.managedbuild.tool.gnu.c.compiler.input.1821151337">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.release.1949005672;cdt.managedbuild.tool.gnu.c.compiler.input.213840198">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
@@ -169,5 +148,26 @@
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 		</buildTargets>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.release.1414249012;cdt.managedbuild.tool.gnu.cpp.compiler.input.1497941015">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug.1615617621;cdt.managedbuild.tool.gnu.cpp.compiler.input.199834744">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517;cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1399890614;cdt.managedbuild.tool.gnu.c.compiler.macosx.base.195298465;cdt.managedbuild.tool.gnu.c.compiler.input.183400347">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.907343205;cdt.managedbuild.config.macosx.exe.release.907343205.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.release.1949005672;cdt.managedbuild.tool.gnu.c.compiler.input.213840198">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860;cdt.managedbuild.config.gnu.macosx.exe.debug.1030291860.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.debug.1860416933;cdt.managedbuild.tool.gnu.c.compiler.input.1821151337">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.macosx.base.1864105517;cdt.managedbuild.toolchain.gnu.macosx.base.1864105517.1399890614;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.505046519;cdt.managedbuild.tool.gnu.cpp.compiler.input.1459343189">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
