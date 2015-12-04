@@ -34,7 +34,7 @@ SpatialIndex::leafNumberById(uint64 id) const{
 //	NOTE BitList no longer exists.
 //  if(maxlevel_ > HTMMAXBIT)
 //    throw SpatialInterfaceError("SpatialIndex:leafNumberById","BitList may only be used up to level HTMMAXBIT deep");
-	std::cout << "-leafNumberById,id,lc: " << id << " " << leafCount() << std::endl << std::flush;
+//	std::cout << "-leafNumberById,id,lc: " << id << " " << leafCount() << std::endl << std::flush;
 	return (uint64)(id - leafCount());
 }
 

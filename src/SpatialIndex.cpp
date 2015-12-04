@@ -176,9 +176,9 @@ SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not 
 //	cout << "nodeVertex-1000" << endl << flush;
 	// TODO Note we need to be very careful about id.
 
-	if(nodeId64 > nodes_.size()){
-		cout << "nodeVertex error: id: " << nodeId64 << " nodes_.size: " << nodes_.size() << endl << flush;
-	}
+//	if(nodeId64 > nodes_.size()){
+//		cout << "nodeVertex error: id: " << nodeId64 << " nodes_.size: " << nodes_.size() << endl << flush;
+//	}
 
 	  // TODO Figure out this leaf node indexing and why a depth of 14 is bad.
 	  //      Seems related to 32 vs. 64 bits.
@@ -195,6 +195,7 @@ SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not 
 	//			+ IOFFSET); // TODO What's the thinking behind going to the non-leaves?
 	//		  - storedleaves_ + IOFFSET); // TODO mlr verify "extra" vertices work.
 
+/* Print node information.
 	#define PRINT_(msg,x) {cout << msg << ": " << x << " " << endl << flush;}
 	  cout << "nodeVertex" << endl << flush;
 	  PRINT_("nodeId64      ",nodeId64);
@@ -208,6 +209,7 @@ SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not 
 	  PRINT_("IOFFSET      ",IOFFSET);
 	  PRINT_("nodes_.size  ",nodes_.size());
 	#undef PRINT_
+*/
 
  // TODO Vertex by leaf number?
   if(buildlevel_ == maxlevel_) {
@@ -267,9 +269,10 @@ SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not 
       v2 = w2;
       break;
     }
-
+/* Print info about the dive to higher resolutions.
     cout << "i,v[]: " << i << " " << ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) )
     		<< " [" << v0 << "] [" << v1 << "] [" << v2 << "]" << endl << flush;
+*/
   }
 }
 
@@ -398,7 +401,7 @@ SpatialIndex::vMax(size_t *nodes, size_t *vertices) {
   while(i-- > 0)
     nf *= 4;
   leaves_ = nf;
-  cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
+//  dbg cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
 }
 
 /////////////SORTINDEX////////////////////////////////////
@@ -566,11 +569,19 @@ SpatialIndex::nameById(uint64 id, char * name){
   // determine index of first set bit
   for(i = 0; i < IDSIZE; i+=2) {
 	if ( (id << i) & IDHIGHBIT ) break;
-    if ( (id << i) & IDHIGHBIT2 )  // invalid id
-		throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+    if ( (id << i) & IDHIGHBIT2 ) { // invalid id
+    	cout << hex;
+    	cout << i << endl;
+    	cout << id << endl;
+    	cout << (id << i) << endl;
+    	cout << IDHIGHBIT2 << endl;
+    	cout << dec;
+		cout << "failure at id=" << id << endl << flush;
+		throw SpatialFailure("SpatialIndex:nameById: invalid ID id at IHIGHBIT2");
+    }
   }
   if(id == 0)
-    throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+    throw SpatialFailure("SpatialIndex:nameById: invalid ID id==0");
 
   size=(IDSIZE-i) >> 1;
   // allocate characters
