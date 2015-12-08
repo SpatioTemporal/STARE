@@ -80,6 +80,8 @@ public:
   uint64 layersSize();
   uint64 firstIndexOfLayerAtDepth(uint64 depth);
 
+  void printNode(int nodeIndex);
+
   /// NodeName conversion to integer ID
   static uint64 idByName(const char *);
 
@@ -96,17 +98,22 @@ public:
 
   /** Return leaf number in bitlist for a certain ID.  Since the ID
       here means the number computed from the name, this is simply
-      returning ID -leafCount().  Bitlists only work until level 14.*/
-  uint32 leafNumberById(uint64 ID) const;
+      returning ID -leafCount().  Bitlists only work until level 14.
+      TODO BitLists don't work for level under 14 either.
+      */
+  uint64 leafNumberById(uint64 ID) const;
 
   /** Return leaf id for a certain bitlist index. 
       Same as the function above */
-  uint64 idByLeafNumber(uint32 n) const ;
+  /* TODO Now that bitlists don't exist, what are leaves? */
+  uint64 idByLeafNumber(uint64 n) const ;
 
   /** return name for a certain leaf index (to be used for name lookup
       from a bitlist).  This function is simply shorthand for
-      nameById(n + leafCount()).  */
-  char * nameByLeafNumber(uint32 n, char * name = 0) const;
+      nameById(n + leafCount()).
+      TODO Note that bitlists no longer exist.
+      */
+  char * nameByLeafNumber(uint64 n, char * name = 0) const;
 
   /** find the vector to the centroid of a triangle represented by 
 	  the ID */

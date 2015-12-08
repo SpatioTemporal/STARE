@@ -29,18 +29,20 @@ SpatialIndex::nVertices() const
 
 //////////////////LEAFNUMBERBYID///////////////////////////////////////////
 // // TODO This just seems wrong.  Maybe for stuff stored after the leaves.
-inline uint32
+inline uint64
 SpatialIndex::leafNumberById(uint64 id) const{
-  if(maxlevel_ > HTMMAXBIT)
-    throw SpatialInterfaceError("SpatialIndex:leafNumberById","BitList may only be used up to level HTMMAXBIT deep");
-
-  return (uint32)(id - leafCount());
+//	NOTE BitList no longer exists.
+//  if(maxlevel_ > HTMMAXBIT)
+//    throw SpatialInterfaceError("SpatialIndex:leafNumberById","BitList may only be used up to level HTMMAXBIT deep");
+//	std::cout << "-leafNumberById,id,lc: " << id << " " << leafCount() << std::endl << std::flush;
+	return (uint64)(id - leafCount());
 }
 
 //////////////////IDBYLEAFNUMBER///////////////////////////////////////////
 //
+// TODO id by leaf number? leafCount == leaves_ which is the total number of leaves.
 inline uint64
-SpatialIndex::idByLeafNumber(uint32 n) const{
+SpatialIndex::idByLeafNumber(uint64 n) const{
   uint64 l = leafCount();
   l += n;
   return l;
@@ -49,7 +51,7 @@ SpatialIndex::idByLeafNumber(uint32 n) const{
 //////////////////NAMEBYLEAFNUMBER////////////////////////////////////////
 //
 inline char *
-SpatialIndex::nameByLeafNumber(uint32 n, char * name) const{
+SpatialIndex::nameByLeafNumber(uint64 n, char * name) const{
   return nameById(idByLeafNumber(n), name);
 }
 
