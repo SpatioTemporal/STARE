@@ -192,7 +192,7 @@ void idReallyDeep() {
 	char foundName[1024]; for(int i=0;i<1024;i++)foundName[i] = 0;
 	try {
 		index.nameById(htmID,foundName);
-	} catch (SpatialException e) {
+	} catch (const SpatialException & e) {
 		cout << "Exception " << e.what() << " n: " << foundName << endl << flush;
 	}
 /*
