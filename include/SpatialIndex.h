@@ -58,7 +58,7 @@
    decomposing every triangle again and again.
 */
 
-
+int depthOfId(uint64 htmId);
 
 class LINKAGE SpatialIndex {
 public:
@@ -79,6 +79,8 @@ public:
   uint64 idAtNodeIndex(uint64 nodeIndex);
   uint64 layersSize();
   uint64 firstIndexOfLayerAtDepth(uint64 depth);
+
+  uint64 nodeIndexFromId(uint64 id);
 
   void printNode(int nodeIndex);
 
@@ -183,6 +185,7 @@ private:
     size_t 	nNode_;			// number of nodes
     size_t 	nEdge_;			// number of edges
     uint64 	firstIndex_;	// index of first node of this layer
+    size_t  lastIndex_;     // index of the last node of this layer
     size_t 	firstVertex_;	// index of first vertex of this layer
   };
 

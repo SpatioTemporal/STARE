@@ -99,6 +99,8 @@ public:
   /// Write vector to a stream
   void write(std::ostream &) const;
 
+  const char* toString();
+
   /// Comparison
   int operator ==(const SpatialVector & ) const;
 

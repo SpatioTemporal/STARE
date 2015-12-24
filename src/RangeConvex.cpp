@@ -13,7 +13,7 @@
 
 #define N(n)	index_->nodes_[(n)]
 #define NC(n,m)	index_->nodes_[(n)].childID_[(m)]	// the children n->m
-#define NV(m)   index_->nodes_[id].v_[(m)]			// the vertices of n
+#define NV(m)   index_->nodes_[nodeIndex].v_[(m)]			// the vertices of n
 #define V(m)    index_->vertices_[(m)]				// the vertex vector m
 
 #define SGN(x) ( (x)<0? -1: ( (x)>0? 1:0 ) )		// signum
@@ -614,14 +614,15 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
 // will properly mark up the flags for the triangular node[index], and
 // all its children
 SpatialMarkup
-RangeConvex::testTrixel(uint64 id)
+RangeConvex::testTrixel(uint64 nodeIndex)
 {
   SpatialMarkup mark;
   uint64 childID;
   uint64 tid;
 
+  // TODO MLR This detailed values depend on the depth of index_.
   // const struct SpatialIndex::QuadNode &indexNode = index_->nodes_[id];
-  const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[id];
+  const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[nodeIndex];
 
   //
   // do the face test on the triangle
@@ -629,21 +630,24 @@ RangeConvex::testTrixel(uint64 id)
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
 
-  mark = testNode(id); // was:(indexNode or  id);
+  mark = testNode(nodeIndex); // was:(indexNode or  id);
 
 
+//  cout << "testing nodeIndex: " << nodeIndex << flush;
   switch(mark){
   case fULL:
-    tid = N(id).id_;
-
+    tid = N(nodeIndex).id_;
+//    cout << " saving id: " << tid << endl << flush;
     saveTrixel(tid);  //was:  plist_->push_back(tid);
     // fillChildren(id); // [ed:NEW]
 
     return mark;
   case rEJECT:
-    tid = N(id).id_;
+    tid = N(nodeIndex).id_;
+//    cout << " rejecting id: " << tid << endl << flush;
     return mark;
   default:
+//	  cout << " partial/dontknow/swallowed";
     // if pARTIAL or dONTKNOW, then continue, test children,
     //    but do not reach beyond the leaf nodes.
     //    If Convex is fully contained within one (sWALLOWED),
@@ -659,22 +663,24 @@ RangeConvex::testTrixel(uint64 id)
     break;
   }
 
+//  cout << endl << flush;
+
   // NEW NEW algorithm  Disabled when enablenew is 0
   //
   {
     childID = indexNode->childID_[0];
     if ( childID != 0){
       ////////////// [ed:split]
-      tid = N(id).id_;
+      tid = N(nodeIndex).id_;
       childID = indexNode->childID_[0];  testTrixel(childID);
       childID = indexNode->childID_[1];  testTrixel(childID);
       childID = indexNode->childID_[2];  testTrixel(childID);
       childID = indexNode->childID_[3];  testTrixel(childID);
     } else { /// No children...
       if (addlevel_){
-	testPartial(addlevel_, N(id).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
+	testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
       } else {
-	saveTrixel(N(id).id_); // was: plist_->push_back(N(id).id_);
+	saveTrixel(N(nodeIndex).id_); // was: plist_->push_back(N(id).id_);
       }
     }
   } ///////////////////////////// END OF NEW ALGORITHM returns mark below;
@@ -757,13 +763,13 @@ RangeConvex::testPartial(size_t level, uint64 id,
 // testNode: tests the QuadNodes for intersections.
 //
 SpatialMarkup
-RangeConvex::testNode(uint64 id)
+RangeConvex::testNode(uint64 nodeIndex)
 		      //uint64 id)
 		      // const struct SpatialIndex::QuadNode *indexNode)
 {
   const SpatialVector *v0, *v1, *v2;
   // const struct SpatialIndex::QuadNode &indexNode = index_->nodes_[id];
-  const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[id];
+  const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[nodeIndex];
   int m;
   m = indexNode->v_[0];
   v0 = &index_->vertices_[m];				// the vertex vector m
@@ -774,14 +780,12 @@ RangeConvex::testNode(uint64 id)
   m = indexNode->v_[2];
   v2 = &index_->vertices_[m];
 
-
   // testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // #define NV(m)   indexNode.v_[(m)]			// the vertices of n
   // #define NV(m)   index_->nodes_[id].v_[(m)]		// the vertices of n
   // #define V(m)    index_->vertices_[(m)]		// the vertex vector m
 
   // Start with testing the vertices for the QuadNode with this convex.
-
 
   int vsum = testVertex(v0) + testVertex(v1) + testVertex(v2);
 
@@ -794,7 +798,6 @@ RangeConvex::testNode(uint64 id)
 
   SpatialMarkup mark =
     testTriangle( *v0, *v1, *v2, vsum);
-
 
 #ifdef DIAGNOSE
   cout << ( mark == pARTIAL ? " partial " :

@@ -111,10 +111,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
 
   // create the first 8 nodes - index 1 through 8
   index_ = 1;
-  newNode(1,5,2,8,0);  // S0
-  newNode(2,5,3,9,0);  // S1
-  newNode(3,5,4,10,0); // S2
-  newNode(4,5,1,11,0); // S3
+  newNode(1,5,2,8,0);  // S0 = numericIdName 8
+  newNode(2,5,3,9,0);  // S1 = numericIdName 9
+  newNode(3,5,4,10,0); // S2 = numericIdName a
+  newNode(4,5,1,11,0); // S3 ...
   newNode(1,0,4,12,0); // N0  i k -j
   newNode(4,0,3,13,0); // N1 -j k -i
   newNode(3,0,2,14,0); // N2 -i k  j
@@ -167,12 +167,19 @@ SpatialIndex::nodeVertex(const size_t idx,
 //}
 
 void
-SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not an external htm index.
-			 SpatialVector & v0,
-			 SpatialVector & v1,
-			 SpatialVector & v2
-//			 ,bool verbose
-			 ) const {
+SpatialIndex::nodeVertex(
+		const uint64 nodeId64, // Note this is a  node-id, not an external htm index.
+		SpatialVector & v0,
+		SpatialVector & v1,
+		SpatialVector & v2
+		//			 ,bool verbose
+) const {
+
+/*
+ * NodeId64, called nodeIndex, is htmId+IOFFSET for the depth of the current index.
+ * If depth(NodeId64) == index.buildlevel_, then we just access nodes_.
+ */
+
 //	cout << "nodeVertex-1000" << endl << flush;
 	// TODO Note we need to be very careful about id.
 
@@ -213,8 +220,10 @@ SpatialIndex::nodeVertex(const uint64 nodeId64, // Note this is a  node-id, not 
 
  // TODO Vertex by leaf number?
   if(buildlevel_ == maxlevel_) {
-	  // TODO Note that the in the original code we use id as an index into nodes_ itself.
-	  //
+	  // TODO Usually buildlevel_ != maxlevel_, so the following code is suspect.
+	  // TODO Note that the in the original code we use NodeId64 as an index into nodes_ itself.
+	  // TODO If this holds, then we've built and stored all of the nodes.
+	  // TODO Need to verify role of IOFFSET here...
 //	cout << "nodeVertex-1000-LookingUpVertices" << endl << flush;
     uint64 nodeId32 = (uint64)nodeId64; // Note no shifting or offsetting.
 	v0 = vertices_[nodes_[nodeId32].v_[0]];
@@ -294,16 +303,28 @@ SpatialIndex::makeNewLayer(size_t oldlayer)
   layers_[newlayer].firstVertex_ = layers_[oldlayer].firstVertex_ + 
                                    layers_[oldlayer].nVert_;
 
-  uint64 ioffset = layers_[oldlayer].firstIndex_ ; 
+  uint64 ioffset = layers_[oldlayer].firstIndex_ ; // ???
+
+//  cout
+//  	  << " level_, newlayer, " << layers_[newlayer].level_ << " " << newlayer
+//	  << " ioffset: " << ioffset
+//	  << " firstIndex_: " << " " << layers_[newlayer].firstIndex_
+//	  << endl << flush;
 
   for(index = ioffset;
       index < ioffset + layers_[oldlayer].nNode_; index++){
     numericIdName = N(index).id_ << 2;
+//    cout << " index,numericIdName: " << index << " " << numericIdName << endl << flush;
     ICHILD(0) = newNode(IV(0),IW(2),IW(1),numericIdName++,index);
     ICHILD(1) = newNode(IV(1),IW(0),IW(2),numericIdName++,index);
     ICHILD(2) = newNode(IV(2),IW(1),IW(0),numericIdName++,index);
     ICHILD(3) = newNode(IW(0),IW(1),IW(2),numericIdName,index);
   }
+
+  layers_[newlayer].lastIndex_ = index_ - 1;
+
+//  cout << " lastIndex_: " << layers_[newlayer].lastIndex_ << endl << flush;
+
 }
 
 /////////////NEWNODE//////////////////////////////////////
@@ -769,3 +790,27 @@ uint64 SpatialIndex::layersSize(){
 uint64 SpatialIndex::firstIndexOfLayerAtDepth(uint64 depth){
 	return layers_[depth].firstIndex_;
 }
+
+int depthOfId(uint64 htmId) {
+	int i;
+	uint32 size;
+	// determine index of first set bit
+	for(i = 0; i < IDSIZE; i+=2) {
+		if ( (htmId << i) & IDHIGHBIT ) break;
+		if ( (htmId << i) & IDHIGHBIT2 )  // invalid id
+			throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+	}
+	if(htmId == 0)
+		throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+	size=(IDSIZE-i) >> 1;
+	return size-1;
+}
+
+uint64 SpatialIndex::nodeIndexFromId(uint64 id) {
+	int depth = depthOfId(id);
+	uint64 one  = 1;
+	uint64 mask = ~(one << (2*depth+1));
+	uint64 nodeIndex = (id & mask) + IOFFSET;
+	return nodeIndex;
+}
+

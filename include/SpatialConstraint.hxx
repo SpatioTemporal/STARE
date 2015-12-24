@@ -38,3 +38,6 @@ SpatialConstraint::setDistance(float64 d) {
   d_ = d;
 }
 
+inline float64 SpatialConstraint::coneAngle() {
+	return s_;
+}

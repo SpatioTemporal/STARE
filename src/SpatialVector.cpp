@@ -290,6 +290,14 @@ SpatialVector::show() const
   printf(" %11.8f %11.8f %11.8f \n",x_,y_,z_);
 }
 
+const char*
+SpatialVector::toString()
+{
+	char *buffer = new char[40];
+	int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
+	return buffer;
+}
+
 /////////////READ/////////////////////////////////////////
 // print to stdout
 //
