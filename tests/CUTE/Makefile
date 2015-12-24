@@ -12,7 +12,7 @@ LDFLAGS += -L/opt/local/lib -L../../unix -lhstm
 CuteTests: test
 	./test
 
-test: test.o
+test: test.o libs
 	$(CXX) -o test $(LDFLAGS) test.o
 	
 test.o: Test.cpp

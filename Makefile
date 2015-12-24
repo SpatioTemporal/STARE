@@ -7,7 +7,9 @@ CC      = gcc
 INCDIR  = $(TOPDIR)/include
 OBJ     = $(TOPDIR)/unix
 SRC     = $(TOPDIR)/trcomp.cpp
+SRCS    = ${TOPDIR}/src
 SHELL   = /bin/csh
+APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
 #CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
@@ -20,7 +22,7 @@ SKIPOB = \
    ${OBJ}/SkipListElement.o \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
-   cc_aux.o 
+   ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
    ${OBJ}/SpatialIndex.o \
@@ -37,7 +39,7 @@ OBJECTS = \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
    ${OBJ}/HtmRangeIterator.o \
-   cc_aux.o 
+   ${TOPDIR}/cc_aux.o 
 
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
@@ -63,30 +65,30 @@ ${OBJ}/libhstm.a: ${OBJECTS}
 	ar -r $@ ${OBJECTS}
 	ar -s $@
 #---------------------------------------------
-${OBJ}/htmlookup.o: app/htmlookup.c
-	$(CC) $(CFLAGS) app/htmlookup.c -o $@
-htmlookup: ${OBJ}/htmlookup.o cc_aux.o
-	$(CC) -g -o $@  ${OBJ}/htmlookup.o cc_aux.o
+${OBJ}/htmlookup.o: ${APP_SRCS}/htmlookup.c
+	$(CC) $(CFLAGS) ${APP_SRCS}/htmlookup.c -o $@
+htmlookup: ${OBJ}/htmlookup.o ${TOPDIR}/cc_aux.o
+	$(CC) -g -o $@  ${OBJ}/htmlookup.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
-${OBJ}/toname.o: app/toname.c
-	$(CC) $(CFLAGS) app/toname.c -o $@
-toname: ${OBJ}/toname.o cc_aux.o
-	$(CC) -g -o $@  ${OBJ}/toname.o cc_aux.o
+${OBJ}/toname.o: ${APP_SRCS}/toname.c
+	$(CC) $(CFLAGS) ${APP_SRCS}/toname.c -o $@
+toname: ${OBJ}/toname.o ${TOPDIR}/cc_aux.o
+	$(CC) -g -o $@  ${OBJ}/toname.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
-${OBJ}/toid.o: app/toid.c
-	$(CC) $(CFLAGS) app/toid.c -o $@
-toid: ${OBJ}/toid.o cc_aux.o
-	$(CC) -g -o $@  ${OBJ}/toid.o cc_aux.o
+${OBJ}/toid.o: ${APP_SRCS}/toid.c
+	$(CC) $(CFLAGS) ${APP_SRCS}/toid.c -o $@
+toid: ${OBJ}/toid.o ${TOPDIR}/cc_aux.o
+	$(CC) -g -o $@  ${OBJ}/toid.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
-${OBJ}/fillout.o: app/fillout.c
-	$(CC) $(CFLAGS) app/fillout.c -o $@
-fillout: ${OBJ}/fillout.o cc_aux.o
-	$(CC) -g -o $@  ${OBJ}/fillout.o cc_aux.o
+${OBJ}/fillout.o: ${APP_SRCS}/fillout.c
+	$(CC) $(CFLAGS) ${APP_SRCS}/fillout.c -o $@
+fillout: ${OBJ}/fillout.o ${TOPDIR}/cc_aux.o
+	$(CC) -g -o $@  ${OBJ}/fillout.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
-${OBJ}/range2list.o: app/range2list.c
-	$(CC) $(CFLAGS) app/range2list.c -o $@
-range2list: ${OBJ}/range2list.o cc_aux.o
-	$(CC) -g -o $@  ${OBJ}/range2list.o cc_aux.o
+${OBJ}/range2list.o: ${APP_SRCS}/range2list.c
+	$(CC) $(CFLAGS) ${APP_SRCS}/range2list.c -o $@
+range2list: ${OBJ}/range2list.o ${TOPDIR}/cc_aux.o
+	$(CC) -g -o $@  ${OBJ}/range2list.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
 lookup: ${OBJ}/lookup.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/lookup.o ${OBJECTS} 
@@ -118,79 +120,79 @@ vis:
 xptest: ${OBJ}/xptest.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/xptest.o ${OBJECTS}
 
-${OBJ}/lookup.o: app/lookup.cpp
-	$(CXX) $(CFLAGS) app/lookup.cpp -o $@
+${OBJ}/lookup.o: ${APP_SRCS}/lookup.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/lookup.cpp -o $@
 
 test1: ${OBJ}/test1.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/test1.o ${OBJECTS}
 
-${OBJ}/xptest.o: app/xptest.cpp
-	$(CXX) $(CFLAGS) app/xptest.cpp -o $@
+${OBJ}/xptest.o: ${APP_SRCS}/xptest.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/xptest.cpp -o $@
 
-${OBJ}/intersect.o: app/intersect.cpp
-	$(CXX) $(CFLAGS) app/intersect.cpp -o $@
+${OBJ}/intersect.o: ${APP_SRCS}/intersect.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/intersect.cpp -o $@
 
-${OBJ}/test1.o: app/test1.cpp
-	$(CXX) $(CFLAGS) app/test1.cpp -o $@
+${OBJ}/test1.o: ${APP_SRCS}/test1.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/test1.cpp -o $@
 
-${OBJ}/example.o: app/example.cpp
-	$(CXX) $(CFLAGS) app/example.cpp -o $@
+${OBJ}/example.o: ${APP_SRCS}/example.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/example.cpp -o $@
 
-${OBJ}/sqlExample.o: app/sqlExample.cpp
-	$(CXX) $(CFLAGS) app/sqlExample.cpp -o $@
+${OBJ}/sqlExample.o: ${APP_SRCS}/sqlExample.cpp
+	$(CXX) $(CFLAGS) ${APP_SRCS}/sqlExample.cpp -o $@
 
-${OBJ}/SpatialIndex.o: src/SpatialIndex.cpp
-	$(CXX) $(CFLAGS) src/SpatialIndex.cpp -o $@
+${OBJ}/SpatialIndex.o: ${SRCS}/SpatialIndex.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialIndex.cpp -o $@
 
-${OBJ}/SpatialConstraint.o: src/SpatialConstraint.cpp
-	$(CXX) $(CFLAGS) src/SpatialConstraint.cpp -o $@
+${OBJ}/SpatialConstraint.o: ${SRCS}/SpatialConstraint.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialConstraint.cpp -o $@
 
-${OBJ}/sqlInterface.o: src/sqlInterface.cpp
-	$(CXX) $(CFLAGS) src/sqlInterface.cpp -o $@
+${OBJ}/sqlInterface.o: ${SRCS}/sqlInterface.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/sqlInterface.cpp -o $@
 
-${OBJ}/SpatialVector.o: src/SpatialVector.cpp
-	$(CXX) $(CFLAGS) src/SpatialVector.cpp -o $@
+${OBJ}/SpatialVector.o: ${SRCS}/SpatialVector.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialVector.cpp -o $@
 
-${OBJ}/SpatialInterface.o: src/SpatialInterface.cpp
-	$(CXX) $(CFLAGS) src/SpatialInterface.cpp -o $@
+${OBJ}/SpatialInterface.o: ${SRCS}/SpatialInterface.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialInterface.cpp -o $@
 
-${OBJ}/SpatialEdge.o: src/SpatialEdge.cpp
-	$(CXX) $(CFLAGS) src/SpatialEdge.cpp -o $@
+${OBJ}/SpatialEdge.o: ${SRCS}/SpatialEdge.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialEdge.cpp -o $@
 
-${OBJ}/SpatialException.o: src/SpatialException.cpp
-	$(CXX) $(CFLAGS) src/SpatialException.cpp -o $@
+${OBJ}/SpatialException.o: ${SRCS}/SpatialException.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialException.cpp -o $@
 
-${OBJ}/SpatialDomain.o: src/SpatialDomain.cpp
-	$(CXX) $(CFLAGS) src/SpatialDomain.cpp -o $@
+${OBJ}/SpatialDomain.o: ${SRCS}/SpatialDomain.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialDomain.cpp -o $@
 
-${OBJ}/SpatialConvex.o: src/SpatialConvex.cpp
-	$(CXX) $(CFLAGS) src/SpatialConvex.cpp -o $@
+${OBJ}/SpatialConvex.o: ${SRCS}/SpatialConvex.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SpatialConvex.cpp -o $@
 
-${OBJ}/RangeConvex.o: src/RangeConvex.cpp
-	$(CXX) $(CFLAGS) src/RangeConvex.cpp -o $@
+${OBJ}/RangeConvex.o: ${SRCS}/RangeConvex.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/RangeConvex.cpp -o $@
 
-${OBJ}/Htmio.o: src/Htmio.cpp
-	$(CXX) $(CFLAGS) src/Htmio.cpp -o $@
+${OBJ}/Htmio.o: ${SRCS}/Htmio.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/Htmio.cpp -o $@
 
-${OBJ}/SkipListElement.o: src/SkipListElement.cpp
-	$(CXX) $(CFLAGS) src/SkipListElement.cpp -o $@
+${OBJ}/SkipListElement.o: ${SRCS}/SkipListElement.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SkipListElement.cpp -o $@
 
-${OBJ}/SkipList.o: src/SkipList.cpp
-	$(CXX) $(CFLAGS) src/SkipList.cpp -o $@
+${OBJ}/SkipList.o: ${SRCS}/SkipList.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/SkipList.cpp -o $@
 
-${OBJ}/HtmRange.o: src/HtmRange.cpp
-	$(CXX) $(CFLAGS) src/HtmRange.cpp -o $@
+${OBJ}/HtmRange.o: ${SRCS}/HtmRange.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/HtmRange.cpp -o $@
 
-${OBJ}/HtmRangeIterator.o: src/HtmRangeIterator.cpp
-	$(CXX) $(CFLAGS) src/HtmRangeIterator.cpp -o $@
+${OBJ}/HtmRangeIterator.o: ${SRCS}/HtmRangeIterator.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/HtmRangeIterator.cpp -o $@
 
-${OBJ}/XXX.o: src/XXX.cpp
-	$(CXX) $(CFLAGS) src/XXX.cpp -o $@
+${OBJ}/XXX.o: ${SRCS}/XXX.cpp
+	$(CXX) $(CFLAGS) ${SRCS}/XXX.cpp -o $@
 
-cc_aux.o: cc_aux.c
-	cc -c $(CFLAGS) cc_aux.c
+${TOPDIR}/cc_aux.o: ${TOPDIR}/cc_aux.c
+	cc -c $(CFLAGS) ${TOPDIR}/cc_aux.c -o $@
 
-cc_intersect.o: cc_intersect.c
+cc_intersect.o: ${TOPDIR}/cc_intersect.c
 	cc -c cc_intersect.c
 
 clean:
@@ -201,7 +203,7 @@ cleanAll:
 	-rm -f a.out intersect sqlExample trcomp 
 	-rm -f $(APPS)
 	-rm -f tmp.out *.o *~ 
-	-rm -f app/*~
+	-rm -f ${APP_SRCS}/*~
 #
 tarball:
 	source mktarball.csh
