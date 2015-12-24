@@ -4,8 +4,11 @@
 # Eclipse/CDT Cevelop configuration
 # Generated code: /Debug/
 /.settings/
-.cproject
-.project
+.cproject*
+.project*
+.gitignore.*
+.gitignore-*
+.gitignore_*
 
 /intersect
 /filter
