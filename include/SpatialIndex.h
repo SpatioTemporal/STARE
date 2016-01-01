@@ -82,7 +82,7 @@ public:
 
   uint64 nodeIndexFromId(uint64 id);
 
-  void printNode(int nodeIndex);
+void printNode(int nodeIndex) const;
 
   /// NodeName conversion to integer ID
   static uint64 idByName(const char *);
@@ -195,7 +195,7 @@ private:
     size_t	w_[3];			// The three middlepoint vector indices
     uint64	childID_[4];	// ids of children
     uint64	parent_;		// id of the parent node (needed for sorting)
-    uint64	id_;			// numeric id -> name
+    uint64	id_;			// numeric id -> name // numericIdName
   };
 
   // add quadnode vector

@@ -57,7 +57,7 @@ using namespace std;
 //
 // ===========================================================================
 
-void SpatialIndex::printNode(int nodeIndex) {
+void SpatialIndex::printNode(int nodeIndex) const {
 	cout << "nIdx: " << nodeIndex << " "
 			<< " own-idx, numeric-id-name, parent, children "
 			<< N(nodeIndex).index_ << " "
@@ -132,6 +132,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
   }
 
   sortIndex();
+
+//  for(int nodeIndex=0;nodeIndex<1000;nodeIndex++) {
+//	  printNode(nodeIndex);
+//  }
 }
 
 /////////////SHOWVERTICES/////////////////////////////////
@@ -314,11 +318,12 @@ SpatialIndex::makeNewLayer(size_t oldlayer)
   for(index = ioffset;
       index < ioffset + layers_[oldlayer].nNode_; index++){
     numericIdName = N(index).id_ << 2;
-//    cout << " index,numericIdName: " << index << " " << numericIdName << endl << flush;
+//    cout << " index,numericIdName: " << index << " " << numericIdName << flush;
     ICHILD(0) = newNode(IV(0),IW(2),IW(1),numericIdName++,index);
     ICHILD(1) = newNode(IV(1),IW(0),IW(2),numericIdName++,index);
     ICHILD(2) = newNode(IV(2),IW(1),IW(0),numericIdName++,index);
     ICHILD(3) = newNode(IW(0),IW(1),IW(2),numericIdName,index);
+//    cout << endl << flush;
   }
 
   layers_[newlayer].lastIndex_ = index_ - 1;
@@ -807,7 +812,14 @@ int depthOfId(uint64 htmId) {
 }
 
 uint64 SpatialIndex::nodeIndexFromId(uint64 id) {
+	// This nodeIndex is only valid if depth == maxlevel+1
+	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
 	int depth = depthOfId(id);
+	if (depth != maxlevel_+1) {
+		cout << "si:nifi: id=" << id << "maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
+		return 0;  // TODO Make this throw an exception?
+	}
+//	cout << "si::nifi: id=" << id << " depth=" << depth << endl << flush;
 	uint64 one  = 1;
 	uint64 mask = ~(one << (2*depth+1));
 	uint64 nodeIndex = (id & mask) + IOFFSET;

@@ -563,6 +563,7 @@ RangeConvex::intersect(const SpatialIndex * idx, HtmRange * htmrange, bool varle
   if(constraints_.size()==0)return;   // nothing to intersect!!
 
   // Start with root nodes (index = 1-8) and intersect triangles
+  // TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
   for(uint32 i = 1; i <= 8; i++){
     testTrixel(i);
   }
@@ -604,6 +605,14 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
   } else {
     lo = hi = htmid;
   }
+
+//  cout
+//  	  << "st:"
+//	  << " htmid=" << htmid
+//	  << " lo=" << lo
+//	  << " hi=" << hi
+//	  << endl << flush;
+
   hr->mergeRange(lo, hi);
 
   return;
@@ -630,10 +639,10 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
 
+//  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
+
   mark = testNode(nodeIndex); // was:(indexNode or  id);
 
-
-//  cout << "testing nodeIndex: " << nodeIndex << flush;
   switch(mark){
   case fULL:
     tid = N(nodeIndex).id_;
@@ -672,7 +681,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
     if ( childID != 0){
       ////////////// [ed:split]
       tid = N(nodeIndex).id_;
-      childID = indexNode->childID_[0];  testTrixel(childID);
+      childID = indexNode->childID_[0];  testTrixel(childID); // Note the recursion.
       childID = indexNode->childID_[1];  testTrixel(childID);
       childID = indexNode->childID_[2];  testTrixel(childID);
       childID = indexNode->childID_[3];  testTrixel(childID);
@@ -771,6 +780,10 @@ RangeConvex::testNode(uint64 nodeIndex)
   // const struct SpatialIndex::QuadNode &indexNode = index_->nodes_[id];
   const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[nodeIndex];
   int m;
+
+//  cout << "testNode: ";
+//  index_->printNode(nodeIndex);
+
   m = indexNode->v_[0];
   v0 = &index_->vertices_[m];				// the vertex vector m
 
@@ -813,6 +826,7 @@ RangeConvex::testNode(uint64 nodeIndex)
        << endl;
     */
 #endif
+
 
   // since we cannot play games using the on-the-fly triangles,
   // substitute dontknow with partial.
