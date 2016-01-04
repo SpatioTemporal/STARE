@@ -44,7 +44,7 @@ OBJECTS = \
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
 
-all: intersect filter
+all: intersect filter libs
 # example
 
 
