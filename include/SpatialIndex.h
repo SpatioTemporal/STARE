@@ -58,7 +58,7 @@
    decomposing every triangle again and again.
 */
 
-
+int depthOfId(uint64 htmId);
 
 class LINKAGE SpatialIndex {
 public:
@@ -80,7 +80,9 @@ public:
   uint64 layersSize();
   uint64 firstIndexOfLayerAtDepth(uint64 depth);
 
-  void printNode(int nodeIndex);
+  uint64 nodeIndexFromId(uint64 id);
+
+void printNode(int nodeIndex) const;
 
   /// NodeName conversion to integer ID
   static uint64 idByName(const char *);
@@ -183,6 +185,7 @@ private:
     size_t 	nNode_;			// number of nodes
     size_t 	nEdge_;			// number of edges
     uint64 	firstIndex_;	// index of first node of this layer
+    size_t  lastIndex_;     // index of the last node of this layer
     size_t 	firstVertex_;	// index of first vertex of this layer
   };
 
@@ -192,7 +195,7 @@ private:
     size_t	w_[3];			// The three middlepoint vector indices
     uint64	childID_[4];	// ids of children
     uint64	parent_;		// id of the parent node (needed for sorting)
-    uint64	id_;			// numeric id -> name
+    uint64	id_;			// numeric id -> name // numericIdName
   };
 
   // add quadnode vector

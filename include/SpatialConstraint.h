@@ -108,6 +108,8 @@ public:
   /// write
   void write(std::ostream &out) const;
 
+  float64 coneAngle();
+
 private:
   SpatialVector a_;			// normal vector
   float64       d_;			// distance from origin

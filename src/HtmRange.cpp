@@ -591,7 +591,6 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range)
   return os;
 }
 
-
 int HtmRange::getNext(Key &lo, Key &hi)
 {
 	lo = my_los->getkey();

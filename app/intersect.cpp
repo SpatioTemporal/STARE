@@ -153,117 +153,117 @@ int init_all(int argc, char *argv[])
 
 int main(int argc, char *argv[]) {
 
-/*******************************************************
+	/*******************************************************
 /
 / Initialization
 /
- ******************************************************/
-  Key gapsize;
-  int rstat = init_all(argc, argv);
-  if (rstat != 0){
-    return rstat;
-  }
-
-  if(arg > 0)
-    usage(argv[0]);
-
-  ifstream in(infile);
-  if(!in) {
-    cout << "cannot open file " << infile << endl;
-    return -1;
-  }
-
-  try
-    {
-
-      // construct index with given depth and savedepth
-
-      htmInterface htm(depth,savedepth);  // generate htm interface
-      const SpatialIndex &index = htm.index();
-      HtmRange htmRange;
-
-      // Read in domain and echo it to screen
-
-      SpatialDomain domain;   // initialize empty domain
-      in >> domain;	      // read domainfile
-      domain.setOlevel(olevel);
-      if(verbose)
-	      cout << domain;
-
-      if (visualize){
-	// A file for hids, and a file for the domain
-	ofstream outfile(domainfilename, ios::out);
-	if (outfile){
-	  outfile << domain;
-	  outfile.close();
+	 ******************************************************/
+	Key gapsize;
+	int rstat = init_all(argc, argv);
+	if (rstat != 0){
+		return rstat;
 	}
-      }
-      // Write domain to a file
-/*******************************************************
+
+	if(arg > 0)
+		usage(argv[0]);
+
+	ifstream in(infile);
+	if(!in) {
+		cout << "cannot open file " << infile << endl;
+		return -1;
+	}
+
+	try
+	{
+
+		// construct index with given depth and savedepth
+
+		htmInterface htm(depth,savedepth);  // generate htm interface
+		const SpatialIndex &index = htm.index();
+		HtmRange htmRange;
+
+		// Read in domain and echo it to screen
+
+		SpatialDomain domain;   // initialize empty domain
+		in >> domain;	      // read domainfile
+		domain.setOlevel(olevel);
+		if(verbose)
+			cout << domain;
+
+		if (visualize){
+			// A file for hids, and a file for the domain
+			ofstream outfile(domainfilename, ios::out);
+			if (outfile){
+				outfile << domain;
+				outfile.close();
+			}
+		}
+		// Write domain to a file
+		/*******************************************************
 /
 / Intersection
 /
- ******************************************************/
-      // do intersection and time it
-      time_t t0 = clock();
-      j = 1; // Why would you want it more? Timing, perhaps...
+		 ******************************************************/
+		// do intersection and time it
+		time_t t0 = clock();
+		j = 1; // Why would you want it more? Timing, perhaps...
 
-      // cerr << "Normal intersect starts here" << endl;
-      htmRange.purge();
-      while(j--) {
-	domain.intersect(&index, &htmRange, varlength);	  // intersect with range
-      }
-      time_t t1 = clock();
-      if(verbose) {
-	printf("%d intersections done at a rate of %f intersections/sec\n",
-	       1, ((float)1)/(((double)(t1-t0)/(double)CLOCKS_PER_SEC)));
-      }
-      
-/*******************************************************
+		// cerr << "Normal intersect starts here" << endl;
+		htmRange.purge();
+		while(j--) {
+			domain.intersect(&index, &htmRange, varlength);	  // intersect with range
+		}
+		time_t t1 = clock();
+		if(verbose) {
+			printf("%d intersections done at a rate of %f intersections/sec\n",
+					1, ((float)1)/(((double)(t1-t0)/(double)CLOCKS_PER_SEC)));
+		}
+
+		/*******************************************************
 /
 / Print result
 /
- ******************************************************/
-      if (varlength){
-	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   only print lows (should be same as highs)
-	htmRange.print(HtmRange::LOWS, cout, symbolic);
-	if (visualize) { 	// print hids to file too
-	  ofstream outfile(htmidfilename, ios::out);
-	  if (outfile){
-	    htmRange.print(HtmRange::LOWS, outfile, symbolic);
-	    outfile.close();
-	  }
+		 ******************************************************/
+		if (varlength){
+			//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   only print lows (should be same as highs)
+			htmRange.print(HtmRange::LOWS, cout, symbolic);
+			if (visualize) { 	// print hids to file too
+				ofstream outfile(htmidfilename, ios::out);
+				if (outfile){
+					htmRange.print(HtmRange::LOWS, outfile, symbolic);
+					outfile.close();
+				}
+			}
+		} else {
+			htmRange.defrag();
+			if (compress){
+				//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   find best gap, and merge (defrag) ranges
+				gapsize = htmRange.bestgap(maximum_nrGaps);
+				htmRange.defrag(gapsize);
+				cerr << "Combining ranges with gaps <= " << gapsize;
+				cerr << " with no more than " << maximum_nrGaps << endl;
+			}
+			if (expand){
+				HtmRangeIterator iter(&htmRange);
+				if (!symbolic){
+					while (iter.hasNext()) {
+						cout << iter.next() << endl;
+					}
+				} else {
+					char buffer[80];
+					while (iter.hasNext()) {
+						cout << iter.nextSymbolic(buffer) << endl;
+					}
+				}
+			} else {
+				htmRange.setSymbolic(symbolic);
+				cout << htmRange;
+			}
+		}
+	}// Try
+	catch (SpatialException &x)
+	{
+		printf("%s\n",x.what());
 	}
-      } else {
-	htmRange.defrag();
-	if (compress){
-	  //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   find best gap, and merge (defrag) ranges
-	  gapsize = htmRange.bestgap(maximum_nrGaps);
-	  htmRange.defrag(gapsize);
-	  cerr << "Combining ranges with gaps <= " << gapsize;
-	  cerr << " with no more than " << maximum_nrGaps << endl;
-	}
-	if (expand){
-	  HtmRangeIterator iter(&htmRange);
-	  if (!symbolic){
-	    while (iter.hasNext()) {
-	      cout << iter.next() << endl;
-	    }
-	  } else {
-	    char buffer[80];
-	    while (iter.hasNext()) {
-	      cout << iter.nextSymbolic(buffer) << endl;
-	    }
-	  }
-	} else {
-	  htmRange.setSymbolic(symbolic);
-	  cout << htmRange;
-	}
-      }
-    }// Try
-  catch (SpatialException &x)
-    {
-      printf("%s\n",x.what());
-    }
-  return 0;
+	return 0;
 }

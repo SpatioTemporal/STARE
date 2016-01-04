@@ -8,6 +8,7 @@
 #include "cute_runner.h"
 
 // TODO #include the headers for the code you want to test
+//#include "SpatialGeneral.h"
 #include "SpatialException.h"
 #include "SpatialIndex.h"
 #include "SpatialVector.h"
@@ -192,7 +193,7 @@ void idReallyDeep() {
 	char foundName[1024]; for(int i=0;i<1024;i++)foundName[i] = 0;
 	try {
 		index.nameById(htmID,foundName);
-	} catch (SpatialException e) {
+	} catch (const SpatialException & e) {
 		cout << "Exception " << e.what() << " n: " << foundName << endl << flush;
 	}
 /*
@@ -203,6 +204,16 @@ void idReallyDeep() {
 	ASSERT_EQUALM("depth:    ",level,depthOfName(foundName));
 	ASSERT_EQUALM("fName:    ",expected,foundName);
 	ASSERT_EQUALM("htmID^-1: ",index.idByName(foundName),htmID);
+/*
+	cout << " depthHtmId: " << depthOfId(htmID) << endl << flush;
+	cout << hex;
+	cout << " htmID0:    " << htmID0 << endl << flush;
+	cout << " htmID:     " << htmID << endl << flush;
+	cout << " nodeIndex: " << index.nodeIndexFromId(htmID) << endl << flush;
+	cout << dec;
+	*/
+#define IOFFSET 9
+	ASSERT_EQUALM("nodeIndex: ",(htmID&(~htmID0))+IOFFSET,index.nodeIndexFromId(htmID));
 }
 #undef ASSERT_EQUALM_NAMEBYID_
 
