@@ -54,7 +54,6 @@ void lookupID() {
    	ASSERT_EQUALM("checking nameByID",name_,"S33332");
 }
 
-
 // TODO I just noticed there is an issue in dealing with parsing the IDs via nameByID -- I don't think they are interpreting the depth correctly. The index is constructed with a depth.  What happens if you give it an HTM string or ID that is associated with another depth?
 
 void lookupOnTwoSaveDepths() {
@@ -77,7 +76,7 @@ void lookupOnTwoSaveDepths() {
 
 }
 
-int depthOfName(const char name[]) { return strlen(name)-1; }
+//int depthOfName(const char name[]) { return strlen(name)-1; }
 #define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
 #define INDEX_(name){htm[depthOfName(name)]->index();}
 #define PRINT_ID(msg,htm,name) {	SpatialIndex index = htm[depthOfName(name)]->index(); cout << msg << " indexDepth: " << index.getMaxlevel() << " id: " << flush; cout << index.idByName(name) << " name: " << name << " nameDepth: " << depthOfName(name); SpatialVector v; index.pointById(v,index.idByName(name)); cout << " v: " << v << endl << flush;}
@@ -204,6 +203,8 @@ void idReallyDeep() {
 	ASSERT_EQUALM("depth:    ",level,depthOfName(foundName));
 	ASSERT_EQUALM("fName:    ",expected,foundName);
 	ASSERT_EQUALM("htmID^-1: ",index.idByName(foundName),htmID);
+
+	index.setMaxlevel(depthOfId(htmID)-1);
 /*
 	cout << " depthHtmId: " << depthOfId(htmID) << endl << flush;
 	cout << hex;
@@ -238,6 +239,31 @@ void pointById(){
 	cout << dec;
 }
 
+/**
+ * Try an example found in the source's comments.
+ */
+void idByName() {
+	int depth         = 4;
+	int saveDepth     = 5;
+	htmInterface *htm_ = new htmInterface(depth,saveDepth);
+	const SpatialIndex index = htm_->index();
+	const char *htmName = "N012023";
+	uint64 htmID = index.idByName(htmName);
+	uint64 htmIDExpected = 12683;
+	ASSERT_EQUALM("N012023 == 12683?",htmIDExpected,htmID);
+	ASSERT_EQUALM("depth(N012023) == 5 or 6th?",6,depthOfName(htmName));
+	ASSERT_EQUALM("depth(12683)   == 5 or 6th?",6,depthOfId(htmID));
+
+	htm_->changeDepth(depthOfId(htmID)-1,saveDepth);
+	const SpatialIndex index1 = htm_->index(); // Update the index.
+	int htmIndexLayerSize = index1.layersSize();
+	ASSERT_EQUALM("htm_ index number of levels==depth==6",depthOfId(htmID),htmIndexLayerSize);
+
+	uint64 nodeIndex = index1.nodeIndexFromId(htmID);
+	uint64 nodeIndexExpected = 4491 + 9; // for N012023
+	ASSERT_EQUALM("nodeIndex(12683) == 4491+IOFFSET == 4500?",nodeIndexExpected,nodeIndex);
+}
+
 
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
@@ -249,6 +275,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(lookupOnTwoSaveDepths));
 	s.push_back(CUTE(lookupOnMultipleDepths));
 	s.push_back(CUTE(idReallyDeep));
+	s.push_back(CUTE(idByName));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

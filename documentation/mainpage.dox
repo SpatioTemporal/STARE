@@ -1,0 +1,32 @@
+
+/**
+\mainpage
+
+HSTM
+==
+
+About
+--
+__hst/documentation/mainpage.dox__
+
+ Created on: Jan 6, 2016
+     Author: mrilee
+
+This is the mainpage.dox file.
+
+__REALLY!__
+
+[Jump to Reference1.](@ref Reference1)
+
+\section SectionOne One
+\subsection SubSectionOne-One One-One
+\section SectionTwo Two
+\section SectionThree Three
+
+\section References References
+- \anchor Reference1 This is a reference target.
+- \anchor Reference2 This is a second reference target.
+
+
+
+*/

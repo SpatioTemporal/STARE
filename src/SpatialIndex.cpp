@@ -73,6 +73,19 @@ void SpatialIndex::printNode(int nodeIndex) const {
 
 /////////////CONSTRUCTOR//////////////////////////////////
 //
+
+/**
+ * Construct a spatial index, an internal construct used by other interfaces.
+ *
+ * Key data structures created include
+ * - \a layers_ [0..buildlevel] This contains information about the numbers of elements at each level.
+ * - \a nodes_  [0..nNode_]     This contains the nodes, which include index, interconnection, and geometry information.
+ *
+ * Note that the zeroth node \c nodes_(0).index_=0 is the invalid node corresponding to htm-index == 0.
+ *
+ * @param [in] maxlevel   The current level of focus for the index, the level of the leaves.
+ * @param [in] buildlevel The level to which nodes are stored in nodes_.
+ */
 SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxlevel), 
   buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
 {
@@ -170,6 +183,24 @@ SpatialIndex::nodeVertex(const size_t idx,
 //	nodeVertex(id,v0,v1,v2,false);
 //}
 
+/**
+ *
+ * NodeId64, aka nodeIndex, is htmId+IOFFSET for the depth of the current index.
+ * If depth(NodeId64) == index.buildlevel_, then we just access nodes_.
+ * If the depth is shallower, then we assume the caller knows what they are doing.
+ * Usually such a nodeIndex (one at less depth) is found when traversing nodes_.
+ * When going deeper than buildlevel_ we build the needed geometry as we go.
+ *
+ * Note that while the octagon is stored at nodes_[1..8] shallower nodes are stored
+ * at the end of nodes_ in the reverse order that they were orginally created in
+ * makeNewLayer.  Also note that nodes_ is sorted so that nodes at the depth
+ * buildlevel_ are stored in nodes_[9..9+layers_[layer].nNode_-1] in ascending order.
+ *
+ * TODO What is the relationship between depth and layer?
+ *
+ * @param[in] nodeId64 (aka nodeIndex) is the index to the field nodes_.
+ * @param[out] v0, v1, v2
+ */
 void
 SpatialIndex::nodeVertex(
 		const uint64 nodeId64, // Note this is a  node-id, not an external htm index.
@@ -180,8 +211,7 @@ SpatialIndex::nodeVertex(
 ) const {
 
 /*
- * NodeId64, called nodeIndex, is htmId+IOFFSET for the depth of the current index.
- * If depth(NodeId64) == index.buildlevel_, then we just access nodes_.
+
  */
 
 //	cout << "nodeVertex-1000" << endl << flush;
@@ -371,16 +401,26 @@ SpatialIndex::area(uint64 ID) const
   return area(n0,n1,n2);
 }
 
+/** Precompute the area (steradians) of a node using
 
-/////////////AREA////////////////////////////////////////
-// area: routine to precompute the area of a node using
-//
-//   AREA = 4*arctan sqrt(tan(s/2)tan((s-a)/2)tan((s-b)/2)tan((s-c)/2))
-//
-//   with s = (a+b+c)/2
-//
-// (with many thanks to Eduard Masana, emasana@pchpc10.am.ub.es )
-//
+\f{align}{
+	\text{area} &= 4\arctan\left(\sqrt{
+									\tan\frac{s}{2}\,
+									\tan\frac{s-a}{2}\,
+									\tan\frac{s-b}{2}\,
+									\tan\frac{s-c}{2}
+									}\right)\\
+	\mbox{where }&\\
+	s &= \frac{1}{2}(a+b+c)
+\f}
+
+The angles between the vertices are denoted \f$a, b, c\f$.
+
+Many thanks to Eduard Masana, emasana@pchpc10.am.ub.es.
+
+ * @param[in] v0, v1, v2  vertices of the spherical triangular area.
+ * @return The area of the spherical triangle in steradians.
+ */
 float64
 SpatialIndex::area(const SpatialVector & v0, 
 		   const SpatialVector & v1,
@@ -400,33 +440,45 @@ SpatialIndex::area(const SpatialVector & v0,
 }
 
 /////////////VMAX/////////////////////////////////////////
-// vMax: compute the maximum number of vertices for the
-//       polyhedron after buildlevel of subdivisions and
-//       the total number of nodes that we store
-//       also, calculate the number of leaf nodes that we eventually have.
-//
+
+/** Compute the following.
+ -# The maximum number of vertices for the polyhedron after buildlevel subdivisions,
+ -# the total number of nodes that we store, and
+ -# calculate the number of leaf nodes that we eventually have.
+
+ Set the following.
+ - \p nodes to the total number of nodes (faces) out to buildlevel_
+ - \p vertices to the number of thereof
+ - \p storedleaves_ to the number of faces at buildlevel_
+ - \p leaves_ to the number of faces at the deepest level we might search
+ 	 - \p leaves_ = \p numberOfFaces(max(buildlevel_,maxlevel_))
+
+ * @param[in,out] nodes
+ * @param[in,out] vertices
+ */
 void
 SpatialIndex::vMax(size_t *nodes, size_t *vertices) {
-  uint64 nv = 6;    // initial values
-  uint64 ne = 12;
-  uint64 nf = 8;
-  int32 i  = buildlevel_;
-  *nodes = (size_t)nf;
+   /// Currently use the octagon case to set the initial values.
+  uint64 numberOfVertices = 6;
+  uint64 numberOfEdges    = 12;
+  uint64 numberOfFaces    = 8;
+  int32 i  = buildlevel_; /// Count through the number of levels we build.
+  *nodes = (size_t)numberOfFaces;
 
   while(i-->0){
-    nv += ne;
-    nf *= 4;
-    ne  = nf + nv -2;
-    *nodes += (size_t)nf;
+    numberOfVertices += numberOfEdges;
+    numberOfFaces *= 4;
+    numberOfEdges  = numberOfFaces + numberOfVertices -2;
+    *nodes += (size_t)numberOfFaces;
   }
-  *vertices = (size_t)nv;
-  storedleaves_ = nf;
+  *vertices = (size_t)numberOfVertices;
+  storedleaves_ = numberOfFaces;
 
-  // calculate number of leaves
-  i = maxlevel_ - buildlevel_;
+  /// Calculate number of leaves.
+  i = maxlevel_ - buildlevel_;  /// Recall \p maxlevel_-buildlevel_ is how deep beyond the stored nodes we go.
   while(i-- > 0)
-    nf *= 4;
-  leaves_ = nf;
+    numberOfFaces *= 4;
+  leaves_ = numberOfFaces;
 //  dbg cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
 }
 
@@ -484,28 +536,41 @@ SpatialIndex::sortIndex() {
 // TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we go to 64 easy?
 
 //////////////////IDBYNAME/////////////////////////////////////////////////
-// Translate ascii leaf name to a uint32
-//
-// The following encoding is used:
-//
-// The string leaf name has the always the same structure, it begins with
-// an N or S, indicating north or south cap and then numbers 0-3 follow 
-// indicating which child to descend into. So for a depth-5-index we have
-// strings like
-//                 N012023  S000222  N102302  etc
-//
-// Each of the numbers correspond to 2 bits of code (00 01 10 11) in the
-// uint32. The first two bits are 10 for S and 11 for N. For example
-//
-//                 N 0 1 2 0 2 3
-//                 11000110001011  =  12683 (dec)
-//
-// The leading bits are always 0.
-//
-// --- WARNING: This works only up to 15 levels. 
-//              (we probably never need more than 7)
-//
+/**
+ *
+ Construct the bit encoded version from the string encoded version of the HTM.
 
+ Note:  This was "Translate ascii leaf name to a uint32," but we have now
+ translated this to uint64 and have found no problems so far.
+
+ The following encoding is used:
+
+ The string leaf name has the always the same structure, it begins with
+ an N or S, indicating north or south cap and then numbers 0-3 follow
+ indicating which child to descend into. So for a depth-5-index we have
+ strings like
+
+                 N012023  S000222  N102302  etc
+
+ Each of the numbers correspond to 2 bits of code (00 01 10 11) in the
+ uint32. The first two bits are 10 for S and 11 for N. For example
+
+                 S0001122334455     depthSet//Level
+                  N 0 1 2 0 2 3     ASCII representation
+                 11000110001011  =  12683 (dec)
+                  1000110001011  =   4491 (stripped of depthSet bit)
+
+ The leading bits are always 0.
+
+- Legacy 32-bit information:
+	-- WARNING: This works only up to 15 levels.
+              	 (we probably never need more than 7)
+- Converted to 64 bits. Checked to level 27. MLR 2016-01-08
+
+
+  @param [in] name
+  @return HTM index including leading depth bit.
+*/
 uint64
 SpatialIndex::idByName(const char *name) {
 // Return the external HTM index. No offsets or other internal indexing.
@@ -789,12 +854,14 @@ uint64 SpatialIndex::indexAtNodeIndex(uint64 nodeIndex) {
 uint64 SpatialIndex::idAtNodeIndex(uint64 nodeIndex) {
 	return nodes_[nodeIndex].id_;
 }
-uint64 SpatialIndex::layersSize(){
+uint64 SpatialIndex::layersSize() const{
 	return layers_.size();
 }
 uint64 SpatialIndex::firstIndexOfLayerAtDepth(uint64 depth){
 	return layers_[depth].firstIndex_;
 }
+
+int depthOfName(const char name[]) { return strlen(name)-1; }
 
 int depthOfId(uint64 htmId) {
 	int i;
@@ -811,7 +878,9 @@ int depthOfId(uint64 htmId) {
 	return size-1;
 }
 
-uint64 SpatialIndex::nodeIndexFromId(uint64 id) {
+int levelOfDepth(int depth) { return depth-1; }
+
+uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// This nodeIndex is only valid if depth == maxlevel+1
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
 	int depth = depthOfId(id);

@@ -29,6 +29,16 @@ SpatialIndex::nVertices() const
 
 //////////////////LEAFNUMBERBYID///////////////////////////////////////////
 // // TODO This just seems wrong.  Maybe for stuff stored after the leaves.
+/**
+ *
+ * This is part of the legacy code that is not really helpful since Bitlists are
+ * not used in the code anymore. Since id is being used as an index into
+ * an array, this means that we're not looking at an HTM-ID since the
+ * depth bit screws up its use as an array index.
+ *
+ * @param id <em>Not an HTM-ID</em>
+ * @return The leafNumberInBitlist = id - leafCount();
+ */
 inline uint64
 SpatialIndex::leafNumberById(uint64 id) const{
 //	NOTE BitList no longer exists.

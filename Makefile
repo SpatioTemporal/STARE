@@ -44,10 +44,12 @@ OBJECTS = \
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
 
-all: intersect filter libs
+all: intersect filter libs CuteTestsTop
 # example
 
-
+CuteTestsTop: libs
+	$(MAKE) -C tests/CUTE clean-test
+	$(MAKE) -C tests/CUTE CuteTests
 
 example: ${OBJ}/example.o ${OBJECTS}
 	$(CXX) -o $@  ${OBJ}/example.o ${OBJECTS}
