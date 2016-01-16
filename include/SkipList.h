@@ -22,6 +22,9 @@ class SkipListElement;
 class LINKAGE SkipList{
 public:
 	/* ITERATOR SUPPRT */
+	/**
+	 * Reset the iterator iter to the header's zeroth element.
+	 */
 	void reset() {
 		iter = myHeader->getElement(0);
 	}
@@ -37,6 +40,7 @@ public:
 	Key findMIN(const Key searchKey) const; // search element with key NLT searchKey
 	void list(ostream & os);	// List to stream
 
+	/// Set iter to the next element, returning True if it exists.
   int step() {
     iter = iter->getElement(0); return (iter != NIL);}
 

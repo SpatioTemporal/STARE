@@ -122,8 +122,8 @@ int HtmRange::isIn(HtmRange & otherRange)
   Key a, b;
   int rel, sav_rel;
   /*
-   * for each range in otheRange, see if there is an intersection,
-   * total incluwsion or total exclusion
+   * for each range in otherRange, see if there is an intersection,
+   * total inclusion or total exclusion
    */
   o.reset();			// the builtin lows and highs lists
   //
@@ -365,17 +365,25 @@ void HtmRange::defrag()
   // my_los->list(cout);
   // my_his->list(cout);
 }
+
+/**
+ * This method returns without doing anything.
+ *
+ * @param depth
+ */
 void HtmRange::levelto(int depth)
 {
   return;
 }
 
+/// Free the range los and his.
 void HtmRange::purge()
 {
   my_los->freeRange(-1, KEY_MAX);
   my_his->freeRange(-1, KEY_MAX);
 }
 
+/// Reset the lo and hi lists to their zeroth element.
 void HtmRange::reset()
 {
   my_los->reset();
@@ -385,6 +393,7 @@ void HtmRange::reset()
 //
 // return the number of ranges
 //
+/// The number of ranges.
 int HtmRange::nranges()
 {
   Key lo, hi;
