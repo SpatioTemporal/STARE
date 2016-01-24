@@ -1,4 +1,5 @@
 
+#include <string>
 #include <iostream>
 #include <iomanip>
 
@@ -13,6 +14,8 @@
 #include "SpatialIndex.h"
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
+
+#include "BitShiftNameEncoding.h"
 
 // TODO Add your test functions
 
@@ -264,6 +267,46 @@ void idByName() {
 	ASSERT_EQUALM("nodeIndex(12683) == 4491+IOFFSET == 4500?",nodeIndexExpected,nodeIndex);
 }
 
+void checkBitShiftNameEncoding0() {
+	BitShiftNameEncoding bitShiftName = BitShiftNameEncoding();
+
+	uint htmId = 12683;
+	string found = "'"+string(bitShiftName.nameById(htmId))+"'";
+	ASSERT_EQUALM("N012023 == 12683?","'N012023'",found);
+	ASSERT_EQUALM("12683 == N012023?",12683,bitShiftName.idByName("N012023"));
+	ASSERT_EQUALM("level(N012023)",5,bitShiftName.levelById(htmId));
+
+	uint64 testId = 0;
+	string failureMessage = "'";
+	try {
+		testId = bitShiftName.idByName("N012024");
+	} catch (SpatialFailure failure) {
+		failureMessage += failure.what();
+		failureMessage += "'";
+	}
+	ASSERT_EQUALM("INVALID DIGIT EXCEPTION","'BitShiftName:idByName-InvalidDigit'",failureMessage);
+
+	bitShiftName.setId(12683);
+	ASSERT_EQUALM("Set ID to 12683.",string("N012023"),bitShiftName.getName());
+
+	bitShiftName.setName("N012022");
+	ASSERT_EQUALM("Set name to N012022",12682,bitShiftName.getId());
+
+
+	BitShiftNameEncoding *htm = new BitShiftNameEncoding("N012023");
+	ASSERT_EQUALM("Construct using name.",12683,htm->getId());
+	try {
+		htm = new BitShiftNameEncoding("N012823");
+	} catch (SpatialFailure failure) {
+		ASSERT_EQUALM("Bad construction","BitShiftName:idByName-InvalidDigit",failure.what());
+	}
+	htm->setName("N012022");
+	ASSERT_EQUALM("Construct using name.",12682,htm->getId());
+	ASSERT_EQUALM("ID valid",true,htm->valid());
+	htm = new BitShiftNameEncoding();
+	ASSERT_EQUALM("ID invalid",false,htm->valid());
+
+}
 
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
@@ -276,6 +319,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(lookupOnMultipleDepths));
 	s.push_back(CUTE(idReallyDeep));
 	s.push_back(CUTE(idByName));
+	s.push_back(CUTE(checkBitShiftNameEncoding0));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

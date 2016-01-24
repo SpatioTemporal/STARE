@@ -39,6 +39,8 @@ OBJECTS = \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
    ${OBJ}/HtmRangeIterator.o \
+   ${OBJ}/NameEncoding.o \
+   ${OBJ}/BitShiftNameEncoding.o \
    ${TOPDIR}/cc_aux.o 
 
 #  ${OBJ}/SpatialConvex.o 
@@ -188,6 +190,12 @@ ${OBJ}/HtmRange.o: ${SRCS}/HtmRange.cpp
 ${OBJ}/HtmRangeIterator.o: ${SRCS}/HtmRangeIterator.cpp
 	$(CXX) $(CFLAGS) ${SRCS}/HtmRangeIterator.cpp -o $@
 
+${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
+	$(CXX) $(CFLAGS) $< -o $@
+
+${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
+	$(CXX) $(CFLAGS) $< -o $@
+
 ${OBJ}/XXX.o: ${SRCS}/XXX.cpp
 	$(CXX) $(CFLAGS) ${SRCS}/XXX.cpp -o $@
 
@@ -198,7 +206,7 @@ cc_intersect.o: ${TOPDIR}/cc_intersect.c
 	cc -c cc_intersect.c
 
 clean:
-	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/libhstm.a
+	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/NameEncoding.o ${OBJ}/BitShiftNameEncoding.o ${OBJ}/libhstm.a
 
 cleanAll:
 	-rm -f $(OBJECTS) ${OBJ}/*.o
