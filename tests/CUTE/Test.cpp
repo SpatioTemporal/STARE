@@ -15,6 +15,7 @@
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
 
+#include "HtmRangeIterator.h"
 #include "BitShiftNameEncoding.h"
 
 // TODO Add your test functions
@@ -315,7 +316,11 @@ void checkBitShiftNameEncoding0() {
     htm->setName("N012023");
     strcat(tmp_buf,htm->getName());
     ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
-
+}
+/* Test symbolic htm representation.
+ *
+ */
+void testRange() {
     HtmRange *htmR = new HtmRange;
     htmR->addRange(12682,12683);
     htmR->setEncoding(new BitShiftNameEncoding());
@@ -324,8 +329,36 @@ void checkBitShiftNameEncoding0() {
     cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
     cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
     cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
+}
 
-//    cout << "tmp_buf: " << tmp_buf << endl << flush;
+/* Test htm range iterator.
+ *
+ * Note that iter.nextSymbolic(buffer) increments its way through the intervals.
+ *
+ */
+void testRangeIterator() {
+
+	HtmRange *htmR = new HtmRange;
+	Key keys[6] = {12682,12683,12690,12691,12697,12698};
+	for( int i=0; i < 6; i+=2 ) {
+		htmR->addRange(keys[i],keys[i+1]);
+	}
+	//    htmR->setEncoding(new BitShiftNameEncoding());
+	htmR->setSymbolic(true);
+	HtmRangeIterator iter(htmR);
+	char buffer[80];
+	int k=0;
+	char expected[80], found[80];
+	while (iter.hasNext()) {
+		strcpy(expected,htmR->encoding->nameById(keys[k++]));
+		strcpy(found,iter.nextSymbolic(buffer));
+//		cout << "k=" << k-1
+//				<< " ( " << expected << " vs. " << found << " )"
+//				<< " keys[k]= " << keys[k-1] << endl << flush;
+		ASSERT_EQUALM("Checking range iterator for iter="+to_string(k-1),expected,found);
+//		cout << iter.nextSymbolic(buffer) << endl << flush;
+	}
+
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -340,6 +373,8 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(idReallyDeep));
 	s.push_back(CUTE(idByName));
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
+//	s.push_back(CUTE(testRange));
+	s.push_back(CUTE(testRangeIterator));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 
