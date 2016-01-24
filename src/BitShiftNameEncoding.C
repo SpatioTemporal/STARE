@@ -111,7 +111,7 @@ uint64 BitShiftNameEncoding::idByName(const char* name) {
 
 }
 
-uint32 BitShiftNameEncoding::levelById(uint64 htmid) {
+uint32 BitShiftNameEncoding::levelById(uint64 htmid) const {
 	  uint32 size=0, i;
 
 	#if defined(_WIN32)
@@ -139,4 +139,12 @@ uint32 BitShiftNameEncoding::levelById(uint64 htmid) {
 	     trixel, the level is size - 2
 	  */
 	  return size-2;
+}
+
+uint64 BitShiftNameEncoding::bareId() const {
+	uint32 depth = levelById(id)+1;
+	uint64 one  = 1;
+	uint64 mask = ~(one << (2*depth+1));
+	uint64 nodeIndexMinusIOFFSET = (id & mask);  // Add + IOFFSET; to get nodeIndex.
+	return nodeIndexMinusIOFFSET;
 }

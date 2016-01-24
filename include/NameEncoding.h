@@ -21,7 +21,9 @@ public:
 
 	virtual char  *nameById(uint64 id)        = 0;
 	virtual uint64 idByName(const char *name) = 0;
-	virtual uint32 levelById(uint64 id)       = 0;
+	virtual uint32 levelById(uint64 id) const = 0;
+
+	virtual uint64 bareId() const = 0; ///< Return id without top (depth) bit set.
 
 	uint64 getId() const {return id;}
 
@@ -36,7 +38,7 @@ public:
 		} else {return false;}
 	}
 
-private:
+protected:
 	uint64 id;
 	const char*  name;
 };

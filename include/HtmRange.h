@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include <SkipList.h>
+#include <NameEncoding.h>
+#include <BitShiftNameEncoding.h>
 
 // class ostream;
 
@@ -42,6 +44,10 @@ class LINKAGE HtmRange {
   void print(int what, std::ostream& os, bool symbolic); // FIX THIS, so caller does not set symbolic here....
 
   int compare(const HtmRange & other) const;
+
+  NameEncoding *encoding;
+  void setEncoding(NameEncoding *encoding) { this->encoding = encoding; }
+  NameEncoding *getEncoding() { return encoding; }
 
   // Moved here per ajmendez.
   SkipList *my_los;

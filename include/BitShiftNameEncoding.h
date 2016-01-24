@@ -20,7 +20,9 @@ public:
 
 	char  *nameById(uint64 id);
 	uint64 idByName(const char *name);
-	uint32 levelById(uint64 id);
+	uint32 levelById(uint64 id) const;
+
+	uint64 bareId() const; ///< Return id without top (depth) bit set.
 };
 
 #endif /* INCLUDE_BITSHIFTNAMEENCODING_H_ */

@@ -306,6 +306,26 @@ void checkBitShiftNameEncoding0() {
 	htm = new BitShiftNameEncoding();
 	ASSERT_EQUALM("ID invalid",false,htm->valid());
 
+	htm->setName("N012022");
+	ASSERT_EQUALM("Test bareID 12682 -> x318a vs. 4490 -> x118a",4490,htm->bareId());
+
+	char tmp_buf[256];
+	strcpy(tmp_buf,htm->getName());
+    strcat(tmp_buf, " ");
+    htm->setName("N012023");
+    strcat(tmp_buf,htm->getName());
+    ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
+
+    HtmRange *htmR = new HtmRange;
+    htmR->addRange(12682,12683);
+    htmR->setEncoding(new BitShiftNameEncoding());
+    htmR->setSymbolic(true);
+    cout << dec;
+    cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
+    cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
+    cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
+
+//    cout << "tmp_buf: " << tmp_buf << endl << flush;
 }
 
 void runSuite(int argc, char const *argv[]){
