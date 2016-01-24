@@ -1,3 +1,5 @@
+/** @file LICENSE
+<pre>
 We are going with GNU/GPLv2 because that's what the original HTM code
 with.  This may change.  2015-1012-1937-57-UTC M. Rilee, Rilee Systems
 Technologies, mike@rilee.net.
@@ -342,3 +344,6 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
+</pre>
+*/
+
