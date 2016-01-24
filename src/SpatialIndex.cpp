@@ -83,6 +83,10 @@ void SpatialIndex::printNode(int nodeIndex) const {
  *
  * Note that the zeroth node \c nodes_(0).index_=0 is the invalid node corresponding to htm-index == 0.
  *
+ * Note \c buildlevel_ is set to maxlevel if buildlevel is 0.
+ * Note \c buildlevel_ is set to maxlevel if buildlevel > maxlevel.
+ * Note \c buildlevel_ is set to buildlevel otherwise. Then we construct indices on the fly.
+ *
  * @param [in] maxlevel   The current level of focus for the index, the level of the leaves.
  * @param [in] buildlevel The level to which nodes are stored in nodes_.
  */
@@ -109,7 +113,7 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
   layers_[0].firstIndex_ = 1;
   layers_[0].firstVertex_ = 0;
 
-  // set the first 6 vertices
+  // set the first 6 vertices // TODO Change for icosahedron.
   float64 v[6][3] = {
     {0.0L,  0.0L,  1.0L}, // 0 k
     {1.0L,  0.0L,  0.0L}, // 1 i

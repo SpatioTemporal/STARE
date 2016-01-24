@@ -119,7 +119,7 @@ SpatialEdge::newEdge(size_t emindex, size_t index, int k)
   // already present, log the midpoint with the new face as well
    
   if( (en=edgeMatch(em)) != NULL){
-    IW(k) = en->mid_;
+    IW(k) = en->mid_; ///< IW(k) is where the edge calc affects the tessellation.
     return emindex;
   }
 
@@ -127,7 +127,7 @@ SpatialEdge::newEdge(size_t emindex, size_t index, int k)
 // and save it with the nodes and the edge as well
 
   insertLookup(em);
-  IW(k)      = getMidPoint(em);
+  IW(k)      = getMidPoint(em); ///< IW(k) is where we store the midpoints.
   em->mid_   = IW(k);
   return ++emindex;
 }

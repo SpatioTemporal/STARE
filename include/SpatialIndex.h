@@ -244,8 +244,8 @@ private:
    * The number of faces stored in \a nodes_, i.e. faces up to \a buildlevel_.
    */
   uint64		storedleaves_;	// number of stored leaf nodes
-  ValueVectorQuad   nodes_;		// the array of nodes 
-  std::vector<Layer> layers_;	// array of layers
+  ValueVectorQuad   nodes_;		///< the array of nodes
+  std::vector<Layer> layers_;	///< array of buildlevel_+1 layers
 
   typedef std::vector<SpatialVector> ValueVectorSpvec;
   ValueVectorSpvec vertices_;
