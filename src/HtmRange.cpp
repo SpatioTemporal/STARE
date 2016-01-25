@@ -16,30 +16,36 @@
 
 using namespace std;
 
-HtmRange::HtmRange()
-{
-	encoding = new BitShiftNameEncoding();
+HtmRange::HtmRange() : HtmRange(new BitShiftNameEncoding()) {}
+
+HtmRange::HtmRange(NameEncoding *encoding) {
+	this->encoding = encoding;
 	my_los = new SkipList(SKIP_PROB);
 	my_his = new SkipList(SKIP_PROB);
 	symbolicOutput = false;
 }
 
+/**
+ * Set numeric or symbolic (string) output for true/false respectively.
+ * @param flag
+ */
 void HtmRange::setSymbolic(bool flag)
 {
   symbolicOutput = flag;
 }
 
-
+/**
+ * Compare the number of intervals stored.
+ * @param other HtmRange
+ * @return true if this and the other store the same number of intervals.
+ */
 int HtmRange::compare(const HtmRange & other) const
 {
-
   int rstat = 0;
   if (my_los->getLength() == other.my_los->getLength()){
     rstat = 1;
   }
   return rstat;
-
-
 }
 
 int HtmRange::isIn(Key a, Key b)

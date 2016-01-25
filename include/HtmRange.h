@@ -65,8 +65,10 @@ class LINKAGE HtmRange {
   bool symbolicOutput;
 
   HtmRange();
+  HtmRange(NameEncoding *encoding);
   ~HtmRange(){
     purge();
+    delete encoding;
     delete my_los;
     delete my_his;
   };
