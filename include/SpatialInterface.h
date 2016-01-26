@@ -212,7 +212,8 @@ public:
   const ValueVector & domainCmd( char *str );
 
   /** Change the current index depth */
-  void changeDepth(size_t depth, size_t saveDepth = 5);
+  void changeDepth(size_t depth, size_t saveDepth = 5); // TODO Deprecate
+  void changeLevel(size_t level, size_t saveLevel = 5); // TODO Replace changeDepth
 
   /** Check whether a varstring is an integer */
   static bool isInteger(const StdStr &);

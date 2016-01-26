@@ -84,6 +84,7 @@ public:
   uint64 idAtNodeIndex(uint64 nodeIndex);
   uint64 layersSize() const;
   uint64 firstIndexOfLayerAtDepth(uint64 depth);
+  uint64 firstIndexOfLayerAtLevel(uint64 level);
 
   uint64 nodeIndexFromId(uint64 id) const;
 

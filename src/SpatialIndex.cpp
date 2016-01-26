@@ -871,7 +871,11 @@ uint64 SpatialIndex::layersSize() const{
 	return layers_.size();
 }
 uint64 SpatialIndex::firstIndexOfLayerAtDepth(uint64 depth){
+	cout << "SpatialIndex::firstIndexOfLayerAtDepth: Warning!!! Deprecated!!!" << endl << flush;
 	return layers_[depth].firstIndex_;
+}
+uint64 SpatialIndex::firstIndexOfLayerAtLevel(uint64 level){
+	return layers_[level].firstIndex_;
 }
 
 int depthOfName(const char name[]) { return strlen(name)-1; }
