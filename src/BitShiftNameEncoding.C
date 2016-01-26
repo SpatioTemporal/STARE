@@ -141,6 +141,13 @@ uint32 BitShiftNameEncoding::levelById(uint64 htmid) const {
 	  return size-2;
 }
 
+/**
+ * Strips the first nonzero bit, which determines the level of the index.
+ * Stripping the depth bit allows a nodeIndex to be calculated from the
+ * result. Other packing schemes may store depth information elsewhere.
+ *
+ * @return an htmId sans the depth bit, essentially nodeIndexMinusIOFFSET at that depth.
+ */
 uint64 BitShiftNameEncoding::bareId() const {
 	uint32 depth = levelById(id)+1;
 	uint64 one  = 1;

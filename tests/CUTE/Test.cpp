@@ -268,6 +268,9 @@ void idByName() {
 	ASSERT_EQUALM("nodeIndex(12683) == 4491+IOFFSET == 4500?",nodeIndexExpected,nodeIndex);
 }
 
+/**
+ * Verify the symbolic name encoding using bit shifting.
+ */
 void checkBitShiftNameEncoding0() {
 	BitShiftNameEncoding bitShiftName = BitShiftNameEncoding();
 
@@ -317,8 +320,9 @@ void checkBitShiftNameEncoding0() {
     strcat(tmp_buf,htm->getName());
     ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
 }
-/* Test symbolic htm representation.
- *
+
+/**
+ * Test symbolic htm representation.
  */
 void testRange() {
     HtmRange *htmR = new HtmRange;
@@ -331,9 +335,10 @@ void testRange() {
     cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
 }
 
-/* Test htm range iterator.
+/**
+ *  Test htm range iterator.
  *
- * Note that iter.nextSymbolic(buffer) increments its way through the intervals.
+ * Note iter.nextSymbolic(buffer) increments its way through the intervals.
  *
  */
 void testRangeIterator() {
@@ -361,6 +366,34 @@ void testRangeIterator() {
 
 }
 
+
+/**
+ * Cover the level and depth calculations underlying SpatialIndex's nodes_.
+ */
+void testIndexLevelAndDepth() {
+	BitShiftNameEncoding *name = new BitShiftNameEncoding();
+	cout << "S0 =0x" << hex << name->idByName("S0") << endl << flush << dec;
+	cout << "S00=0x" << hex << name->idByName("S00") << endl << flush << dec;
+	int maxLevel   = 4;
+	int saveLevel  = 6;
+	for(maxLevel=1;maxLevel<9;maxLevel++) {
+		SpatialIndex *index = new SpatialIndex(maxLevel,saveLevel);
+		cout
+		<< " maxLevel=" << maxLevel
+		<< " saveLevel=" << saveLevel
+		<< " index->layers_.size=" << index->layersSize()
+		<< " index->maxLevel=" << index->getMaxlevel()
+		<< " index->buildLevel=" << index->getBuildLevel()
+		<< " symbolic-name-base=0x"
+		<< hex << index->idAtNodeIndex(9)
+		<< dec << " " << index->nameById(index->idAtNodeIndex(9))
+		<< " depth=" << depthOfName(index->nameById(index->idAtNodeIndex(9)))
+		<< " level=" << name->levelById(index->idAtNodeIndex(9))
+		<< endl << flush;
+	}
+	delete name;
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -375,6 +408,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
 //	s.push_back(CUTE(testRange));
 	s.push_back(CUTE(testRangeIterator));
+	s.push_back(CUTE(testIndexLevelAndDepth));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

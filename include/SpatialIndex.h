@@ -33,6 +33,8 @@
 int depthOfName(const char name[]);
 int depthOfId(uint64 htmId);
 int levelOfDepth(int depth);
+int levelOfName(const char name[]);
+int levelOfId(uint64 htmId);
 
 //########################################################################
 //#
@@ -68,7 +70,7 @@ public:
 	// Note: On Darwin size_t is long unsigned int.
 
     size_t getMaxlevel(){return maxlevel_;};	// the depth of the Layer
-    size_t getBildLevel(){return buildlevel_;};	// the depth of the Layer storedbuildlevel_;
+    size_t getBuildLevel(){return buildlevel_;};	// the depth of the Layer storedbuildlevel_;
 
   /** Constructor.
       Give the level of the index and optionally the level to build -

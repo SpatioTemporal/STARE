@@ -87,6 +87,8 @@ void SpatialIndex::printNode(int nodeIndex) const {
  * Note \c buildlevel_ is set to maxlevel if buildlevel > maxlevel.
  * Note \c buildlevel_ is set to buildlevel otherwise. Then we construct indices on the fly.
  *
+ * Calls \c newNodep, makeNewLayer, ...
+ *
  * @param [in] maxlevel   The current level of focus for the index, the level of the leaves.
  * @param [in] buildlevel The level to which nodes are stored in nodes_.
  */
@@ -324,8 +326,10 @@ SpatialIndex::nodeVertex(
 }
 
 /////////////MAKENEWLAYER/////////////////////////////////
-// makeNewLayer: generate a new layer and the nodes in it
-//
+/** makeNewLayer: generate a new layer and the nodes in it
+ *
+ * @param oldlayer
+ */
 void 
 SpatialIndex::makeNewLayer(size_t oldlayer)
 {
@@ -367,8 +371,13 @@ SpatialIndex::makeNewLayer(size_t oldlayer)
 }
 
 /////////////NEWNODE//////////////////////////////////////
-// newNode: make a new node
-//
+/** newNode: make a new node initializing child and midpoints to zero.
+ *
+ * @param v1, v2, v3 vertex indices of the new node
+ * @param numericIdName
+ * @param parent
+ * @return The index of the next node.
+ */
 uint64
 SpatialIndex::newNode(size_t v1, size_t v2,size_t v3,uint64 numericIdName,uint64 parent)
 {
@@ -866,8 +875,13 @@ uint64 SpatialIndex::firstIndexOfLayerAtDepth(uint64 depth){
 }
 
 int depthOfName(const char name[]) { return strlen(name)-1; }
+int levelOfName(const char name[]) { return strlen(name)-2; } // TODO Move to NameEncoding.
+int levelOfDepth(int depth) { return depth-1; } // TODO Remove.
 
 int depthOfId(uint64 htmId) {
+	return levelOfId(htmId) + 1;
+}
+int levelOfId(uint64 htmId) {
 	int i;
 	uint32 size;
 	// determine index of first set bit
@@ -879,10 +893,8 @@ int depthOfId(uint64 htmId) {
 	if(htmId == 0)
 		throw SpatialFailure("SpatialIndex:nameById: invalid ID");
 	size=(IDSIZE-i) >> 1;
-	return size-1;
+	return size-2;
 }
-
-int levelOfDepth(int depth) { return depth-1; }
 
 uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// This nodeIndex is only valid if depth == maxlevel+1

@@ -11,7 +11,12 @@
 //#
 
 /////////////leafCount//////////////////////////////////////
-// leafCount: return number of leaf nodes
+/** leafCount: return number of leaf nodes
+ *
+ * This may be much greater than the number of storedleaves_.
+ *
+ * @return leaves_ the number of leaves at maxlevel_, the bottom of the index.
+ */
 inline uint64
 SpatialIndex::leafCount() const
 {
