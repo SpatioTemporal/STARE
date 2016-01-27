@@ -363,9 +363,7 @@ void testRangeIterator() {
 		ASSERT_EQUALM("Checking range iterator for iter="+to_string(k-1),expected,found);
 //		cout << iter.nextSymbolic(buffer) << endl << flush;
 	}
-
 }
-
 
 /**
  * Cover the level and depth calculations underlying SpatialIndex's nodes_.

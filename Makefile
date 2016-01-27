@@ -31,6 +31,7 @@ SKIPOB = \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
+   ${OBJ}/SpatialGeneral.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
    ${OBJ}/SpatialIndex.o \
@@ -110,15 +111,15 @@ filter.o: filter.cpp
 	$(CXX) $(CXX_FLAGS) filter.cpp -o $@
 	
 testrun:
-	make -f Makefile intersect
+	make -f Makefile intersect; rm -f tmp.out
 	./intersect  20 testInputIntersect > tmp.out
-	diff tmp.out correctOutputIntersect
+	diff -q tmp.out correctOutputIntersect
 	./intersect -varlength 20 testInputIntersect > tmp.out 
-	diff tmp.out correctVarout
+	diff -q tmp.out correctVarout
 	./intersect -varlength 20 testTiny > tmp.out
-	diff tmp.out correctTinyVarout
+	diff -q tmp.out correctTinyVarout
 	./intersect  20 testTiny > tmp.out
-	diff tmp.out correctTinyOut
+	diff -q tmp.out correctTinyOut
 testcompress:
 	make -f Makefile intersect filter
 	./intersect 20 testInputIntersect | filter 1 
@@ -150,6 +151,9 @@ ${OBJ}/example.o: ${APP_SRCS}/example.cpp
 
 ${OBJ}/sqlExample.o: ${APP_SRCS}/sqlExample.cpp
 	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/sqlExample.cpp -o $@
+
+${OBJ}/SpatialGeneral.o: ${SRCS}/SpatialGeneral.C
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialGeneral.C -o $@
 
 ${OBJ}/SpatialIndex.o: ${SRCS}/SpatialIndex.cpp
 	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialIndex.cpp -o $@

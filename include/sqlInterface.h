@@ -64,7 +64,7 @@ public:
       <li> the same domain string as in the domain() method
       </ul>
   */
-  size_t intersect1( char*, ValueVector & );
+  size_t intersect1( char*, HTMRangeValueVector & );
 
   /** Intersect function 2. This only differs from the version
       above that the depth parameter is omitted. The constructor
@@ -80,7 +80,7 @@ public:
            for the depth parameter.
       </ul>
   */
-  size_t intersect2( char*, ValueVector & );
+  size_t intersect2( char*, HTMRangeValueVector & );
 
   /** Request all triangles in a circular region.
       Given are the center coordinate and radius in arcminutes.
@@ -91,7 +91,7 @@ public:
       <li> "CARTESIAN depth x y z rad"
       </ul>
   */
-  size_t  circleRegion( char *, ValueVector & );
+  size_t  circleRegion( char *, HTMRangeValueVector & );
 
   /** Check the circleRegion syntax */
   MsgStr circleRegionDiagnostic(char *);
@@ -114,7 +114,7 @@ public:
 
 	  <p> The vector to be filled will be cleared by the routine.
   */
-  size_t convexHull( char *str, ValueVector & );
+  size_t convexHull( char *str, HTMRangeValueVector & );
 
   /** Check convexHull Syntax */
   MsgStr convexHullDiagnostic(char *);
@@ -151,7 +151,7 @@ public:
       <p>
       The numbers need to be separated by whitespace (newlines are allowed).
   */
-  size_t domain( char *str, ValueVector & );
+  size_t domain( char *str, HTMRangeValueVector & );
 
   /** Check the domain syntax */
   MsgStr domainDiagnostic(char *);
@@ -177,7 +177,7 @@ private:
 	StdStr error_;
 	bool err_;
 	Result result_;
-	const ValueVector *resVec_;
+	const HTMRangeValueVector *resVec_;
 	HTM_ID resID_;
     StdStr depth_;
 };

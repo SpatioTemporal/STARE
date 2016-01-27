@@ -135,13 +135,13 @@ htmInterface::getCode() {
 }
 
 void 
-htmInterface::getDepth() {
+htmInterface::getDepth() { // TODO Why depth?  Switch to level.
 
   size_t depth = getInteger();
   if(depth > HTMMAXDEPTH)
     throw SpatialInterfaceError("htmInterface:getDepth: Depth too large: Max is HTMMAXDEPTH");
 
-  changeDepth(depth);
+  changeDepth(depth); // TODO replace with level
 }
 
 // get an integer out of the command string
@@ -196,7 +196,6 @@ htmInterface::getFloat() {
   return atof(token.data());
 }
 
-
 // parse the string, returning the number of floats
 // that have been in the string.
 bool
@@ -248,7 +247,7 @@ bool htmInterface::isFloat(const StdStr &str) {
 
 
 // check whether an id is in a range
-bool htmInterface::inRange( const ValueVector &range, uint64 id) {
+bool htmInterface::inRange( const HTMRangeValueVector &range, uint64 id) {
     size_t len = range.size() - 1;
 
 	// completely outside range?
@@ -262,7 +261,7 @@ bool htmInterface::inRange( const ValueVector &range, uint64 id) {
 
 // print the range
 void 
-htmInterface::printRange( const ValueVector &range) {
+htmInterface::printRange( const HTMRangeValueVector &range) {
 
 #ifdef _WIN32
     char buf[20];
@@ -291,7 +290,7 @@ htmInterface::printRange( const ValueVector &range) {
 
 //////////////////////CIRCLEREGION METHODS//////////////////////
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::circleRegion( float64 ra,
 			    float64 dec,
 			    float64 rad ) {
@@ -307,7 +306,7 @@ htmInterface::circleRegion( float64 ra,
 	return domain(dom);
 }
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::circleRegion( float64 x,
 			    float64 y,
 			    float64 z,
@@ -326,7 +325,7 @@ htmInterface::circleRegion( float64 x,
 	return domain(dom);
 }
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::circleRegionCmd( char *str ) {
 
 	cmd_ = str;
@@ -349,7 +348,7 @@ htmInterface::circleRegionCmd( char *str ) {
 }
 
 //////////////////ConvexHull///////////////////////
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::convexHull( ValueVectorF64 ra,
 			  ValueVectorF64 dec ) {
 
@@ -365,7 +364,7 @@ htmInterface::convexHull( ValueVectorF64 ra,
   return doHull();
 }
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::convexHull( ValueVectorF64 x,
 			  ValueVectorF64 y,
 			  ValueVectorF64 z ) {
@@ -382,7 +381,7 @@ htmInterface::convexHull( ValueVectorF64 x,
   return doHull();
 }
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::convexHullCmd( char *str ) {
 
   cmd_ = str;
@@ -408,8 +407,7 @@ htmInterface::convexHullCmd( char *str ) {
   return doHull();
 }
 
-
-const ValueVector &
+const HTMRangeValueVector &
 htmInterface::doHull() {
 
 	if(polyCorners_.size() < 3)
@@ -554,7 +552,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 
 
 //////////////////////////domain/////////////////////////
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::domain( SpatialDomain & domain ) {
   HtmRange htmRange;
 
@@ -576,7 +574,7 @@ htmInterface::domain( SpatialDomain & domain ) {
 
 
 
-const ValueVector & 
+const HTMRangeValueVector & 
 htmInterface::domainCmd( char *str ) {
 
   cmd_ = str;
@@ -628,7 +626,7 @@ ostream& operator<<(ostream& os, const uint64 &ui64)
 }
 #endif
 
-void htmInterface::fillValueVec(HtmRange &hr, ValueVector &vec)
+void htmInterface::fillValueVec(HtmRange &hr, HTMRangeValueVector &vec)
 {
 	htmRange ran;
 	vec.clear();

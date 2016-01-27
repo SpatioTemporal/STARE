@@ -84,6 +84,17 @@ SpatialVector::set(const float64 &ra, const float64 &dec)
   dec_ = dec;
   updateXYZ();
 }
+void
+SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
+{
+//	throw SpatialUnimplemented();
+	float64 *x = xyzFromLatLonDegrees(lat,lon);
+	x_ = x[0];
+	y_ = x[1];
+	z_ = x[2];
+	normalize();
+//	updateRA(); // TODO Why should we do this?
+}
 
 /////////////GET//////////////////////////////////////////
 //

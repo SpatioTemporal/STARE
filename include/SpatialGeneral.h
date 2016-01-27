@@ -47,6 +47,10 @@
  TODO Explore using uint64 instead of uint32...
  */
 
+#include <math.h>
+//#include <stdio.h>
+//#include <iostream>
+
 #if !defined(OO_MACHINE_H) && !defined(OO_CONFIG_H) && !defined(SXGENERAL_H)
 typedef char				int8;
 typedef unsigned char		uint8;
@@ -71,6 +75,7 @@ typedef unsigned long long	uint64;
 
 #define IDSIZE             64
 #define HTMNAMEMAX         32
+// mlr TODO can we change HTMMAXDEPTH to HTMMAXLEVEL?
 #define HTMMAXDEPTH        25
 #define MAX_SQL_DEPTH      20
 // mlr only reference to HTMMAXKEEP???
@@ -106,6 +111,7 @@ const bool                      true = 1;
 
 const float64 gPi = 3.1415926535897932385E0 ;
 const float64 gPr = gPi/180.0; 
+const float64 piDiv180 = gPr;
 const float64 gEpsilon = 1.0E-15;
 // CVSversion = "$Name:  $";
 
@@ -188,5 +194,9 @@ const float64 gEpsilon = 1.0E-15;
 LINKAGE ostream& operator<<(ostream& os, const int64 &i64);
 LINKAGE ostream& operator<<(ostream& os, const uint64 &ui64);
 #endif
+
+unsigned long lg2(unsigned long v);
+float64* xyzFromLatLonRadians(float64 lat,float64 lon);
+float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
 
 #endif /* SPATIALGENERAL_H */

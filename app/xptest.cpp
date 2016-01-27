@@ -34,7 +34,7 @@ void Permute(uint64 source, char *  Target) {
 int main(int argc, char **argv)
 {
   size_t nRanges;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   char pzCoordinateSpec[1024];
   char czErrorMsg [1000] = OK_MSG;		// diagnostic message output
   int64		result[MAX_OUTPUT_VECTOR_LENGTH+1]; // the result array that we build locally

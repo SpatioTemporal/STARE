@@ -67,86 +67,86 @@ size_t i,j;
 void
 usage(char *name) {
 
-  cerr << "usage: " << endl
-       << name << " [-save savelevel] [-verbose] [-olevel olevel] level domainfile" << endl;
-  cerr << " [-save savelevel]   : store up to this depth (default 2)" << endl
-       << " [-verbose]          : verbose" << endl
-       << " [-olevel out_level] : output HTMID level (must be >= level)" << endl
-       << " [-symbolic]         : output HTMID as a symbolic name, must be used with -varlength" << endl
-       << " [-expand]           : output all HTMIDs in the range (conflicts with -varlength)" << endl
-       << " [-varlength]        : output natural HTMID (conflicts with -olevel)" << endl
-       << " [-nranges nrages]   : keep number of ranges below this number" << endl
-    //       << " [-visualize domainfile hidfile] : creates two files to be used with htmviz openGL application" << endl
-       << " level               : Maximal spatialindex depth " << endl
-       << " domainfile          : filename of domain " << endl
-       << endl;
-  exit(1);
+	cerr << "usage: " << endl
+			<< name << " [-save savelevel] [-verbose] [-olevel olevel] level domainfile" << endl;
+	cerr << " [-save savelevel]   : store up to this depth (default 2)" << endl
+			<< " [-verbose]          : verbose" << endl
+			<< " [-olevel out_level] : output HTMID level (must be >= level)" << endl
+			<< " [-symbolic]         : output HTMID as a symbolic name, must be used with -varlength" << endl
+			<< " [-expand]           : output all HTMIDs in the range (conflicts with -varlength)" << endl
+			<< " [-varlength]        : output natural HTMID (conflicts with -olevel)" << endl
+			<< " [-nranges nrages]   : keep number of ranges below this number" << endl
+			//       << " [-visualize domainfile hidfile] : creates two files to be used with htmviz openGL application" << endl
+			<< " level               : Maximal spatialindex depth " << endl
+			<< " domainfile          : filename of domain " << endl
+			<< endl;
+	exit(1);
 }
 
 int init_all(int argc, char *argv[])
 {
 
-  int args = 1;			// start to parse argument no 1
-  argc--;
+	int args = 1;			// start to parse argument no 1
+	argc--;
 
-  while(argc > 0) {
-    if(strcmp(argv[args],"-verbose")==0) {
-      verbose = true;
-    } else if(strcmp(argv[args],"-visualize")==0) {
-      visualize = true;
-      if (argc > 2){
-	strcpy(domainfilename, argv[++args]); argc--;
-	strcpy(htmidfilename, argv[++args]); argc--;
-      } else {
-	usage(argv[0]);
-      }
-    } else if (strcmp(argv[args],"-expand")==0) {
-      expand = true;
-    } else if (strcmp(argv[args],"-symbolic")==0) {
-      symbolic = true;
-    } else if (strcmp(argv[args],"-varlength")==0) {
-      varlength = true;
-    } else if(strcmp(argv[args],"-save")==0) {
-      savedepth = atoi(argv[++args]); argc--;
-      if(savedepth < 1 || savedepth > 8) {
-	cerr << "savedepth should be between 1 and 8, is " << savedepth << endl;
-	return -1;
-      }
-    } else if(strcmp(argv[args],"-olevel")==0) {
-      olevel = atoi(argv[++args]); argc--;
-    } else if(strcmp(argv[args],"-nranges")==0) {
-      maximum_nrGaps = atoi(argv[++args]); argc--;
-      compress = true;
-    } else {
-      if( *argv[args] == '-' ) usage(argv[0]);
-      switch(arg) {
-      case 2:
-	depth = atoi(argv[args]);
-	if(depth < 1 || depth > HTMMAXDEPTH) {
-	  cerr << "depth should be between 1 and " << HTMMAXDEPTH << ", is " << depth << endl;
-	  return -1;
-	}
-	break;
-      case 1:
-	infile = argv[args];
-	break;
-      default:
-	usage(argv[0]);
-      }
-      arg--;
-    }
-    argc--;
-    args++;
-  } // while (argc > 0)
+	while(argc > 0) {
+		if(strcmp(argv[args],"-verbose")==0) {
+			verbose = true;
+		} else if(strcmp(argv[args],"-visualize")==0) {
+			visualize = true;
+			if (argc > 2){
+				strcpy(domainfilename, argv[++args]); argc--;
+				strcpy(htmidfilename, argv[++args]); argc--;
+			} else {
+				usage(argv[0]);
+			}
+		} else if (strcmp(argv[args],"-expand")==0) {
+			expand = true;
+		} else if (strcmp(argv[args],"-symbolic")==0) {
+			symbolic = true;
+		} else if (strcmp(argv[args],"-varlength")==0) {
+			varlength = true;
+		} else if(strcmp(argv[args],"-save")==0) {
+			savedepth = atoi(argv[++args]); argc--;
+			if(savedepth < 1 || savedepth > 8) {
+				cerr << "savedepth should be between 1 and 8, is " << savedepth << endl;
+				return -1;
+			}
+		} else if(strcmp(argv[args],"-olevel")==0) {
+			olevel = atoi(argv[++args]); argc--;
+		} else if(strcmp(argv[args],"-nranges")==0) {
+			maximum_nrGaps = atoi(argv[++args]); argc--;
+			compress = true;
+		} else {
+			if( *argv[args] == '-' ) usage(argv[0]);
+			switch(arg) { // How many "bare" arguments are there?  2 are expected.
+			case 2:
+				depth = atoi(argv[args]); // MLR depth is really level, no?
+				if(depth < 1 || depth > HTMMAXDEPTH) {
+					cerr << "depth should be between 1 and " << HTMMAXDEPTH << ", is " << depth << endl;
+					return -1;
+				}
+				break;
+			case 1:
+				infile = argv[args];
+				break;
+			default:
+				usage(argv[0]); // If we have more bare arguments than expected.
+			}
+			arg--; // Got one more bare argument.
+		}
+		argc--;
+		args++;
+	} // while (argc > 0)
 
-  if (olevel < depth)
-    olevel = depth;
+	if (olevel < depth)
+		olevel = depth;
 
-//   if (symbolic && !varlength)
-//     usage(argv[0]);
+	//   if (symbolic && !varlength)
+	//     usage(argv[0]);
 
-  cerr << "Depth = " << depth << ", output level = " << olevel << endl;
-  return 0;
+	cerr << "Depth = " << depth << ", output level = " << olevel << endl;
+	return 0;
 }
 // intopends60.lib 
 
@@ -185,7 +185,10 @@ int main(int argc, char *argv[]) {
 		// Read in domain and echo it to screen
 
 		SpatialDomain domain;   // initialize empty domain
+		// //////////////////////////////////////////////
+		// Read the domain here.
 		in >> domain;	      // read domainfile
+		// //////////////////////////////////////////////
 		domain.setOlevel(olevel);
 		if(verbose)
 			cout << domain;

@@ -89,7 +89,7 @@ runtest1 (const SpatialIndex &si, double ra, double dec, uint64 htmid, int flag)
 }
 
 void
-printRanges(char *msg, size_t nRanges, ValueVector &ranges, int flag) {
+printRanges(char *msg, size_t nRanges, HTMRangeValueVector &ranges, int flag) {
 	
   if (flag>=DBG_MORE)
     cout << msg << endl;
@@ -261,7 +261,7 @@ itest3(int flag)
   int n=0;
 
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char circle[100] = "J2000 6 41.4 47.9 2.0";
@@ -286,7 +286,7 @@ itest4(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char circle[100] = "J2000 6 41.4 47.9 8.0";
@@ -311,7 +311,7 @@ itest5(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char circle[100] = "J2000 6 41.4 47.9 2.0";
@@ -336,7 +336,7 @@ itest6(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char hull[100]	 = "J2000 6 41.4 47.9 41.2.47.9 41.0 47.5 41.4 48";
@@ -359,7 +359,7 @@ itest7(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char hull[100] = "CONVEX J2000 1 1 -1 1 -1 -1 1 -1"; // counterclockwise
@@ -385,7 +385,7 @@ itest8(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
   char domain[100] = "DOMAIN 6 1 2 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0";
@@ -407,7 +407,7 @@ itest9(int flag)
 {
   int n=0;
   MsgStr errMsg;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm(6);
 
@@ -430,7 +430,7 @@ itest10(int flag)
 {
   int n=0;
   int64 result = 0;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm;
 
@@ -458,7 +458,7 @@ itest11(int flag)
 {
   int n=0;
   int64 result = 0;
-  ValueVector ranges;
+  HTMRangeValueVector ranges;
   size_t nRanges;
   htmSqlInterface htm;
   std::vector<int> listofint;
