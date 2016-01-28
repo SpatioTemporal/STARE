@@ -80,6 +80,9 @@ public:
   SpatialIndex() {};
   SpatialIndex(size_t maxlevel, size_t buildlevel =5);
 
+  size_t getMaxlevel() const { return maxlevel_; }
+  size_t getBuildlevel() const { return buildlevel_; }
+
   uint64 indexAtNodeIndex(uint64 nodeIndex);
   uint64 idAtNodeIndex(uint64 nodeIndex);
   uint64 layersSize() const;

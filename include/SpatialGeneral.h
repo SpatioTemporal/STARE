@@ -50,6 +50,7 @@
 #include <math.h>
 //#include <stdio.h>
 //#include <iostream>
+#include <vector>
 
 #if !defined(OO_MACHINE_H) && !defined(OO_CONFIG_H) && !defined(SXGENERAL_H)
 typedef char				int8;
@@ -198,5 +199,11 @@ LINKAGE ostream& operator<<(ostream& os, const uint64 &ui64);
 unsigned long lg2(unsigned long v);
 float64* xyzFromLatLonRadians(float64 lat,float64 lon);
 float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
+
+struct LatLonDegrees64 {
+	float64 lat, lon;
+	LatLonDegrees64(float64 lat, float64 lon) : lat(lat), lon(lon) {}
+};
+typedef std::vector<LatLonDegrees64> LatLonDegrees64ValueVector ;
 
 #endif /* SPATIALGENERAL_H */

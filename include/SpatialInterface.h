@@ -41,6 +41,8 @@ struct htmPolyCorner {
   SpatialVector c_;
   bool inside_;
   bool replace_;
+  htmPolyCorner() {}
+  htmPolyCorner(SpatialVector c_) : c_(c_) {}
 }; 
 
 /**
@@ -167,6 +169,12 @@ public:
 				       ValueVectorF64 y,
 				       ValueVectorF64 z ) ;
 
+  /** Request all triangles in the convex hull of a given set of
+      points.
+  */
+  const HTMRangeValueVector & convexHull( LatLonDegrees64ValueVector latlon,
+		  size_t steps = -1);
+
   /** Request all triangles in the convex hull of a given set of 
       points.
       The points are given in the string in the following form:
@@ -234,6 +242,10 @@ public:
 
   /** Print the ranges to cout */
   static void printRange( const HTMRangeValueVector & );
+
+  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
+  ValueVectorPolyCor polyCorners_;
+
 private:
 
   enum cmdCode {
@@ -249,8 +261,8 @@ private:
   SpatialIndex *index_;
   HTMRangeValueVector range_;
   ValueVectorUint64 idList_;
-  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
-  ValueVectorPolyCor polyCorners_;
+//  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
+//  ValueVectorPolyCor polyCorners_;
   StdStr cmd_;
   VarStrToken *t_;
 
