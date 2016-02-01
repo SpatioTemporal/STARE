@@ -60,6 +60,9 @@ public:
   void set(const float64 &ra,
 	   const float64 &dec);
 
+  void setLatLonDegrees(const float64 &lat,
+		  	  	 	 	const float64 &lon);
+
   /// Get x,y,z
   void get( float64 &x,
 	    float64 &y,

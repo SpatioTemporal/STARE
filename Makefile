@@ -1,5 +1,5 @@
 
-.PHONY: libs
+.PHONY: libs version
 
 TOPDIR  = /Users/mrilee/git/hstm
 CXX     = g++
@@ -13,7 +13,10 @@ APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
 #CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
-CFLAGS  = -c -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+CFLAGS  = -c ${CFLAGS_BASE}
+CXX_FLAGS  = -std=c++11 ${CFLAGS}
+CLX_FLAGS  = -std=c++11
 #
 # Should not have -O3 with debug
 # -DHAVE_BITLIST
@@ -22,9 +25,17 @@ SKIPOB = \
    ${OBJ}/SkipListElement.o \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
+   ${OBJ}/SpatialException.o \
+   ${OBJ}/NameEncoding.o \
+   ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
+   ${OBJ}/SpatialGeneral.o \
+   ${OBJ}/NameEncoding.o \
+   ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${OBJ}/SpatialIndex.o \
    ${OBJ}/SpatialConstraint.o \
    ${OBJ}/sqlInterface.o \
@@ -44,10 +55,12 @@ OBJECTS = \
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
 
-all: intersect filter libs
+all: intersect filter libs CuteTestsTop
 # example
 
-
+CuteTestsTop: libs
+	$(MAKE) -C tests/CUTE clean-test
+	$(MAKE) -C tests/CUTE CuteTests
 
 example: ${OBJ}/example.o ${OBJECTS}
 	$(CXX) -o $@  ${OBJ}/example.o ${OBJECTS}
@@ -94,21 +107,21 @@ lookup: ${OBJ}/lookup.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/lookup.o ${OBJECTS} 
 
 filter: filter.o $(SKIPOB)
-	$(CXX) -o $@ filter.o $(SKIPOB)
+	$(CXX) $(CLX_FLAGS) -o $@ filter.o $(SKIPOB)
 
 filter.o: filter.cpp
-	$(CXX) $(CFLAGS) filter.cpp -o $@
+	$(CXX) $(CXX_FLAGS) filter.cpp -o $@
 	
 testrun:
-	make -f Makefile intersect
+	make -f Makefile intersect; rm -f tmp.out
 	./intersect  20 testInputIntersect > tmp.out
-	diff tmp.out correctOutputIntersect
+	diff -q tmp.out correctOutputIntersect
 	./intersect -varlength 20 testInputIntersect > tmp.out 
-	diff tmp.out correctVarout
+	diff -q tmp.out correctVarout
 	./intersect -varlength 20 testTiny > tmp.out
-	diff tmp.out correctTinyVarout
+	diff -q tmp.out correctTinyVarout
 	./intersect  20 testTiny > tmp.out
-	diff tmp.out correctTinyOut
+	diff -q tmp.out correctTinyOut
 testcompress:
 	make -f Makefile intersect filter
 	./intersect 20 testInputIntersect | filter 1 
@@ -121,82 +134,94 @@ xptest: ${OBJ}/xptest.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/xptest.o ${OBJECTS}
 
 ${OBJ}/lookup.o: ${APP_SRCS}/lookup.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/lookup.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/lookup.cpp -o $@
 
 test1: ${OBJ}/test1.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/test1.o ${OBJECTS}
 
 ${OBJ}/xptest.o: ${APP_SRCS}/xptest.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/xptest.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/xptest.cpp -o $@
 
 ${OBJ}/intersect.o: ${APP_SRCS}/intersect.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/intersect.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/intersect.cpp -o $@
 
 ${OBJ}/test1.o: ${APP_SRCS}/test1.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/test1.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/test1.cpp -o $@
 
 ${OBJ}/example.o: ${APP_SRCS}/example.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/example.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/example.cpp -o $@
 
 ${OBJ}/sqlExample.o: ${APP_SRCS}/sqlExample.cpp
-	$(CXX) $(CFLAGS) ${APP_SRCS}/sqlExample.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/sqlExample.cpp -o $@
+
+${OBJ}/SpatialGeneral.o: ${SRCS}/SpatialGeneral.C
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialGeneral.C -o $@
 
 ${OBJ}/SpatialIndex.o: ${SRCS}/SpatialIndex.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialIndex.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialIndex.cpp -o $@
 
 ${OBJ}/SpatialConstraint.o: ${SRCS}/SpatialConstraint.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialConstraint.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialConstraint.cpp -o $@
 
 ${OBJ}/sqlInterface.o: ${SRCS}/sqlInterface.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/sqlInterface.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/sqlInterface.cpp -o $@
 
 ${OBJ}/SpatialVector.o: ${SRCS}/SpatialVector.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialVector.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialVector.cpp -o $@
 
 ${OBJ}/SpatialInterface.o: ${SRCS}/SpatialInterface.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialInterface.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialInterface.cpp -o $@
 
 ${OBJ}/SpatialEdge.o: ${SRCS}/SpatialEdge.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialEdge.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialEdge.cpp -o $@
 
 ${OBJ}/SpatialException.o: ${SRCS}/SpatialException.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialException.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialException.cpp -o $@
 
 ${OBJ}/SpatialDomain.o: ${SRCS}/SpatialDomain.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialDomain.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialDomain.cpp -o $@
 
 ${OBJ}/SpatialConvex.o: ${SRCS}/SpatialConvex.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SpatialConvex.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialConvex.cpp -o $@
 
 ${OBJ}/RangeConvex.o: ${SRCS}/RangeConvex.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/RangeConvex.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/RangeConvex.cpp -o $@
 
 ${OBJ}/Htmio.o: ${SRCS}/Htmio.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/Htmio.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/Htmio.cpp -o $@
 
 ${OBJ}/SkipListElement.o: ${SRCS}/SkipListElement.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SkipListElement.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SkipListElement.cpp -o $@
 
 ${OBJ}/SkipList.o: ${SRCS}/SkipList.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/SkipList.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SkipList.cpp -o $@
 
 ${OBJ}/HtmRange.o: ${SRCS}/HtmRange.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/HtmRange.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/HtmRange.cpp -o $@
 
 ${OBJ}/HtmRangeIterator.o: ${SRCS}/HtmRangeIterator.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/HtmRangeIterator.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/HtmRangeIterator.cpp -o $@
+
+${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
+
+${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
+	
+${OBJ}/EmbeddedLevelNameEncoding.o: ${SRCS}/EmbeddedLevelNameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
 
 ${OBJ}/XXX.o: ${SRCS}/XXX.cpp
-	$(CXX) $(CFLAGS) ${SRCS}/XXX.cpp -o $@
+	$(CXX) $(CXX_FLAGS) ${SRCS}/XXX.cpp -o $@
 
 ${TOPDIR}/cc_aux.o: ${TOPDIR}/cc_aux.c
-	cc -c $(CFLAGS) ${TOPDIR}/cc_aux.c -o $@
+	$(CC) -c $(CFLAGS) ${TOPDIR}/cc_aux.c -o $@
 
 cc_intersect.o: ${TOPDIR}/cc_intersect.c
-	cc -c cc_intersect.c
+	$(CC) -c cc_intersect.c
 
 clean:
-	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/libhstm.a
+	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/NameEncoding.o ${OBJ}/BitShiftNameEncoding.o ${OBJ}/libhstm.a
 
 cleanAll:
 	-rm -f $(OBJECTS) ${OBJ}/*.o
@@ -211,6 +236,10 @@ par: HtmParse.o
 	$(CXX) -g -o $@ HtmParse.o  ${OBJECTS}
 
 HtmParse.o: HtmParse.cpp HtmParse.h
-	$(CXX) $(CFLAGS) -I. HtmParse.cpp
+	$(CXX) $(CXX_FLAGS) -I. HtmParse.cpp
 %.o: %.cpp
-	$(CXX) -c $(CC_FLAGS) $< -o $@
+	$(CXX) -c $(CXX_FLAGS) $< -o $@
+	
+version:
+	$(CXX) --version
+

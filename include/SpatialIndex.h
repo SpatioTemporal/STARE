@@ -30,6 +30,11 @@
 #include <string>
 #include <algorithm>
 
+int depthOfName(const char name[]);
+int depthOfId(uint64 htmId);
+int levelOfDepth(int depth);
+int levelOfName(const char name[]);
+int levelOfId(uint64 htmId);
 
 //########################################################################
 //#
@@ -58,14 +63,14 @@
    decomposing every triangle again and again.
 */
 
-int depthOfId(uint64 htmId);
-
 class LINKAGE SpatialIndex {
 public:
 //	bool debug;
 
-    size_t getMaxlevel(){return maxlevel_;};		// the depth of the Layer
-    size_t getBildLevel(){return buildlevel_;};	// the depth of the Layer storedbuildlevel_;
+	// Note: On Darwin size_t is long unsigned int.
+
+    size_t getMaxlevel(){return maxlevel_;};	// the depth of the Layer
+    size_t getBuildLevel(){return buildlevel_;};	// the depth of the Layer storedbuildlevel_;
 
   /** Constructor.
       Give the level of the index and optionally the level to build -
@@ -75,19 +80,25 @@ public:
   SpatialIndex() {};
   SpatialIndex(size_t maxlevel, size_t buildlevel =5);
 
+  size_t getMaxlevel() const { return maxlevel_; }
+  size_t getBuildlevel() const { return buildlevel_; }
+
   uint64 indexAtNodeIndex(uint64 nodeIndex);
   uint64 idAtNodeIndex(uint64 nodeIndex);
-  uint64 layersSize();
+  uint64 layersSize() const;
   uint64 firstIndexOfLayerAtDepth(uint64 depth);
+  uint64 firstIndexOfLayerAtLevel(uint64 level);
 
-  uint64 nodeIndexFromId(uint64 id);
+  uint64 nodeIndexFromId(uint64 id) const;
 
+  ///Print the node information in nodes_ at nodeIndex.
 void printNode(int nodeIndex) const;
 
   /// NodeName conversion to integer ID
   static uint64 idByName(const char *);
 
-  /** int32 conversion to a string (name of database).
+  /// Legacy code
+  /** uint64 int32 conversion to a string (name of database).
       WARNING: if name is already allocated, a size of at least 17 is
       required.  The conversion is done by directly calculating the
       name from a number.  To calculate the name of a certain level,
@@ -179,23 +190,29 @@ private:
 
   // STRUCTURES
 
+  /**
+   * Index geometry support information created in SpatialIndex::makeNewLayer
+   */
   struct Layer {
-    size_t 	level_;			// layer level
-    size_t 	nVert_;			// number of vertices in this layer
-    size_t 	nNode_;			// number of nodes
-    size_t 	nEdge_;			// number of edges
-    uint64 	firstIndex_;	// index of first node of this layer
-    size_t  lastIndex_;     // index of the last node of this layer
-    size_t 	firstVertex_;	// index of first vertex of this layer
+    size_t 	level_;			///< layer level
+    size_t 	nVert_;			///< number of vertices in this layer
+    size_t 	nNode_;			///< number of nodes
+    size_t 	nEdge_;			///< number of edges
+    uint64 	firstIndex_;	///< index of first node of this layer
+    size_t  lastIndex_;     ///< index of the last node of this layer
+    size_t 	firstVertex_;	///< index of first vertex of this layer
   };
 
+  /**
+   * Index geometry data, cf. SpatialIndex::makeNewLayer, SpatialIndex::SpatialIndex, SpatialIndex::newNode
+   */
   struct QuadNode {
-    uint64	index_;			// its own index
-    size_t	v_[3];			// The three vertex vector indices
-    size_t	w_[3];			// The three middlepoint vector indices
-    uint64	childID_[4];	// ids of children
-    uint64	parent_;		// id of the parent node (needed for sorting)
-    uint64	id_;			// numeric id -> name // numericIdName
+    uint64	index_;			///< its own index
+    size_t	v_[3];			///< The three vertex vector indices
+    size_t	w_[3];			///< The three middlepoint vector indices
+    uint64	childID_[4];	///< ids of children
+    uint64	parent_;		///< id of the parent node (needed for sorting)
+    uint64	id_;			///< numeric id -> name // numericIdName
   };
 
   // add quadnode vector
@@ -223,12 +240,18 @@ private:
 
   // VARIABLES
 
-  size_t 		maxlevel_;		// the depth of the Layer
-  size_t 	    buildlevel_;	// the depth of the Layer stored
+  size_t 		maxlevel_;		///< the depth of the Layer
+  size_t 	    buildlevel_;	///< the depth of the Layer stored
+  /**
+   * The number of faces (leaf nodes) to the greater of \a buildlevel_ or \a maxlevel_
+   */
   uint64		leaves_;		// number of leaf nodes
+  /**
+   * The number of faces stored in \a nodes_, i.e. faces up to \a buildlevel_.
+   */
   uint64		storedleaves_;	// number of stored leaf nodes
-  ValueVectorQuad   nodes_;		// the array of nodes 
-  std::vector<Layer> layers_;	// array of layers
+  ValueVectorQuad   nodes_;		///< the array of nodes
+  std::vector<Layer> layers_;	///< array of buildlevel_+1 layers
 
   typedef std::vector<SpatialVector> ValueVectorSpvec;
   ValueVectorSpvec vertices_;

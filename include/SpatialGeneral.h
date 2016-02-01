@@ -1,50 +1,56 @@
 #if !defined (_SpatialGeneral_h)
 #define _SpatialGeneral_h
-//#		Filename:	SpatialGeneral.h
-//#
-//#		This file contains all SDSS Science Archive global information,
-//#		including Global Type Definitions, Global Macros, and Global Inlines
-//#
-//#		Author:		Peter Z. Kunszt
-//#	
-//#		Date:		October 19, 1999
-//#
-//#		Copyright (C) 2000  Peter Z. Kunszt, Alex S. Szalay, Aniruddha R. Thakar
-//#                     The Johns Hopkins University
-//#
-//#     Modification History:
-//#
-//#     Oct 18, 2001 : Dennis C. Dinge -- Replaced ValVec with std::vector:
-//#
+/** @file SpatialGeneral.h
+ *
+		This file contains all SDSS Science Archive global information,
+		including Global Type Definitions, Global Macros, and Global Inlines
+		\author		Peter Z. Kunszt
 
-// Type Definitions
+		\date		October 19, 1999
 
-//  define portable int and float types where not already defined
-//  The SDSS Science Archive and Objectivity define the very same thing.
-//	Objectivity defines these in ooMachine.h (version 4) and
-//	in ooConfig.h (version 5).
-//
+		\copyright GNU GENERAL PUBLIC LICENSE Version 2, June 1991, see LICENSE
+		\copyright (C) 2000  Peter Z. Kunszt, Alex S. Szalay, Aniruddha R. Thakar
+                   The Johns Hopkins University
 
-// The following list is for different machines:
-//
-// ------------------------------------------------------------------------
-// MACHINE |  CHAR | SHORT |   INT |  LONG | FLOAT | DOUBLE | LONG DOUBLE |
-// ------------------------------------------------------------------------
-//  SUN    |    8  |   16  |   32  |   32  |   32  |   64   |   128       |
-// ------------------------------------------------------------------------
-//  ALPHA  |    8  |   16  |   32  |   64  |   32  |   64   |    64       |
-// ------------------------------------------------------------------------
-//  SGI-n32|    8  |   16  |   32  |   32  |   32  |   64   |   128       |
-// ------------------------------------------------------------------------
-//  SGI    |    8  |   16  |   32  |   32  |   32  |   64   |    64       |
-// ------------------------------------------------------------------------
-//  NT     |    8  |   16  |   32  |   32  |   32  |   64   |    64       |
-// ------------------------------------------------------------------------
-//  LINUX  |    8  |   16  |   32  |   32  |   32  |   64   |    96       |
-// ------------------------------------------------------------------------
-//
 
-// TODO Explore using uint64 instead of uint32...
+     Modification History:
+
+     Oct 18, 2001 : Dennis C. Dinge -- Replaced ValVec with std::vector:
+
+
+ Type Definitions
+
+  Define portable int and float types where not already defined.
+  The SDSS Science Archive and Objectivity define the very same thing.
+	Objectivity defines these in ooMachine.h (version 4) and
+	in ooConfig.h (version 5).
+
+ The following list is for different machines:
+<pre>
+ ------------------------------------------------------------------------
+ MACHINE |  CHAR | SHORT |   INT |  LONG | FLOAT | DOUBLE | LONG DOUBLE |
+ ------------------------------------------------------------------------
+  SUN    |    8  |   16  |   32  |   32  |   32  |   64   |   128       |
+ ------------------------------------------------------------------------
+  ALPHA  |    8  |   16  |   32  |   64  |   32  |   64   |    64       |
+ ------------------------------------------------------------------------
+  SGI-n32|    8  |   16  |   32  |   32  |   32  |   64   |   128       |
+ ------------------------------------------------------------------------
+  SGI    |    8  |   16  |   32  |   32  |   32  |   64   |    64       |
+ ------------------------------------------------------------------------
+  NT     |    8  |   16  |   32  |   32  |   32  |   64   |    64       |
+ ------------------------------------------------------------------------
+  LINUX  |    8  |   16  |   32  |   32  |   32  |   64   |    96       |
+ ------------------------------------------------------------------------
+</pre>
+
+ TODO Explore using uint64 instead of uint32...
+ */
+
+#include <math.h>
+//#include <stdio.h>
+//#include <iostream>
+#include <vector>
 
 #if !defined(OO_MACHINE_H) && !defined(OO_CONFIG_H) && !defined(SXGENERAL_H)
 typedef char				int8;
@@ -70,8 +76,10 @@ typedef unsigned long long	uint64;
 
 #define IDSIZE             64
 #define HTMNAMEMAX         32
+// mlr TODO can we change HTMMAXDEPTH to HTMMAXLEVEL?
 #define HTMMAXDEPTH        25
-#define MAX_SQL_DEPTH      20
+// mlr only reference to MAX_SQL_DEPTH
+//#define MAX_SQL_DEPTH      20
 // mlr only reference to HTMMAXKEEP???
 // define HTMMAXKEEP		   12
 // TODO Try to extend HTMMAXBIT.  Change HTMNAMEMAX etc?  I see maxdepth above is 25... Why is the following 14?
@@ -105,6 +113,7 @@ const bool                      true = 1;
 
 const float64 gPi = 3.1415926535897932385E0 ;
 const float64 gPr = gPi/180.0; 
+const float64 piDiv180 = gPr;
 const float64 gEpsilon = 1.0E-15;
 // CVSversion = "$Name:  $";
 
@@ -187,5 +196,15 @@ const float64 gEpsilon = 1.0E-15;
 LINKAGE ostream& operator<<(ostream& os, const int64 &i64);
 LINKAGE ostream& operator<<(ostream& os, const uint64 &ui64);
 #endif
+
+unsigned long lg2(unsigned long v);
+float64* xyzFromLatLonRadians(float64 lat,float64 lon);
+float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
+
+struct LatLonDegrees64 {
+	float64 lat, lon;
+	LatLonDegrees64(float64 lat, float64 lon) : lat(lat), lon(lon) {}
+};
+typedef std::vector<LatLonDegrees64> LatLonDegrees64ValueVector ;
 
 #endif /* SPATIALGENERAL_H */

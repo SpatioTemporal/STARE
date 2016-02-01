@@ -78,7 +78,7 @@ HTM_ID htmSqlInterface::lookupID(char *str) {
 
 /////////////////////General Intersect////////////////
 size_t
-htmSqlInterface::intersect1( char *s, ValueVector &vec ) {
+htmSqlInterface::intersect1( char *s, HTMRangeValueVector &vec ) {
 
   char *str = s;
   StdStr key;
@@ -99,7 +99,7 @@ htmSqlInterface::intersect1( char *s, ValueVector &vec ) {
 }
 
 size_t
-htmSqlInterface::intersect2( char *s, ValueVector &vec ) {
+htmSqlInterface::intersect2( char *s, HTMRangeValueVector &vec ) {
 
   char *str = s;
   StdStr key, qualifier, istr;
@@ -186,7 +186,7 @@ htmSqlInterface::circleRegionDiagnostic( char *str ) {
 }
 
 size_t
-htmSqlInterface::circleRegion( char *str, ValueVector &vec ) {
+htmSqlInterface::circleRegion( char *str, HTMRangeValueVector &vec ) {
 
   if(result_ == cIRCLE) {
 	result_ = nONE;
@@ -226,7 +226,7 @@ htmSqlInterface::convexHullDiagnostic( char *str ) {
 
 
 size_t
-htmSqlInterface::convexHull( char *str, ValueVector &vec  ) {
+htmSqlInterface::convexHull( char *str, HTMRangeValueVector &vec  ) {
   if(result_ == cHULL) {
 	result_ = nONE;
 	vec = *resVec_;
@@ -265,7 +265,7 @@ htmSqlInterface::domainDiagnostic( char *str ) {
 }
 
 size_t
-htmSqlInterface::domain( char *str, ValueVector &vec  ) {
+htmSqlInterface::domain( char *str, HTMRangeValueVector &vec  ) {
   if(result_ == dOMAIN) {
 	result_ = nONE;
 	vec = *resVec_;

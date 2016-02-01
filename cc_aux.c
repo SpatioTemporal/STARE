@@ -422,11 +422,12 @@ uint64 idByPoint(double x, double y, double z)
       //vec.show();
     }    
 #endif
+
   return ID;
 
 }
 
-int cc_isinside(double *p, double *v1, double *v2, double *v3) // p need not be nromalilzed!!!
+int cc_isinside(double *p, double *v1, double *v2, double *v3) // p need not be normalized!!!
 {
   double crossp[3];
   // if (v1 X v2) . p < epsilon then false 

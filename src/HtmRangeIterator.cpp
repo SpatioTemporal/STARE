@@ -1,10 +1,5 @@
 #include <HtmRangeIterator.h>
 
-extern "C" {
-  // uint64 cc_name2ID(const char *name);
-  int cc_ID2name(char *name, uint64 id);
-};
-
 Key HtmRangeIterator::next()
 {
   Key key = this->nextval;
@@ -36,7 +31,7 @@ char * HtmRangeIterator::nextSymbolic(char *buffer)
   if (key <= 0) {
     buffer[0] = '\0';
   } else {
-    cc_ID2name(buffer, key);
+	  strcpy(buffer,range->encoding->nameById(key));
   }
   return buffer;
 }

@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include <SkipList.h>
+#include <NameEncoding.h>
+#include <BitShiftNameEncoding.h>
 
 // class ostream;
 
@@ -14,7 +16,10 @@ enum InclusionType {
   InclHi,			/* number is on high end of an interval */
   InclAdjacentXXX
 };
-  
+
+/**
+ * Maintain a set of htm intervals.
+ */
 class LINKAGE HtmRange {
 
  public:
@@ -43,14 +48,27 @@ class LINKAGE HtmRange {
 
   int compare(const HtmRange & other) const;
 
+  /** Hold the encoding scheme for the symbolic representation.
+   * The default is BitShiftNameEncoding.
+   */
+  NameEncoding *encoding;
+  /** Change or set symbolic encoding.
+   */
+  void setEncoding(NameEncoding *encoding) { this->encoding = encoding; }
+  /** Return the encoding for translations, etc.
+   */
+  NameEncoding *getEncoding() { return encoding; }
+
   // Moved here per ajmendez.
   SkipList *my_los;
   SkipList *my_his;
   bool symbolicOutput;
 
   HtmRange();
+  HtmRange(NameEncoding *encoding);
   ~HtmRange(){
     purge();
+    delete encoding;
     delete my_los;
     delete my_his;
   };

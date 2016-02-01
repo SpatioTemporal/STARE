@@ -85,6 +85,19 @@ void htmInterface::changeDepth(size_t depth, size_t saveDepth) {
     index_ = new SpatialIndex(depth, saveDepth);
   }
 }
+/**
+ * Replace the existing index with a new one at \p level.
+ * @author M. Rilee
+ * @param level
+ * @param saveLevel
+ */
+inline
+void htmInterface::changeLevel(size_t level, size_t saveLevel) {
+  if(index_->maxlevel_ != level || index_->buildlevel_ != saveLevel) {
+	  delete index_;
+    index_ = new SpatialIndex(level, saveLevel);
+  }
+}
 
 
 inline

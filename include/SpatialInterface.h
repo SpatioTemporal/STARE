@@ -20,19 +20,29 @@
 #include "SpatialDomain.h"
 #include "VarStr.h"
 
+/**
+ * Holds a single interval.
+ *
+ * TODO Can this be replaced with a KeyPair?
+ * TODO Should we use a struct here?
+ * TODO Can one have "invalid" ranges? I.e. lo in one branch, hi in another?
+ *
+ */
 class htmRange {
 public:
   uint64 lo;
   uint64 hi;
 };
 
-typedef std::vector<htmRange> ValueVector;
+typedef std::vector<htmRange> HTMRangeValueVector;
 typedef std::vector<float64> ValueVectorF64;
 
 struct htmPolyCorner {
   SpatialVector c_;
   bool inside_;
   bool replace_;
+  htmPolyCorner() {}
+  htmPolyCorner(SpatialVector c_) : c_(c_) {}
 }; 
 
 /**
@@ -45,15 +55,21 @@ struct htmPolyCorner {
 class  LINKAGE htmInterface {
 
 public:
-	void fillValueVec(HtmRange &hr, ValueVector &vec);
+	/**
+	 * Copy the htm-intervals (htmRange) out of an HtmRange into a vector<htmRange>
+	 *
+	 * @param hr is the full set of HtmRange information
+	 * @param vec is only the lo-hi intervals extracted from \p hr
+	 */
+	void fillValueVec(HtmRange &hr, HTMRangeValueVector &vec);
 
-  /** Constructor. The depth is optional, defaulting to level 5. It
+  /** Constructor. The level is optional, defaulting to level 5. It
       can be changed with the changeDepth() memberfunction or it can
       be specified with one of the string command interfaces. The
       saveDepth parameter can be specified to keep the given amount of
       levels in memory. This can also be altered by changeDepth. */
 
-	htmInterface(size_t depth = 5, size_t saveDepth = 5); // [ed:gyuri:saveDepth was 2]
+	htmInterface(size_t searchlevel = 5, size_t buildevel = 5); // [ed:gyuri:saveDepth was 2]
 
   /** Destructor. */
   ~htmInterface();
@@ -128,14 +144,14 @@ public:
   /** Request all triangles in a circular region.
       Given are the center coordinate and radius in arcminutes.
   */
-  const ValueVector & circleRegion( float64 ra,
+  const HTMRangeValueVector & circleRegion( float64 ra,
 					 float64 dec,
 					 float64 rad ) ;
 
   /** Request all triangles in a circular region.
       Given are the center coordinate and radius in arcminutes.
   */
-  const ValueVector & circleRegion( float64 x,
+  const HTMRangeValueVector & circleRegion( float64 x,
 					 float64 y,
 					 float64 z,
 					 float64 rad ) ;
@@ -144,20 +160,31 @@ public:
       Given are the center coordinate and radius in arcminutes.
       Same as previous two functions but from a string.
   */
-  const ValueVector & circleRegionCmd( char *str );
+  const HTMRangeValueVector & circleRegionCmd( char *str );
 
   /** Request all triangles in the convex hull of a given set of 
       points.
   */
-  const ValueVector & convexHull( ValueVectorF64 ra,
+  const HTMRangeValueVector & convexHull( ValueVectorF64 ra,
 				       ValueVectorF64 dec ) ;
 
   /** Request all triangles in the convex hull of a given set of 
       points.
   */
-  const ValueVector & convexHull( ValueVectorF64 x,
+  const HTMRangeValueVector & convexHull( ValueVectorF64 x,
 				       ValueVectorF64 y,
 				       ValueVectorF64 z ) ;
+
+
+  /**
+   * Request all triangles in the convex hull of a given set of points.
+   *
+   * @param latlon a vector of LatLonDegrees64
+   * @param steps How many iterations to execute. -1 implies unbounded above.
+   * @return
+   */
+  const HTMRangeValueVector & convexHull( LatLonDegrees64ValueVector latlon,
+		  size_t steps = -1);
 
   /** Request all triangles in the convex hull of a given set of 
       points.
@@ -171,11 +198,11 @@ public:
       </pre>
       There may be as many points ra, dec or x,y,z as you want.
   */
-  const ValueVector & convexHullCmd( char *str );
+  const HTMRangeValueVector & convexHullCmd( char *str );
 
 
   /** Give the ranges for an intersection with a proper domain. */
-  const ValueVector & domain( SpatialDomain & );
+  const HTMRangeValueVector & domain( SpatialDomain & );
 
   /** String interface for domain intersection.
       The domain should be given in the following form:
@@ -209,10 +236,11 @@ public:
       The numbers need to be separated by whitespace (newlines are allowed).
       Throws SpatialInterfaceError on syntax errors.
   */
-  const ValueVector & domainCmd( char *str );
+  const HTMRangeValueVector & domainCmd( char *str );
 
   /** Change the current index depth */
-  void changeDepth(size_t depth, size_t saveDepth = 5);
+  void changeDepth(size_t depth, size_t saveDepth = 5); // TODO Deprecate.  Only shows up in SpatialInterface.*.
+  void changeLevel(size_t level, size_t saveLevel = 5); // TODO Replace changeDepth
 
   /** Check whether a varstring is an integer */
   static bool isInteger(const StdStr &);
@@ -221,10 +249,14 @@ public:
   static bool isFloat(const StdStr &);
 
   /** Check whether a range contains a certain id */
-  static bool inRange( const ValueVector &, uint64 );
+  static bool inRange( const HTMRangeValueVector &, uint64 );
 
   /** Print the ranges to cout */
-  static void printRange( const ValueVector & );
+  static void printRange( const HTMRangeValueVector & );
+
+  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
+  ValueVectorPolyCor polyCorners_;
+
 private:
 
   enum cmdCode {
@@ -238,10 +270,10 @@ private:
   char name_[HTMNAMEMAX];
 
   SpatialIndex *index_;
-  ValueVector range_;
+  HTMRangeValueVector range_;
   ValueVectorUint64 idList_;
-  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
-  ValueVectorPolyCor polyCorners_;
+//  typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
+//  ValueVectorPolyCor polyCorners_;
   StdStr cmd_;
   VarStrToken *t_;
 
@@ -263,7 +295,7 @@ private:
   void setPolyCorner(SpatialVector &v);
 
   // this routine does the work for all convexHull calls
-  const ValueVector & doHull();
+  const HTMRangeValueVector & doHull();
 
 };
 

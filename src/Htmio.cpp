@@ -42,6 +42,18 @@ Htmio::readRaDec(istream &in, RangeConvex &rc) {
     rc.add(constr);
   }
 }
+void
+Htmio::readLatLonDegrees(istream &in, RangeConvex &rc) {
+	size_t nconstr;
+	SpatialConstraint constr;
+	while(in.peek() == COMMENT)  // ignore comments
+		in.ignore(10000,'\n');
+	in >> nconstr ; in.ignore(); // ignore endl
+	for(size_t i = 0; i < nconstr; i++) {
+		readLatLonDegrees(in, constr);
+		rc.add(constr);
+	}
+}
 
 /////////////WRITE////////////////////////////////////////
 //
@@ -136,11 +148,13 @@ Htmio::read(istream &in, SpatialDomain &sd) {
       Htmio::readRaDec(in, conv);
       sd.add(conv);
       ignoreCrLf(in);		// added,gyuri,11/12/2002
-    } else {
+    } else  if(strcmp(comstr,"#CONVEX")==0) {
       RangeConvex conv;
       in >> conv;
       sd.add(conv);
       ignoreCrLf(in);		// added,gyuri,11/12/2002
+    } else {
+    	throw SpatialFailure("Htmio::read-SpatialDomain","UnknownTypeOfInputFile");
     }
     comstr[0] = 0;
   }
@@ -154,11 +168,11 @@ Htmio::read(istream &in, SpatialConstraint &sc) {
   in.setf(ios::skipws);
   while(in.peek() == COMMENT)  // ignore comments
       in.ignore(10000,'\n');
-  in >> sc.a_ >> sc.d_ ;
+  in >> sc.a_ >> sc.d_ ; // direction, distance from origin of the plane
   if(!in.good())
     throw SpatialFailure("SpatialConstraint:read: Could not read constraint");
   sc.a_.normalize();
-  sc.s_ = acos(sc.d_);
+  sc.s_ = acos(sc.d_);  // opening angle of the cone formed by the origin and the intersection of the plane and unit sphere.
   if     (sc.d_ <= -gEpsilon) sc.sign_ = sc.nEG;
   else if(sc.d_ >=  gEpsilon) sc.sign_ = sc.pOS;
   else                sc.sign_ = sc.zERO;
@@ -173,6 +187,18 @@ Htmio::readRaDec(istream &in, SpatialConstraint &sc) {
   float64 ra,dec;
   in >> ra >> dec >> sc.d_ ; in.ignore();
   sc.a_.set(ra,dec);
+  sc.s_ = acos(sc.d_);
+  if     (sc.d_ <= -gEpsilon) sc.sign_ = sc.nEG;
+  else if(sc.d_ >=  gEpsilon) sc.sign_ = sc.pOS;
+  else                sc.sign_ = sc.zERO;
+}
+void
+Htmio::readLatLonDegrees(istream &in, SpatialConstraint &sc) { // TODO Convex???
+  while(in.peek() == COMMENT)  // ignore comments
+      in.ignore(10000,'\n');
+  float64 lat,lon;
+  in >> lat >> lon >> sc.d_ ; in.ignore();
+  sc.a_.setLatLonDegrees(lat,lon);
   sc.s_ = acos(sc.d_);
   if     (sc.d_ <= -gEpsilon) sc.sign_ = sc.nEG;
   else if(sc.d_ >=  gEpsilon) sc.sign_ = sc.pOS;

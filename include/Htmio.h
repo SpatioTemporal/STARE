@@ -39,6 +39,9 @@ class LINKAGE Htmio  {
   static void readRaDec(istream&, RangeConvex &rc);
   static void readRaDec(istream&, SpatialConstraint &sc);
 
+  static void readLatLonDegrees(istream &in, RangeConvex &rc);
+  static void readLatLonDegrees(istream &in, SpatialConstraint &sc);
+
   /// write to stream
   static void write(ostream&, const RangeConvex &rc);
 
