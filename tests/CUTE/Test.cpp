@@ -17,6 +17,7 @@
 
 #include "HtmRangeIterator.h"
 #include "BitShiftNameEncoding.h"
+#include "EmbeddedLevelNameEncoding.h"
 
 // TODO Add your test functions
 
@@ -50,12 +51,12 @@ void lookupID() {
 	float64 z = -0.6109330459045055;
 
 	int id_ = htm_ ->lookupID(x,y,z);
-    ASSERT_EQUALM("id from lookupID(x,y,z)",id_,3070);
+	ASSERT_EQUALM("id from lookupID(x,y,z)",id_,3070);
 
-    char name_[1024];
-    htm_->index().nameById(id_,name_);
-    //cout << "name_: '" << name_ << "'" << endl << flush;
-   	ASSERT_EQUALM("checking nameByID",name_,"S33332");
+	char name_[1024];
+	htm_->index().nameById(id_,name_);
+	//cout << "name_: '" << name_ << "'" << endl << flush;
+	ASSERT_EQUALM("checking nameByID",name_,"S33332");
 }
 
 // TODO I just noticed there is an issue in dealing with parsing the IDs via nameByID -- I don't think they are interpreting the depth correctly. The index is constructed with a depth.  What happens if you give it an HTM string or ID that is associated with another depth?
@@ -76,7 +77,7 @@ void lookupOnTwoSaveLevels() {
 	htmInterface *htm1_ = new htmInterface(level,saveLevel);
 	int id1 = htm1_ ->lookupID(x,y,z);
 
-    ASSERT_EQUALM("id from 2 saveLevels: ",id0,id1);
+	ASSERT_EQUALM("id from 2 saveLevels: ",id0,id1);
 
 }
 
@@ -120,18 +121,18 @@ void lookupOnMultipleLevels() {
 	ASSERT_EQUALM_NAMEBYID_("index1, name0","S3333",index1_,id0,name0);
 	ASSERT_EQUALM_NAMEBYID_("index1, name1","S33332",index1_,id1,name1);
 
-//	PRINT_ID("index S33",INDEX_("S33"),"S33");
-//	PRINT_ID("index S33",INDEX_("S333"),"S333");
-//	PRINT_ID("index S33",INDEX_("S3332"),"S3332");
+	//	PRINT_ID("index S33",INDEX_("S33"),"S33");
+	//	PRINT_ID("index S33",INDEX_("S333"),"S333");
+	//	PRINT_ID("index S33",INDEX_("S3332"),"S3332");
 
-/*
+	/*
 	PRINT_ID("098 index0",htm,"S33");
 	PRINT_ID("099 index0",htm,"S333");
 	PRINT_ID("100 index0",htm,"S3333");
 	PRINT_ID("102 index0",htm,"S33332");
-*/
+	 */
 
-/*
+	/*
 	level = 0;
 	level = levelOfName("S00");
 //	cout << hex;
@@ -160,7 +161,7 @@ void lookupOnMultipleLevels() {
 		cout << "fIndex: " << index.firstIndexOfLayerAtLevel(level) << " ";
 		cout << endl << flush;
 	}
-*/
+	 */
 	char cTmp[1024];
 	ASSERT_EQUALM("id0 to name to index1's id1",id0,index1_.idByName(index0_.nameById(id0,cTmp)));
 	ASSERT_EQUALM("id1 to name to index0's id0",id1,index0_.idByName(index1_.nameById(id1,cTmp)));
@@ -168,7 +169,7 @@ void lookupOnMultipleLevels() {
 
 void idReallyDeep() {
 	uint32 level = 27;
-//	level = 1;
+	//	level = 1;
 	uint32 shift = level*2+3; // GOTCHA IN SWITCH TO LEVEL
 	uint64 htmID0 = 1;
 	htmID0 = htmID0 << shift;
@@ -178,11 +179,11 @@ void idReallyDeep() {
 	uint64 htmID=2;
 	for(int i=1; i<level+2; i++) { // GOTCHA IN SWITCH TO LEVEL
 		uint64 triangle = rand() % 4;
-//		triangle = 0;
+		//		triangle = 0;
 		expected[i] = '0' + triangle;
 		htmID = htmID << 2;
 		htmID += triangle;
-//		cout << " " << i << " " << triangle << " " << expected[i] << " " << expected << " " << hex << htmID << dec << endl << flush;
+		//		cout << " " << i << " " << triangle << " " << expected[i] << " " << expected << " " << hex << htmID << dec << endl << flush;
 	}
 	expected[level+2]=0;// GOTCHA IN SWITCH TO LEVEL
 	if(false){
@@ -209,14 +210,14 @@ void idReallyDeep() {
 	ASSERT_EQUALM("htmID^-1: ",index.idByName(foundName),htmID);
 
 	index.setMaxlevel(levelOfId(htmID));
-/*
+	/*
 	cout << " levelHtmId: " << levelOfId(htmID) << endl << flush;
 	cout << hex;
 	cout << " htmID0:    " << htmID0 << endl << flush;
 	cout << " htmID:     " << htmID << endl << flush;
 	cout << " nodeIndex: " << index.nodeIndexFromId(htmID) << endl << flush;
 	cout << dec;
-	*/
+	 */
 #define IOFFSET 9
 	ASSERT_EQUALM("nodeIndex: ",(htmID&(~htmID0))+IOFFSET,index.nodeIndexFromId(htmID));
 }
@@ -232,10 +233,10 @@ void pointById(){
 	double tolerance = 1.0e-14;
 	int id_ = htm_->lookupID(x,y,z);
 	SpatialVector v_;
-//	htm_->pointById(v_,id_);
+	//	htm_->pointById(v_,id_);
 	htm_->pointById_mlr1(v_,id_);
-//	ASSERT_EQUALM("SpatialVectors x: ",0,2.0*(v_.x()-x)/abs(v_.x()+x));
-//	componentCheck(z);
+	//	ASSERT_EQUALM("SpatialVectors x: ",0,2.0*(v_.x()-x)/abs(v_.x()+x));
+	//	componentCheck(z);
 
 	cout << hex;
 	ASSERT_LESSM("SpatialVectors x: ",abs(x-v_.x()),tolerance);
@@ -286,8 +287,8 @@ void checkBitShiftNameEncoding0() {
 		testId = bitShiftName.idByName("N012024");
 	} catch (SpatialFailure failure) {
 		failureMessage += failure.what();
-		failureMessage += "'";
 	}
+	failureMessage += "'";
 	ASSERT_EQUALM("INVALID DIGIT EXCEPTION","'BitShiftName:idByName-InvalidDigit'",failureMessage);
 
 	bitShiftName.setId(12683);
@@ -315,24 +316,24 @@ void checkBitShiftNameEncoding0() {
 
 	char tmp_buf[256];
 	strcpy(tmp_buf,htm->getName());
-    strcat(tmp_buf, " ");
-    htm->setName("N012023");
-    strcat(tmp_buf,htm->getName());
-    ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
+	strcat(tmp_buf, " ");
+	htm->setName("N012023");
+	strcat(tmp_buf,htm->getName());
+	ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
 }
 
 /**
  * Test symbolic htm representation.
  */
 void testRange() {
-    HtmRange *htmR = new HtmRange;
-    htmR->addRange(12682,12683);
-    htmR->setEncoding(new BitShiftNameEncoding());
-    htmR->setSymbolic(true);
-    cout << dec;
-    cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
-    cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
-    cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
+	HtmRange *htmR = new HtmRange;
+	htmR->addRange(12682,12683);
+	htmR->setEncoding(new BitShiftNameEncoding());
+	htmR->setSymbolic(true);
+	cout << dec;
+	cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
+	cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
+	cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
 }
 
 /**
@@ -357,11 +358,11 @@ void testRangeIterator() {
 	while (iter.hasNext()) {
 		strcpy(expected,htmR->encoding->nameById(keys[k++]));
 		strcpy(found,iter.nextSymbolic(buffer));
-//		cout << "k=" << k-1
-//				<< " ( " << expected << " vs. " << found << " )"
-//				<< " keys[k]= " << keys[k-1] << endl << flush;
+		//		cout << "k=" << k-1
+		//				<< " ( " << expected << " vs. " << found << " )"
+		//				<< " keys[k]= " << keys[k-1] << endl << flush;
 		ASSERT_EQUALM("Checking range iterator for iter="+to_string(k-1),expected,found);
-//		cout << iter.nextSymbolic(buffer) << endl << flush;
+		//		cout << iter.nextSymbolic(buffer) << endl << flush;
 	}
 }
 
@@ -370,8 +371,8 @@ void testRangeIterator() {
  */
 void testIndexLevel() {
 	BitShiftNameEncoding *name = new BitShiftNameEncoding();
-//	cout << "S0 =0x" << hex << name->idByName("S0") << endl << flush << dec;
-//	cout << "S00=0x" << hex << name->idByName("S00") << endl << flush << dec;
+	//	cout << "S0 =0x" << hex << name->idByName("S0") << endl << flush << dec;
+	//	cout << "S00=0x" << hex << name->idByName("S00") << endl << flush << dec;
 	int maxLevel   = 4;
 	int saveLevel  = 6;
 	for(maxLevel=1;maxLevel<9;maxLevel++) {
@@ -385,11 +386,115 @@ void testIndexLevel() {
 		<< " symbolic-name-base=0x"
 		<< hex << index->idAtNodeIndex(9)
 		<< dec << " " << index->nameById(index->idAtNodeIndex(9))
-//		<< " depth=" << depthOfName(index->nameById(index->idAtNodeIndex(9)))
+		//		<< " depth=" << depthOfName(index->nameById(index->idAtNodeIndex(9)))
 		<< " level=" << name->levelById(index->idAtNodeIndex(9))
 		<< endl << flush;
 	}
 	delete name;
+}
+
+void testEmbeddedLevelNameEncoding() {
+	EmbeddedLevelNameEncoding *name = new EmbeddedLevelNameEncoding();
+	//	ASSERT_EQUALM("id to name","nothing",name->nameById(0));
+	uint64 id = name->idByName("N3");
+	//	cout <<  "id: N3=0x" << hex << id << dec << " " << id << endl << flush;
+	// 17293822569102704640ull
+	ASSERT_EQUALM("name to id",0xf000000000000000ull,id);
+
+	id = name->idByName("S3");
+	//	cout <<  "id: S3=0x" << hex << id << dec << " " << id << endl << flush;
+	// 12682136550675316736ull
+	ASSERT_EQUALM("name to id",0xb000000000000000ull,id);
+
+	id = name->idByName("S33");
+//	cout <<  "id: S33=0x" << hex << id << dec << " " << id << endl << flush;
+	// 13546827679130451969ull
+	ASSERT_EQUALM("name to id",0xbc00000000000001ull,id);
+
+	id = name->idByName("S303");
+//	cout <<  "id: S303=0x" << hex << id << dec << " " << id << endl << flush;
+	// 12898309332789100546ull
+	ASSERT_EQUALM("name to id",0xb300000000000002ull,id);
+
+	id = name->idByName("S00000");
+	//	cout <<  "id: S00000=0x" << hex << id << dec << " " << id << endl << flush;
+	//	id: S00000=0x8000000000000004 9223372036854775812
+	ASSERT_EQUALM("name to id",0x8000000000000004ull,id);
+
+	ASSERT_EQUALM("level of id",4,name->levelById(name->idByName("S00000")));
+
+	const char *nameString = "N20001123123123123";
+	id = name->idByName(nameString);
+	//	cout <<  "id: " << nameString << "=0x" << hex << id << ", " << dec << " " << id << endl << flush;
+
+	name->setName(nameString);
+	//    cout << "name: " << nameString << endl << flush
+	//    		<< hex << " 0x" << setw(20) << name->getId() << endl << flush
+	//			       << " 0x" << setw(20) << name->bareId() << endl << flush;
+
+	BitShiftNameEncoding *bitShiftName = new BitShiftNameEncoding(nameString);
+	bitShiftName->setName(nameString);
+	//    cout << "bitShiftName: " << nameString << endl << flush
+	//    		<< hex << " 0x" << setw(20) << bitShiftName->getId() << endl << flush
+	//			       << " 0x" << setw(20) << bitShiftName->bareId() << endl << flush;
+
+	ASSERT_EQUALM("compare bare id's to old-style",bitShiftName->bareId(),name->bareId());
+
+	{
+		uint64 testId = 0;
+		string failureMessage = "'";
+		string foundName ="'";
+		try {
+			foundName += name->nameById(0);
+		} catch (SpatialFailure failure) {
+			failureMessage += failure.what();
+		}
+		foundName += "'";
+		failureMessage += "'";
+		ASSERT_EQUALM("INVALID ID 0","'EmbeddedLevelNameEncoding::nameById-INVALID_ID_0'",failureMessage);
+
+		foundName ="'";
+		foundName += name->nameById(name->idByName("N3"));
+		foundName +="'";
+		ASSERT_EQUALM("Test N3","'N3'",foundName);
+
+		foundName = "'";
+		foundName += name->nameById(name->idByName("S3123123"));
+		foundName +="'";
+		ASSERT_EQUALM("Test S3123123","'S3123123'",foundName);
+
+		ASSERT_EQUALM("S02 > N01",false,name->idByName("S02") > name->idByName("N01"));
+		ASSERT_EQUALM("N01 > N01",false,name->idByName("N01") > name->idByName("N01"));
+		ASSERT_EQUALM("S02 < N01",true,name->idByName("S02") < name->idByName("N01"));
+
+		ASSERT_EQUALM("N0123 == N0123",true,name->idByName("N0123") == name->idByName("N0123"));
+		ASSERT_EQUALM("N0123 != N0123",false,name->idByName("N0123") != name->idByName("N0123"));
+		ASSERT_EQUALM("N01230 != N0123",true,name->idByName("N01230") != name->idByName("N0123"));
+
+		EmbeddedLevelNameEncoding *n0  = new EmbeddedLevelNameEncoding("N01230");
+		EmbeddedLevelNameEncoding *n1  = new EmbeddedLevelNameEncoding("N0123");
+//		ASSERT_EQUALM("N01230.level < N0123.level?",false,n0->levelLessThan(*n1));
+//		ASSERT_EQUALM("N0123.level < N01230.level?",true,n1->levelLessThan(*n0));
+		ASSERT_EQUALM("N01230.level == 4",4,n0->getLevel());
+		ASSERT_EQUALM("N0123.level == 3",3,n1->getLevel());
+		ASSERT_EQUALM("greatest common level N01230 and N0123",3,n0->greatestCommonLevel(*n1));
+		n1->setName("N02230");
+		ASSERT_EQUALM("greatest common level N01230 and N02230",0,n0->greatestCommonLevel(*n1));
+		n1->setName("S01230");
+		ASSERT_EQUALM("greatest common level N01230 and S01230",-1,n0->greatestCommonLevel(*n1));
+		n1->setName("N0123");
+//		cout << "'" << n0->greatestCommonName(*n1) << "'" << endl << flush;
+//		cout << "'" << "N0123" << "'" << endl << flush;
+		string expected = "N0123", found=n0->greatestCommonName(*n1);
+		ASSERT_EQUALM("greatest common name N01230 and N0123",expected,found);
+		n1->setName("N02230");
+		expected = "N0"; found=n0->greatestCommonName(*n1);
+		ASSERT_EQUALM("greatest common name N01230 and N02230",expected,found);
+		n1->setName("N01220");
+		expected = "N012"; found=n0->greatestCommonName(*n1);
+		ASSERT_EQUALM("greatest common name N01230 and N01220",expected,found);
+	}
+
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -404,13 +509,14 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(idReallyDeep));
 	s.push_back(CUTE(idByName));
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
-//	s.push_back(CUTE(testRange));
+	//	s.push_back(CUTE(testRange));
 	s.push_back(CUTE(testRangeIterator));
-//	s.push_back(CUTE(testIndexLevel));
+	//	s.push_back(CUTE(testIndexLevel));
+	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 
 int main(int argc, char const *argv[]){
-    runSuite(argc,argv);
+	runSuite(argc,argv);
 }
 

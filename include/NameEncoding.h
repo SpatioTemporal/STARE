@@ -22,6 +22,7 @@ public:
 	virtual char  *nameById(uint64 id)        = 0;
 	virtual uint64 idByName(const char *name) = 0;
 	virtual uint32 levelById(uint64 id) const = 0;
+	uint32 levelByName(const char *name) { return strlen(name)-2; }
 
 	virtual uint64 bareId() const = 0; ///< Return id without top (depth) bit set.
 
@@ -32,6 +33,8 @@ public:
 	const char* getName() const {return name;}
 
 	void setName(const char* name) {id = idByName(name);this->name = name;}
+
+	const uint32 getLevel() const { return levelById(id); }
 
 	bool valid() {
 		if(id!=0) {return id == idByName(getName());

@@ -38,8 +38,8 @@ extern long long atoll (const char *str);
 //==============================================================
 
 ///////////CONSTRUCTOR///////////////////////
-htmInterface::htmInterface(size_t depth, size_t savedepth) : t_(NULL) {
-	index_ = new SpatialIndex(depth, savedepth);
+htmInterface::htmInterface(size_t searchlevel, size_t buildlevel) : t_(NULL) {
+	index_ = new SpatialIndex(searchlevel, buildlevel);
 }
 
 ///////////DESTRUCTOR////////////////////////

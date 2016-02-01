@@ -28,12 +28,14 @@ SKIPOB = \
    ${OBJ}/SpatialException.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
    ${OBJ}/SpatialGeneral.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${OBJ}/SpatialIndex.o \
    ${OBJ}/SpatialConstraint.o \
    ${OBJ}/sqlInterface.o \
@@ -204,6 +206,9 @@ ${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
 ${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
+	
+${OBJ}/EmbeddedLevelNameEncoding.o: ${SRCS}/EmbeddedLevelNameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
 ${OBJ}/XXX.o: ${SRCS}/XXX.cpp

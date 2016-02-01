@@ -78,7 +78,8 @@ typedef unsigned long long	uint64;
 #define HTMNAMEMAX         32
 // mlr TODO can we change HTMMAXDEPTH to HTMMAXLEVEL?
 #define HTMMAXDEPTH        25
-#define MAX_SQL_DEPTH      20
+// mlr only reference to MAX_SQL_DEPTH
+//#define MAX_SQL_DEPTH      20
 // mlr only reference to HTMMAXKEEP???
 // define HTMMAXKEEP		   12
 // TODO Try to extend HTMMAXBIT.  Change HTMNAMEMAX etc?  I see maxdepth above is 25... Why is the following 14?

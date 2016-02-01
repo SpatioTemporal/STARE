@@ -55,15 +55,21 @@ struct htmPolyCorner {
 class  LINKAGE htmInterface {
 
 public:
+	/**
+	 * Copy the htm-intervals (htmRange) out of an HtmRange into a vector<htmRange>
+	 *
+	 * @param hr is the full set of HtmRange information
+	 * @param vec is only the lo-hi intervals extracted from \p hr
+	 */
 	void fillValueVec(HtmRange &hr, HTMRangeValueVector &vec);
 
-  /** Constructor. The depth is optional, defaulting to level 5. It
+  /** Constructor. The level is optional, defaulting to level 5. It
       can be changed with the changeDepth() memberfunction or it can
       be specified with one of the string command interfaces. The
       saveDepth parameter can be specified to keep the given amount of
       levels in memory. This can also be altered by changeDepth. */
 
-	htmInterface(size_t depth = 5, size_t saveDepth = 5); // [ed:gyuri:saveDepth was 2]
+	htmInterface(size_t searchlevel = 5, size_t buildevel = 5); // [ed:gyuri:saveDepth was 2]
 
   /** Destructor. */
   ~htmInterface();
@@ -169,9 +175,14 @@ public:
 				       ValueVectorF64 y,
 				       ValueVectorF64 z ) ;
 
-  /** Request all triangles in the convex hull of a given set of
-      points.
-  */
+
+  /**
+   * Request all triangles in the convex hull of a given set of points.
+   *
+   * @param latlon a vector of LatLonDegrees64
+   * @param steps How many iterations to execute. -1 implies unbounded above.
+   * @return
+   */
   const HTMRangeValueVector & convexHull( LatLonDegrees64ValueVector latlon,
 		  size_t steps = -1);
 
