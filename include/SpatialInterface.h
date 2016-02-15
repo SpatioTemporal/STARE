@@ -81,7 +81,7 @@ public:
      Given a HTM ID, return a vector to the centroid of the triangle (GYF)
   */
   void pointById(SpatialVector &vec, uint64 htmid) const;
-  void pointById_mlr1(SpatialVector &vec, uint64 htmid) const;
+  void pointByHtmId(SpatialVector &vec, uint64 htmid) const;
 
   /** Look at the given htmid, and adjust the spatialindex object's depth (GYF)
     */

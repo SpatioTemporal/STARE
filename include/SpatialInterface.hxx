@@ -17,7 +17,14 @@ uint64 htmInterface::lookupID(float64 ra, float64 dec) const {
   return index_->idByPoint(ra,dec);
 }
 
-// Find the id of the leaf triangle containing the vector (x,y,z).
+/**
+ * Find the htm id of the leaf triangle containing the vector (x,y,z).
+ *
+ * @param x
+ * @param y
+ * @param z
+ * @return htmId
+ */
 inline
 uint64 htmInterface::lookupID(float64 x, float64 y, float64 z) const {
   SpatialVector v(x,y,z);
@@ -49,16 +56,16 @@ const char * htmInterface::lookupName(uint64 id) {
 }
 
 inline 
-void htmInterface::pointById(SpatialVector &vec, uint64 htmid) const {
-	index_->pointById(vec, htmid);
+void htmInterface::pointById(SpatialVector &vec, uint64 nodeId) const {
+	index_->pointById(vec, nodeId);
 	return;
 }
 
 
 // TODO Let's now translate the htmid into something index_-pointById understands.
 inline
-void htmInterface::pointById_mlr1(SpatialVector &vec, uint64 htmid) const {
-	index_->pointById_mlr1(vec, htmid);
+void htmInterface::pointByHtmId(SpatialVector &vec, uint64 htmid) const {
+	index_->pointByHtmId(vec, htmid);
 	return;
 }
 

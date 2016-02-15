@@ -61,6 +61,8 @@ void lookupID() {
 
 // TODO I just noticed there is an issue in dealing with parsing the IDs via nameByID -- I don't think they are interpreting the depth correctly. The index is constructed with a depth.  What happens if you give it an HTM string or ID that is associated with another depth?
 
+
+
 void lookupOnTwoSaveLevels() {
 
 	float64 x =  0.50350931157595497;
@@ -234,7 +236,7 @@ void pointById(){
 	int id_ = htm_->lookupID(x,y,z);
 	SpatialVector v_;
 	//	htm_->pointById(v_,id_);
-	htm_->pointById_mlr1(v_,id_);
+	htm_->pointByHtmId(v_,id_);
 	//	ASSERT_EQUALM("SpatialVectors x: ",0,2.0*(v_.x()-x)/abs(v_.x()+x));
 	//	componentCheck(z);
 
@@ -244,10 +246,32 @@ void pointById(){
 	cout << dec;
 }
 
+void idByPoint1() {
+	int level          = 8;
+	int saveLevel      = 5;
+	htmInterface *htm_ = new htmInterface(level,saveLevel);
+	float64 x = 0.50350942389316267;
+	float64 y = -0.61093299962057024;
+	float64 z = -0.61093299962057024;
+	double tolerance = 1.0e-14;
+	int id_ = htm_->lookupID(x,y,z);
+
+//	cout << "id_ " << id_ << endl << flush;
+
+	const SpatialIndex index = htm_->index();
+
+	SpatialVector v = SpatialVector(x,y,z);
+	int idTest = index.idByPoint(v);
+
+//	cout << "idT " << idTest << endl << flush;
+
+	ASSERT_EQUALM("idByPoint1",id_,idTest);
+}
+
 /**
  * Try an example found in the source's comments.
  */
-void idByName() {
+ void idByName() {
 	int level         = 4;
 	int saveLevel     = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
@@ -504,6 +528,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(precisionTest));
 	s.push_back(CUTE(lookupID));
 	s.push_back(CUTE(pointById));
+	s.push_back(CUTE(idByPoint1));
 	s.push_back(CUTE(lookupOnTwoSaveLevels));
 	s.push_back(CUTE(lookupOnMultipleLevels));
 	s.push_back(CUTE(idReallyDeep));

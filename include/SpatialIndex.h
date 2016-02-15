@@ -130,7 +130,7 @@ void printNode(int nodeIndex) const;
 
   /** find the vector to the centroid of a triangle represented by 
 	  the ID */
-  void pointById_mlr1(SpatialVector & vector, uint64 ID) const;
+  void pointByHtmId(SpatialVector & vector, uint64 ID) const;
   void pointById(SpatialVector & vector, uint64 ID) const;
 
   /** find a node by giving a vector. 
@@ -212,7 +212,7 @@ private:
     size_t	w_[3];			///< The three middlepoint vector indices
     uint64	childID_[4];	///< ids of children
     uint64	parent_;		///< id of the parent node (needed for sorting)
-    uint64	id_;			///< numeric id -> name // numericIdName
+    uint64	id_;			///< numeric id -> name // numericIdName, which is the HTM BitShifted encoding
   };
 
   // add quadnode vector
