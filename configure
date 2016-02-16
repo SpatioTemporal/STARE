@@ -1,8 +1,9 @@
 #!/bin/csh -f
 set platform=`uname`
+# TODO set TOPDIR=`pwd` # Maybe not needed if env variable is set.
 switch ($platform)
 case "Darwin":
-	echo "Makefile for Moc OS X"
+	echo "Makefile for Mac OS X"
 	sed -f darwin.sed < Makefile.generic > Makefile
 	breaksw
 case "Linux":

@@ -1,7 +1,7 @@
 
 .PHONY: libs version
 
-TOPDIR  = /Users/mrilee/git/hstm
+TOPDIR  ?= /Users/mrilee/git/hstm
 CXX     = g++
 CC      = gcc
 INCDIR  = $(TOPDIR)/include
@@ -12,8 +12,11 @@ SHELL   = /bin/csh
 APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
+CFLAGS_FROM_CONFIGURE_SCRIPT  = -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__unix -UDIAGNOSE
+
 #CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
-CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+#CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+CFLAGS_BASE = ${CFLAGS_FROM_CONFIGURE_SCRIPT}
 CFLAGS  = -c ${CFLAGS_BASE}
 CXX_FLAGS  = -std=c++11 ${CFLAGS}
 CLX_FLAGS  = -std=c++11
@@ -207,7 +210,7 @@ ${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
 
 ${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
-	
+
 ${OBJ}/EmbeddedLevelNameEncoding.o: ${SRCS}/EmbeddedLevelNameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
