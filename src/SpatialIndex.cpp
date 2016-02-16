@@ -141,6 +141,8 @@ uint64 subTriangleIndexByPoint(
 	return subTriangleIndex;
 }
 
+
+
 void SpatialIndex::printNode(int nodeIndex) const {
 	cout << "nIdx: " << nodeIndex << " "
 			<< " own-idx, numeric-id-name, parent, children "
@@ -702,6 +704,11 @@ SpatialIndex::nameById(uint64 id, char * name){
 // Find a vector for the leaf node given by its ID
 //
 
+/**
+ * Return the "center" of the triangle
+ * @param vec output the center of the triangle as a SpatialVector
+ * @param htmId The external numeric-id of the triangle
+ */
 void
 SpatialIndex::pointByHtmId(SpatialVector &vec, uint64 htmId) const {
 // TODO Check out index->nodeVertex for a possibly correct way to get the right point.
@@ -709,6 +716,12 @@ SpatialIndex::pointByHtmId(SpatialVector &vec, uint64 htmId) const {
 	uint64 leafID = this->leafNumberById(htmId)+IOFFSET;
 	this->pointById(vec,leafID);
 }
+
+/**
+ * Return the vector sum of the vertices normalized by its length.
+ * @param vec SpatialVector center of triangle returned
+ * @param nodeId64 the internal node-id of the triangle
+ */
 void
 SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
 	float64 center_x, center_y, center_z, sum;
@@ -729,15 +742,17 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
 	center_z /= sum;
 	vec.x_ = center_x;
 	vec.y_ = center_y;
-	vec.z_ = center_z; // I don't want it nomralized or radec to be set, 
+	vec.z_ = center_z; // I don't want it normalized or radec to be set,
 //	cerr << " - - - - " << endl;
 //	vec.show();
 //	cerr << "---------- Point by id Retuning" << endl;
 }
 //////////////////IDBYPOINT////////////////////////////////////////////////
-// Find a leaf node where a vector points to
-//
-
+/** Find a leaf node where a vector points to
+ *
+ * @param v The input point whose enclosing triangle we seek
+ * @return ID the HTM (external numeric-id) ID
+ */
 uint64
 SpatialIndex::idByPoint(SpatialVector & v) const {
     uint64 index;
@@ -822,6 +837,13 @@ int levelOfDepth(int depth) { return depth-1; } // TODO Remove.
 int depthOfId(uint64 htmId) {
 	return levelOfId(htmId) + 1;
 }
+/** Deprecated hardcoded way to find level of an htmID
+ *
+ * TODO replace with NameEncoding
+ *
+ * @param htmId
+ * @return level of htmID
+ */
 int levelOfId(uint64 htmId) {
 	int i;
 	uint32 size;
@@ -837,6 +859,11 @@ int levelOfId(uint64 htmId) {
 	return size-2;
 }
 
+/** Deprecated hardcoded way to find the nodeIndex from an htmId
+ * TODO replace with NameEncodning
+ * @param id contains the htmId (external numeric-id) for a triangle
+ * @return that triangle's nodeIndex
+ */
 uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// This nodeIndex is only valid if depth == maxlevel+1
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
