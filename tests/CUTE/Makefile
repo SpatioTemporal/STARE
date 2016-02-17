@@ -5,11 +5,19 @@
 
 include ../../Makefile
 
-BOOST_FLAGS = -I/opt/scidb/15.7/3rdparty/boost_1_54_0/include
-CXX_FLAGS += -I${TOPDIR}/cute -I/opt/local/include ${BOOST_FLAGS}
+ifeq ($(ARCH),LINUX)
+	BOOST_FLAGS ?= -I/opt/scidb/15.7/3rdparty/boost_1_54_0/include
+	BOOST_LIBS  ?= -L/opt/scidb/15.7/3rdparty/boost_1_54_0/lib
+else ifeq ($(ARCH),DARWIN)
+	BOOST_FLAGS ?= -I/opt/local/include
+	BOOST_LIBS  ?= -L/opt/local/lib
+else
+	BOOST_FLAGS ?= -I/opt/local/include
+	BOOST_LIBS  ?= -L/opt/local/lib
+endif
 
-BOOST_LIBS = -L/opt/scidb/15.7/3rdparty/boost_1_54_0/lib
-CLX_FLAGS += -L${BOOST_LIBS} -L/opt/local/lib -L../../unix -lhstm
+CXX_FLAGS += -I${TOPDIR}/cute ${BOOST_FLAGS}
+CLX_FLAGS += ${BOOST_LIBS} -L../../unix -lhstm
 
 CuteTests: test
 	./test

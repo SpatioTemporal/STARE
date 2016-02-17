@@ -1,6 +1,8 @@
 
 .PHONY: libs version
 
+ARCH    = @@ARCH##
+
 TOPDIR  ?= /Users/mrilee/git/hstm
 CXX     = g++
 CC      = gcc
@@ -246,3 +248,4 @@ HtmParse.o: HtmParse.cpp HtmParse.h
 version:
 	$(CXX) --version
 
+export ARCH

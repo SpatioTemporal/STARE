@@ -1,6 +1,8 @@
 
 .PHONY: libs version
 
+ARCH    = DARWIN
+
 TOPDIR  ?= /Users/mrilee/git/hstm
 CXX     = g++
 CC      = gcc
@@ -12,7 +14,7 @@ SHELL   = /bin/csh
 APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
-CFLAGS_FROM_CONFIGURE_SCRIPT  = -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__unix -UDIAGNOSE
+CFLAGS_FROM_CONFIGURE_SCRIPT  = -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
 
 #CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
 #CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
@@ -246,3 +248,4 @@ HtmParse.o: HtmParse.cpp HtmParse.h
 version:
 	$(CXX) --version
 
+export ARCH
