@@ -35,3 +35,11 @@ set (
   ${PROJECT_SOURCE_DIR}/include/VarStr.hpp
   ${PROJECT_SOURCE_DIR}/include/VarStr.hxx )
 
+# TODO Trouble with VarStr.hpp
+# Later...
+# add_library(HEADER_ONLY_TARGET STATIC test1.hpp test2.hpp)
+# set_target_properties(HEADER_ONLY_TARGET PROPERTIES LINKER_LANGUAGE CXX)
+#
+# INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
+#
+
