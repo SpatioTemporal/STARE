@@ -6,6 +6,7 @@
  */
 
 #include "BitShiftNameEncoding.h"
+#include <SpatialException.h>
 
 BitShiftNameEncoding::BitShiftNameEncoding() {
 	// TODO Auto-generated constructor stub

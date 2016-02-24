@@ -1,7 +1,9 @@
 
 .PHONY: libs version
 
-TOPDIR  = /Users/mrilee/git/hstm
+ARCH    = @@ARCH##
+
+TOPDIR  ?= /Users/mrilee/git/hstm
 CXX     = g++
 CC      = gcc
 INCDIR  = $(TOPDIR)/include
@@ -12,10 +14,11 @@ SHELL   = /bin/csh
 APP_SRCS= ${TOPDIR}/app
 APPS    = range2list fillout toid toname par xptest filter lookup
 
-CFLAGS  = @@CFLAGS##
+CFLAGS_FROM_CONFIGURE_SCRIPT  = @@CFLAGS##
 
 #CFLAGS  = -c -g -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
-CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+#CFLAGS_BASE = -O3 -Wall -I${INCDIR} -D_BOOL_EXISTS -D__macosx -UDIAGNOSE
+CFLAGS_BASE = ${CFLAGS_FROM_CONFIGURE_SCRIPT}
 CFLAGS  = -c ${CFLAGS_BASE}
 CXX_FLAGS  = -std=c++11 ${CFLAGS}
 CLX_FLAGS  = -std=c++11
@@ -30,12 +33,14 @@ SKIPOB = \
    ${OBJ}/SpatialException.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
    ${OBJ}/SpatialGeneral.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
+   ${OBJ}/EmbeddedLevelNameEncoding.o \
    ${OBJ}/SpatialIndex.o \
    ${OBJ}/SpatialConstraint.o \
    ${OBJ}/sqlInterface.o \
@@ -208,6 +213,9 @@ ${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
 ${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
+${OBJ}/EmbeddedLevelNameEncoding.o: ${SRCS}/EmbeddedLevelNameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
+
 ${OBJ}/XXX.o: ${SRCS}/XXX.cpp
 	$(CXX) $(CXX_FLAGS) ${SRCS}/XXX.cpp -o $@
 
@@ -240,3 +248,4 @@ HtmParse.o: HtmParse.cpp HtmParse.h
 version:
 	$(CXX) --version
 
+export ARCH
