@@ -1,2 +1,4 @@
 /hstm-configure.launch
 /configure-hstm.launch
+/ch.hsr.ifs.cute.gcov.gcovBuilder.launch
+/configure-makefile.launch
