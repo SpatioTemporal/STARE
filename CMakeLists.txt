@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 3.4)
 
 project(HSTM)
 
-option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ${PROJECT_SOURCE_DIR}/cute )
+option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
+
+if(CUTE_INCLUDE_DIR)
+     set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/cute )
+else()
+     message(FATAL_ERROR " CUTE_INCLUDE_DIR not set! Equals ${CUTE_INCLUDE_DIR}\n ")
+endif()
+message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
 
 # Set CC and CXX before calling cmake...
 # set(CMAKE_C_COMPILER gcc)
