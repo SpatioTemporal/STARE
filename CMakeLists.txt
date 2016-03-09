@@ -5,12 +5,15 @@ project(HSTM)
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
 
-if(CUTE_INCLUDE_DIR)
+if(CUTE_INCLUDE_DIR MATCHES "ON")
      set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/cute )
-else()
-     message(FATAL_ERROR " CUTE_INCLUDE_DIR not set! Equals ${CUTE_INCLUDE_DIR}\n ")
 endif()
-message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
+
+if(EXISTS "${CUTE_INCLUDE_DIR}")
+     message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
+else()
+     message( FATAL_ERROR " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\n ")
+endif()
 
 # Set CC and CXX before calling cmake...
 # set(CMAKE_C_COMPILER gcc)
