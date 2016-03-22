@@ -447,10 +447,11 @@ htmInterface::doHull() {
 
 	RangeConvex cvx;
 
-	SpatialDomain dom;
 	const SpatialIndex index = this->index();
-	dom.setOlevel(index.getMaxlevel());
+	SpatialDomain dom(&index); // mlr -- should domain have its own index?
+//	dom.setOlevel(index.getMaxlevel()); // SpatialDomain should have an index! // TODO Weird
 //	cout << 3005 << "index.getMaxlevel()=" << index.getMaxlevel() << endl << flush;
+	// Note:  index.getMaxlevel is getLeafLevel
 
 	// The constraint we have for each side is a 0-constraint (great circle)
 	// passing through the 2 corners. Since we are in counterclockwise order,
@@ -663,7 +664,9 @@ htmInterface::domainCmd( char *str ) {
 		}
 		dom.add(convex);
 	}
-	dom.setOlevel(20); 		// [ed:olevel]
+	// TODO Fix weirdness.
+	dom.setIndex(new SpatialIndex(20)); // SpatialIndex? Memory leak possibility?
+//	dom.setOlevel(20); 		// [ed:olevel] /// Domain should have an index that sets this...
 	return domain(dom);
 }
 

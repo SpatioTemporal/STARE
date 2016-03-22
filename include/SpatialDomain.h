@@ -65,8 +65,9 @@ public:
 
   static void ignoreCrLf(istream &);
 
-  void setOlevel(int level);
-  int getOlevel(void){return olevel;};
+//  void setOlevel(int level);
+//  int getOlevel(void){return olevel;};
+  int getOlevel(void){return 0;}
 
 protected:
   int olevel;

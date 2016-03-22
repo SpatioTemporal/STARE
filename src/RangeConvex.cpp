@@ -576,7 +576,7 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
 
   // Some application want a complete htmid20 range
   //
-
+	// TODO if(!index) throw tantrum.
 
   int level, i, shifts=-999;
   uint64 lo, hi;
@@ -599,6 +599,8 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
   level = (IDSIZE-i) >> 1;
   level -= 2;
   // local!
+  // TODO Weird. Having olevel set manually w/o connection to index seems insane.
+  // TODO Weird. If the htmid comes from an index of one level and olevel is different, you get a problem.
   int olevel = index_->getLeafLevel();
   if (level < olevel){
     /* Size is the length of the string representing the name of the

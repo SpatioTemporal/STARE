@@ -184,12 +184,16 @@ int main(int argc, char *argv[]) {
 
 		// Read in domain and echo it to screen
 
-		SpatialDomain domain;   // initialize empty domain
+		SpatialDomain domain(&index);   // initialize empty domain
 		// //////////////////////////////////////////////
 		// Read the domain here.
 		in >> domain;	      // read domainfile
 		// //////////////////////////////////////////////
-		domain.setOlevel(olevel);
+		// TODO What is the difference between olevel and depth.
+		// cf. above olevel < depth => olevel = depth
+		// cf. what does it mean for olevel to be greater than depth?
+		// olevel is the output level -- but how does this differ from depth in the index?
+//		domain.setOlevel(olevel); TODO huh? Can olevel differ from the index depth?
 		if(verbose)
 			cout << domain;
 

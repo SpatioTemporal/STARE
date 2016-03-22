@@ -32,7 +32,7 @@
 //
 SpatialDomain::SpatialDomain(const SpatialIndex * i) :
   index(i) {
-	setOlevel(i->getLeafLevel());
+//	setOlevel(i->getLeafLevel());  Needed?
 }
 
 /////////////DESTRUCTOR///////////////////////////////////
@@ -54,20 +54,20 @@ SpatialDomain::setIndex(const SpatialIndex * idx)
 void
 SpatialDomain::add(RangeConvex & c)
 {
-	c.setOlevel(olevel);
+//	c.setOlevel(olevel); // TODO not needed?
   convexes_.push_back(c);
 //  c.setOlevel(olevel);
 }
 
-/// Mischief here: SpatialDomain has an index (with a level) as well as a level?
-void SpatialDomain::setOlevel(int level)
-{
-  size_t i;
-  this->olevel = level;  /// What about index->maxlevel_? Or leaf level?
-
-  for(i = 0; i < convexes_.size(); i++)  // intersect every convex
-    convexes_[i].setOlevel(level);
-}
+///// Mischief here: SpatialDomain has an index (with a level) as well as a level?
+//void SpatialDomain::setOlevel(int level)
+//{
+//  size_t i;
+//  this->olevel = level;  /// What about index->maxlevel_? Or leaf level?
+//
+//  for(i = 0; i < convexes_.size(); i++)  // intersect every convex
+//    convexes_[i].setOlevel(level);
+//}
 
 /////////////INTERSECT////////////////////////////////////
 //
