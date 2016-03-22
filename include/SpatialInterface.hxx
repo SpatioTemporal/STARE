@@ -42,6 +42,8 @@ const char * htmInterface::lookupName(float64 ra, float64 dec) {
   return name_;
 }
 
+
+
 inline
 const char * htmInterface::lookupName(float64 x, float64 y, float64 z) {
   SpatialVector v(x,y,z);

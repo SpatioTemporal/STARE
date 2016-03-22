@@ -104,8 +104,8 @@ public:
   /// [] operator: give back constraint
   SpatialConstraint & operator [](size_t i);
 
-  void setOlevel(int level){olevel = level;};
-  int getOlevel(void){return olevel;};
+//  void setOlevel(int level){olevel = level;};
+//  int getOlevel(void){return olevel;};
 
   void write(ostream& out);
 

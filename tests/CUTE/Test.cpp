@@ -390,6 +390,129 @@ void testRangeIterator() {
 	}
 }
 
+//void intersectTwoRectangles(
+//		const SpatialIndex  *index,
+//		const SpatialVector *u0,
+//		const SpatialVector *u1,
+//		const SpatialVector *u2,
+//		const SpatialVector *u3,
+//		const SpatialVector *v0,
+//		const SpatialVector *v1,
+//		const SpatialVector *v2,
+//		const SpatialVector *v3
+//		) {
+//	int htmIdLevel = index->getLeafLevel();
+//
+//	SpatialDomain domain1 = SpatialDomain(index);
+//	domain1.setOlevel(htmIdLevel); // Note this sets the olevel on the convexes.
+//
+//	SpatialDomain domain2 = SpatialDomain(index);
+//	domain2.setOlevel(htmIdLevel); // Note this sets the olevel on the convexes.
+//
+//	cout << "1" << flush;
+//	if(true){
+////		SpatialVector *v0 = VectorFromLatLonDegrees(30.0,20.0);
+////		SpatialVector *v1 = VectorFromLatLonDegrees(30.0,-10.0);
+////		SpatialVector *v2 = VectorFromLatLonDegrees(20.0,0.0);
+////		SpatialVector *v3 = VectorFromLatLonDegrees(20.0,30.0);
+//		float r = 0.0;
+//		float g = 1.0;
+//		float b = 1.0;
+////		viz->addRectangle(*u0,*u1,*u2,*u3,r,g,b);
+//
+//		RangeConvex rc = RangeConvex(u0,u1,u2,u3);
+//		//	cout << "nConstraints: " << rc->numConstraints() << endl << flush;
+//		//	SpatialConstraint *sc = new SpatialConstraint(SpatialVector(0.,0.,1.),0.5);
+//		//	viz->addConstraint(*sc,1.0,1.0,1.0);
+//		//	rc->add(*sc);
+//		rc.setOlevel(htmIdLevel); // Note this is supposed to be done when added to the domain.
+//		domain1.add(rc);
+//
+//	}
+//	cout << "2" << flush;
+//	if(true){
+////		SpatialVector *v0 = VectorFromLatLonDegrees(10.0,0.0);
+////		SpatialVector *v1 = VectorFromLatLonDegrees(30.0,-10.0);
+////		SpatialVector *v2 = VectorFromLatLonDegrees(60.0,10.0);
+////		SpatialVector *v3 = VectorFromLatLonDegrees(40.0,20.0);
+//		float r = 1.0;
+//		float g = 1.0;
+//		float b = 0.0;
+////		viz->addRectangle(*v0,*v1,*v2,*v3,r,g,b);
+//
+//		RangeConvex rc = RangeConvex(v0,v1,v2,v3);
+//		//	cout << "nConstraints: " << rc->numConstraints() << endl << flush;
+//		//	SpatialConstraint *sc = new SpatialConstraint(SpatialVector(0.,0.,1.),0.5);
+//		//	viz->addConstraint(*sc,1.0,1.0,1.0);
+//		//	rc->add(*sc);
+//		rc.setOlevel(htmIdLevel); // Note this is supposed to be done when added to the domain.
+//		domain2.add(rc);
+//	}
+//
+////		return;
+//	cout << "3" << flush;
+//	bool varlen_individualHTMIds = false; // true for individuals, false for ranges
+//
+//	cout << "." << flush;
+////	HtmRange range1 = HtmRange();
+//	HtmRange range1;
+//	range1.purge();
+//	bool overlap1 = domain1.intersect(index,&range1,varlen_individualHTMIds);
+//	cout << "." << flush;
+//	range1.defrag();
+//	range1.reset();
+//	if(range1.nranges()==0)return;
+//
+//	cout << "." << flush;
+//	HtmRange range2 = HtmRange();
+//	range2.purge();
+//	bool overlap2 = domain2.intersect(index,&range2,varlen_individualHTMIds);
+//	cout << "." << flush;
+//	range2.defrag();
+//	range2.reset();
+//	if(range2.nranges()==0)return;
+//
+//	Key lo = 0, hi = 0;
+//	uint64 indexp = 0;
+//
+//	cout << "4" << flush;
+//	cout << " overlaps: " << overlap1 << " " << overlap2 << ";" << flush;
+//	cout << endl << flush;
+//
+//	cout << " range1.ranges(): " << range1.nranges() << endl << flush;
+//	range1.reset();
+//	indexp = range1.getNext(lo,hi);
+//	cout << " range1.lo,hi " << lo << " " << hi << endl << flush;
+//	cout << "        level " << levelOfId(lo) << endl << flush;
+//
+//	cout << " range2.ranges(): " << range2.nranges() << endl << flush;
+//	range2.reset();
+//	indexp = range2.getNext(lo,hi);
+//	cout << " range2.lo,hi " << lo << " " << hi << endl << flush;
+//	cout << "        level " << levelOfId(lo) << endl << flush;
+//
+//	HtmRange *resultRange = HTMRangeAtLevelFromIntersection(htmIdLevel,&range1,&range2);
+//
+//	cout << "5" << flush;
+//	HtmRange *range = resultRange;
+//	range->reset();
+//	cout << "6" << flush;
+//	lo=0; hi=0;
+//	indexp = range->getNext(lo,hi);
+//	SpatialVector x1,x2,x3;
+//
+//	cout << "7" << flush;
+////		if(indexp) //?
+//	cout << "lo,hi: " << lo << " " << hi << endl << flush;
+//	cout << "indexp: " << indexp << endl << flush;
+//
+//	delete resultRange;
+//}
+//
+//void testIntersectionRectangles() {
+//
+//}
+
 /**
  * Cover the level and depth calculations underlying SpatialIndex's nodes_.
  */

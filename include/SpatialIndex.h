@@ -78,9 +78,12 @@ public:
       , that many levels are generated on the fly each time the index
       is called. */
   SpatialIndex() {};
-  SpatialIndex(size_t maxlevel, size_t buildlevel =5);
+  SpatialIndex(size_t maxlevel, size_t buildlevel = 5);
+  SpatialIndex(const char* htmIdName, int buildlevel = 5) :
+	  SpatialIndex(levelOfName(htmIdName),buildlevel) {};
 
   size_t getMaxlevel() const { return maxlevel_; }
+  size_t getLeafLevel() const { return maxlevel_; }
   size_t getBuildlevel() const { return buildlevel_; }
 
   uint64 indexAtNodeIndex(uint64 nodeIndex);
@@ -90,6 +93,7 @@ public:
   uint64 firstIndexOfLayerAtLevel(uint64 level);
 
   uint64 nodeIndexFromId(uint64 id) const;
+  uint64 nodeIndexFromName(const char* htmIdName) const;
 
   ///Print the node information in nodes_ at nodeIndex.
 void printNode(int nodeIndex) const;
@@ -142,6 +146,9 @@ void printNode(int nodeIndex) const;
 
   /// find a node by giving a ra,dec in degrees.
   uint64 idByPoint(const float64 & ra, const float64 & dec) const;
+
+  /// find a node by giving LatLon in degrees.
+  uint64 idByLatLon(const float64 &lat, const float64 &lon) const;
 
   /// find a node by giving a vector. 
   /**@return The ID of the node is returned. */

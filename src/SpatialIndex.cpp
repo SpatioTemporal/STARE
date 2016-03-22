@@ -178,6 +178,7 @@ void SpatialIndex::printNode(int nodeIndex) const {
  * @param [in] maxlevel   The current level of focus for the index, the level of the leaves.
  * @param [in] buildlevel The level to which nodes are stored in nodes_.
  */
+
 SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxlevel), 
   buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
 {
@@ -860,7 +861,7 @@ int levelOfId(uint64 htmId) {
 }
 
 /** Deprecated hardcoded way to find the nodeIndex from an htmId
- * TODO replace with NameEncodning
+ * TODO replace with NameEncoding
  * @param id contains the htmId (external numeric-id) for a triangle
  * @return that triangle's nodeIndex
  */
@@ -869,7 +870,7 @@ uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
 	int depth = depthOfId(id);
 	if (depth != maxlevel_+1) {
-		cout << "si:nifi: id=" << id << "maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
+		cout << "si:nifi: id=" << id << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
 		return 0;  // TODO Make this throw an exception?
 	}
 //	cout << "si::nifi: id=" << id << " depth=" << depth << endl << flush;
@@ -877,5 +878,9 @@ uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	uint64 mask = ~(one << (2*depth+1));
 	uint64 nodeIndex = (id & mask) + IOFFSET;
 	return nodeIndex;
+}
+
+uint64 SpatialIndex::nodeIndexFromName(const char* htmIdName) const {
+	return nodeIndexFromId(idByName(htmIdName));
 }
 

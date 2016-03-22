@@ -80,6 +80,13 @@ SpatialIndex::idByPoint(const float64 & ra, const float64 & dec) const {
   return idByPoint(v);
 }
 
+inline uint64
+SpatialIndex::idByLatLon(const float64 &lat, const float64 &lon) const {
+	SpatialVector v;
+	v.setLatLonDegrees(lat,lon);
+	return idByPoint(v);
+}
+
 //////////////////NAMEBYPOINT//////////////////////////////////////////////
 // Find a leaf node where a ra/dec points to, return its name
 //

@@ -576,7 +576,9 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
 
   // Some application want a complete htmid20 range
   //
-  int level, i, shifts;
+
+
+  int level, i, shifts=-999;
   uint64 lo, hi;
 #ifdef _WIN32
   uint64 IDHIGHBIT = 1;
@@ -584,17 +586,20 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
   IDHIGHBIT = IDHIGHBIT << 63;
   IDHIGHBIT2 = IDHIGHBIT2 << 62;
 #endif
-  if(varlen_){
+  if(varlen_){ // For individuals
     hr->mergeRange(htmid, htmid);
     return;
   }
 
+  // TODO BitShift encoding, no?
   for(i = 0; i < IDSIZE; i+=2) {
     if ( (htmid << i) & IDHIGHBIT ) break;
   }
 
   level = (IDSIZE-i) >> 1;
   level -= 2;
+  // local!
+  int olevel = index_->getLeafLevel();
   if (level < olevel){
     /* Size is the length of the string representing the name of the
        trixel, the level is size - 2
@@ -606,12 +611,16 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
     lo = hi = htmid;
   }
 
-//  cout
-//  	  << "st:"
-//	  << " htmid=" << htmid
-//	  << " lo=" << lo
-//	  << " hi=" << hi
-//	  << endl << flush;
+  cout
+  	  << "st:"
+	  << " htmid=" << htmid
+	  << " lo=" << lo
+	  << " hi=" << hi
+	  << " olevel=" << olevel
+	  << " level=" << level
+	  << " ol-le=" << (olevel-level)
+	  << " shifts=" << shifts
+	  << endl << flush;
 
   hr->mergeRange(lo, hi);
 
@@ -639,7 +648,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
 
-//  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
+  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
 
   mark = testNode(nodeIndex); // was:(indexNode or  id);
 

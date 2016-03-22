@@ -43,7 +43,7 @@ public:
 
   /// Constructor from ra/dec, this is always normed to 1
   SpatialVector(float64 ra,
-		float64 dec);
+		        float64 dec);
 
   /// Copy constructor
   SpatialVector(const SpatialVector &);
