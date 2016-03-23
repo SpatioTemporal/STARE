@@ -613,16 +613,16 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
     lo = hi = htmid;
   }
 
-  cout
-  	  << "st:"
-	  << " htmid=" << htmid
-	  << " lo=" << lo
-	  << " hi=" << hi
-	  << " olevel=" << olevel
-	  << " level=" << level
-	  << " ol-le=" << (olevel-level)
-	  << " shifts=" << shifts
-	  << endl << flush;
+//  cout
+//  	  << "st:"
+//	  << " htmid=" << htmid
+//	  << " lo=" << lo
+//	  << " hi=" << hi
+//	  << " olevel=" << olevel
+//	  << " level=" << level
+//	  << " ol-le=" << (olevel-level)
+//	  << " shifts=" << shifts
+//	  << endl << flush;
 
   hr->mergeRange(lo, hi);
 
@@ -650,7 +650,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
 
-  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
+//  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
 
   mark = testNode(nodeIndex); // was:(indexNode or  id);
 

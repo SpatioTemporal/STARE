@@ -203,7 +203,7 @@ private:
   struct Layer {
     size_t 	level_;			///< layer level
     size_t 	nVert_;			///< number of vertices in this layer
-    size_t 	nNode_;			///< number of nodes
+    size_t 	nNode_;			///< number of nodes Q: Nodes at this level or the children?
     size_t 	nEdge_;			///< number of edges
     uint64 	firstIndex_;	///< index of first node of this layer
     size_t  lastIndex_;     ///< index of the last node of this layer

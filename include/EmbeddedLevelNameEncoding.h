@@ -11,7 +11,7 @@
 #include <SpatialException.h>
 #include "NameEncoding.h"
 #include <algorithm>
-
+/// Left justified
 class EmbeddedLevelNameEncoding: public NameEncoding {
 public:
 	EmbeddedLevelNameEncoding();

@@ -11,6 +11,7 @@
 #include <SpatialException.h>
 #include "NameEncoding.h"
 
+/// Right justified.
 class BitShiftNameEncoding: public NameEncoding {
 public:
 	BitShiftNameEncoding();

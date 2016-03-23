@@ -297,7 +297,7 @@ SpatialIndex::nodeVertex(const size_t idx,
 void
 SpatialIndex::nodeVertex(
 		const uint64 nodeId64, // Note this is a  node-id, not an external htm index.
-		SpatialVector & v0,
+		SpatialVector & v0, // These are the vertices of the triangle indexed by nodeId64.
 		SpatialVector & v1,
 		SpatialVector & v2
 		//			 ,bool verbose
