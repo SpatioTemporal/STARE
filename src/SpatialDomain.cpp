@@ -69,21 +69,33 @@ SpatialDomain::add(RangeConvex & c)
 //    convexes_[i].setOlevel(level);
 //}
 
-/////////////INTERSECT////////////////////////////////////
-//
+// //////////INTERSECT////////////////////////////////////
+/// Intersect using a new SpatialIndex.
+///
 bool
 SpatialDomain::intersect(const SpatialIndex * idx, HtmRange *htmrange, bool varlen)
 {
-
   index = idx;
-
   size_t i;
 
-  for(i = 0; i < convexes_.size(); i++)  // intersect every convex
-    convexes_[i].intersect(index, htmrange, varlen);
-  return true;
+  return intersect(htmrange,varlen);
+//  for(i = 0; i < convexes_.size(); i++)  // intersect every convex
+//    convexes_[i].intersect(index, htmrange, varlen);
+//  return true;
 }
-
+/// Intersect using the default SpatialIndex in the domain.
+bool
+SpatialDomain::intersect(HtmRange *htmrange, bool varlen)
+{
+	size_t i;
+	bool ok = false;
+	if(index) {
+		for(i = 0; i < convexes_.size(); i++)  // intersect every convex
+			convexes_[i].intersect(index, htmrange, varlen);
+		ok = true;
+	}
+	return ok;
+}
 /////////////Write////////////////////////////////////////
 //
 void

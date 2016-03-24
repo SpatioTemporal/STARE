@@ -49,8 +49,9 @@ public:
   /// Simplify the Domain, remove redundancies
   void simplify();
 
-  /// intersection, returns ranges of HTMids, or individual HTMids is valren is true
+  /// intersection, returns ranges of HTMids, or individual HTMids is varlen is true
   bool intersect(const SpatialIndex * idx, HtmRange *htmrange, bool varlen);
+  bool intersect(HtmRange *htmrange, bool varlen);
 
   /// numConvexes: give back the number of convexes
   size_t numConvexes();
