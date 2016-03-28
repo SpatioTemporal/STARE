@@ -63,6 +63,8 @@ public:
   void setLatLonDegrees(const float64 &lat,
 		  	  	 	 	const float64 &lon);
 
+  bool getLatLonDegrees(float64 &lat, float64 &lon);
+
   /// Get x,y,z
   void get( float64 &x,
 	    float64 &y,
@@ -140,6 +142,10 @@ private:
   float64 ra_;
   float64 dec_;
   bool okRaDec_;
+
+  float64 latDegrees_;
+  float64 lonDegrees_;
+  bool latlon_=false;
 
   void updateXYZ();
   void updateRaDec();

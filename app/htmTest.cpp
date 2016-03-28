@@ -34,6 +34,12 @@ main() {
  out.precision(10);
 
  for(size_t p = 0; p < index.leafCount(); p++) {
+	 // TODO MLR: The following is probably wrong.
+	 // index.idByLeafNumber provides an htmId, but
+	 // it seems area takes a nodeIndex because it uses
+	 // nodeVertex. We probably need to fix this with a
+	 // call to nodeIndexFromId instead of idByLeafNumber.
+	 // Q? Is there a nodeIndexByLeafNumber?  Just add IOFFSET?
    leafArea = index.area(index.idByLeafNumber(p));
    out << index.nameByLeafNumber(p) << "   " << leafArea << endl;
 

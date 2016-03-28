@@ -408,6 +408,16 @@ void testRangeContains() {
 	ASSERT_EQUALM("3: 100..101 in 50..100",-1,h1->contains(100,101));
 }
 
+void testLatLonDegrees() {
+	SpatialVector v;
+	float64 a0=-1, a1=-2;
+	ASSERT_EQUALM("LatLonFalse",false,v.getLatLonDegrees(a0,a1));
+	v.setLatLonDegrees(30.0,45.0);
+	ASSERT_EQUALM("LatLonTrue",true,v.getLatLonDegrees(a0,a1));
+	ASSERT_EQUALM("a0==30",30,a0);
+	ASSERT_EQUALM("a1==45",45,a1);
+}
+
 /**
  *  Test htm range iterator.
  *
@@ -774,6 +784,7 @@ void runSuite(int argc, char const *argv[]){
 	//	s.push_back(CUTE(testIndexLevel));
 	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
 	s.push_back(CUTE(testRotation));
+	s.push_back(testLatLonDegrees);
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

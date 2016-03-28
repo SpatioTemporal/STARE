@@ -85,16 +85,30 @@ SpatialVector::set(const float64 &ra, const float64 &dec)
   dec_ = dec;
   updateXYZ();
 }
+
 void
 SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
 {
 //	throw SpatialUnimplemented();
+	latDegrees_ = lat;
+	lonDegrees_ = lon;
+	latlon_     = true;
 	float64 *x = xyzFromLatLonDegrees(lat,lon);
 	x_ = x[0];
 	y_ = x[1];
 	z_ = x[2];
 	normalize();
 //	updateRA(); // TODO Why should we do this?
+}
+
+// TODO The right thing to do is to implement a coordinate class for the different kinds of coords we use.
+bool
+SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
+	if (latlon_) {
+		lat = latDegrees_;
+		lon = lonDegrees_;
+	}
+	return latlon_;
 }
 
 /////////////GET//////////////////////////////////////////
