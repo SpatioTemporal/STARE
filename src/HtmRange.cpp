@@ -1,6 +1,7 @@
 #include <iostream> // cout
 #include <iomanip>  // setw()
 #include <HtmRange.h>
+#include <SpatialIndex.h> // levelOfId
 
 
 
@@ -15,6 +16,97 @@
 #define GAP_HISTO_SIZE 10000
 
 using namespace std;
+
+/**
+ * Translate an HtmRange to one at a greater level.  If the desired level is
+ * less that the level implicit in the input range (lo & hi), then just return
+ * an HtmRange constructed from the input range without modification.
+ * Note: Currently hardcoded for bit-shifted encoding
+ * @param htmIdLevel
+ * @param lo the low end of the range
+ * @param hi the high end of the range
+ * @return levelAdaptedRange an HtmRange
+ */
+KeyPair HTMRangeAtLevelFromHTMRange(int htmIdLevel, Key lo, Key hi) {
+	// htmIdLevel is used to set maxlevel in the index. aka olevel.
+	int levelLo = levelOfId(lo);
+	if(levelLo<htmIdLevel) {
+		lo = lo << (2*(htmIdLevel-levelLo));
+	}
+	int levelHi = levelOfId(hi);
+	if(levelHi<htmIdLevel) {
+		for(int shift=0; shift < (htmIdLevel-levelHi); shift++) {
+			hi = hi << 2;
+			hi += 3; /// Increment hi by 3 to catch all of the faces at that level.
+		}
+	}
+	KeyPair levelAdaptedRange;
+	levelAdaptedRange.lo = lo;
+	levelAdaptedRange.hi = hi;
+	return levelAdaptedRange;
+}
+
+/**
+ *
+ * @param htmIdLevel
+ * @param range1
+ * @param range2
+ * @return
+ */
+HtmRange *HtmRange::HTMRangeAtLevelFromIntersection(HtmRange *range2, int htmIdLevel){
+	//	cout << "Comparing..." << endl << flush;
+	HtmRange *range1 = this; // Rename to use existing code. TODO rename to this.
+	if((!range1)||(!range2)) return 0;
+	if((range1->nranges()<=0)||(range2->nranges()<=0)) return 0;
+	HtmRange *resultRange = new HtmRange();
+	resultRange->purge();
+	Key lo1,hi1,lo2,hi2;
+	range1->reset();
+	uint64 indexp1 = range1->getNext(lo1,hi1);
+	if (!indexp1) return 0;
+
+	if(htmIdLevel<0) {
+		htmIdLevel = levelOfId(lo1);
+	}
+
+	//	cout << "indexp1: " << indexp1 << endl << flush;
+	//	cout << "l,lo,hi1: " << htmIdLevel << " " << lo1 << " " << hi1 << endl << flush;
+	//	cout << "a" << flush;
+	do {
+		//		cout << "b" << endl << flush;
+		KeyPair testRange1 = HTMRangeAtLevelFromHTMRange(htmIdLevel,lo1,hi1);
+		range2->reset();
+		uint64 indexp2 = range2->getNext(lo2,hi2);
+		if(!indexp2) return 0;
+		//		cout << "indexp2: " << indexp2 << endl << flush;
+		//		cout << "l,lo,hi2: " << htmIdLevel << " " << lo2 << " " << hi2 << endl << flush;
+		bool intersects = false;
+		do {
+			//			cout << "c" << endl << flush;
+			KeyPair testRange2 = HTMRangeAtLevelFromHTMRange(htmIdLevel,lo2,hi2);
+			intersects = testRange2.lo <= testRange1.hi
+					&& testRange2.hi >= testRange1.lo;
+			//						cout << "lh1,lh2: "
+			//								<< lo1 << " " << hi1 << ", "
+			//								<< lo2 << " " << hi2 << ", "
+			//								<< intersects << flush;
+			if(intersects){
+				Key lo_ = max(testRange1.lo,testRange2.lo);
+				Key hi_ = min(testRange1.hi,testRange2.hi);
+				resultRange->addRange(lo_,hi_);
+				//								cout << ", added "
+				//										<< lo_ << " "
+				//										<< hi_ << flush;
+			}
+			//						cout << "." << endl << flush;
+		} while (range2->getNext(lo2,hi2));
+	} while (range1->getNext(lo1,hi1));
+	//	cout << "d" << flush;
+	if(resultRange->nranges()>0)resultRange->defrag();
+	//	cout << "e" << flush;
+	return resultRange;
+}
+
 
 HtmRange::HtmRange() : HtmRange(new BitShiftNameEncoding()) {}
 
@@ -71,39 +163,40 @@ int HtmRange::isIn(Key a, Key b)
 	param[i++] = SL_b = my_los->findMIN(b);
 	param[i++] = SH_b = my_his->findMIN(b);
 
-	// cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
-	// cout << "(isIn" ;
-
-	//   for(i=0; i<8; i++){
-	//     if (param[i] == KEY_MAX)
-	//       cout << "  MAX";
-	//     else if (param[i] == -KEY_MAX)
-	//       cout << " -MAX";
-	//     else
-	//       cout << setw(5) << param[i];
-	//   }
-	//   cout << ")" << endl;
+//	cout << "(isIn checking a,b: " << a << " " << b << ")" << endl << flush;
+//	cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
+//	cout << "(isIn" ;
+//
+//	for(i=0; i<8; i++){
+//		if (param[i] == KEY_MAX)
+//			cout << "  MAX";
+//		else if (param[i] == -KEY_MAX)
+//			cout << " -MAX";
+//		else
+//			cout << setw(5) << param[i];
+//	}
+//	cout << ")" << endl;
 	//   // 0 is intersect, -1 is out +1 is inside
 	//
 
-	if(GH_a < GL_a && GL_b < GH_b){
+	if(GH_a < GL_a && GL_b < GH_b){ // a is in, b is not. TODO What about +/- MAX?
 		rstat = 0;
-		// cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
+//		cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
 	} else if (GL_b == a && SH_a == b){
 		rstat = 1;
-		// cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl;
+//		cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl;
 	} else if (GL_b > GL_a) {
 		rstat = 0;
-		// cout << " <<<<< X (0), because GL_b > GL_a" << endl;
+//		cout << " <<<<< X (0), because GL_b > GL_a" << endl;
 	} else if (GH_a < GL_a) {
 		rstat = 1;
-		// cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
+//		cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
 	} else if (SL_a == b) {
 		rstat = 0;
-		// cout << " <<<<< X (0), b concides " << endl;
+//		cout << " <<<<< X (0), b coincides " << endl;
 	} else {
 		rstat = -1;
-		// cout << " <<<<< O (-1), because none of the above" << endl;
+//		cout << " <<<<< O (-1), because none of the above" << endl;
 	}
 
 	return rstat;
@@ -135,7 +228,7 @@ int HtmRange::isIn(HtmRange & otherRange)
 	while((a = o.my_los->getkey()) > 0){
 		b = o.my_his->getkey();
 
-		rel = isIn(a, b);
+		rel = isIn(a, b); // TODO MLR Am I in that other guy's sub-interval? I think a design pattern is near...
 		//
 		// decide what type rel is, and keep looking for a
 		// different type
@@ -156,10 +249,21 @@ int HtmRange::isIn(HtmRange & otherRange)
 		o.my_his->step();
 		o.my_los->step();
 	}
-	cout << "RETURNING " << rel << endl;
+//	cout << "RETURNING " << rel << endl;
 	return rel;
 }
 
+int HtmRange::contains(Key a, Key b) {
+	HtmRange compare;
+	compare.addRange(a,b);
+	// int rstat = compare.isIn(*this);  // 0 is intersect, -1 is out +1 is inside // TODO What isIn what?
+	// The following seems to work, but is somewhat inscrutable.
+	int rstat = this->isIn(compare);  // 0 is intersect, -1 is out +1 is inside
+	//	cout << " contains:  a,b,rstat " << a << " " << b << " " << rstat << endl << flush;
+	if (rstat == 0) { rstat = -1; }
+	else if (rstat == -1) { rstat = 0; }
+	return rstat; // 0 is no-intersection, -1 is partial, 1 is full
+}
 
 InclusionType HtmRange::tinside(const Key mid) const
 {
@@ -254,13 +358,30 @@ void HtmRange::mergeRange(const Key lo, const Key hi)
 
 void HtmRange::addRange(const Key lo, const Key hi)
 {
-	my_los->insert(lo, (Value) 0);
+	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
 	my_his->insert(hi, (Value) 0);
 	return;
 }
 
+void HtmRange::addRange(HtmRange *range) {
+	if(!range)return;
+	if(range->nranges()==0)return;
+	Key lo, hi;
+	range->reset();
+	if(range->getNext(lo,hi)){
+		do {
+//			this->addRange(lo,hi);
+			this->mergeRange(lo,hi);
+		} while( range->getNext(lo,hi) );
+	}
+//	this->defrag();
+}
+
+
 void HtmRange::defrag(Key gap)
 {
+	if(nranges()<2) return;
+
 	Key hi, lo, save_key;
 	my_los->reset();
 	my_his->reset();
@@ -269,6 +390,7 @@ void HtmRange::defrag(Key gap)
 	// so step lo by one before anything
 	//
 	my_los->step();
+
 	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 		// cout << "compare " << hi << "---" << lo << endl;
@@ -316,6 +438,8 @@ void HtmRange::defrag(Key gap)
 
 void HtmRange::defrag()
 {
+	if(nranges()<2) return;
+
 	Key hi, lo, save_key;
 	my_los->reset();
 	my_his->reset();
@@ -632,7 +756,7 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 	Key hi, lo;
 	char tmp_buf[256];
 	// Though we always print either low or high here,
-	// the code cycles through both skiplists as if
+	// the code cycles through both skiplists as if // TODO MLR Why keep two skiplists?
 	// both were printed. Saves code, looks neater
 	// and since it is ascii IO, who cares if it is fast
 	//
@@ -641,14 +765,24 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 
 	while((lo = my_los->getkey()) > 0){
 		hi = my_his->getkey();
-		if (symbolic){
-			strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi));
-		} else {
+		if (what != BOTH) {
+			if (symbolic){
+				strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi));
+			} else {
 #ifdef _WIN32
-			sprintf(tmp_buf, "%I64d", what == LOWS ? lo : hi);
+				sprintf(tmp_buf, "%I64d", what == LOWS ? lo : hi);
 #else
-			sprintf(tmp_buf, "%llu", what == LOWS ? lo : hi);
+				sprintf(tmp_buf, "%llu", what == LOWS ? lo : hi);
 #endif
+			}
+		} else {
+			if (symbolic){
+				strcpy(tmp_buf,encoding->nameById(lo));
+				strcat(tmp_buf,"..");
+				strcat(tmp_buf,encoding->nameById(hi));
+			} else {
+				sprintf(tmp_buf, "%llu..%llu", lo, hi);
+			}
 		}
 
 		os << tmp_buf << endl;
@@ -660,3 +794,4 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 
 int HtmRange::LOWS = 1;
 int HtmRange::HIGHS = 2;
+int HtmRange::BOTH = 3;

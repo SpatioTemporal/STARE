@@ -31,6 +31,7 @@ SpatialVector::SpatialVector() :
 }
 
 
+/// TODO Maybe we should create a Coordinate class to handle R3, RA-DEC, LatLon, etc.
 SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
   x_(x), y_(y), z_(z), okRaDec_(false) {
 }
@@ -135,6 +136,18 @@ float64 SpatialVector::dec() {
   return dec_;
 }
 
+
+SpatialVector SpatialVector::rotatedAbout(const SpatialVector axis, const float64 theta) const {
+	// Use Rodrigues's formula
+	// Inefficient in that we're calling the transcendental functions each time.
+	const float64 mu     = cos(theta);
+	const float64 muComp = mu - 1.0;
+	const float64 lambda = sin(theta);
+
+	SpatialVector vRot;
+	vRot = (*this)*mu + (axis^(*this))*lambda + axis*((axis*(*this))*muComp);
+	return vRot;
+}
 
 /////////////NORMALIZE////////////////////////////////////
 //

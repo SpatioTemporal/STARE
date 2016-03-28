@@ -1,5 +1,6 @@
 
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
@@ -360,6 +361,53 @@ void testRange() {
 	cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
 }
 
+void testRangeContains() {
+	HtmRange *h1 = new HtmRange;
+	h1->purge();
+	h1->addRange(50,100);
+//	cout << "10..40 in 50..100? "<< h1->contains(10,40) << endl << flush;
+//	h1->addRange(1,5);
+//	h1->addRange(200,400);
+
+//	cout << "10..40 in 50..100 " << endl << h1->contains(10,40) << endl << flush;
+//	cout << "10..60 in 50..100 " << endl << h1->contains(10,60) << endl << flush;
+//	cout << "10..110 in 50..100 " << endl << h1->contains(10,110) << endl << flush;
+//	cout << "100.5..110 in 50..100 " << endl << h1->contains(100.5,110) << endl << flush;
+//	cout << "60..110 in 50..100 " << endl << h1->contains(60,110) << endl << flush;
+//	cout << "60..80 in 50..100 " << endl << h1->contains(60,80) << endl << flush;
+
+	ASSERT_EQUALM("10..40 in 50..100",0,h1->contains(10,40));
+	ASSERT_EQUALM("10..60 in 50..100",-1,h1->contains(10,60));
+	ASSERT_EQUALM("10..110 in 50..100",-1,h1->contains(10,110));
+	ASSERT_EQUALM("100.5..110 in 50..100",0,h1->contains(101,110));
+	ASSERT_EQUALM("60..110 in 50..100",-1,h1->contains(60,110));
+	ASSERT_EQUALM("60..80 in 50..100",1,h1->contains(60,80));
+
+	h1->addRange(1,5);
+
+	ASSERT_EQUALM("2: 10..40 in 50..100",0,h1->contains(10,40));
+	ASSERT_EQUALM("2: 10..60 in 50..100",-1,h1->contains(10,60));
+	ASSERT_EQUALM("2: 10..110 in 50..100",-1,h1->contains(10,110));
+	ASSERT_EQUALM("2: 101..110 in 50..100",0,h1->contains(101,110));
+	ASSERT_EQUALM("2: 60..110 in 50..100",-1,h1->contains(60,110));
+	ASSERT_EQUALM("2: 60..80 in 50..100",1,h1->contains(60,80));
+
+
+	h1->addRange(200,400);
+
+	ASSERT_EQUALM("3: 10..40 in 50..100",0,h1->contains(10,40));
+	ASSERT_EQUALM("3: 10..60 in 50..100",-1,h1->contains(10,60));
+	ASSERT_EQUALM("3: 10..110 in 50..100",-1,h1->contains(10,110));
+	ASSERT_EQUALM("3: 101..110 in 50..100",0,h1->contains(101,110));
+	ASSERT_EQUALM("3: 60..110 in 50..100",-1,h1->contains(60,110));
+	ASSERT_EQUALM("3: 60..80 in 50..100",1,h1->contains(60,80));
+
+	ASSERT_EQUALM("3: 50..100 in 50..100",1,h1->contains(50,100));
+	ASSERT_EQUALM("3: 50..100 in 50..100",1,h1->contains(50,100));
+	ASSERT_EQUALM("3: 5..50 in 50..100",-1,h1->contains(5,50));
+	ASSERT_EQUALM("3: 100..101 in 50..100",-1,h1->contains(100,101));
+}
+
 /**
  *  Test htm range iterator.
  *
@@ -644,6 +692,69 @@ void testEmbeddedLevelNameEncoding() {
 
 }
 
+/**
+ * Add rotation about an axis to SpatialVector.
+ */
+void testRotation() {
+	//	ASSERT_EQUALM("Failing test",0,1);
+	stringstream msgStream;
+	float64 tolerance = 1.0e-15;
+//	SpatialVector origin(0.0,0.0,0.0);
+	const SpatialVector zHat(0.0,0.0,1.0), xHat(1.0,0.0,0.0), yHat(0.0,1.0,0.0);
+
+	float64 theta, phi;
+	SpatialVector start, axis, rot, expected;
+
+	theta = gPi;
+	start = xHat;
+	axis  = zHat;
+	expected = -1.0*xHat;
+	rot = start.rotatedAbout(axis,theta);
+	tolerance = 1.0e-15;
+	msgStream << "Reverse xHat: <";
+	msgStream << "start: " << start << ", ";
+	msgStream << "axis: " << axis << ", ";
+	msgStream << "th: " << theta << ", ";
+	msgStream << "r: " << rot << ", ";
+	msgStream << "tol: " << tolerance;
+	msgStream << ">";
+	ASSERT_EQUALDM(msgStream.str().c_str(),expected,rot,tolerance);
+	msgStream.str(string()); msgStream.clear();
+
+	theta = gPi*0.5;
+	start = xHat;
+	axis  = zHat;
+	expected = yHat;
+	rot = start.rotatedAbout(axis,theta);
+	tolerance = 1.0e-15;
+	msgStream << "Rotate xHat to yHat: <";
+	msgStream << "start: " << start << ", ";
+	msgStream << "axis: " << axis << ", ";
+	msgStream << "th: " << theta << ", ";
+	msgStream << "r: " << rot << ", ";
+	msgStream << "tol: " << tolerance;
+	msgStream << ">";
+	ASSERT_EQUALDM(msgStream.str().c_str(),expected,rot,tolerance);
+	msgStream.str(string()); msgStream.clear();
+
+	theta = -gPi*0.5;
+	start = zHat;
+	axis  = xHat;
+	expected = yHat;
+	rot = start.rotatedAbout(axis,theta);
+	tolerance = 1.0e-15;
+	msgStream << "Rotate zHat to yHat: <";
+	msgStream << "start: " << start << ", ";
+	msgStream << "axis: " << axis << ", ";
+	msgStream << "th: " << theta << ", ";
+	msgStream << "r: " << rot << ", ";
+	msgStream << "tol: " << tolerance;
+	msgStream << ">";
+	ASSERT_EQUALDM(msgStream.str().c_str(),expected,rot,tolerance);
+	msgStream.str(string()); msgStream.clear();
+
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -658,9 +769,11 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(idByName));
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
 	//	s.push_back(CUTE(testRange));
+	s.push_back(CUTE(testRangeContains));
 	s.push_back(CUTE(testRangeIterator));
 	//	s.push_back(CUTE(testIndexLevel));
 	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
+	s.push_back(CUTE(testRotation));
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

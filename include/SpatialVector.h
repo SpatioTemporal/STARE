@@ -90,6 +90,9 @@ public:
   /// return dec - this norms the vector to 1 if not already done so
   float64 dec();
 
+  /// return a copy rotated by theta about axis
+  SpatialVector rotatedAbout(const SpatialVector axis, const float64 theta) const;
+
   /// Normalize vector length to 1
   void normalize();
 

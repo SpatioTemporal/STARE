@@ -34,6 +34,7 @@ SKIPOB = \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
    ${OBJ}/EmbeddedLevelNameEncoding.o \
+      ${OBJ}/SpatialIndex.o \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
@@ -111,8 +112,11 @@ range2list: ${OBJ}/range2list.o ${TOPDIR}/cc_aux.o
 lookup: ${OBJ}/lookup.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/lookup.o ${OBJECTS} 
 
-filter: filter.o $(SKIPOB)
-	$(CXX) $(CLX_FLAGS) -o $@ filter.o $(SKIPOB)
+#filter: filter.o $(SKIPOB)
+#	$(CXX) $(CLX_FLAGS) -o $@ filter.o $(SKIPOB)
+	
+filter: filter.o $(OBJECTS)
+	$(CXX) $(CLX_FLAGS) -o $@ filter.o $(OBJECTS)
 
 filter.o: filter.cpp
 	$(CXX) $(CXX_FLAGS) filter.cpp -o $@

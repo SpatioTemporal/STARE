@@ -8,6 +8,14 @@
 #include <BitShiftNameEncoding.h>
 
 // class ostream;
+/**
+ * struct KeyPair is a lightweight aggregate a single interval [lo,hi] for HtmRange
+ */
+struct KeyPair {
+	Key lo; Key hi;
+};
+
+KeyPair HTMRangeAtLevelFromHTMRange(int htmIdLevel, Key lo, Key hi);
 
 enum InclusionType {
   InclOutside = 0,
@@ -25,15 +33,18 @@ class LINKAGE HtmRange {
  public:
   static int HIGHS;
   static int LOWS;
+  static int BOTH;
   int getNext(Key &lo, Key &hi);
   int getNext(Key *lo, Key *hi);
 
   void setSymbolic(bool flag);
 
   void addRange(const Key lo, const Key hi);
+  void addRange(HtmRange *range);
   void mergeRange(const Key lo, const Key hi);
   void defrag();
   void defrag(Key gap);
+  /// TODO Remove levelto.
   void levelto(int level);
   void purge();
   int isIn(Key key);
@@ -44,7 +55,7 @@ class LINKAGE HtmRange {
   int nranges();
   void reset();
 
-  void print(int what, std::ostream& os, bool symbolic); // FIX THIS, so caller does not set symbolic here....
+  void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
 
   int compare(const HtmRange & other) const;
 
@@ -60,6 +71,7 @@ class LINKAGE HtmRange {
   NameEncoding *getEncoding() { return encoding; }
 
   // Moved here per ajmendez.
+  // TODO MLR Why two skip lists for ranges?  Why not one skip list? Or an interval arithmetic package?
   SkipList *my_los;
   SkipList *my_his;
   bool symbolicOutput;
@@ -73,6 +85,9 @@ class LINKAGE HtmRange {
     delete my_his;
   };
   
+  HtmRange *HTMRangeAtLevelFromIntersection(HtmRange *range2, int htmIdLevel=-1);
+  int contains(Key a, Key b);
+
   friend LINKAGE ostream& operator<<(ostream& os, const HtmRange& range);
 
  protected:
