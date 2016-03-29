@@ -82,21 +82,21 @@ void
 usage(char *name) {
 
 	cout << "usage: " << endl
-			<< name << " [-hex] [-symbol] [-numeric] [-area] [-corner] [-verbose] [-quiet] [-n n] [-text] [-latlon] depth ( x y z | ra dec | lat lon )" << endl;
-	cout <<    " [-hex]      : print node id in hexadecimal" << endl
-			<< " [-dec]      : print node id as a decimal" << endl
-			<< " [-symbol]   : print node id as a string symbol" << endl
-			<< " [-noBitShift] : do not print bitShifted node id (clobbers -dec if alone)" << endl
-			<< " [-area]     : print area of node" << endl
-			<< " [-corner]   : print node corners" << endl
-			<< " [-verbose]  : verbose: print all" << endl
-			<< " [-text]     : submit text command (test interface)" << endl
-			<< " [-n n]      : do n lookups (speed test)" << endl
-			<< " [-quiet]    : don't chat, just give back node name" << endl
-			<< " [-latlon]   : LatLon in degrees of point to look up" << endl
-			<< " [-levelEmbedded] : print htm id in embedded level format (full)" << endl
-			<< " [-levelEmbeddedIdWithTopBit] : print htm id in embedded level format (level stripped)" << endl
-			<< " [-levelEmbeddedIdOnly] : print htm id in embedded level format (level and top bit stripped)" << endl
+			<< name << " [--hex] [--symbol] [--numeric] [--area] [--corner] [--verbose] [--quiet] [--n n] [--text] [--latlon] depth ( x y z | ra dec | lat lon )" << endl;
+	cout <<    " [--hex]      : print node id in hexadecimal" << endl
+			<< " [--dec]      : print node id as a decimal" << endl
+			<< " [--symbol]   : print node id as a string symbol" << endl
+			<< " [--noBitShift] : do not print bitShifted node id (clobbers -dec if alone)" << endl
+			<< " [--area]     : print area of node" << endl
+			<< " [--corner]   : print node corners" << endl
+			<< " [--verbose]  : verbose: print all" << endl
+			<< " [--text]     : submit text command (test interface)" << endl
+			<< " [--n n]      : do n lookups (speed test)" << endl
+			<< " [--quiet]    : don't chat, just give back node name" << endl
+			<< " [--latlon]   : LatLon in degrees of point to look up" << endl
+			<< " [--levelEmbedded] : print htm id in embedded level format (full)" << endl
+			<< " [--levelEmbeddedIdWithTopBit] : print htm id in embedded level format (level stripped)" << endl
+			<< " [--levelEmbeddedIdOnly] : print htm id in embedded level format (level and top bit stripped)" << endl
 			<< " depth       : level of index to return" << endl
 			<< " x y z       : cartesian coordinate of point to look up" << endl
 			<< " ra dec      : J2000 coordinate of point to look up" << endl
@@ -142,37 +142,37 @@ main(int argc, char *argv[]) {
 	argc--;
 
 	while(argc > 0) {
-		if      (strcmp(argv[args],"-hex")==0) hex=true;
-		else if (strcmp(argv[args],"-dec")==0) decimal=true;
-		else if (strcmp(argv[args],"-symbol")==0) symbol=true;
-		else if (strcmp(argv[args],"-noBitShift")==0) bitShifted=false;
-		else if(strcmp(argv[args],"-latlon")==0) {
+		if      (strcmp(argv[args],"--hex")==0) hex=true;
+		else if (strcmp(argv[args],"--dec")==0) decimal=true;
+		else if (strcmp(argv[args],"--symbol")==0) symbol=true;
+		else if (strcmp(argv[args],"--noBitShift")==0) bitShifted=false;
+		else if(strcmp(argv[args],"--latlon")==0) {
 			radec=false; latlon=true;
-		} else if(strcmp(argv[args],"-levelEmbedded")==0) {
+		} else if(strcmp(argv[args],"--levelEmbedded")==0) {
 			levelEmbedded = true;
-		} else if(strcmp(argv[args],"-levelEmbeddedIdWithTopBit")==0) {
+		} else if(strcmp(argv[args],"--levelEmbeddedIdWithTopBit")==0) {
 			levelEmbeddedIdWithTopBit = true;
-		} else if(strcmp(argv[args],"-levelEmbeddedIdOnly")==0) {
+		} else if(strcmp(argv[args],"--levelEmbeddedIdOnly")==0) {
 			levelEmbeddedIdOnly = true;
-		} else if(strcmp(argv[args],"-area")==0)
+		} else if(strcmp(argv[args],"--area")==0)
 			area = true;
-		else if(strcmp(argv[args],"-text")==0)
+		else if(strcmp(argv[args],"--text")==0)
 			text = true;
-		else if(strcmp(argv[args],"-corner")==0)
+		else if(strcmp(argv[args],"--corner")==0)
 			corner = true;
-		else if(strcmp(argv[args],"-quiet")==0)
+		else if(strcmp(argv[args],"--quiet")==0)
 			quiet = true;
-		else if(strcmp(argv[args],"-verbose")==0) {
+		else if(strcmp(argv[args],"--verbose")==0) {
 			hex = true;
 			corner = true;
 			area = true;
-		} else if(strcmp(argv[args],"-n")==0) {
+		} else if(strcmp(argv[args],"--n")==0) {
 			varg = argv[++args];
 			if(!htmInterface::isInteger(varg))usage(argv[0]);
 			n = atoi(varg.data());
 			argc--;
 		} else {
-			if( *argv[args] == '-' ) usage(argv[0]);
+			if( *argv[args] == '--' ) usage(argv[0]);
 			switch(arg) {
 			case 3:
 				// build the index to level 'depth'
@@ -367,12 +367,27 @@ main(int argc, char *argv[]) {
 			htm->index().nodeVertex(htm->index().nodeIndexFromId(id),v1,v2,v3);
 
 			cout.precision(18);
-			cout << "Corners :" << endl << v1 << endl
+			cout << "Corners :"
+					<< endl << v1 << endl
 					<< v2 << endl
 					<< v3 << endl;
-			cout << "Corners (ra/dec):" << endl << v1.ra() << " " << v1.dec() << endl
+			if(radec) {
+			cout << "Corners (ra/dec):"
+					<< endl << v1.ra() << " " << v1.dec() << endl
 					<< v2.ra() << " " << v2.dec() << endl
 					<< v3.ra() << " " << v3.dec() << endl;
+			} else if(latlon) {
+				float64 lat1, lon1, lat2, lon2, lat3, lon3;
+				bool ok = false;
+				ok = v1.getLatLonDegrees(lat1,lon1);
+				ok = v2.getLatLonDegrees(lat2,lon2);
+				ok = v3.getLatLonDegrees(lat3,lon3);
+
+				cout << "Corners (latlon):" << endl
+						<< lat1 << " " << lon1 << endl
+						<< lat2 << " " << lon2 << endl
+						<< lat3 << " " << lon3 << endl;
+			}
 			cout << "Differences : " << endl
 					<< v1.x() - v2.x() << " " << v1.y() - v2.y() << " " << v1.z() - v2.z() << endl
 					<< v1.x() - v3.x() << " " << v1.y() - v3.y() << " " << v1.z() - v3.z() << endl

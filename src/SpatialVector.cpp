@@ -107,6 +107,19 @@ SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
 	if (latlon_) {
 		lat = latDegrees_;
 		lon = lonDegrees_;
+	} else {
+		lat = asin(z_)/gPr; // easy.
+		float64 cd = cos(lat*gPr);
+		if(cd>gEpsilon || cd<-gEpsilon)
+			if(y_>gEpsilon || y_<-gEpsilon)
+				if (y_ < 0.0)
+					lon = 360 - acos(x_/cd)/gPr;
+				else
+					lon = acos(x_/cd)/gPr;
+			else
+				lon = (x_ < 0.0 ? 180.0 : 0.0);
+		else
+			lon=0.0;
 	}
 	return latlon_;
 }
