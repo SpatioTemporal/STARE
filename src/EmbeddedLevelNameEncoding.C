@@ -81,3 +81,14 @@ uint64 EmbeddedLevelNameEncoding::bareId() const {
 	uint64 shiftId = stripId >> (60 - 2*(levelById(id)));
 	return shiftId;
 }
+
+uint64 EmbeddedLevelNameEncoding::bareId_NoShift_NoEmbeddedLevel() const {
+	uint64 stripId = id & stripMask;
+	return stripId;
+}
+
+uint64 EmbeddedLevelNameEncoding::getId_NoEmbeddedLevel() const {
+	uint64 id = getId();
+	return id & ~levelMask; // Only remove level.
+//	return id & stripMask;
+}

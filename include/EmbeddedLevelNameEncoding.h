@@ -25,6 +25,9 @@ public:
 	uint32 levelById(uint64 id) const;
 
 	uint64 bareId() const;  ///< Returns old-style HTM w/o depth bit.
+	uint64 bareId_NoShift_NoEmbeddedLevel() const; ///< Returns HTM w/o depth bit or embedded level.
+
+	uint64 getId_NoEmbeddedLevel() const; /// Return left justified level w/o level information.
 
 	/**
 	 * Compare two id's without regard for the level.

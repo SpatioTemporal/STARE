@@ -28,10 +28,13 @@
 //#
 //#
 #include <stdlib.h>
+#include <iomanip>
+#include <ios>
 //dcdtmp #include <VarVecDef.h>
 #include "VarStr.h"
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
+#include "EmbeddedLevelNameEncoding.h"
 
 /*******************************************************
 
@@ -79,8 +82,11 @@ void
 usage(char *name) {
 
 	cout << "usage: " << endl
-			<< name << " [-hex] [-area] [-corner] [-verbose] [-quiet] [-n n] [-text] [-latlon] depth ( x y z | ra dec | lat lon )" << endl;
-	cout << " [-hex]      : print node id in hexadecimal" << endl
+			<< name << " [-hex] [-symbol] [-numeric] [-area] [-corner] [-verbose] [-quiet] [-n n] [-text] [-latlon] depth ( x y z | ra dec | lat lon )" << endl;
+	cout <<    " [-hex]      : print node id in hexadecimal" << endl
+			<< " [-dec]      : print node id as a decimal" << endl
+			<< " [-symbol]   : print node id as a string symbol" << endl
+			<< " [-noBitShift] : do not print bitShifted node id (clobbers -dec if alone)" << endl
 			<< " [-area]     : print area of node" << endl
 			<< " [-corner]   : print node corners" << endl
 			<< " [-verbose]  : verbose: print all" << endl
@@ -88,11 +94,19 @@ usage(char *name) {
 			<< " [-n n]      : do n lookups (speed test)" << endl
 			<< " [-quiet]    : don't chat, just give back node name" << endl
 			<< " [-latlon]   : LatLon in degrees of point to look up" << endl
+			<< " [-levelEmbedded] : print htm id in embedded level format (full)" << endl
+			<< " [-levelEmbeddedIdWithTopBit] : print htm id in embedded level format (level stripped)" << endl
+			<< " [-levelEmbeddedIdOnly] : print htm id in embedded level format (level and top bit stripped)" << endl
 			<< " depth       : level of index to return" << endl
 			<< " x y z       : cartesian coordinate of point to look up" << endl
-			<< " ra dec      : J2000 coordinate of point to look up" << endl;
+			<< " ra dec      : J2000 coordinate of point to look up" << endl
+			<< endl
+			<< " The command line arguments toggle printing the IDs in order as follows." << endl
+			<< " ID 0xID symbol IDEmbedded IDEmbeddedWithTopBit IDEmbeddedIdOnly 0xIDEmbedded 0xIDEmbeddedWithTopBit 0xIDEmbeddedIdOnly" << endl;
 	exit(0);
 }
+
+
 
 int
 main(int argc, char *argv[]) {
@@ -107,10 +121,17 @@ main(int argc, char *argv[]) {
 	bool latlon=false;
 	bool idlookup=false;
 	bool hex=false;		// id in hex
+	bool decimal=false;     // id as decimal
+	bool symbol=false;  // id as string symbol
 	bool area=false;		// print area of node
 	bool corner=false;		// print corners
 	bool text = false;		// text flag
 	bool quiet = false;		// debug flag
+	bool bitShifted = true; // flag original id
+	bool levelEmbedded = false;
+	bool levelEmbeddedIdWithTopBit = false;
+	bool levelEmbeddedIdOnly = false;
+
 	int args = 1;			// counter
 	int arg = 3;			// number of required arguments
 	size_t j, depth, n=1;
@@ -121,10 +142,18 @@ main(int argc, char *argv[]) {
 	argc--;
 
 	while(argc > 0) {
-		if(strcmp(argv[args],"-hex")==0)
-			hex=true;
+		if      (strcmp(argv[args],"-hex")==0) hex=true;
+		else if (strcmp(argv[args],"-dec")==0) decimal=true;
+		else if (strcmp(argv[args],"-symbol")==0) symbol=true;
+		else if (strcmp(argv[args],"-noBitShift")==0) bitShifted=false;
 		else if(strcmp(argv[args],"-latlon")==0) {
 			radec=false; latlon=true;
+		} else if(strcmp(argv[args],"-levelEmbedded")==0) {
+			levelEmbedded = true;
+		} else if(strcmp(argv[args],"-levelEmbeddedIdWithTopBit")==0) {
+			levelEmbeddedIdWithTopBit = true;
+		} else if(strcmp(argv[args],"-levelEmbeddedIdOnly")==0) {
+			levelEmbeddedIdOnly = true;
 		} else if(strcmp(argv[args],"-area")==0)
 			area = true;
 		else if(strcmp(argv[args],"-text")==0)
@@ -217,7 +246,7 @@ main(int argc, char *argv[]) {
 		}
 
 		if (!quiet && !idlookup) {
-			cout << "radec: " << radec << endl << flush;
+//			cout << "radec: " << radec << endl << flush;
 			printf("(x,y,z)  = %20.16f, %20.16f, %20.16f\n",x,y,z);
 			if(latlon) {
 				printf("(lat,lon) = %20.16f, %20.16f\n",ra,dec);
@@ -275,24 +304,68 @@ main(int argc, char *argv[]) {
 		//
 		// ******************************************************
 
-		cout << "100" << endl << flush;
-		if (!quiet) {
-			printf("ID/Name  = ");
-			if(hex)
-				PRINTID_HEX(id);
-			else
-				PRINTID(id);
-		}
-		printf(" %s\n",htm->lookupName(id));
+//		cout << "100" << endl << flush;
 
-		cout << "200" << endl << flush;
+		if(symbol||decimal||hex||bitShifted){
+			if (!quiet)	printf("ID/Name  = ");
+			if(bitShifted) PRINTID(id);
+			if(hex&&bitShifted) {
+				cout << " 0x";
+				PRINTID_HEX(id);
+			}
+			if(symbol)  printf(" %s",htm->lookupName(id));
+
+			if(levelEmbedded||levelEmbeddedIdOnly||levelEmbeddedIdWithTopBit) {
+				EmbeddedLevelNameEncoding *encoding
+				= new EmbeddedLevelNameEncoding(htm->lookupName(id));
+
+				ios::fmtflags coutFlags(cout.flags());
+				if(levelEmbedded) {
+					if(!quiet)  cout << " embeddedLevel-id: ";
+					if(decimal) cout << " " << encoding->getId();
+				}
+				if(levelEmbeddedIdWithTopBit){
+					if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
+					if(decimal) cout << " " << encoding->getId_NoEmbeddedLevel();
+				}
+				if(levelEmbeddedIdOnly){
+					if(!quiet)  cout << " embeddedLevel-idOnly: ";
+					if(decimal) cout << " " << encoding->bareId_NoShift_NoEmbeddedLevel();
+				}
+				if(hex) {
+					cout
+					<< std::hex
+					<< std::showbase
+					<< std::internal
+					<< std::setfill('0');
+				}
+				if(levelEmbedded) {
+					if(!quiet)  cout << " embeddedLevel-id: ";
+					if(hex)     cout << " " << std::setw(18) << encoding->getId();
+				}
+				if(levelEmbeddedIdWithTopBit){
+					if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
+					if(hex) cout << " " << std::setw(18) << encoding->getId_NoEmbeddedLevel();
+				}
+				if(levelEmbeddedIdOnly) {
+					if(!quiet)  cout << " embeddedLevel-idOnly: ";
+					if(hex)     cout << " " << std::setw(18) << encoding->bareId_NoShift_NoEmbeddedLevel();
+				}
+				if(hex) cout << std::dec;
+				cout.flags(coutFlags);
+			}
+//			if(!(!bitShifted&&decimal))
+			cout << endl << flush;
+		}
+
+//		cout << "200" << endl << flush;
 
 		if(corner) {
 			SpatialVector v1,v2,v3;
-			cout << "210" << endl << flush;
+
 //			htm->index().nodeVertex(id,v1,v2,v3);  // Bug in the original code.
 			htm->index().nodeVertex(htm->index().nodeIndexFromId(id),v1,v2,v3);
-			cout << "220" << endl << flush;
+
 			cout.precision(18);
 			cout << "Corners :" << endl << v1 << endl
 					<< v2 << endl
@@ -306,19 +379,19 @@ main(int argc, char *argv[]) {
 					<< v3.x() - v2.x() << " " << v3.y() - v2.y() << " " << v3.z() - v2.z() << endl;
 		}
 
-		cout << "300" << endl << flush;
+//		cout << "300" << endl << flush;
 
 		if(area) {
 //			cout << "AREA = " << htm->index().area(id) << endl; // broken
 			cout << "AREA = " << htm->index().area(htm->index().nodeIndexFromId(id)) << endl; // broken
 //			   leafArea = index.area(index.idByLeafNumber(p)); // From htmTest.cpp
-			cout
-			<< "nodeIndex vs. idByLeafNumber: " << htm->index().nodeIndexFromId(id)
-			<< " vs. " << htm->index().idByLeafNumber(id)
-			<< endl << flush;
+//			cout
+//			<< "nodeIndex vs. idByLeafNumber: " << htm->index().nodeIndexFromId(id)
+//			<< " vs. " << htm->index().idByLeafNumber(id)
+//			<< endl << flush;
 		}
 
-		cout << "400" << endl << flush;
+//		cout << "400" << endl << flush;
 
 	} catch (SpatialException x) {
 		printf("%s\n",x.what());
