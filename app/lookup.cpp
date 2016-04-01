@@ -100,6 +100,7 @@ usage(char *name) {
 			<< " depth       : level of index to return" << endl
 			<< " x y z       : cartesian coordinate of point to look up" << endl
 			<< " ra dec      : J2000 coordinate of point to look up" << endl
+			<< " lat lon     : latitude longitude of point to look up" << endl
 			<< endl
 			<< " The command line arguments toggle printing the IDs in order as follows." << endl
 			<< " ID 0xID symbol IDEmbedded IDEmbeddedWithTopBit IDEmbeddedIdOnly 0xIDEmbedded 0xIDEmbeddedWithTopBit 0xIDEmbeddedIdOnly" << endl;
@@ -172,7 +173,7 @@ main(int argc, char *argv[]) {
 			n = atoi(varg.data());
 			argc--;
 		} else {
-			if( *argv[args] == '--' ) usage(argv[0]);
+//			if( strcmp(argv[args],"--") ) usage(argv[0]); ???
 			switch(arg) {
 			case 3:
 				// build the index to level 'depth'
