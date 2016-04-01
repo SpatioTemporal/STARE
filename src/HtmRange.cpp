@@ -142,6 +142,30 @@ int HtmRange::compare(const HtmRange & other) const
 
 int HtmRange::isIn(Key a, Key b)
 {
+
+	// First see if the interval a,b is in this.
+	// Note: driven by error when a==b.
+	// TODO Maybe we should do a real interval set api.
+	Key ka = my_los->search(a); // Returns stored value: 0 if found, -1 if not found.
+	Key kb = my_his->search(b);
+	if( ka >= 0 ) { // a is a lower bound
+		if( ka == kb ) {
+			// Inside, because we're all 0-length.
+//			cout << "100: " << a << " " << b << " " << ka << " " << kb << endl << flush;
+			return 1;
+		}
+	}
+	kb = my_los->search(b);
+	if( kb >= 0 ) { // b is a lower bound! => intersection if != a.
+		if( ka == kb ) {
+			// Equality, because we're 0-length.
+//			cout << "110: " << a << " " << b << " " << ka << " " << kb << endl << flush;
+			return 1;
+		}
+	}
+
+	// Continue on to previous logic.
+
 	// If both lo and hi are inside some range, and the range numbers agree...
 	//
 	Key GH_a, GL_a, SH_a, SL_a;
@@ -163,40 +187,43 @@ int HtmRange::isIn(Key a, Key b)
 	param[i++] = SL_b = my_los->findMIN(b);
 	param[i++] = SH_b = my_his->findMIN(b);
 
-//	cout << "(isIn checking a,b: " << a << " " << b << ")" << endl << flush;
-//	cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
-//	cout << "(isIn" ;
+//	bool dbg = a==150;
+//	if(dbg){
+//		cout << "(isIn checking a,b: " << a << " " << b << ")" << endl << flush;
+//		cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
+//		cout << "(isIn" ;
 //
-//	for(i=0; i<8; i++){
-//		if (param[i] == KEY_MAX)
-//			cout << "  MAX";
-//		else if (param[i] == -KEY_MAX)
-//			cout << " -MAX";
-//		else
-//			cout << setw(5) << param[i];
+//		for(i=0; i<8; i++){
+//			if (param[i] == KEY_MAX)
+//				cout << "  MAX";
+//			else if (param[i] == -KEY_MAX)
+//				cout << " -MAX";
+//			else
+//				cout << setw(5) << param[i];
+//		}
+//		cout << ")" << endl;
+//		// 0 is intersect, -1 is out +1 is inside
+//	//
 //	}
-//	cout << ")" << endl;
-	//   // 0 is intersect, -1 is out +1 is inside
-	//
 
 	if(GH_a < GL_a && GL_b < GH_b){ // a is in, b is not. TODO What about +/- MAX?
 		rstat = 0;
-//		cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
+//		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
 	} else if (GL_b == a && SH_a == b){
 		rstat = 1;
-//		cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl;
+//		if(dbg) cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl;
 	} else if (GL_b > GL_a) {
 		rstat = 0;
-//		cout << " <<<<< X (0), because GL_b > GL_a" << endl;
+//		if(dbg) cout << " <<<<< X (0), because GL_b > GL_a" << endl;
 	} else if (GH_a < GL_a) {
 		rstat = 1;
-//		cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
+//		if(dbg) cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
 	} else if (SL_a == b) {
 		rstat = 0;
-//		cout << " <<<<< X (0), b coincides " << endl;
+//		if(dbg) cout << " <<<<< X (0), b coincides " << endl;
 	} else {
 		rstat = -1;
-//		cout << " <<<<< O (-1), because none of the above" << endl;
+//		if(dbg) cout << " <<<<< O (-1), because none of the above" << endl;
 	}
 
 	return rstat;
@@ -452,7 +479,8 @@ void HtmRange::defrag()
 		hi = my_his->getkey();
 		// cout << "compare " << hi << "---" << lo << endl;
 
-		if (hi + 1 == lo){
+		if (hi >= lo) { // TODO MLR Change... ???
+//		if (hi + 1 == lo){ // TODO Original code, seems such a rare case!!!
 			//
 			// merge to intervals, delete the lo and the high
 			// is iter pointing to the right thing?
@@ -748,6 +776,12 @@ int HtmRange::getNext(Key *lo, Key *hi)
 	my_his->step();
 	my_los->step();
 	return 1;
+}
+KeyPair HtmRange::getNext() {
+	KeyPair key;
+	int indexp = getNext(key.lo,key.hi);
+	key.set = indexp;
+	return key;
 }
 
 void HtmRange::print(int what, std::ostream& os, bool symbolic)

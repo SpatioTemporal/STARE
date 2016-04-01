@@ -406,6 +406,13 @@ void testRangeContains() {
 	ASSERT_EQUALM("3: 50..100 in 50..100",1,h1->contains(50,100));
 	ASSERT_EQUALM("3: 5..50 in 50..100",-1,h1->contains(5,50));
 	ASSERT_EQUALM("3: 100..101 in 50..100",-1,h1->contains(100,101));
+
+	h1->addRange(150,150);
+
+	ASSERT_EQUALM("4: 150..150 in 150..150",1,h1->contains(150,150)); // From a bug found 2016-0331. MLR
+	ASSERT_EQUALM("4: 75..75 in 50..100",1,h1->contains(75,75));
+	ASSERT_EQUALM("4: 100..100 in 50.100",1, h1->contains(100,100));
+	ASSERT_EQUALM("4: 50..50 IN 50..100", 1, h1->contains(50,50));
 }
 
 void testLatLonDegrees() {
@@ -699,7 +706,64 @@ void testEmbeddedLevelNameEncoding() {
 		expected = "N012"; found=n0->greatestCommonName(*n1);
 		ASSERT_EQUALM("greatest common name N01230 and N01220",expected,found);
 	}
+}
 
+void testRangeManipulation() {
+
+	{
+		HtmRange h;
+		h.addRange(10,15);
+		//	cout << "10..15--" << endl << flush;
+		//	h.print(HtmRange::BOTH,cout,false);
+		h.addRange(12,20);
+		h.reset();
+		KeyPair kp = h.getNext();
+		ASSERT_EQUALM("kp.set == 1", 1,kp.set);
+		ASSERT_EQUALM("kp.lo == 10",10,kp.lo);
+		ASSERT_EQUALM("kp.hi == 15",15,kp.hi);
+		kp = h.getNext();
+		ASSERT_EQUALM("kp.set == 1", 1,kp.set);
+		ASSERT_EQUALM("kp.lo == 12",12,kp.lo);
+		ASSERT_EQUALM("kp.hi == 20",20,kp.hi);
+		kp = h.getNext();
+		ASSERT_EQUALM("kp.set == 0", 0,kp.set);
+		h.reset();
+		h.defrag();
+//		h.print(HtmRange::BOTH,cout,false);
+	}
+
+	{
+		HtmRange h;
+		h.addRange(10,15);
+		//	cout << "10..15--" << endl << flush;
+		//	h.print(HtmRange::BOTH,cout,false);
+		h.mergeRange(12,20);
+		h.reset();
+		KeyPair kp = h.getNext();
+		ASSERT_EQUALM("kp.lo == 10",10,kp.lo);
+		ASSERT_EQUALM("kp.hi == 20",20,kp.hi);
+		ASSERT_EQUALM("kp.set == 1", 1,kp.set);
+		kp = h.getNext();
+		ASSERT_EQUALM("kp.set == 0", 0,kp.set);
+	}
+
+
+
+
+//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
+//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
+
+////	h.addRange(12,20);
+//	cout << "10..20-1" << endl << flush;
+//	h.print(HtmRange::BOTH,cout,false);
+//	h.defrag();
+//	cout << "10..20-2" << endl << flush;
+//	h.print(HtmRange::BOTH,cout,false);
+//	HtmRange i;
+//	i.addRange(15,25);
+//	h.addRange(&i);
+//	cout << "10..25-1" << endl << flush;
+//	h.print(HtmRange::BOTH,cout,false);
 }
 
 /**
@@ -785,6 +849,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
 	s.push_back(CUTE(testRotation));
 	s.push_back(testLatLonDegrees);
+	s.push_back(testRangeManipulation);
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 

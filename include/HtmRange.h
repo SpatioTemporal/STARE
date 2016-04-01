@@ -12,7 +12,7 @@
  * struct KeyPair is a lightweight aggregate a single interval [lo,hi] for HtmRange
  */
 struct KeyPair {
-	Key lo; Key hi;
+	Key lo; Key hi; bool set = false;
 };
 
 KeyPair HTMRangeAtLevelFromHTMRange(int htmIdLevel, Key lo, Key hi);
@@ -36,6 +36,7 @@ class LINKAGE HtmRange {
   static int BOTH;
   int getNext(Key &lo, Key &hi);
   int getNext(Key *lo, Key *hi);
+  KeyPair getNext();
 
   void setSymbolic(bool flag);
 
