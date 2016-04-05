@@ -383,6 +383,15 @@ void HtmRange::mergeRange(const Key lo, const Key hi)
 	//   }
 }
 
+/**
+ * Add a lo-hi interval to the skiplists my_los and my_his using lo and hi as
+ * keys.  Currently does not store any useful value in the lists, but uses
+ * the positions to keep track of the intervals. This routine makes no attempt
+ * to merge or defrag overlapping intervals.
+ *
+ * @param lo
+ * @param hi
+ */
 void HtmRange::addRange(const Key lo, const Key hi)
 {
 	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
@@ -390,6 +399,12 @@ void HtmRange::addRange(const Key lo, const Key hi)
 	return;
 }
 
+/**
+ * Merge a range into this by looping over sub ranges and merging them
+ * one at a time.
+ *
+ * @param range
+ */
 void HtmRange::addRange(HtmRange *range) {
 	if(!range)return;
 	if(range->nranges()==0)return;

@@ -419,10 +419,16 @@ void testLatLonDegrees() {
 	SpatialVector v;
 	float64 a0=-1, a1=-2;
 	ASSERT_EQUALM("LatLonFalse",false,v.getLatLonDegrees(a0,a1));
+
 	v.setLatLonDegrees(30.0,45.0);
 	ASSERT_EQUALM("LatLonTrue",true,v.getLatLonDegrees(a0,a1));
 	ASSERT_EQUALM("a0==30",30,a0);
 	ASSERT_EQUALM("a1==45",45,a1);
+
+	v.setLatLonDegrees(-15.0,-27.0);
+	ASSERT_EQUALM("LatLonTrue",true,v.getLatLonDegrees(a0,a1));
+	ASSERT_EQUALM("a0==-15",-15,a0);
+	ASSERT_EQUALM("a1==-27",-27,a1);
 }
 
 /**
@@ -842,14 +848,19 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(idReallyDeep));
 	s.push_back(CUTE(idByName));
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
-	//	s.push_back(CUTE(testRange));
 	s.push_back(CUTE(testRangeContains));
 	s.push_back(CUTE(testRangeIterator));
-	//	s.push_back(CUTE(testIndexLevel));
 	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
 	s.push_back(CUTE(testRotation));
-	s.push_back(testLatLonDegrees);
-	s.push_back(testRangeManipulation);
+	s.push_back(CUTE(testRangeManipulation));
+	s.push_back(CUTE(testLatLonDegrees));
+
+
+	if(false) { // Lots of diagnostic output in the following.
+		s.push_back(CUTE(testRange));
+		s.push_back(CUTE(testIndexLevel));
+	}
+
 	cute::makeRunner(lis,argc,argv)(s, "testTestSuite");
 }
 
