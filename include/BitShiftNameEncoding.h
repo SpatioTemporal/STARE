@@ -24,6 +24,9 @@ public:
 	uint32 levelById(uint64 id) const;
 
 	uint64 bareId() const; ///< Return id without top (depth) bit set.
+
+	const char* getEncodingType() const {return "BitShiftedNameEncoding";}
+
 };
 
 #endif /* INCLUDE_BITSHIFTNAMEENCODING_H_ */

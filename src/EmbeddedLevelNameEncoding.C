@@ -12,13 +12,18 @@ EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
 EmbeddedLevelNameEncoding::~EmbeddedLevelNameEncoding() {}
 
+/**
+ * Return the symbolic (string) name associated with the id in left-justified format.
+ * @param id
+ * @return
+ */
 char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 	if(id == 0) {
 		// Throw an exception?
 		throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
 	}
 
-	int nameSize = levelById(id)+3;
+	int nameSize = levelById(id)+3; ///< levelById is local to the encoding
 	char *returnedName = new char[nameSize];
 	if(id & NorthSouthBit) {
 		returnedName[0] = 'N';

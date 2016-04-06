@@ -102,12 +102,23 @@ SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
 }
 
 // TODO The right thing to do is to implement a coordinate class for the different kinds of coords we use.
+
+/**
+ * Get the lat-lon in degrees. Presume we're a unit vector.
+ *
+ * TODO We should have a SpatialUnitVector class.
+ *
+ */
 bool
 SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
 	if (latlon_) {
 		lat = latDegrees_;
 		lon = lonDegrees_;
 	} else {
+		if(length()!=1) {
+			// TODO A logger would be useful here.
+		    throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
+		}
 		lat = asin(z_)/gPr; // easy.
 		float64 cd = cos(lat*gPr);
 		if(cd>gEpsilon || cd<-gEpsilon)

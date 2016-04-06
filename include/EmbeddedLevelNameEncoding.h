@@ -121,12 +121,15 @@ public:
 	// Need relational operators. >, <
 	// Need some sort of "and" to find the greatest shared root node.
 
+	const char* getEncodingType() const {return "EmbeddedLevelNameEncoding";}
+
 private:
 	const uint32 levelMaskWidth = 6; // Should be consistent with below.
 	const uint64 levelMask = 63; // Probably could make do with 31 since each level takes 2 bits.
 	const uint64 one = 1;
 	const uint64 stripMask = ~(one << 63) & ~levelMask;
 	const uint64 NorthSouthBit = one << 62;
+
 };
 
 #endif /* INCLUDE_EMBEDDEDLEVELNAMEENCODING_H_ */

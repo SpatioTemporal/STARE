@@ -34,6 +34,8 @@ public:
 
 	void setName(const char* name) {id = idByName(name);this->name = name;}
 
+	virtual const char* getEncodingType() const = 0;
+
 	const uint32 getLevel() const { return levelById(id); }
 
 	bool valid() {
@@ -44,6 +46,7 @@ public:
 protected:
 	uint64 id;
 	const char*  name;
+
 };
 
 #endif /* INCLUDE_NAMEENCODING_H_ */

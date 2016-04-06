@@ -254,7 +254,6 @@ void idByPoint1() {
 	float64 x = 0.50350942389316267;
 	float64 y = -0.61093299962057024;
 	float64 z = -0.61093299962057024;
-	double tolerance = 1.0e-14;
 	int id_ = htm_->lookupID(x,y,z);
 
 //	cout << "id_ " << id_ << endl << flush;
@@ -429,6 +428,16 @@ void testLatLonDegrees() {
 	ASSERT_EQUALM("LatLonTrue",true,v.getLatLonDegrees(a0,a1));
 	ASSERT_EQUALM("a0==-15",-15,a0);
 	ASSERT_EQUALM("a1==-27",-27,a1);
+
+	SpatialVector u = SpatialVector(2.0,0.,0.);
+	float64 l0 = -1, l1 = -1;
+	try {
+		u.getLatLonDegrees(l0,l1);
+	} catch(SpatialException e) {
+		ASSERT_EQUALM("LatLon from non-unit vector.",
+				"SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.",
+				e.what());
+	}
 }
 
 /**
@@ -613,6 +622,9 @@ void testIndexLevel() {
 
 void testEmbeddedLevelNameEncoding() {
 	EmbeddedLevelNameEncoding *name = new EmbeddedLevelNameEncoding();
+
+	ASSERT_EQUALM("Encoding type","EmbeddedLevelNameEncoding",name->getEncodingType());
+
 	//	ASSERT_EQUALM("id to name","nothing",name->nameById(0));
 	uint64 id = name->idByName("N3");
 	//	cout <<  "id: N3=0x" << hex << id << dec << " " << id << endl << flush;
@@ -651,6 +663,11 @@ void testEmbeddedLevelNameEncoding() {
 	//			       << " 0x" << setw(20) << name->bareId() << endl << flush;
 
 	BitShiftNameEncoding *bitShiftName = new BitShiftNameEncoding(nameString);
+	ASSERT_EQUALM("Encoding type","BitShiftedNameEncoding",bitShiftName->getEncodingType());
+
+	NameEncoding *testName = bitShiftName;
+	ASSERT_EQUALM("Encoding type","BitShiftedNameEncoding",testName->getEncodingType());
+
 	bitShiftName->setName(nameString);
 	//    cout << "bitShiftName: " << nameString << endl << flush
 	//    		<< hex << " 0x" << setw(20) << bitShiftName->getId() << endl << flush
@@ -659,7 +676,6 @@ void testEmbeddedLevelNameEncoding() {
 	ASSERT_EQUALM("compare bare id's to old-style",bitShiftName->bareId(),name->bareId());
 
 	{
-		uint64 testId = 0;
 		string failureMessage = "'";
 		string foundName ="'";
 		try {
@@ -759,7 +775,7 @@ void testRangeManipulation() {
 //	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
 //	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
 
-////	h.addRange(12,20);
+//	h.addRange(12,20);
 //	cout << "10..20-1" << endl << flush;
 //	h.print(HtmRange::BOTH,cout,false);
 //	h.defrag();
@@ -782,7 +798,7 @@ void testRotation() {
 //	SpatialVector origin(0.0,0.0,0.0);
 	const SpatialVector zHat(0.0,0.0,1.0), xHat(1.0,0.0,0.0), yHat(0.0,1.0,0.0);
 
-	float64 theta, phi;
+	float64 theta;
 	SpatialVector start, axis, rot, expected;
 
 	theta = gPi;
