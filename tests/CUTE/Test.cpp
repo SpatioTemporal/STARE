@@ -851,6 +851,37 @@ void testRotation() {
 
 }
 
+struct HstmIndex {
+	HtmRange *range;
+	HstmIndex() {
+		range = new HtmRange;
+		range->purge();
+	}
+	HstmIndex(int64_t id) {
+		range = new HtmRange;
+		range->purge();
+		range->addRange(id,id);
+	}
+	~HstmIndex() {
+		delete range;
+	}
+};
+
+void hstmIndexLibrarySketch() {
+	HstmIndex hIndex = HstmIndex();
+	// cout << "10 " << flush;
+	// cout << hIndex.range->nranges() << endl << flush;
+	ASSERT_NOT_EQUAL_TO((HtmRange*)0,hIndex.range);
+	ASSERT_EQUAL(0,hIndex.range->nranges());
+	hIndex.range->addRange(1,3);
+	ASSERT_EQUAL(1,hIndex.range->nranges());
+	stringstream ss;
+	ss << *(hIndex.range);
+	// cout << "20: "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("1 3\n",ss.str());
+	// ASSERT_EQUALM("False test",false,true);
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -870,6 +901,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testRotation));
 	s.push_back(CUTE(testRangeManipulation));
 	s.push_back(CUTE(testLatLonDegrees));
+	s.push_back(CUTE(hstmIndexLibrarySketch));
 
 
 	if(false) { // Lots of diagnostic output in the following.
