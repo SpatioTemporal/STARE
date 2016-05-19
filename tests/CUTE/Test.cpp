@@ -9,6 +9,8 @@
 #include "xml_listener.h"
 #include "cute_runner.h"
 
+#include "HstmIndex.h"
+
 // TODO #include the headers for the code you want to test
 //#include "SpatialGeneral.h"
 #include "SpatialException.h"
@@ -851,22 +853,6 @@ void testRotation() {
 
 }
 
-struct HstmIndex {
-	HtmRange *range;
-	HstmIndex() {
-		range = new HtmRange;
-		range->purge();
-	}
-	HstmIndex(int64_t id) {
-		range = new HtmRange;
-		range->purge();
-		range->addRange(id,id);
-	}
-	~HstmIndex() {
-		delete range;
-	}
-};
-
 void hstmIndexLibrarySketch() {
 	HstmIndex hIndex = HstmIndex();
 	// cout << "10 " << flush;
@@ -876,9 +862,9 @@ void hstmIndexLibrarySketch() {
 	hIndex.range->addRange(1,3);
 	ASSERT_EQUAL(1,hIndex.range->nranges());
 	stringstream ss;
-	ss << *(hIndex.range);
+	ss << "'" << *(hIndex.range) << "'";
 	// cout << "20: "<< ss.str() << endl << flush;
-	ASSERT_EQUAL("1 3\n",ss.str());
+	ASSERT_EQUAL("'1 3'",ss.str());
 	// ASSERT_EQUALM("False test",false,true);
 }
 

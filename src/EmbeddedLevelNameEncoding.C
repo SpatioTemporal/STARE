@@ -14,6 +14,8 @@ EmbeddedLevelNameEncoding::~EmbeddedLevelNameEncoding() {}
 
 /**
  * Return the symbolic (string) name associated with the id in left-justified format.
+ *
+ *
  * @param id
  * @return
  */
@@ -88,6 +90,7 @@ uint64 EmbeddedLevelNameEncoding::bareId() const {
 }
 
 uint64 EmbeddedLevelNameEncoding::bareId_NoShift_NoEmbeddedLevel() const {
+	// TODO This is left justified. Is bareId left or right justified?
 	uint64 stripId = id & stripMask;
 	return stripId;
 }
