@@ -9,6 +9,8 @@
 #include "xml_listener.h"
 #include "cute_runner.h"
 
+#include "HstmIndex.h"
+
 // TODO #include the headers for the code you want to test
 //#include "SpatialGeneral.h"
 #include "SpatialException.h"
@@ -965,6 +967,21 @@ void testNeighbors() {
 	ASSERT_EQUALM("Neighbor across vertex 3,13",13190,neighborsV[8]);
 }
 
+void hstmIndexLibrarySketch() {
+	HstmIndex hIndex = HstmIndex();
+	// cout << "10 " << flush;
+	// cout << hIndex.range->nranges() << endl << flush;
+	ASSERT_NOT_EQUAL_TO((HtmRange*)0,hIndex.range);
+	ASSERT_EQUAL(0,hIndex.range->nranges());
+	hIndex.range->addRange(1,3);
+	ASSERT_EQUAL(1,hIndex.range->nranges());
+	stringstream ss;
+	ss << "'" << *(hIndex.range) << "'";
+	// cout << "20: "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("'1 3'",ss.str());
+	// ASSERT_EQUALM("False test",false,true);
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -985,6 +1002,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testRangeManipulation));
 	s.push_back(CUTE(testLatLonDegrees));
 	s.push_back(CUTE(testNeighbors));
+	s.push_back(CUTE(hstmIndexLibrarySketch));
 
 
 	if(false) { // Lots of diagnostic output in the following.

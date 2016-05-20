@@ -751,14 +751,19 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range)
 			strcpy(tmp_buf,range.encoding->nameById(lo));
 			strcat(tmp_buf," ");
 			strcat(tmp_buf,range.encoding->nameById(hi));
+			os << tmp_buf;
 		} else {
 #ifdef _WIN32
-			sprintf(tmp_buf, "%I64d %I64d", lo, hi);
+			sprintf(tmp_buf, "%I64d %I64d ", lo, hi);
+			os << tmp_buf;
 #else
-			sprintf(tmp_buf, "%llu %lld", lo, hi);
+			os << lo << " " << hi;
+			// sprintf(tmp_buf, "%llu %llu ", lo, hi);
+			// sprintf(tmp_buf, "%llu %lld ", lo, hi);
 #endif
 		}
-		os << tmp_buf << endl;
+		// os << tmp_buf << endl; // TODO MLR Why gratuitously add an EOL here?
+		// os << tmp_buf;
 
 		// os << lo << " " << hi << endl;
 		range.my_los->step();
@@ -834,7 +839,7 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 			}
 		}
 
-		os << tmp_buf << endl;
+		os << tmp_buf << " "; //  << endl;
 		my_los->step();
 		my_his->step();
 	}

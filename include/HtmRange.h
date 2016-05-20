@@ -100,7 +100,6 @@ class LINKAGE HtmRange {
 //  SkipList *my_his;
 };
 
-
 #define SKIP_PROB (0.5)
 
 #endif
