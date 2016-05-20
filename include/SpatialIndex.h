@@ -137,6 +137,13 @@ void printNode(int nodeIndex) const;
   void pointByHtmId(SpatialVector & vector, uint64 ID) const;
   void pointById(SpatialVector & vector, uint64 ID) const;
 
+  /** Find the neighbors across the edges of the triangles htmId */
+  void
+  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const;
+
+  void
+  NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const;
+
   /** find a node by giving a vector. 
       The ID of the node is returned.
 
