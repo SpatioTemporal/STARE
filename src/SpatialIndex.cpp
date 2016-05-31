@@ -79,6 +79,14 @@ isInside(const SpatialVector & v, const SpatialVector & v0,
   return true;
 }
 
+/**
+ * Construct the sub-triangle of index subTriangleIndex.
+ *
+ * @param v0
+ * @param v1
+ * @param v2
+ * @param subTriangleIndex
+ */
 void partitionTriangle(
 		SpatialVector &v0,
 		SpatialVector &v1,
@@ -112,6 +120,16 @@ void partitionTriangle(
     }
 }
 
+/**
+ * Construct the subtriangle containing the point v and return the subtriangle
+ * index so we know which partition contained the point.
+ *
+ * @param v
+ * @param v0
+ * @param v1
+ * @param v2
+ * @return
+ */
 uint64 subTriangleIndexByPoint(
 		SpatialVector &v,
 		SpatialVector &v0,
@@ -748,6 +766,94 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
 //	vec.show();
 //	cerr << "---------- Point by id Retuning" << endl;
 }
+
+/**
+ * Do the geometric calculation to find neighboring triangles across the faces.
+ * Not as cheap if siblings are known. The ith neighbor is across the face
+ * opposite the ith vertex as returned from nodeVertex.
+ * @param neighbors
+ * @param htmId
+ */
+void
+SpatialIndex::NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const {
+	SpatialVector v1, v2, v3, m12, m23, m13, q1, q2, q3;
+	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
+	//	SpatialVector center = pointByHtmId(htmId);
+	SpatialVector center = v1 + v2 + v3; center.normalize();
+	m12 = v1 + v2; m12.normalize();
+	m23 = v2 + v3; m23.normalize();
+	m13 = v1 + v3; m13.normalize();
+	float64 alpha = 1.1;
+	SpatialVector centerAlpha = center * ( 1-alpha );
+	q1 = centerAlpha + m23 * alpha;
+	q2 = centerAlpha + m13 * alpha;
+	q3 = centerAlpha + m12 * alpha;
+	neighbors[0] = idByPoint(q1);
+	neighbors[1] = idByPoint(q2);
+	neighbors[2] = idByPoint(q3);
+
+//	cout << "c  " << center << endl << flush;
+//	cout << "m12 " << m12 << endl << flush;
+//	cout << "m23 " << m23 << endl << flush;
+//	cout << "m13 " << m13 << endl << flush;
+//	cout << "q1 " << q1 << endl << flush;
+//	cout << "q2 " << q2 << endl << flush;
+//	cout << "q3 " << q3 << endl << flush;
+}
+
+/**
+ * Calculate the neighboring triangles that are across the vertices.
+ * The neighbors are in groups of 3 ordered counterclockwise as the vertices are
+ * returned from nodeVertex.
+ * @param neighbors
+ * @param htmId
+ */
+void
+SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const {
+	SpatialVector v1, v2, v3, m12, m23, m13;
+	SpatialVector q0, q1, q2, q3, q4, q5, q6, q7, q8;
+	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
+	//	SpatialVector center = pointByHtmId(htmId);
+	SpatialVector center = v1 + v2 + v3; center.normalize();
+	m12 = v1 + v2; m12.normalize();
+	m23 = v2 + v3; m23.normalize();
+	m13 = v1 + v3; m13.normalize();
+	float64 alpha = 1.1;
+	SpatialVector centerAlpha = center * ( 1-alpha );
+	float64 beta = 0.1;
+
+	q0 = v1 + (m13-center) * beta; q1.normalize();
+	q1 = centerAlpha + v1 * alpha;
+	q2 = v1 + (m12-center) * beta; q2.normalize();
+
+	q3 = v2 + (m12-center) * beta; q3.normalize();
+	q4 = centerAlpha + v2 * alpha;
+	q5 = v2 + (m23-center) * beta; q4.normalize();
+
+	q6 = v3 + (m23-center) * beta; q8.normalize();
+	q7 = centerAlpha + v3 * alpha;
+	q8 = v3 + (m13-center) * beta; q7.normalize();
+
+	neighbors[0] = idByPoint(q0);
+	neighbors[1] = idByPoint(q1);
+	neighbors[2] = idByPoint(q2);
+	neighbors[3] = idByPoint(q3);
+	neighbors[4] = idByPoint(q4);
+	neighbors[5] = idByPoint(q5);
+	neighbors[6] = idByPoint(q6);
+	neighbors[7] = idByPoint(q7);
+	neighbors[8] = idByPoint(q8);
+
+//	cout << "c  " << center << endl << flush;
+//	cout << "m12 " << m12 << endl << flush;
+//	cout << "m23 " << m23 << endl << flush;
+//	cout << "m13 " << m13 << endl << flush;
+//	cout << "q1 " << q1 << endl << flush;
+//	cout << "q2 " << q2 << endl << flush;
+//	cout << "q3 " << q3 << endl << flush;
+}
+
+
 //////////////////IDBYPOINT////////////////////////////////////////////////
 /** Find a leaf node where a vector points to
  *

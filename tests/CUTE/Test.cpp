@@ -854,6 +854,120 @@ void testRotation() {
 
 }
 
+
+void testNeighbors() {
+
+	int level         = 5;
+	int saveLevel     = 5;
+	htmInterface *htm_ = new htmInterface(level,saveLevel);
+	const SpatialIndex index = htm_->index();
+	const char *htmName = "N012023";
+	uint64 htmID = index.idByName(htmName);
+	uint64 htmIDExpected = 12683;
+	ASSERT_EQUALM("N012023 == 12683?",htmIDExpected,htmID);
+	ASSERT_EQUALM("level(N012023) == 5",5,levelOfName(htmName));
+	ASSERT_EQUALM("level(12683)   == 5",5,levelOfId(htmID));
+
+	uint64 neighbors[3];
+	uint64 htmId;
+	htmId = htmID;
+
+	htmId = 12683;
+	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+
+//	cout
+//	<< "Neighbors of " << (htmId) << " are "
+//	<< (neighbors[0]) << ", "
+//	<< (neighbors[1]) << ", "
+//	<< (neighbors[2]) << endl << flush;
+//
+//	cout
+//	<< "Neighbors of " << index.nameById(htmId) << " are "
+//	<< index.nameById(neighbors[0]) << ", "
+//	<< index.nameById(neighbors[1]) << ", "
+//	<< index.nameById(neighbors[2]) << endl << flush;
+
+//	htmId = 12681;
+//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+//
+//	cout
+//	<< "Neighbors of " << (htmId) << " are "
+//	<< (neighbors[0]) << ", "
+//	<< (neighbors[1]) << ", "
+//	<< (neighbors[2]) << endl << flush;
+//
+//	cout
+//	<< "Neighbors of " << index.nameById(htmId) << " are "
+//	<< index.nameById(neighbors[0]) << ", "
+//	<< index.nameById(neighbors[1]) << ", "
+//	<< index.nameById(neighbors[2]) << endl << flush;
+//
+//	htmId = 13190;
+//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+//
+//	cout
+//	<< "Neighbors of " << (htmId) << " are "
+//	<< (neighbors[0]) << ", "
+//	<< (neighbors[1]) << ", "
+//	<< (neighbors[2]) << endl << flush;
+//
+//	cout
+//	<< "Neighbors of " << index.nameById(htmId) << " are "
+//	<< index.nameById(neighbors[0]) << ", "
+//	<< index.nameById(neighbors[1]) << ", "
+//	<< index.nameById(neighbors[2]) << endl << flush;
+//
+//	htmId = 12680;
+//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+//
+//	cout
+//	<< "Neighbors of " << (htmId) << " are "
+//	<< (neighbors[0]) << ", "
+//	<< (neighbors[1]) << ", "
+//	<< (neighbors[2]) << endl << flush;
+//
+//	htmId = 12682;
+//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+//
+//	cout
+//	<< "Neighbors of " << (htmId) << " are "
+//	<< (neighbors[0]) << ", "
+//	<< (neighbors[1]) << ", "
+//	<< (neighbors[2]) << endl << flush;
+
+	htmId = 12683;
+	uint64 neighborsV[9];
+	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
+
+//	cout << "Neighbors Across Vertices of " << (htmId) << " are ";
+//	for(int i=0; i<9; i++) {
+//		cout << (neighborsV[i]) << " ";
+//	}
+//	cout << endl << flush;
+//
+//	cout << "Neighbors Across Vertices of " << index.nameById(htmId) << " are ";
+//	for(int i=0; i<9; i++) {
+//		cout << index.nameById(neighborsV[i]) << " ";
+//	}
+//	cout << endl << flush;
+
+	ASSERT_EQUALM("Neighbor face 23",12680,neighbors[0]);
+	ASSERT_EQUALM("Neighbor face 13",12681,neighbors[1]);
+	ASSERT_EQUALM("Neighbor face 12",12682,neighbors[2]);
+
+	ASSERT_EQUALM("Neighbor across vertex 1,13",12685,neighborsV[0]);
+	ASSERT_EQUALM("Neighbor across vertex 1",   12687,neighborsV[1]);
+	ASSERT_EQUALM("Neighbor across vertex 1,12",12684,neighborsV[2]);
+
+	ASSERT_EQUALM("Neighbor across vertex 2,12",12725,neighborsV[3]);
+	ASSERT_EQUALM("Neighbor across vertex 2",   12727,neighborsV[4]);
+	ASSERT_EQUALM("Neighbor across vertex 2,23",12724,neighborsV[5]);
+
+	ASSERT_EQUALM("Neighbor across vertex 3,23",13188,neighborsV[6]);
+	ASSERT_EQUALM("Neighbor across vertex 3",   13191,neighborsV[7]);
+	ASSERT_EQUALM("Neighbor across vertex 3,13",13190,neighborsV[8]);
+}
+
 void hstmIndexLibrarySketch() {
 	HstmIndex hIndex = HstmIndex();
 	// cout << "10 " << flush;
@@ -892,6 +1006,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testRotation));
 	s.push_back(CUTE(testRangeManipulation));
 	s.push_back(CUTE(testLatLonDegrees));
+	s.push_back(CUTE(testNeighbors));
 	s.push_back(CUTE(hstmIndexLibrarySketch));
 
 
