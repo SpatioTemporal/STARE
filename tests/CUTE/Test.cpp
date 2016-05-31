@@ -675,6 +675,7 @@ void testEmbeddedLevelNameEncoding() {
 	//    		<< hex << " 0x" << setw(20) << bitShiftName->getId() << endl << flush
 	//			       << " 0x" << setw(20) << bitShiftName->bareId() << endl << flush;
 
+	// bitShiftName is right justified, name is left justified. What about the depth bit?
 	ASSERT_EQUALM("compare bare id's to old-style",bitShiftName->bareId(),name->bareId());
 
 	{
@@ -866,6 +867,10 @@ void hstmIndexLibrarySketch() {
 	// cout << "20: "<< ss.str() << endl << flush;
 	ASSERT_EQUAL("'1 3'",ss.str());
 	// ASSERT_EQUALM("False test",false,true);
+}
+
+void htmRangeLeftJustifiedSketch() {
+	HtmRange leftHtmRange = HtmRange(new EmbeddedLevelNameEncoding());
 }
 
 void runSuite(int argc, char const *argv[]){

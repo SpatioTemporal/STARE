@@ -82,6 +82,9 @@ uint32 EmbeddedLevelNameEncoding::levelById(uint64 id) const {
 	return level;
 }
 
+/**
+ * Returns a right justified (old-style) HTM id, without a depth bit. // TODO Verify
+ */
 uint64 EmbeddedLevelNameEncoding::bareId() const {
 	// Should this be the old style id?
 	uint64 stripId = id & stripMask;
