@@ -67,56 +67,60 @@ SkipList::~SkipList()
 ////////////////////////////////////////////////////////////////////////////////
 void SkipList::insert(const Key searchKey, const Value value)
 {
-  int i;
-  long newLevel;
-  SkipListElement* element;
-  SkipListElement* nextElement;
-  SkipListElement  update(SKIPLIST_MAXLEVEL);
+	int i;
+	long newLevel;
+	SkipListElement* element;
+	SkipListElement* nextElement;
+	SkipListElement  update(SKIPLIST_MAXLEVEL);
 
-  // scan all levels while key < searchKey
-  // starting with header in his level
-  element = myHeader;
-  for(i=myHeader->getLevel(); i>=0; i--) {
-    nextElement = element->getElement(i);
-    while( (nextElement != NIL) && (nextElement->getKey() < searchKey) ) {
-      element=nextElement;
-      nextElement = element->getElement(i);
-    }
-    update.setElement(i, element); // save level pointer
-  }
+	// scan all levels while key < searchKey
+	// starting with header in his level
+	element = myHeader;
+	for(i=myHeader->getLevel(); i>=0; i--) {
+		nextElement = element->getElement(i);
+		while( (nextElement != NIL) && (nextElement->getKey() < searchKey) ) {
+			element=nextElement;
+			nextElement = element->getElement(i);
+		}
+		update.setElement(i, element); // save level pointer
+	}
 
-  element=element->getElement(0); // key is < searchKey
+	element=element->getElement(0); // key is < searchKey
 
-  // key exists. set new value
-  //
-  if( (element != NIL) && (element->getKey() == searchKey) ) {
-    //    cerr << "(dup " << searchKey << ")"; // print # to cout. remove later!
-    element->setValue(value);
-  }  else {			// new key. add to list
-    // get new level and fix list level
-    newLevel = getNewLevel(SKIPLIST_MAXLEVEL, myProbability); // get new level
-    if (newLevel > myHeader->getLevel() ) { // adjust header level
-      for (i=myHeader->getLevel() + 1; i<=newLevel; i++) {
-	update.setElement(i, myHeader); // adjust new pointer of new element
-      }
-      myHeader->setLevel(newLevel); // set new header level
-    }
-    // make new element [NEW *******]
-    myLength++;
-    element = new SkipListElement(newLevel, searchKey, value);
-    for (i=0; i<= newLevel; i++ ) { // scan all levels
-      // set next pointer of new element
-      element->setElement(i, update.getElement(i)->getElement(i));
-     update.getElement(i)->setElement(i, element);
-    }
-    
-    /*
+	// key exists. set new value
+	//
+	if( (element != NIL) && (element->getKey() == searchKey) ) {
+		//    cerr << "(dup " << searchKey << ")"; // print # to cout. remove later!
+		// TODO Note for htm value is zero, having the element in the skip list is significant.
+		// TODO Note that los and his may have different numbers of elements because we don't keep
+		// TODO duplicates this seems.  Don't know if this is a bug yet.
+		// TODO
+		element->setValue(value);
+	}  else {			// new key. add to list
+		// get new level and fix list level
+		newLevel = getNewLevel(SKIPLIST_MAXLEVEL, myProbability); // get new level
+		if (newLevel > myHeader->getLevel() ) { // adjust header level
+			for (i=myHeader->getLevel() + 1; i<=newLevel; i++) {
+				update.setElement(i, myHeader); // adjust new pointer of new element
+			}
+			myHeader->setLevel(newLevel); // set new header level
+		}
+		// make new element [NEW *******]
+		myLength++;
+		element = new SkipListElement(newLevel, searchKey, value);
+		for (i=0; i<= newLevel; i++ ) { // scan all levels
+			// set next pointer of new element
+			element->setElement(i, update.getElement(i)->getElement(i));
+			update.getElement(i)->setElement(i, element);
+		}
+
+		/*
     // fix level of element -- why not?
     if(newLevel < update.getLevel()) {
       update.setLevel(newLevel);
     }
-    */
-  }
+		 */
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -392,6 +396,23 @@ ostream& operator<<(ostream& os, const SkipList& list)
   }
   return(os);
 }
+
+long SkipList::getCount() {
+	long count = 0;
+	SkipListElement* element;
+	SkipListElement* nextElement;
+
+	element = myHeader;
+	nextElement = element->getElement(0);
+
+	while( (nextElement != NIL) ) {
+		count++;
+		element=nextElement;
+		nextElement = element->getElement(0);
+	}
+	return count;
+}
+
 //// STATISTICS on skiplist
 void SkipList::stat()
 {
