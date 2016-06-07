@@ -394,8 +394,11 @@ void HtmRange::mergeRange(const Key lo, const Key hi)
  */
 void HtmRange::addRange(const Key lo, const Key hi)
 {
-	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
-	my_his->insert(hi, (Value) 0);
+//	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
+//	my_his->insert(hi, (Value) 0);
+
+	// TODO Simplest thing that might possibly work.
+	mergeRange(lo,hi);
 	return;
 }
 
@@ -554,18 +557,25 @@ void HtmRange::reset()
 /// The number of ranges.
 int HtmRange::nranges()
 {
+//	cout << "z000" << endl << flush;
 	Key lo, hi;
 	int n_ranges;
 	n_ranges = 0;
 	my_los->reset();
 	my_his->reset();
+//	cout << "z010" << endl << flush;
 
 	while((lo = my_los->getkey()) > 0){
 		n_ranges++;
+//		cout << "z020 " << n_ranges << flush;
 		hi = my_his->getkey();
+//		cout << " : " << lo << ", " << hi << " " << flush << endl;
 		my_los->step();
 		my_his->step();
 	}
+
+//	cout << "z100" << endl << flush;
+
 	return n_ranges;
 }
 
@@ -765,14 +775,26 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range)
 
 int HtmRange::getNext(Key &lo, Key &hi)
 {
+//	cout << "a" << flush;
 	lo = my_los->getkey();
 	if (lo <= (Key) 0){
 		hi = lo = (Key) 0;
 		return 0;
 	}
+//	cout << "b" << flush;
+//	cout << " " << lo << " " << flush;
 	hi = my_his->getkey();
+//	cout << " " << hi << " " << flush;
+	if (hi <= (Key) 0){
+		cout << endl;
+		cout << " getNext error!! " << endl << flush;
+		hi = lo = (Key) 0;
+		return 0;
+	}
 	my_his->step();
+//	cout << "c" << flush;
 	my_los->step();
+//	cout << "d " << flush;
 	return 1;
 }
 int HtmRange::getNext(Key *lo, Key *hi)
@@ -829,7 +851,7 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 			}
 		}
 
-		os << tmp_buf << " "; //  << endl;
+		os << tmp_buf << " " << flush; //  << endl;
 		my_los->step();
 		my_his->step();
 	}

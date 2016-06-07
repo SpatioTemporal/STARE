@@ -52,6 +52,13 @@ class LINKAGE HtmRange {
   Key bestgap(Key desiredSize);
   int stats(int desiredSize);
   int nranges();
+
+  uint getLosLength() {
+	  my_los->getLength();
+  }
+  uint getHisLength() {
+	  my_his->getLength();
+  }
   void reset();
 
   void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....

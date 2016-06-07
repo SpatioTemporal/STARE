@@ -745,11 +745,13 @@ void testRangeManipulation() {
 		KeyPair kp = h.getNext();
 		ASSERT_EQUALM("kp.set == 1", 1,kp.set);
 		ASSERT_EQUALM("kp.lo == 10",10,kp.lo);
-		ASSERT_EQUALM("kp.hi == 15",15,kp.hi);
+		// ASSERT_EQUALM("kp.hi == 15",15,kp.hi); // We now have merge semantics instead of add.
+		ASSERT_EQUALM("kp.hi == 20",20,kp.hi); // We now have merge semantics instead of add.
 		kp = h.getNext();
-		ASSERT_EQUALM("kp.set == 1", 1,kp.set);
-		ASSERT_EQUALM("kp.lo == 12",12,kp.lo);
-		ASSERT_EQUALM("kp.hi == 20",20,kp.hi);
+		// ASSERT_EQUALM("kp.set == 0", 1,kp.set); // We now have merge semantics instead of add.
+		ASSERT_EQUALM("kp.set == 0", 0,kp.set); // We now have merge semantics instead of add.
+		// ASSERT_EQUALM("kp.lo == 12",12,kp.lo); // We now have merge semantics instead of add.
+		// ASSERT_EQUALM("kp.hi == 20",20,kp.hi); // We now have merge semantics instead of add.
 		kp = h.getNext();
 		ASSERT_EQUALM("kp.set == 0", 0,kp.set);
 		h.reset();
@@ -789,6 +791,65 @@ void testRangeManipulation() {
 //	h.addRange(&i);
 //	cout << "10..25-1" << endl << flush;
 //	h.print(HtmRange::BOTH,cout,false);
+}
+
+void testRangeDuplication() {
+	HtmRange h;
+//	long losCount, hisCount;
+
+	h.addRange(100,110);
+//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
+	ASSERT_EQUAL(1,h.my_los->getCount());
+	ASSERT_EQUAL(1,h.my_his->getCount());
+
+	h.addRange(105,110);
+//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
+	ASSERT_EQUAL(1,h.my_los->getCount());
+	ASSERT_EQUAL(1,h.my_his->getCount());
+
+
+	h.addRange(100,103);
+	ASSERT_EQUAL(1,h.my_los->getCount());
+	ASSERT_EQUAL(1,h.my_his->getCount());
+
+	h.addRange(200,300);
+	ASSERT_EQUAL(2,h.my_los->getCount());
+	ASSERT_EQUAL(2,h.my_his->getCount());
+
+//	h.defrag();
+//	ASSERT_EQUAL(2,h.my_los->getCount());
+//	ASSERT_EQUAL(1,h.my_his->getCount());
+//	cout << "101" << endl << flush;
+
+	Key lo, hi;
+	h.reset();
+
+	int iRange = 0;
+	int iTestCount = 0;
+	int indexp = h.getNext(lo,hi);
+	if(indexp) {
+		do {
+			switch(iRange) {
+			case 0 :
+				ASSERT_EQUAL(100,lo);
+				ASSERT_EQUAL(110,hi);
+				iTestCount++;
+				break;
+			case 1 :
+				ASSERT_EQUAL(200,lo);
+				ASSERT_EQUAL(300,hi);
+				iTestCount++;
+				break;
+			default :
+				break;
+			}
+			iRange++;
+		} while (h.getNext(lo,hi));
+	}
+
+	ASSERT_EQUAL(2,h.nranges());
+	ASSERT_EQUAL(2,iTestCount);
+	ASSERT_EQUAL(2,iRange);
 }
 
 /**
@@ -1005,6 +1066,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testEmbeddedLevelNameEncoding));
 	s.push_back(CUTE(testRotation));
 	s.push_back(CUTE(testRangeManipulation));
+	s.push_back(CUTE(testRangeDuplication));
 	s.push_back(CUTE(testLatLonDegrees));
 	s.push_back(CUTE(testNeighbors));
 	s.push_back(CUTE(hstmIndexLibrarySketch));

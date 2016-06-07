@@ -80,6 +80,7 @@ public:
   long getLength() {
     return myLength;
   }
+  long getCount() ;
 
   friend ostream& operator<<(ostream& os, const SkipList& list);
 
