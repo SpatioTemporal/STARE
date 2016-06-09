@@ -188,42 +188,51 @@ int HtmRange::isIn(Key a, Key b)
 	param[i++] = SH_b = my_his->findMIN(b);
 
 //	bool dbg = a==150;
-//	if(dbg){
-//		cout << "(isIn checking a,b: " << a << " " << b << ")" << endl << flush;
-//		cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
-//		cout << "(isIn" ;
-//
-//		for(i=0; i<8; i++){
-//			if (param[i] == KEY_MAX)
-//				cout << "  MAX";
-//			else if (param[i] == -KEY_MAX)
-//				cout << " -MAX";
-//			else
-//				cout << setw(5) << param[i];
-//		}
-//		cout << ")" << endl;
-//		// 0 is intersect, -1 is out +1 is inside
-//	//
-//	}
+	bool dbg = a==50;
+	dbg = (a == 60 && b == 80) || (a==50);
+	if(dbg){
+		cout << "(isIn checking a,b: " << a << " " << b << ")" << endl << flush;
+		cout << "(isIn GL_a GH_a SL_a SH_a GL_b GH_b SL_b SH_b)" << endl;
+		cout << "(isIn" ;
+
+		for(i=0; i<8; i++){
+			if (param[i] == KEY_MAX)
+				cout << "  MAX";
+			else if (param[i] == -KEY_MAX)
+				cout << " -MAX";
+			else
+				cout << setw(5) << param[i];
+		}
+		cout << ")" << endl;
+
+	// 0 is intersect, -1 is out +1 is inside
+	}
 
 	if(GH_a < GL_a && GL_b < GH_b){ // a is in, b is not. TODO What about +/- MAX?
 		rstat = 0;
-//		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
+		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
 	} else if (GL_b == a && SH_a == b){
 		rstat = 1;
-//		if(dbg) cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl;
+//		if(dbg) cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl; // bug? error?
+		if(dbg) cout << " <<<<< I (1), because SH_a == b and GL_b == a perfect match" << endl; // correction?
 	} else if (GL_b > GL_a) {
-		rstat = 0;
-//		if(dbg) cout << " <<<<< X (0), because GL_b > GL_a" << endl;
+		// kluge
+		if( GL_b == a && SH_a >= b ) {
+			rstat = 1;
+			if(dbg) cout << " <<<<< I (1), because GL_b = a > GL_a && SH_a >= b" << endl;
+		} else {
+			rstat = 0;
+			if(dbg) cout << " <<<<< X (0), because GL_b > GL_a" << endl;
+		}
 	} else if (GH_a < GL_a) {
 		rstat = 1;
-//		if(dbg) cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
+		if(dbg) cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
 	} else if (SL_a == b) {
 		rstat = 0;
-//		if(dbg) cout << " <<<<< X (0), b coincides " << endl;
+		if(dbg) cout << " <<<<< X (0), b coincides " << endl;
 	} else {
 		rstat = -1;
-//		if(dbg) cout << " <<<<< O (-1), because none of the above" << endl;
+		if(dbg) cout << " <<<<< O (-1), because none of the above" << endl;
 	}
 
 	return rstat;

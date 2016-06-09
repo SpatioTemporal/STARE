@@ -591,13 +591,13 @@ SpatialIndex::sortIndex() {
 
  The string leaf name has the always the same structure, it begins with
  an N or S, indicating north or south cap and then numbers 0-3 follow
- indicating which child to descend into. So for a depth-5-index we have
- strings like
+ indicating which child to descend into. So for a level-5-index
+ (deprecated terminology: depth-5-index) we have strings like
 
                  N012023  S000222  N102302  etc
 
  Each of the numbers correspond to 2 bits of code (00 01 10 11) in the
- uint32. The first two bits are 10 for S and 11 for N. For example
+ uint64. The first two bits are 10 for S and 11 for N. For example
 
                  S0001122334455     depthSet//Level
                   N 0 1 2 0 2 3     ASCII representation
@@ -605,6 +605,9 @@ SpatialIndex::sortIndex() {
                   1000110001011  =   4491 (stripped of depthSet bit)
 
  The leading bits are always 0.
+
+The first two characters, e.g. "S1", of the symbolic name are level 0. Every
+succeeding character corresponds to the next level of resolution.
 
 - Legacy 32-bit information:
 	-- WARNING: This works only up to 15 levels.

@@ -414,6 +414,14 @@ void testRangeContains() {
 	ASSERT_EQUALM("4: 75..75 in 50..100",1,h1->contains(75,75));
 	ASSERT_EQUALM("4: 100..100 in 50.100",1, h1->contains(100,100));
 	ASSERT_EQUALM("4: 50..50 IN 50..100", 1, h1->contains(50,50));
+
+	ASSERT_EQUALM("4: 80..100 IN 50..100", 1, h1->contains(80,100));
+	ASSERT_EQUALM("4: 60..80 in 50..100",1,h1->contains(60,80)); // Try again with more elements in lists.
+	ASSERT_EQUALM("4: 50..51 IN 50..100", 1, h1->contains(50,51)); // Bug 2016-0602 MLR.
+	ASSERT_EQUALM("4: 50..80 IN 50..100", 1, h1->contains(50,80)); // Bug 2016-0602 MLR.
+	ASSERT_EQUALM("4: 99..100 IN 50..100", 1, h1->contains(99,100)); // Bug 2016-0602 MLR.
+
+
 }
 
 void testLatLonDegrees() {
@@ -620,6 +628,13 @@ void testIndexLevel() {
 		<< endl << flush;
 	}
 	delete name;
+}
+
+void testIndexLevel1() {
+	ASSERT_EQUAL(0,levelOfName("N0"));
+	ASSERT_EQUAL(1,levelOfName("N01"));
+	ASSERT_EQUAL(2,levelOfName("N012"));
+	ASSERT_EQUAL(3,levelOfName("N0123"));
 }
 
 void testEmbeddedLevelNameEncoding() {
@@ -1065,6 +1080,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testLatLonDegrees));
 	s.push_back(CUTE(testNeighbors));
 	s.push_back(CUTE(hstmIndexLibrarySketch));
+	s.push_back(CUTE(testIndexLevel1));
 
 
 	if(false) { // Lots of diagnostic output in the following.
