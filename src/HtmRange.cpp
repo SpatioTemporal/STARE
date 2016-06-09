@@ -546,16 +546,6 @@ void HtmRange::defrag()
 	// my_his->list(cout);
 }
 
-/**
- * This method returns without doing anything.
- *
- * @param depth
- */
-void HtmRange::levelto(int depth)
-{
-	return;
-}
-
 /// Free the range los and his.
 void HtmRange::purge()
 {

@@ -45,8 +45,6 @@ class LINKAGE HtmRange {
   void mergeRange(const Key lo, const Key hi);
   void defrag();
   void defrag(Key gap);
-  /// TODO Remove levelto.
-  void levelto(int level);
   void purge();
   int isIn(Key key);
   int isIn(Key lo, Key hi);
