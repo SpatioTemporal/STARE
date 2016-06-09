@@ -54,10 +54,10 @@ class LINKAGE HtmRange {
   int nranges();
 
   uint getLosLength() {
-	  my_los->getLength();
+	  return my_los->getLength();
   }
   uint getHisLength() {
-	  my_his->getLength();
+	  return my_his->getLength();
   }
   void reset();
 

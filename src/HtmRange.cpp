@@ -187,6 +187,7 @@ int HtmRange::isIn(Key a, Key b)
 	param[i++] = SL_b = my_los->findMIN(b);
 	param[i++] = SH_b = my_his->findMIN(b);
 
+	/*
 //	bool dbg = a==150;
 	bool dbg = a==50;
 	dbg = (a == 60 && b == 80) || (a==50);
@@ -207,32 +208,33 @@ int HtmRange::isIn(Key a, Key b)
 
 	// 0 is intersect, -1 is out +1 is inside
 	}
+	*/
 
 	if(GH_a < GL_a && GL_b < GH_b){ // a is in, b is not. TODO What about +/- MAX?
 		rstat = 0;
-		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
+//		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
 	} else if (GL_b == a && SH_a == b){
 		rstat = 1;
-//		if(dbg) cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl; // bug? error?
-		if(dbg) cout << " <<<<< I (1), because SH_a == b and GL_b == a perfect match" << endl; // correction?
+// //		if(dbg) cout << " <<<<< I (1), because SH_a == a and GL_b == b perfect match" << endl; // bug? error?
+//		if(dbg) cout << " <<<<< I (1), because SH_a == b and GL_b == a perfect match" << endl; // correction?
 	} else if (GL_b > GL_a) {
 		// kluge
 		if( GL_b == a && SH_a >= b ) {
 			rstat = 1;
-			if(dbg) cout << " <<<<< I (1), because GL_b = a > GL_a && SH_a >= b" << endl;
+//			if(dbg) cout << " <<<<< I (1), because GL_b = a > GL_a && SH_a >= b" << endl;
 		} else {
 			rstat = 0;
-			if(dbg) cout << " <<<<< X (0), because GL_b > GL_a" << endl;
+//			if(dbg) cout << " <<<<< X (0), because GL_b > GL_a" << endl;
 		}
 	} else if (GH_a < GL_a) {
 		rstat = 1;
-		if(dbg) cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
+//		if(dbg) cout << " <<<<< I (1), because GH_a < GL_a, and none of previous conditions" << endl;
 	} else if (SL_a == b) {
 		rstat = 0;
-		if(dbg) cout << " <<<<< X (0), b coincides " << endl;
+//		if(dbg) cout << " <<<<< X (0), b coincides " << endl;
 	} else {
 		rstat = -1;
-		if(dbg) cout << " <<<<< O (-1), because none of the above" << endl;
+//		if(dbg) cout << " <<<<< O (-1), because none of the above" << endl;
 	}
 
 	return rstat;
