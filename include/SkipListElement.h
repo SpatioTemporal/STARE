@@ -26,12 +26,16 @@
 #else
 #if __cplusplus >= 201103L
 #define KEY_MAX LLONG_MAX
+#define KEY_MIN -KEY_MAX
+//#define KEY_MAX ULLONG_MAX
+//#define KEY_MIN 0
 #else
 #define KEY_MAX LONG_LONG_MAX
 #endif
 #endif
 
-typedef int64 Key;            // key type
+typedef int64 Key;            // key type TODO Why not uint64?
+//typedef uint64 Key;            // key type TODO Why not uint64?
 typedef int Value;          // value type
 
 // class ostream;

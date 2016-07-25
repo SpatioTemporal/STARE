@@ -87,14 +87,11 @@ void SkipList::insert(const Key searchKey, const Value value)
 
 	element=element->getElement(0); // key is < searchKey
 
-	// key exists. set new value
+	// key exists. set new value TODO Note: NEW VALUE!!! Don't have multiple values at a key.
 	//
 	if( (element != NIL) && (element->getKey() == searchKey) ) {
 		//    cerr << "(dup " << searchKey << ")"; // print # to cout. remove later!
 		// TODO Note for htm value is zero, having the element in the skip list is significant.
-		// TODO Note that los and his may have different numbers of elements because we don't keep
-		// TODO duplicates this seems.  Don't know if this is a bug yet.
-		// TODO
 		element->setValue(value);
 	}  else {			// new key. add to list
 		// get new level and fix list level
@@ -151,7 +148,7 @@ Key SkipList::findMAX(const Key searchKey) const
   
   if(element != NIL) {
     retKey = element->getKey();
-    return( retKey == KEY_MAX ? (-KEY_MAX) : retKey);
+    return( retKey == KEY_MAX ? (KEY_MIN) : retKey);
   }
   else
     return((Key) KEY_MAX);
@@ -203,7 +200,7 @@ Key SkipList::findMIN(const Key searchKey) const
   element = nextElement;
   if(element != NIL) {
     retKey = element->getKey();
-    return( retKey == KEY_MAX ? (-KEY_MAX) : retKey);
+    return( retKey == KEY_MAX ? (KEY_MIN) : retKey);
   }
   else
     return((Key) KEY_MAX);

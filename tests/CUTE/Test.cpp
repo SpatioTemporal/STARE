@@ -22,6 +22,11 @@
 #include "BitShiftNameEncoding.h"
 #include "EmbeddedLevelNameEncoding.h"
 
+#include "HtmRangeMultiLevel.h"
+#include "HtmRAngeMultiLevelIterator.h"
+
+#include "HstmRange.h"
+
 // TODO Add your test functions
 
 double square(SpatialVector x){	return x*x; }
@@ -670,14 +675,29 @@ void testEmbeddedLevelNameEncoding() {
 
 	ASSERT_EQUALM("level of id",4,name->levelById(name->idByName("S00000")));
 
-	const char *nameString = "N20001123123123123";
+//	const char *nameString = "N20001123123123123";
+	const char *nameString = "S00000";
 	id = name->idByName(nameString);
-	//	cout <<  "id: " << nameString << "=0x" << hex << id << ", " << dec << " " << id << endl << flush;
+//	cout <<  "id: " << nameString << "=0x" << hex << id << ", " << dec << " " << id << endl << flush;
 
 	name->setName(nameString);
 	//    cout << "name: " << nameString << endl << flush
 	//    		<< hex << " 0x" << setw(20) << name->getId() << endl << flush
 	//			       << " 0x" << setw(20) << name->bareId() << endl << flush;
+
+	BitShiftNameEncoding *rightJustified = new BitShiftNameEncoding(nameString);
+
+	uint64 rightId = rightJustified->idByName(nameString);
+
+//	cout << "right       " << hex << setfill('0') << setw(16) << rightId << dec << endl << flush;
+//	cout << "left.right  " << hex << setfill('0') << setw(16) << name->rightJustifiedId() << dec << endl << flush;
+//	cout << "id    0x" << hex << setfill('0') << setw(16) << name->getId() << dec << endl << flush;
+//	cout << "left  0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId_NoDepthBit(rightId) << dec << endl << flush;
+//	cout << "left1 0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId(rightId) << dec << endl << flush;
+
+	ASSERT_EQUAL(rightJustified->idByName(nameString),name->rightJustifiedId());
+	ASSERT_EQUAL(name->maskOffLevelBit(),rightJustified->leftJustifiedId_NoDepthBit(rightId));
+	ASSERT_EQUAL(name->getId(),rightJustified->leftJustifiedId(rightId));
 
 	BitShiftNameEncoding *bitShiftName = new BitShiftNameEncoding(nameString);
 	ASSERT_EQUALM("Encoding type","BitShiftedNameEncoding",bitShiftName->getEncodingType());
@@ -1059,8 +1079,1189 @@ void hstmIndexLibrarySketch() {
 	// ASSERT_EQUALM("False test",false,true);
 }
 
+void htmIntersection() {
+	HtmRange range;
+	range.purge();
+	range.addRange(10,15);
+
+	KeyPair kp = KeyPair(1,2);
+	KeyPair intersection = range.intersection(kp);
+	ASSERT_EQUAL(-998,intersection.lo);
+
+	kp = KeyPair(5,12);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(12,intersection.hi);
+
+	kp = KeyPair(11,13);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(11,intersection.lo);
+	ASSERT_EQUAL(13,intersection.hi);
+
+	kp = KeyPair(13,17);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(13,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(5,20);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(20,25);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(-998,intersection.lo);
+	ASSERT_EQUAL(-999,intersection.hi);
+
+	kp = KeyPair(5,10);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(10,intersection.hi);
+
+	kp = KeyPair(10,13);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(13,intersection.hi);
+
+	kp = KeyPair(10,15);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(10,20);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(15,20);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(15,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(10,10);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(10,intersection.lo);
+	ASSERT_EQUAL(10,intersection.hi);
+
+	kp = KeyPair(15,15);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(15,intersection.lo);
+	ASSERT_EQUAL(15,intersection.hi);
+
+	kp = KeyPair(12,12);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(12,intersection.lo);
+	ASSERT_EQUAL(12,intersection.hi);
+
+	kp = KeyPair(20,5);
+	intersection = range.intersection(kp);
+	ASSERT_EQUAL(-998,intersection.lo);
+	ASSERT_EQUAL(-999,intersection.hi);
+
+}
+
+void HtmRangeIntersection() {
+	KeyPair kp;
+
+	HtmRange range;
+
+	range.purge();
+	range.addRange(10,15);
+
+	HtmRange other;
+	other.purge();
+	other.addRange(12,20);
+
+	HtmRange newRange;
+
+	int indexp;
+
+	other.reset();
+	while((indexp = other.getNext(kp)) > 0) {
+		KeyPair p = range.intersection(kp);
+		newRange.addRange(p.lo,p.hi);
+	}
+
+	kp.lo = -1; kp.hi = -2;
+	newRange.reset();
+	indexp = newRange.getNext(kp);
+	ASSERT_EQUAL(12,kp.lo);
+	ASSERT_EQUAL(15,kp.hi);
+
+//	FAIL();
+}
+
+
+void printIntervalsFromRangeSymbols(string s0, string s1) {
+	EmbeddedLevelNameEncoding leftJustified;
+
+	leftJustified.setName(s0.c_str());
+	uint64 id = leftJustified.getId();
+
+	cout << s0 << " = " << id << " 0x" << hex << id << " " << endl << flush;
+	cout << s0 << " -> " << hex
+			<< "0x" << leftJustified.maskOffLevelBit() << ".."
+			<< "0x" << leftJustified.getIdTerminator_NoDepthBit() << dec
+			<< " " << leftJustified.maskOffLevelBit() << ".."    // inf
+			<< leftJustified.getIdTerminator_NoDepthBit() << dec // sup
+			<< endl << flush;
+
+	leftJustified.setName(s1.c_str());
+	cout << s1 << " = " << id << " 0x" << hex << id << " " << endl << flush;
+	cout << s1 << " -> " << hex
+			<< "0x" << leftJustified.maskOffLevelBit() << ".."
+			<< "0x" << leftJustified.getIdTerminator_NoDepthBit() << dec
+			<< " " << leftJustified.maskOffLevelBit() << ".."
+			<< leftJustified.getIdTerminator_NoDepthBit() << dec
+			<< endl << flush;
+}
+
+KeyPair rangeFromSymbols(string lo, string hi) {
+	KeyPair range;
+	EmbeddedLevelNameEncoding leftJustified;
+	leftJustified.setName(lo.c_str());
+	range.lo = leftJustified.maskOffLevelBit();
+	leftJustified.setName(hi.c_str());
+	range.hi = leftJustified.getIdTerminator_NoDepthBit();
+	return range;
+}
+
+
+void htmRangeMultiLevel() {
+
+	bool verbose = false;
+
+	HtmRangeMultiLevel range;
+	EmbeddedLevelNameEncoding leftJustified;
+	Key lo, terminator;
+	Key lo1, terminator1;
+	int level;
+	Key successor, hi0;
+	KeyPair A, B;
+
+//	// leftJustified.setName("N0030");
+//	leftJustified.setName("S0012331");
+//	level = leftJustified.getLevel();
+//	terminator = leftJustified.getIdTerminator_NoDepthBit();
+//	// level = 3;
+//	// terminator = 4832362400168542207;
+//	cout << "level: " << level << endl << flush;
+//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
+//	cout << hex << "terminator,lo1: " << terminator << " " << lo1 << dec << endl << flush;
+//	terminator = terminator & ~((uint64) 63);
+//	terminator += level;
+//	cout << "terminator: " << leftJustified.nameById(terminator) << endl << flush;
+//	cout << "lo1:        " << leftJustified.nameById(lo1) << endl << flush;
+//	exit(1);
+
+//#define hexOut(a,b) cout << a << "0x " << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+//	leftJustified.setName("N0030");
+//	level = leftJustified.getLevel();
+//	terminator = leftJustified.getIdTerminator_NoDepthBit();
+//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
+//	hi0        = leftJustified.predecessorToLowerBound_NoDepthBit(lo1,level);
+//
+//	hexOut("lo1",lo1);
+//	hexOut("hi0",hi0);
+//	lo1        = leftJustified.successorToTerminator_NoDepthBit(hi0,level);
+//	hexOut("lo1",lo1);
+//	exit(1);
+
+	// Test how we can step up or down to the next triangle at a given level.
+
+	A = rangeFromSymbols("N0001", "N0030");
+	B = rangeFromSymbols("N0002", "N0030");
+
+	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,3));
+	ASSERT_EQUAL(A.lo,leftJustified.decrement(B.lo,3));
+	ASSERT_EQUAL(A.lo,leftJustified.increment(leftJustified.decrement(A.lo,3),3));
+
+	A = rangeFromSymbols("S0000", "N0030");
+	ASSERT_EQUAL(0,leftJustified.decrement(A.lo,3));
+
+	A = rangeFromSymbols("N3333333333333333333333333333","N3333333333333333333333333333"); // Level 27
+//#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+//	cout << "level(A.lo) " << leftJustified.levelById(A.lo) << endl << flush;
+//	hexOut("A.lo ",A.lo);
+//#undef hexOut
+	ASSERT_EQUAL(0,leftJustified.increment(A.lo,27));
+
+	A = rangeFromSymbols("N3333","N3333");
+	ASSERT_EQUAL(0,leftJustified.increment(A.lo,3));
+
+	A = rangeFromSymbols("N33000","N33330");
+	B = rangeFromSymbols("N3301","N3333");
+	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,3));
+
+	A = rangeFromSymbols("N33000","N33330");
+	B = rangeFromSymbols("N3300001","N3300001");
+	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,6));
+
+	A = rangeFromSymbols("N33000","N33330");
+	B = rangeFromSymbols("N3233333","N3233333");
+	ASSERT_EQUAL(B.lo,leftJustified.decrement(A.lo,6));
+
+	// Test the terminator
+
+	ASSERT_EQUAL(false,leftJustified.terminatorp(A.lo));
+	ASSERT_EQUAL(true,leftJustified.terminatorp(B.hi));
+
+	// Start looking at ranges.
+
+	range.purge();
+	leftJustified.setName("N0001");
+	lo         = leftJustified.maskOffLevelBit();
+	terminator = leftJustified.getIdTerminator_NoDepthBit();
+	range.addRange(lo,terminator);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(lo,lo1);
+	ASSERT_EQUAL(terminator,terminator1);
+
+	// Case 1. Add an interval before, no overlap.
+	range.purge();
+
+	KeyPair noOverlap1 = rangeFromSymbols("N0001","N0030");
+	range.addRange(noOverlap1.lo,noOverlap1.hi);
+
+	KeyPair noOverlap0 = rangeFromSymbols("S0001","S0030");
+	range.addRange(noOverlap0.lo,noOverlap0.hi);
+
+	range.reset();
+
+	range.getNext(lo1,terminator1);
+	// Should be the one just added.
+	ASSERT_EQUAL(noOverlap0.lo,lo1);
+	ASSERT_EQUAL(noOverlap0.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	// Should be the first one added.
+	ASSERT_EQUAL(noOverlap1.lo,lo1);
+	ASSERT_EQUAL(noOverlap1.hi,terminator1);
+
+	// Case 2.
+	range.purge();
+
+	// Case 2.1 inf(a) < inf(b); sup(a) > inf(b); l(a) = l(b). Concatenate a and b.
+
+	A = rangeFromSymbols("N0001","N0030"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N0000","N0003"); range.addRange(B.lo,B.hi);
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+
+	ASSERT_EQUAL(1,range.nranges());
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	// Case 2.2 inf(a) < inf(b); sup(a) > inf(b); l(a) > l(b). Add lower part of a, ignore in b.
+	range.purge();
+
+	A = rangeFromSymbols("N0001", "N0030"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N00000","N00030"); range.addRange(B.lo,B.hi);
+
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	int aLevel = leftJustified.levelById(A.lo);
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,aLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	if(verbose) cout << "Test:Case 2.3" << endl << flush;
+	// Case 2.3 inf(a) < inf(b); inf(b) <= sup(a) <= sup(b); l(a) < l(b).
+	// Add a, trim b.
+	range.purge();
+	A = rangeFromSymbols("N0001", "N0030"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N000",  "N002");  range.addRange(B.lo,B.hi);
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+	aLevel = leftJustified.levelById(A.lo);
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	range.purge();
+	A = rangeFromSymbols("N010", "N031"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N00",  "N01");  range.addRange(B.lo,B.hi);
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+	aLevel = leftJustified.levelById(A.lo);
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	// NOTE N031 .nlt. N03, because N03 contains N031
+	range.purge();
+	A = rangeFromSymbols("N010", "N031"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N00",  "N02");  range.addRange(B.lo,B.hi);
+//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+//	hexOut("A ",A.lo,A.hi);
+//	hexOut("B ",B.lo,B.hi);
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+//#undef hexOut
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+	aLevel = leftJustified.levelById(A.lo);
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	Key ranges[32] = {
+			0x7140000000000003, 0x717fffffffffffff,
+			0x7300000000000003, 0x733fffffffffffff,
+			0x73c0000000000003, 0x73ffffffffffffff,
+			0x7500000000000003, 0x75ffffffffffffff,
+			0x7680000000000003, 0x76bfffffffffffff,
+			0x7700000000000003, 0x773fffffffffffff,
+			0x7780000000000003, 0x77bfffffffffffff,
+			0x77c0000000000003, 0x77ffffffffffffff,
+			0x7880000000000003, 0x78bfffffffffffff,
+			0x7a00000000000003, 0x7affffffffffffff,
+			0x7b40000000000003, 0x7b7fffffffffffff,
+			0x7c00000000000003, 0x7cffffffffffffff,
+			0x7e40000000000003, 0x7e7fffffffffffff,
+			0x7e80000000000003, 0x7ebfffffffffffff,
+			0x7ec0000000000003, 0x7effffffffffffff,
+			0x7f00000000000003, 0x7fffffffffffffff
+	};
+
+//	cout << 1000 << endl << flush;
+	range.purge();
+	for(int i=0; i<16; i++) {
+		range.addRange(ranges[2*i],ranges[2*i+1]);
+	}
+//	cout << 1100 << endl << flush;
+	ASSERT_EQUAL(16,range.nranges());
+//	cout << 1200 << endl << flush;
+
+	range.addRange(0x7500000000000002,0x75ffffffffffffff);
+//	cout << 1300 << endl << flush;
+
+//	ASSERT_EQUAL(17,range.nranges());
+//	cout << 1000 << endl << flush;
+
+	int indexp, k;
+
+	if(verbose) {
+		range.reset();
+		k = 0;
+		while( (indexp = range.getNext(lo1,terminator1)) > 0 ) {
+			cout << k << " lo1,term1 0x" << hex << lo1 << ", 0x" << terminator1 << ",  " << dec
+					<< endl << flush;
+			k++;
+		}
+
+		range.reset();
+		k=0;
+		while( (indexp = range.getNext(lo1,terminator1)) > 0 ) {
+			if( k == 3 ) {
+				cout << k << " k,lt1 0x" << hex << lo1 << " 0x" << terminator1 << endl << flush;
+				ASSERT_EQUAL(0x7500000000000002,lo1);
+				ASSERT_EQUAL(0x75ffffffffffffff,terminator1);
+			}
+			k++;
+		}
+	}
+
+	//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	//	hexOut("A ",A.lo,A.hi);
+	//	hexOut("B ",B.lo,B.hi);
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	//#undef hexOut
+
+	// Case 3. Intervals are equal.
+
+	// Case 3.1.1 l(a) = l(b). Ignore.
+	range.purge();
+
+	A = rangeFromSymbols("N0001", "N0030"); range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N0001", "N0030"); range.addRange(B.lo,B.hi);
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	// Case 3.1.2 l(a) > l(b). Ignore.
+	range.purge();
+
+	A = rangeFromSymbols("N0001",  "N0030");  range.addRange(A.lo,A.hi);
+	B = rangeFromSymbols("N00010", "N00303"); range.addRange(B.lo,B.hi);
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	// Case 3.2 l(a) < l(b). Replace.
+	if(verbose) cout << "Test:Case 3.2 Replace" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N00010", "N00300");
+	B = rangeFromSymbols("N0001",  "N0030");   // Note the los are not really equal!
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+//	FAIL();
+
+	range.addRange(A.lo,A.hi);
+	range.addRange(B.lo,B.hi);
+
+//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+//	cout << endl << "1279 " << endl << flush;
+//	hexOut("A",A.lo,A.hi);
+//	hexOut("B",B.lo,B.hi);
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+//#undef hexOut
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	// Case 4. A inside B.
+	if(verbose) cout << "Test:Case 4. A inside B." << endl << flush;
+
+	// 4.1 l(a) == level(b)
+	if(verbose) cout << "Test:Case 4.1" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N0010", "N0020");
+	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+//	FAIL();
+
+	range.addRange(B.lo,B.hi); // old
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	// 4.1.1 l(a) > level(b)
+	if(verbose) cout << "Test:Case 4.1.1" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N00100", "N00200");
+	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+//	FAIL();
+
+	range.addRange(B.lo,B.hi); // old
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	// 4.2 l(a) < l(b)
+	if(verbose) cout << "Test:Case 4.2" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N001",  "N002");
+	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+//	FAIL();
+
+	range.addRange(B.lo,B.hi); // old
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(3,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	int bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,bLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(A.hi,bLevel),lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.defrag(); // irreducible
+	ASSERT_EQUAL(3,range.nranges());
+
+//	FAIL();
+
+	// 4.3 Collision at end. l(a) < l(b)
+	if(verbose) cout << "Test:Case 4.3 Collision at end. l(a) < l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N001",  "N003");
+	B = rangeFromSymbols("N0001", "N0033");   // Note the los are not really equal!
+
+//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+//	hexOut("A",A.lo,A.hi);
+//	hexOut("B",B.lo,B.hi);
+//#undef hexOut
+
+//	cout << " A " << A.lo << ".." << A.hi << endl;
+//	cout << " B " << B.lo << ".." << B.hi << endl;
+
+//	FAIL();
+
+	range.addRange(B.lo,B.hi); // old
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,bLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+//	FAIL();
+
+	// Case 4.4 A new, B old. B in A.
+	// 4.4.1 l(a) == l(b)
+	if(verbose) cout << "Test:Case 4.4.1 l(a) == l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N010",  "N030"); // bigger // new
+	B = rangeFromSymbols("N013",  "N023"); // smaller inside // old
+
+
+//	FAIL();
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+//	FAIL();
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	// 4.4.2 l(a) < l(b)
+	if(verbose) cout << "Test:Case 4.4.2 l(a) < l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N01",  "N03"); // bigger // new
+	B = rangeFromSymbols("N013",  "N023"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(A.hi,terminator1);
+
+
+	// 4.4.3 l(a) > l(b)
+	if(verbose) cout << "Test:Case 4.4.3 l(a) > l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N0100", "N0300"); // bigger // new
+	B = rangeFromSymbols("N013",  "N023"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(3,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(B.lo,aLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	range.defrag();
+	ASSERT_EQUAL(3,range.nranges());
+
+
+	// Case 5.
+	if(verbose) cout << "Test:Case 5.1 l(a) == l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N013", "N030"); // bigger // new
+	B = rangeFromSymbols("N010", "N023"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	if(verbose) cout << "Test:Case 5.2 l(a) > l(b)" << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N0130","N0300"); // bigger // new
+	B = rangeFromSymbols("N010", "N023"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	if(verbose) cout << "Test:Case 5.3 l(a) < l(b)" << endl << flush;
+	range.purge();
+
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+
+	A = rangeFromSymbols("N013",  "N030"); // bigger // new
+	B = rangeFromSymbols("N0100", "N0230"); // smaller inside // old
+
+//	hexOut("A ",A.lo,A.hi);
+//	hexOut("B ",B.lo,B.hi);
+
+	range.addRange(B.lo,B.hi); // old
+
+//	cout << endl << "B " << endl << flush;
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+//	cout << endl << "B+A " << endl << flush;
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[2] ",lo1,terminator1);
+
+	ASSERT_EQUAL(3,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,bLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
+//	ASSERT_EQUAL(B.hi,terminator1); // Oops. Wrong level.
+	Key l_1 = leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel);
+	Key h_0 = leftJustified.predecessorToLowerBound_NoDepthBit(l_1,aLevel); // Note this is the right level now.
+	ASSERT_EQUAL(h_0,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+//	cout << endl << "original" << endl << flush;
+//	hexOut("A",A.lo,A.hi);
+//	hexOut("B",B.lo,B.hi);
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[2] ",lo1,terminator1);
+////
+//	cout << endl << "defrag" << endl << flush;
+//	range.defrag();
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+
+//	cout << endl << flush;
+//	hexOut("A",A.lo,A.hi);
+//	hexOut("B",B.lo,B.hi);
+//	cout << endl << "defrag" << endl << flush;
+//	range.defrag();
+//	cout << "nranges: " << range.nranges() << endl << flush;
+//	range.reset();
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[0] ",lo1,terminator1);
+//	range.getNext(lo1,terminator1);
+//	hexOut("r[1] ",lo1,terminator1);
+////	range.getNext(lo1,terminator1);
+////	hexOut("r[2] ",lo1,terminator1);
+//
+//	cout << endl << flush;
+////	FAIL();
+
+	range.defrag();
+	ASSERT_EQUAL(2,range.nranges());
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+//	hexOut("A",A.lo,A.hi);
+//	hexOut("B",B.lo,B.hi);
+//	hexOut("r[0] ",lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,bLevel),terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+//	FAIL();
+#undef hexOut
+
+	// Case 6.
+
+	if(verbose) cout << "Test:Case 6 " << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N300", "N330"); // bigger // new
+	B = rangeFromSymbols("N100", "N200"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+	range.defrag();
+	ASSERT_EQUAL(2,range.nranges());
+
+	if(verbose) cout << "Test:Case 6.1 " << endl << flush;
+	range.purge();
+
+	A = rangeFromSymbols("N300", "N330"); // bigger // new
+	B = rangeFromSymbols("N1000","N2000"); // smaller inside // old
+
+	range.addRange(B.lo,B.hi); // old
+
+	ASSERT_EQUAL(1,range.nranges());
+
+	range.addRange(A.lo,A.hi); // new
+
+	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
+
+	aLevel = leftJustified.levelById(A.lo);
+	bLevel = leftJustified.levelById(B.lo);
+
+	range.reset();
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(B.lo,lo1);
+	ASSERT_EQUAL(B.hi,terminator1);
+
+	range.getNext(lo1,terminator1);
+	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
+	ASSERT_EQUAL(A.hi,terminator1);
+
+}
+
 void htmRangeLeftJustifiedSketch() {
+
+	bool verbose = false;
+
 	HtmRange leftHtmRange = HtmRange(new EmbeddedLevelNameEncoding());
+	EmbeddedLevelNameEncoding leftJustified;
+	leftJustified.setName("N01");
+	ASSERT_EQUAL("N01",leftJustified.getName());
+	ASSERT_EQUAL(leftJustified.idByName(leftJustified.getName()), leftJustified.getId());
+	ASSERT_EQUAL(4899916394579099649,    leftJustified.getId_NoLevelBit());
+	ASSERT_EQUAL(17,    leftJustified.bareId()); // right-justified id without top (level) bit set.
+
+	// addRange
+	HstmRange hstmRange;
+	leftJustified.setName("N011");
+	uint64 id = leftJustified.getId();
+	hstmRange.addRange(id,id);
+
+	// addRange
+	leftJustified.setName("N01");
+	id = leftJustified.getId();
+	hstmRange.addRange(id,id);
+
+	// addRange
+	leftJustified.setName("S0123");
+	id = leftJustified.getId();
+	hstmRange.addRange(id,id);
+
+//	cout << 100 << endl << flush;
+//	cout << " nranges = " << hstmRange.range->nranges() << endl << flush;
+//	hstmRange.range->print(HtmRange::BOTH,cout,false);
+//	cout << 101 << endl << flush;
+
+	int const nExpectedMax = 100;
+	KeyPair kp;
+	KeyPair expectedKp[nExpectedMax];
+	expectedKp[0] = KeyPair(486388759756013571,504403158265495551);
+	expectedKp[1] = KeyPair(4899916394579099649,5188146770730811391);
+	expectedKp[2] = KeyPair(0,0);
+	int expectedIndex[nExpectedMax];
+	expectedIndex[0] = 0;
+	expectedIndex[1] = 1;
+	expectedIndex[2] = 2;
+
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	if(verbose) {
+		cout << endl << "A100 " << endl << flush;
+		hstmRange.reset();
+		hstmRange.getNext(kp);
+		hexOut("r[0] ",kp.lo,kp.hi);
+		hstmRange.getNext(kp);
+		hexOut("r[1] ",kp.lo,kp.hi);
+		hstmRange.getNext(kp);
+		hexOut("r[2] ",kp.lo,kp.hi);
+		hexOut("kp.lo..pred(kp.lo) ",kp.lo,leftJustified.predecessorToLowerBound_NoDepthBit(kp.lo,1));
+	}
+#undef hexOut
+
+	// Added 3 ranges, only two should be left since N011 IS IN N01.
+	ASSERT_EQUAL(2,hstmRange.range->nranges());
+	hstmRange.reset();
+	int i = 0;
+	while(hstmRange.getNext(kp)) {
+		ASSERT_EQUAL(expectedIndex[i],i);
+		ASSERT_EQUAL(expectedKp[i].lo,kp.lo);
+		ASSERT_EQUAL(expectedKp[i].hi,kp.hi);
+		i++;
+	}
+
+	// addRange
+	leftJustified.setName("S0122");
+	uint64 id0 = leftJustified.getId();
+	leftJustified.setName("S3230");
+	uint64 id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	expectedKp[0] = KeyPair(486388759756013571,504403158265495551);   // S0123
+	expectedKp[0] = KeyPair(468374361246531587,4269412446747230207);   // S0122..S3230
+	expectedKp[1] = KeyPair(4899916394579099649,5188146770730811391); // N01
+
+	// Added another range. How many left?
+	hstmRange.range->defrag();
+	ASSERT_EQUAL(2,hstmRange.range->nranges());
+	hstmRange.reset();
+	i = 0;
+	while(hstmRange.getNext(kp)) {
+		ASSERT_EQUAL(expectedIndex[i],i);
+		ASSERT_EQUAL(expectedKp[i].lo,kp.lo);
+		ASSERT_EQUAL(expectedKp[i].hi,kp.hi);
+		i++;
+	}
+
+	string symbol;
+//	string names[4] = { "S0122", "S2133", "S2210", "S3230" };
+
+	symbol = "S220";
+	leftJustified.setName(symbol.c_str());
+	id = leftJustified.getId();
+	hstmRange.addRange(id,id);
+
+	symbol = "N013";
+	leftJustified.setName(symbol.c_str());
+	id0 = leftJustified.getId();
+	symbol = "N020";
+	leftJustified.setName(symbol.c_str());
+	id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	symbol = "N000";
+	leftJustified.setName(symbol.c_str());
+	id0 = leftJustified.getId();
+	symbol = "N011";
+	leftJustified.setName(symbol.c_str());
+	id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	symbol = "S33333";
+	leftJustified.setName(symbol.c_str());
+	id0 = leftJustified.getId();
+	symbol = "N00001";
+	leftJustified.setName(symbol.c_str());
+	id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	ASSERT_EQUAL(7,hstmRange.range->nranges());
+
+	// Should add nothing.
+	symbol = "S333331";
+	leftJustified.setName(symbol.c_str());
+	id0 = leftJustified.getId();
+	symbol = "S333332";
+	leftJustified.setName(symbol.c_str());
+	id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	ASSERT_EQUAL(7,hstmRange.range->nranges());
+
+	// Should add nothing.
+	symbol = "S33333";
+	leftJustified.setName(symbol.c_str());
+	id0 = leftJustified.getId();
+	symbol = "N00000";
+	leftJustified.setName(symbol.c_str());
+	id1 = leftJustified.getId();
+	hstmRange.addRange(id0,id1);
+
+	ASSERT_EQUAL(7,hstmRange.range->nranges());
+
+	i=0;
+//	expectedKp[i++] = KeyPair( 468374361246531587,4269412446747230207);  // S0122..S3230
+	expectedKp[i++] = KeyPair( 468374361246531587,2882303761517117439);  // S0122..S2133 -- S2133 -> S21333_
+	expectedKp[i++] = KeyPair(2882303761517117442,2954361355555045375);  // S220
+	expectedKp[i++] = KeyPair(2954361355555045379,4269412446747230207);  // S2210..S3230 -- S3230 -> S32303_
+
+//	 S33333..N000- N000..N01- N01..N01_ N01+..N020
+//	printIntervalsFromRangeSymbols("S33333","S33333");
+//	printIntervalsFromRangeSymbols("N000","N003");
+//	printIntervalsFromRangeSymbols( "N01", "N01");
+//	printIntervalsFromRangeSymbols("N020","N020");
+//	printIntervalsFromRangeSymbols("","");
+
+	expectedKp[i++] = KeyPair(4607182418800017412,4611686018427387903); // S33333..N000-, latter is S3_
+	expectedKp[i++] = KeyPair(4611686018427387906,4899916394579099647); // N000..N01-, latter is N003_
+	expectedKp[i++] = KeyPair(4899916394579099649,5188146770730811391); // N01..N01_
+    expectedKp[i++] = KeyPair(5188146770730811394,5260204364768739327); // N01+ -> N020
+
+    for(int j=0; j<i; j++) {
+    	expectedIndex[j] = j;
+    }
+    hstmRange.range->defrag();
+	ASSERT_EQUAL(i,hstmRange.range->nranges());
+	hstmRange.reset();
+	i = 0;
+	while(hstmRange.getNext(kp)) {
+		ASSERT_EQUAL(expectedIndex[i],i);
+		ASSERT_EQUAL(expectedKp[i].lo,kp.lo);
+		ASSERT_EQUAL(expectedKp[i].hi,kp.hi);
+		i++;
+	}
+
+// /////////////////////////////// bug?
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+
+	uint64 id_;
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N01");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N01 ",id_,0);
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N02");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N02 ",id_,0);
+
+	hstmRange.purge();
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N01");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N01 ",id_,0);
+	hstmRange.addRange(id_,id_);
+
+	if (verbose) cout << endl << flush;
+	ASSERT_EQUAL(1,hstmRange.range->nranges());
+	hstmRange.reset();
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[0] ",kp.lo,kp.hi);
+
+
+	hstmRange.purge();
+
+	if (verbose) cout << endl << flush;
+
+	leftJustified.setName("N011");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N011 ",id_,0);
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N011");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N011 ",id_,0);
+	hstmRange.addRange(id_,id_);
+
+	if (verbose) cout << endl << flush;
+	ASSERT_EQUAL(1,hstmRange.range->nranges());
+	hstmRange.reset();
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[0] ",kp.lo,kp.hi);
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N0120");
+	uint64 id0_ = leftJustified.getId();
+	leftJustified.setName("N0210");
+	uint64 id1_ = leftJustified.getId();
+	if (verbose) hexOut("N0120..N0210 ",id0_,id1_);
+	hstmRange.addRange(id0_,id1_);
+
+	if (verbose) cout << endl << flush;
+	ASSERT_EQUAL(2,hstmRange.range->nranges());
+	hstmRange.reset();
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[0] ",kp.lo,kp.hi);
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[1] ",kp.lo,kp.hi);
+
+	if (verbose) cout << endl << flush;
+	leftJustified.setName("N01");
+	id_ = leftJustified.getId();
+	if (verbose) hexOut("N01 ",id_,0);
+	hstmRange.addRange(id_,id_);
+
+	if (verbose) cout << endl << flush;
+	ASSERT_EQUAL(2,hstmRange.range->nranges());
+	hstmRange.reset();
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[0] ",kp.lo,kp.hi);
+	hstmRange.getNext(kp);
+	if (verbose) hexOut("r[1] ",kp.lo,kp.hi);
+
+//	FAIL();
+#undef hexOut
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -1086,7 +2287,10 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testNeighbors));
 	s.push_back(CUTE(hstmIndexLibrarySketch));
 	s.push_back(CUTE(testIndexLevel1));
-
+	s.push_back(CUTE(htmRangeMultiLevel));
+	s.push_back(CUTE(htmRangeLeftJustifiedSketch));
+	s.push_back(CUTE(htmIntersection));
+	s.push_back(CUTE(HtmRangeIntersection));
 
 	if(false) { // Lots of diagnostic output in the following.
 		s.push_back(CUTE(testRange));

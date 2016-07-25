@@ -1,5 +1,5 @@
-#ifndef _HTMHANGE_H_
-#define _HTMHANGE_H_
+#ifndef _HtmRangeMultiLevelMULTILEVEL_H_
+#define _HtmRangeMultiLevelMULTILEVEL_H_
 
 #include <iostream>
 
@@ -7,14 +7,13 @@
 #include <SkipList.h>
 #include <NameEncoding.h>
 #include <BitShiftNameEncoding.h>
+#include <EmbeddedLevelNameEncoding.h>
 
-// class ostream;
-
-KeyPair HTMRangeAtLevelFromHTMRange(int htmIdLevel, Key lo, Key hi);
+namespace HtmRangeMultiLevel_NameSpace {
 
 enum InclusionType {
-  InclOutside = 0,
-  InclInside,
+  InclOutside = 0,  /* */
+  InclInside,       /* */
   InclLo,			/* number is on low end of an interval */
   InclHi,			/* number is on high end of an interval */
   InclAdjacentXXX
@@ -33,7 +32,7 @@ struct TInsideResult {
 /**
  * Maintain a set of htm intervals.
  */
-class LINKAGE HtmRange {
+class LINKAGE HtmRangeMultiLevel {
 
  public:
   static int HIGHS;
@@ -47,20 +46,17 @@ class LINKAGE HtmRange {
   void setSymbolic(bool flag);
 
   void addRange(const Key lo, const Key hi);
-  void addRange(HtmRange *range);
+  void addRange(HtmRangeMultiLevel *range);
   void mergeRange(const Key lo, const Key hi);
   void defrag();
   void defrag(Key gap);
   void purge();
   int isIn(Key key);
   int isIn(Key lo, Key hi);
-  int isIn(HtmRange & otherRange);
+  int isIn(HtmRangeMultiLevel & otherRange);
   Key bestgap(Key desiredSize);
   int stats(int desiredSize);
   int nranges();
-
-  KeyPair intersection(KeyPair kp);
-//  bool    intersection(HtmRange otherRange, HtmRange &intersection);
 
   int getLosLength() {
 	  return my_los->getLength();
@@ -72,18 +68,17 @@ class LINKAGE HtmRange {
 
   void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
 
-  int compare(const HtmRange & other) const;
+  int compare(const HtmRangeMultiLevel & other) const;
 
   /** Hold the encoding scheme for the symbolic representation.
-   * The default is BitShiftNameEncoding.
    */
-  NameEncoding *encoding;
+  EmbeddedLevelNameEncoding *encoding;
   /** Change or set symbolic encoding.
    */
-  void setEncoding(NameEncoding *encoding) { this->encoding = encoding; }
+  void setEncoding(EmbeddedLevelNameEncoding *encoding) { this->encoding = encoding; }
   /** Return the encoding for translations, etc.
    */
-  NameEncoding *getEncoding() { return encoding; }
+  EmbeddedLevelNameEncoding *getEncoding() { return encoding; }
 
   // Moved here per ajmendez.
   // TODO MLR Why two skip lists for ranges?  Why not one skip list? Or an interval arithmetic package?
@@ -91,19 +86,19 @@ class LINKAGE HtmRange {
   SkipList *my_his;
   bool symbolicOutput;
 
-  HtmRange();
-  HtmRange(NameEncoding *encoding);
-  ~HtmRange(){
+  HtmRangeMultiLevel();
+  HtmRangeMultiLevel(EmbeddedLevelNameEncoding *encoding);
+  ~HtmRangeMultiLevel(){
     purge();
     delete encoding;
     delete my_los;
     delete my_his;
   };
   
-  HtmRange *HTMRangeAtLevelFromIntersection(HtmRange *range2, int htmIdLevel=-1);
+  HtmRangeMultiLevel *HtmRangeMultiLevelAtLevelFromIntersection(HtmRangeMultiLevel *range2, int htmIdLevel=-1);
   int contains(Key a, Key b);
 
-  friend LINKAGE ostream& operator<<(ostream& os, const HtmRange& range);
+  friend LINKAGE ostream& operator<<(ostream& os, const HtmRangeMultiLevel& range);
 
  protected:
   TInsideResult tinside(const Key mid) const;
@@ -116,4 +111,6 @@ class LINKAGE HtmRange {
 
 #define SKIP_PROB (0.5)
 
-#endif
+}
+
+#endif // _HtmRangeMultiLevelMULTILEVEL_H_

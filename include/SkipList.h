@@ -21,12 +21,41 @@ class SkipListElement;
 
 class LINKAGE SkipList{
 public:
+
 	/* ITERATOR SUPPRT */
 	/**
 	 * Reset the iterator iter to the header's zeroth element.
 	 */
 	void reset() {
 		iter = myHeader->getElement(0);
+	}
+	/// Set iter to the next element, returning True if it exists.
+	int step() {
+		iter = iter->getElement(0); return (iter != NIL);}
+	Key getkey() {
+		if (iter != NIL)
+			return iter->getKey();
+		else
+			return (Key) -1;
+	}
+	Value getvalue() {
+		if (iter != NIL)
+			return iter->getValue();
+		else
+			return (Value) -1;
+	}
+	Key getNthKey(const int n){
+		int n_now = n-1;
+		iter = myHeader->getElement(0);
+		while(n_now > 0){
+			if (iter == NIL)
+				break;
+			iter = iter->getElement(0);
+			n_now--;
+		}
+		if (iter != NIL)
+			return iter->getKey();
+		return (Key) -1;
 	}
 
 	SkipList(float probability = 0.5);
@@ -40,38 +69,7 @@ public:
 	Key findMIN(const Key searchKey) const; // search element with key NLT searchKey
 	void list(ostream & os);	// List to stream
 
-	/// Set iter to the next element, returning True if it exists.
-  int step() {
-    iter = iter->getElement(0); return (iter != NIL);}
 
-  Key getkey() {
-    if (iter != NIL)
-      return iter->getKey();
-    else
-      return (Key) -1;
-  }
-
-  Value getvalue() {
-    if (iter != NIL)
-      return iter->getValue();
-    else
-      return (Value) -1;
-  }
-
-  Key getNthKey(const int n){
-    int n_now = n-1;
-    iter = myHeader->getElement(0);
-    while(n_now > 0){
-      if (iter == NIL) 
-	break;
-      iter = iter->getElement(0);
-      n_now--;
-    }
-    if (iter != NIL)
-      return iter->getKey();
-
-    return (Key) -1;
-  }
   void free(const Key searchKey); // free element with key
   void freeRange(const Key loKey, const Key hiKey);
   void freeAll();

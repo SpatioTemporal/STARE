@@ -23,7 +23,13 @@ public:
 	uint64 idByName(const char *name);
 	uint32 levelById(uint64 id) const;
 
+	uint64 maskOffLevel(uint64 id);
+	uint64 maskOffLevel();
+
 	uint64 bareId() const; ///< Return id without top (depth) bit set.
+
+	uint64 leftJustifiedId_NoDepthBit(uint64 htmid);
+	uint64 leftJustifiedId(uint64 htmid);
 
 	const char* getEncodingType() const {return "BitShiftedNameEncoding";}
 

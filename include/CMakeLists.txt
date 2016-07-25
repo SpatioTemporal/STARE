@@ -7,7 +7,10 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/EmbeddedLevelNameEncoding.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRange.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeIterator.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeMultiLevel.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeMultiLevelIterator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Htmio.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/HstmRange.h
   ${CMAKE_CURRENT_SOURCE_DIR}/NameEncoding.h
   ${CMAKE_CURRENT_SOURCE_DIR}/RangeConvex.h
   ${CMAKE_CURRENT_SOURCE_DIR}/RangeConvex.hxx

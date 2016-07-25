@@ -30,11 +30,13 @@ SKIPOB = \
    ${OBJ}/SkipListElement.o \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
+   ${OBJ}/HtmRangeMultiLevel.o \
+   ${OBJ}/HstmRange.o \
    ${OBJ}/SpatialException.o \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
    ${OBJ}/EmbeddedLevelNameEncoding.o \
-      ${OBJ}/SpatialIndex.o \
+   ${OBJ}/SpatialIndex.o \
    ${TOPDIR}/cc_aux.o 
 
 OBJECTS = \
@@ -56,6 +58,9 @@ OBJECTS = \
    ${OBJ}/SkipList.o \
    ${OBJ}/HtmRange.o \
    ${OBJ}/HtmRangeIterator.o \
+   ${OBJ}/HtmRangeMultiLevel.o \
+   ${OBJ}/HtmRangeMultiLevelIterator.o \
+   ${OBJ}/HstmRange.o \
    ${TOPDIR}/cc_aux.o 
 
 #  ${OBJ}/SpatialConvex.o 
@@ -210,6 +215,15 @@ ${OBJ}/HtmRange.o: ${SRCS}/HtmRange.cpp
 
 ${OBJ}/HtmRangeIterator.o: ${SRCS}/HtmRangeIterator.cpp
 	$(CXX) $(CXX_FLAGS) ${SRCS}/HtmRangeIterator.cpp -o $@
+
+${OBJ}/HtmRangeMultiLevel.o: ${SRCS}/HtmRangeMultiLevel.cpp
+	$(CXX) $(CXX_FLAGS) ${SRCS}/HtmRangeMultiLevel.cpp -o $@
+
+${OBJ}/HtmRangeMultiLevelIterator.o: ${SRCS}/HtmRangeMultiLevelIterator.cpp
+	$(CXX) $(CXX_FLAGS) ${SRCS}/HtmRangeMultiLevelIterator.cpp -o $@
+
+${OBJ}/HstmRange.o: ${SRCS}/HstmRange.C
+	$(CXX) $(CXX_FLAGS) ${SRCS}/HstmRange.C -o $@
 
 ${OBJ}/NameEncoding.o: ${SRCS}/NameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@

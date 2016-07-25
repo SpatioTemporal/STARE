@@ -609,6 +609,8 @@ SpatialIndex::sortIndex() {
 The first two characters, e.g. "S1", of the symbolic name are level 0. Every
 succeeding character corresponds to the next level of resolution.
 
+The number of triangles at a given level is 8*4**level.
+
 - Legacy 32-bit information:
 	-- WARNING: This works only up to 15 levels.
               	 (we probably never need more than 7)

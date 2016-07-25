@@ -551,9 +551,13 @@ RangeConvex::testConstraints(size_t i, size_t j) {
 // used by intersect.cpp application
 //
 void
-RangeConvex::intersect(const SpatialIndex * idx, HtmRange * htmrange, bool varlen)
+RangeConvex::intersect(
+		const SpatialIndex * idx, HtmRange * htmrange, bool varlen,
+		HtmRange *hrInterior, HtmRange *hrBoundary )
 {
   hr = htmrange;
+  hrInterior_ = hrInterior;
+  hrBoundary_ = hrBoundary;
   index_ = idx;
   varlen_ = varlen;
   addlevel_ = idx->maxlevel_ - idx->buildlevel_;
@@ -571,7 +575,7 @@ RangeConvex::intersect(const SpatialIndex * idx, HtmRange * htmrange, bool varle
 
 ////////////SAVETRIXEL
 //
-inline void RangeConvex::saveTrixel(uint64 htmid)
+inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
 {
 
   // Some application want a complete htmid20 range
@@ -588,6 +592,11 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
 #endif
   if(varlen_){ // For individuals
     hr->mergeRange(htmid, htmid);
+    if( mark == SpatialMarkup::pARTIAL ) {
+  	  hrBoundary_->mergeRange(htmid,htmid);
+    } else {
+  	  hrInterior_->mergeRange(htmid,htmid);
+    }
     return;
   }
 
@@ -625,6 +634,11 @@ inline void RangeConvex::saveTrixel(uint64 htmid)
 //	  << endl << flush;
 
   hr->mergeRange(lo, hi);
+  if( mark == SpatialMarkup::pARTIAL ) {
+	  hrBoundary_->mergeRange(lo,hi);
+  } else {
+	  hrInterior_->mergeRange(lo,hi);
+  }
 
   return;
 }
@@ -688,21 +702,21 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // NEW NEW algorithm  Disabled when enablenew is 0
   //
   {
-    childID = indexNode->childID_[0];
-    if ( childID != 0){
-      ////////////// [ed:split]
-      tid = N(nodeIndex).id_;
-      childID = indexNode->childID_[0];  testTrixel(childID); // Note the recursion.
-      childID = indexNode->childID_[1];  testTrixel(childID);
-      childID = indexNode->childID_[2];  testTrixel(childID);
-      childID = indexNode->childID_[3];  testTrixel(childID);
-    } else { /// No children...
-      if (addlevel_){
-	testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
-      } else {
-	saveTrixel(N(nodeIndex).id_); // was: plist_->push_back(N(id).id_);
-      }
-    }
+	  childID = indexNode->childID_[0];
+	  if ( childID != 0){
+		  ////////////// [ed:split]
+		  tid = N(nodeIndex).id_;
+		  childID = indexNode->childID_[0];  testTrixel(childID); // Note the recursion.
+		  childID = indexNode->childID_[1];  testTrixel(childID);
+		  childID = indexNode->childID_[2];  testTrixel(childID);
+		  childID = indexNode->childID_[3];  testTrixel(childID);
+	  } else { /// No children...
+		  if (addlevel_){
+			  testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
+		  } else {
+			  saveTrixel(N(nodeIndex).id_,mark); // was: plist_->push_back(N(id).id_);
+		  }
+	  }
   } ///////////////////////////// END OF NEW ALGORITHM returns mark below;
 
 
@@ -727,56 +741,67 @@ RangeConvex::testTrixel(uint64 nodeIndex)
 //
 void
 RangeConvex::testPartial(size_t level, uint64 id,
-			   const SpatialVector & v0,
-			   const SpatialVector & v1,
-			 const SpatialVector & v2, int PPrev)
+		const SpatialVector & v0,
+		const SpatialVector & v1,
+		const SpatialVector & v2, int PPrev)
 {
-  uint64 ids[4], id0;
-  SpatialMarkup m[4];
-  int P, F;// count number of partials and fulls
+	uint64 ids[4], id0;
+	SpatialMarkup m[4];
+	int P, F;// count number of partials and fulls
 
-  SpatialVector w0 = v1 + v2; w0.normalize();
-  SpatialVector w1 = v0 + v2; w1.normalize();
-  SpatialVector w2 = v1 + v0; w2.normalize();
+	SpatialVector w0 = v1 + v2; w0.normalize();
+	SpatialVector w1 = v0 + v2; w1.normalize();
+	SpatialVector w2 = v1 + v0; w2.normalize();
 
-  ids[0] = id0 = id << 2;
-  ids[1] = id0 + 1;
-  ids[2] = id0 + 2;
-  ids[3] = id0 + 3;
+	ids[0] = id0 = id << 2;
+	ids[1] = id0 + 1;
+	ids[2] = id0 + 2;
+	ids[3] = id0 + 3;
 
-  m[0] = testNode(v0, w2, w1);
-  m[1] = testNode(v1, w0, w2);
-  m[2] = testNode(v2, w1, w0);
-  m[3] = testNode(w0, w1, w2);
+	m[0] = testNode(v0, w2, w1);
+	m[1] = testNode(v1, w0, w2);
+	m[2] = testNode(v2, w1, w0);
+	m[3] = testNode(w0, w1, w2);
 
-  F  = (m[0] == fULL)  + (m[1] == fULL)  + (m[2] == fULL)  + (m[3] == fULL);
-  P = (m[0] == pARTIAL) + (m[1] == pARTIAL) + (m[2] == pARTIAL) + (m[3] == pARTIAL);
+	F  = (m[0] == fULL)  + (m[1] == fULL)  + (m[2] == fULL)  + (m[3] == fULL);
+	P = (m[0] == pARTIAL) + (m[1] == pARTIAL) + (m[2] == pARTIAL) + (m[3] == pARTIAL);
 
-  //
-  // Several interesting cases for saving this (the parent) trixel.
-  // Case P==4, all four children are partials, so pretend parent is full, we save and return
-  // Case P==3, and F==1, most of the parent is in, so pretend that parent is full again
-  // Case P==2 or 3, but the previous testPartial had three partials, so parent was in an arc
-  // as opposed to previous partials being fewer, so parent was in a tiny corner...
-  
+	//
+	// Several interesting cases for saving this (the parent) trixel.
+	// Case P==4, all four children are partials, so pretend parent is full, we save and return
+	// Case P==3, and F==1, most of the parent is in, so pretend that parent is full again
+	// Case P==2 or 3, but the previous testPartial had three partials, so parent was in an arc
+	// as opposed to previous partials being fewer, so parent was in a tiny corner...
 
-  if ((level-- <= 0) || ((P == 4) || (F >= 2) || (P == 3 && F == 1) || (P > 1 && PPrev == 3))){
-    saveTrixel(id);
-    return;
-  } else {
-    // look at each child, see if some need saving;
-    for(int i=0; i<4; i++){
-      if (m[i] == fULL){
-	saveTrixel(ids[i]);
-      }
-    }
-    // look at the four kids again, for partials
-    
-    if (m[0] == pARTIAL) testPartial(level, ids[0], v0, w2, w1, P);
-    if (m[1] == pARTIAL) testPartial(level, ids[1], v1, w0, w2, P);
-    if (m[2] == pARTIAL) testPartial(level, ids[2], v2, w1, w0, P);
-    if (m[3] == pARTIAL) testPartial(level, ids[3], w0, w1, w2, P);
-  }
+
+	if ((level-- <= 0) || ((P == 4) || (F >= 2) || (P == 3 && F == 1) || (P > 1 && PPrev == 3))){
+		// old behavior saveTrixel(id);
+		if (P == 4) {
+			saveTrixel(id,pARTIAL);
+		} else if (F >= 2) {
+			saveTrixel(id,pARTIAL);
+		} else if (P == 3 && F == 1) {
+			saveTrixel(id,pARTIAL);
+		} else if (P > 1 && PPrev == 3) {
+			saveTrixel(id,pARTIAL);
+		}
+		return;
+	} else {
+		// look at each child, see if some need saving;
+		for(int i=0; i<4; i++){
+			if (m[i] == fULL){
+				saveTrixel(ids[i]);
+			} else if( m[i] == pARTIAL ) {
+				saveTrixel(ids[i],pARTIAL);
+			}
+		}
+		// look at the four kids again, for partials
+
+		if (m[0] == pARTIAL) testPartial(level, ids[0], v0, w2, w1, P);
+		if (m[1] == pARTIAL) testPartial(level, ids[1], v1, w0, w2, P);
+		if (m[2] == pARTIAL) testPartial(level, ids[2], v2, w1, w0, P);
+		if (m[3] == pARTIAL) testPartial(level, ids[3], w0, w1, w2, P);
+	}
 }
 
 /////////////TESTNODE/////////////////////////////////////

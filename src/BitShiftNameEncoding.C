@@ -156,3 +156,44 @@ uint64 BitShiftNameEncoding::bareId() const {
 	uint64 nodeIndexMinusIOFFSET = (id & mask);  // Add + IOFFSET; to get nodeIndex.
 	return nodeIndexMinusIOFFSET;
 }
+
+uint64 BitShiftNameEncoding::leftJustifiedId_NoDepthBit(uint64 htmid) {
+	// See bareId above.
+	// htmid is rightJustified.
+	uint32 depth = levelById(htmid)+1;
+	uint32 level = depth - 1;
+	uint64 one  = 1;
+	uint64 mask = ~(one << (2*depth+1));
+	uint64 nodeIndexMinusIOFFSET = (htmid & mask);  // Add + IOFFSET; to get nodeIndex.
+	// Now shift to right justification.
+	uint32 const topBitPosition = 63;
+	uint64 leftId = nodeIndexMinusIOFFSET << ( (topBitPosition-1) - 2*(level+1) );
+	leftId += level;
+	return leftId;
+}
+
+uint64 BitShiftNameEncoding::leftJustifiedId(uint64 htmid) {
+	// See bareId above.
+	// htmid is rightJustified.
+	uint32 depth = levelById(htmid)+1;
+	uint32 level = depth - 1;
+	uint64 one  = 1;
+	uint64 mask = ~(one << (2*depth+1));
+	uint64 nodeIndexMinusIOFFSET = (htmid & mask);  // Add + IOFFSET; to get nodeIndex.
+//	uint64 nodeIndexMinusIOFFSET = htmid;
+	// Now shift to right justification.
+	uint32 const topBitPosition = 63;
+	uint64 leftId = nodeIndexMinusIOFFSET << ( (topBitPosition-1) - 2*(level+1) );
+	leftId = leftId | (one << topBitPosition); // Depth bit
+	leftId += level;
+	return leftId;
+}
+
+// TODO Maybe have two different kinds of htmid types: left & right justified.
+uint64 BitShiftNameEncoding::maskOffLevel(uint64 htmid) {
+	return htmid;
+}
+
+uint64 BitShiftNameEncoding::maskOffLevel() {
+	return this->id;
+}

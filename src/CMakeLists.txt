@@ -6,7 +6,10 @@ set (
   EmbeddedLevelNameEncoding.C
   HtmRange.cpp
   HtmRangeIterator.cpp
+  HtmRangeMultiLevel.cpp
+  HtmRangeMultiLevelIterator.cpp
   Htmio.cpp
+  HstmRange.C
   NameEncoding.C
   RangeConvex.cpp
   SkipList.cpp

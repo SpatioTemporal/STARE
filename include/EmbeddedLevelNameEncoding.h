@@ -10,6 +10,7 @@
 
 #include <SpatialException.h>
 #include "NameEncoding.h"
+#include "BitShiftNameEncoding.h"
 #include <algorithm>
 /// Left justified
 class EmbeddedLevelNameEncoding: public NameEncoding {
@@ -27,7 +28,52 @@ public:
 	uint64 bareId() const;  ///< Returns old-style HTM w/o depth bit.
 	uint64 bareId_NoShift_NoEmbeddedLevel() const; ///< Returns HTM w/o depth bit or embedded level.
 
+	uint64 rightJustifiedId() {
+		return rightJustifiedId(id);
+	}
+
+	uint64 rightJustifiedId(uint64 leftJustifiedId) {
+		BitShiftNameEncoding rightJustified;
+		uint64 rightId;
+		uint32 level = levelById(leftJustifiedId);
+		rightId = leftJustifiedId >> ( (topBitPosition-1) - 2*(level+1) );
+//		rightId = leftJustifiedId | (one << (2*(level)) );
+//		rightId = 12;
+		return rightId;
+	}
+
 	uint64 getId_NoEmbeddedLevel() const; /// Return left justified level w/o level information.
+	uint64 getId_NoLevelBit() const { return maskOffLevelBit(); }
+
+	uint64 maskOffLevelAndLevelBit(uint64 id) const;
+	uint64 maskOffLevelAndLevelBit() const;
+
+	uint64 maskOffLevel(uint64 id);
+	uint64 maskOffLevel();
+
+	uint64 maskOffLevelBit(uint64 id) const;
+	uint64 maskOffLevelBit() const;
+
+	/// Returns a uint64 that is greater than all IDs_w/o_TopBit in HtmId, but less than HtmId's successor.
+	uint64 getIdTerminator_NoDepthBit() const;
+	uint64 getIdTerminator_NoDepthBit(
+			uint64 idWithMaskOffLevelAndLevelBit,
+			uint32 aLevel
+			) const; ///< Somewhat dangerous to use.
+	uint64 idFromTerminatorAndLevel_NoDepthBit(uint64 terminator, uint32 level); ///< Also a little dangerous.
+
+	/// What triangle is just after the terminator?
+	uint64 successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const;
+	/// What triangle is just before the lower bound?
+	uint64 predecessorToLowerBound_NoDepthBit(uint64 lowerBound, uint32 lbLevel) const;
+
+	uint64 increment(uint64 lowerBound, uint32 level) const;
+	uint64 decrement(uint64 lowerBound, uint32 level) const;
+
+	bool terminatorp(uint64 terminator) const {
+		uint64 levelBits = terminator & levelMask;
+		return levelBits == levelMask;
+	}
 
 	/**
 	 * Compare two id's without regard for the level.
@@ -123,12 +169,15 @@ public:
 
 	const char* getEncodingType() const {return "EmbeddedLevelNameEncoding";}
 
-private:
+// private:
+	const uint32 topBitPosition = 63; //
 	const uint32 levelMaskWidth = 6; // Should be consistent with below.
 	const uint64 levelMask = 63; // Probably could make do with 31 since each level takes 2 bits.
 	const uint64 one = 1;
-	const uint64 stripMask = ~(one << 63) & ~levelMask;
+	const uint64 stripMask = ~(one << 63) & ~levelMask; // This 63 is topBitPosition.
+	const uint64 stripLevelBitMask = ~(one << 63); // Do we have every permutation now?
 	const uint64 NorthSouthBit = one << 62;
+	const uint64 TopBit = one << topBitPosition;
 
 };
 

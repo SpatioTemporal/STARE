@@ -7,6 +7,8 @@
 
 #include "EmbeddedLevelNameEncoding.h"
 #include <string>
+#include <iomanip>
+#include <iostream>
 
 EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
@@ -92,6 +94,7 @@ uint64 EmbeddedLevelNameEncoding::bareId() const {
 	return shiftId;
 }
 
+
 uint64 EmbeddedLevelNameEncoding::bareId_NoShift_NoEmbeddedLevel() const {
 	// TODO This is left justified. Is bareId left or right justified?
 	uint64 stripId = id & stripMask;
@@ -103,3 +106,188 @@ uint64 EmbeddedLevelNameEncoding::getId_NoEmbeddedLevel() const {
 	return id & ~levelMask; // Only remove level.
 //	return id & stripMask;
 }
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevelAndLevelBit(uint64 id) const {
+	return id & stripMask;
+}
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevelAndLevelBit() const {
+	uint64 id = getId();
+	return id & stripMask;
+}
+
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevel(uint64 id) {
+	return id & (~levelMask);
+}
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevel() {
+	return getId_NoEmbeddedLevel();
+}
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevelBit(uint64 id) const {
+	return id & stripLevelBitMask;
+}
+
+uint64 EmbeddedLevelNameEncoding::maskOffLevelBit() const {
+	uint64 id = getId();
+	return id & stripLevelBitMask;
+}
+
+uint64 EmbeddedLevelNameEncoding::getIdTerminator_NoDepthBit() const {
+	return getIdTerminator_NoDepthBit(
+			this->maskOffLevelAndLevelBit(),
+			this->levelById(this->id));
+}
+
+uint64 EmbeddedLevelNameEncoding::getIdTerminator_NoDepthBit(uint64 b, uint32 aLevel) const {
+	uint64 one_mask_to_level = 0;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*aLevel);
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+	}
+	uint64 terminator = b | one_mask_to_level; // Watch out -- b may have stuff in the wrong place. So use bitor and pray.
+	// terminator +=  one_mask_to_level; // Fill up everything with 3s.
+	return terminator;
+}
+
+uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 terminator, uint32 level) {
+	using namespace std;
+	uint64 terminatorAtLevel = terminator; // Bump up one, but we still need the level.
+	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
+	uint64 one_mask_to_level = 0;
+	uint64 one_at_level      = one;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*(level) );
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+		one_at_level = one_at_level << 2;
+	}
+//	one_at_level = one_at_level >> 2;
+
+	terminatorAtLevel = terminatorAtLevel & (~one_mask_to_level);
+//	terminatorAtLevel += one_at_level; // Don't add one because we want to stay at the Terminator.
+
+//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+
+	// Check for overflow.
+	if( terminatorAtLevel == TopBit ) {
+		return 0; // It's invalid!
+	}
+	terminatorAtLevel += level;
+	return terminatorAtLevel;
+}
+
+// TODO Unit tests
+/// Find terminator+
+uint64 EmbeddedLevelNameEncoding::successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const {
+	using namespace std;
+	uint64 successor = terminator; // Bump up one, but we still need the level.
+	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
+	uint64 one_mask_to_level = 0;
+	uint64 one_at_level      = one;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*(level) );
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+		one_at_level = one_at_level << 2;
+	}
+//	one_at_level = one_at_level >> 2;
+
+	successor = successor & (~one_mask_to_level);
+	successor += one_at_level;
+
+//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+
+	// Check for overflow.
+	if( successor == TopBit ) {
+		return 0; // It's invalid!
+	}
+	successor += level;
+	return successor;
+}
+
+// TODO Unit tests
+/// Find lowerBound-
+uint64 EmbeddedLevelNameEncoding::predecessorToLowerBound_NoDepthBit(uint64 lowerBound, uint32 lbLevel) const {
+	uint64 decrement = one;
+	// TODO We could take the level off of lowerBound... Are we ignoring the level field in lowerBound?  Guess so...
+	// TODO Re: lbLevel -- I guess this is a little dangerous.
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*lbLevel );
+			shift +=2 ) {
+		decrement = decrement << 2;
+	}
+	uint64 predecessor = lowerBound - decrement;
+	uint64 terminator  = getIdTerminator_NoDepthBit(predecessor,lbLevel);
+	return terminator;
+}
+
+
+uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level) const {
+	using namespace std;
+	uint64 successor = lowerBound; // Bump up one, but we still need the level.
+	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
+	uint64 one_mask_to_level = 0;
+	uint64 one_at_level      = one;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*(level) );
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+		one_at_level = one_at_level << 2;
+	}
+//	one_at_level = one_at_level >> 2;
+
+	successor = successor & (~one_mask_to_level);
+	successor += one_at_level;
+
+//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+
+	// Check for overflow.
+	if( successor == TopBit ) {
+		return 0; // It's invalid!
+	}
+	successor += level;
+	return successor;
+}
+uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level) const {
+	using namespace std;
+	uint64 successor = lowerBound; // Bump up one, but we still need the level.
+	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
+	uint64 one_mask_to_level = 0;
+	uint64 one_at_level      = one;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*(level) );
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+		one_at_level = one_at_level << 2;
+	}
+//	one_at_level = one_at_level >> 2;
+
+	successor = successor & (~one_mask_to_level);
+	if( successor == 0 ) {
+		return 0; // It's invald!
+	}
+	successor -= one_at_level;
+
+//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+
+	// Check for overflow.
+	if( successor == TopBit ) {
+		return 0; // It's invalid!
+	}
+	successor += level;
+	return successor;
+}
+
+

@@ -88,7 +88,7 @@ public:
       Intersect with index.
       result is given in a list of nodes.
   */
-  void intersect(const SpatialIndex * index, HtmRange *hr, bool varlen);
+  void intersect(const SpatialIndex * index, HtmRange *hr, bool varlen, HtmRange *hrInterior = 0, HtmRange *hrBoundary = 0);
 
   /** 
       Intersect with index.
@@ -109,8 +109,16 @@ public:
 
   void write(ostream& out);
 
+    void invert() {
+    	for(int i = 0; i < constraints_.size(); i++ ) {
+    		constraints_[i].invert();
+    	}
+    }
+
  protected:
   HtmRange *hr;
+  HtmRange *hrInterior_;
+  HtmRange *hrBoundary_;
   int olevel;
 
   // Do the intersection (common function for overloaded intersect())
@@ -119,7 +127,7 @@ public:
   void simplify0();
 
   // saveTrixel: saves the given htmid for later output
-  void saveTrixel(uint64 htmid);
+  void saveTrixel(uint64 htmid, SpatialMarkup mark = SpatialMarkup::fULL);
 
   // testTrixel: Test the nodes of the index if the convex hits it
   // the argument gives the index of the nodes_ array to specify the QuadNode

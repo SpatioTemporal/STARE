@@ -50,8 +50,8 @@ public:
   void simplify();
 
   /// intersection, returns ranges of HTMids, or individual HTMids is varlen is true
-  bool intersect(const SpatialIndex * idx, HtmRange *htmrange, bool varlen);
-  bool intersect(HtmRange *htmrange, bool varlen);
+  bool intersect(const SpatialIndex * idx, HtmRange *htmrange, bool varlen, HtmRange *hrInterior=0, HtmRange *hrBoundary=0);
+  bool intersect(HtmRange *htmrange, bool varlen, HtmRange *hrInterior=0, HtmRange *hrBoundary=0);
 
   /// numConvexes: give back the number of convexes
   size_t numConvexes();
