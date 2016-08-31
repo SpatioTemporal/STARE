@@ -33,7 +33,9 @@ void HstmRange::addRange(Key a_, Key b_) {
 
 	if( aLevel != bLevel ) {
 		cout << "HstmRange::addRange::ERROR::KeyLevelMismatch "
-				<< aLevel << " != " << bLevel
+				<< aLevel << " != " << bLevel << " "
+				<< "a = " << a_ << " "
+				<< "b = " << b_ << " "
 				<< endl << flush;
 	}
 

@@ -68,7 +68,7 @@ uint64 EmbeddedLevelNameEncoding::idByName(const char* name) {
 		// 		out += ( (uint64)(name[i]-'0')) << 2*(siz - i -1);
 		// Maybe the 32 below should be set to some sort of MAXLEVEL, like HTMNAMEMAX.
 		// or perhaps getting up to HTMMAXBIT==64 or IDSIZE==64.
-		out += ( (uint64)(name[i]-'0')) << 2*(32-i)-2;
+		out += ( (uint64)(name[i]-'0')) << ( 2*(32-i)-2 );
 	}
 
 	i = 2;

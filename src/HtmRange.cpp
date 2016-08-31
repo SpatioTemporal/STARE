@@ -1011,9 +1011,15 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 			}
 		}
 
-		os << tmp_buf << " " << flush; //  << endl;
+		os << tmp_buf << flush;
+
 		my_los->step();
 		my_his->step();
+
+		// Peek ahead.  TODO A Little inefficiency here.
+		if((lo = my_los->getkey()) > 0) {
+			os << " " << flush; //  << endl;
+		}
 	}
 	return;
 }
