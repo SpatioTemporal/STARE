@@ -97,6 +97,8 @@ public:
 
   /// Normalize vector length to 1
   void normalize();
+  /// Normalize vector length to r
+  void normalize(float64 r);
 
   /// Printf it to stdout
   void show() const;

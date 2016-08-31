@@ -365,7 +365,15 @@ void testRange() {
 	cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
 	cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
 	cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
-}
+	cout << endl << flush;
+	cout << "htmR expecting 'N012022..N012023',\n        found: '"; htmR->print(3,cout,true); cout << "'" << flush; // 3 == BOTH
+	cout << endl << flush;
+
+	htmR->addRange(12685,12687);
+	cout << "htmR expecting 'N012022..N012023 N012031..N012033',\n        found: '"; htmR->print(3,cout,true); cout << "'" << flush; // 3 == BOTH
+	cout << endl << flush;
+
+	}
 
 void testRangeContains() {
 	HtmRange *h1 = new HtmRange;
@@ -1235,8 +1243,8 @@ void htmRangeMultiLevel() {
 	EmbeddedLevelNameEncoding leftJustified;
 	Key lo, terminator;
 	Key lo1, terminator1;
-	int level;
-	Key successor, hi0;
+//	int level;
+//  Key successor, hi0;
 	KeyPair A, B;
 
 //	// leftJustified.setName("N0030");
@@ -1432,6 +1440,8 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1);
 	ASSERT_EQUAL(A.hi,terminator1);
 
+	// Beware the hardcoded array length.
+	// This next test was motivated by a bug.
 	Key ranges[32] = {
 			0x7140000000000003, 0x717fffffffffffff,
 			0x7300000000000003, 0x733fffffffffffff,
@@ -2291,6 +2301,8 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(htmRangeLeftJustifiedSketch));
 	s.push_back(CUTE(htmIntersection));
 	s.push_back(CUTE(HtmRangeIntersection));
+
+//	s.push_back(CUTE(testRange));
 
 	if(false) { // Lots of diagnostic output in the following.
 		s.push_back(CUTE(testRange));

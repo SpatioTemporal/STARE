@@ -199,6 +199,16 @@ float64 sum;
    y_ /= sum;
    z_ /= sum;
 }
+void
+SpatialVector::normalize(float64 r)
+{
+float64 sum, scale;
+   sum = x_*x_ + y_*y_ + z_*z_;
+   scale = r/sqrt(sum);
+   x_ *= scale;
+   y_ *= scale;
+   z_ *= scale;
+}
 
 /////////////LENGTH///////////////////////////////////////
 //
