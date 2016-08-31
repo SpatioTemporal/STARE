@@ -23,7 +23,7 @@
 #include "EmbeddedLevelNameEncoding.h"
 
 #include "HtmRangeMultiLevel.h"
-#include "HtmRAngeMultiLevelIterator.h"
+#include "HtmRangeMultiLevelIterator.h"
 
 #include "HstmRange.h"
 
