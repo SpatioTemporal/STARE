@@ -263,14 +263,14 @@ void idByPoint1() {
 	float64 z = -0.61093299962057024;
 	int id_ = htm_->lookupID(x,y,z);
 
-//	cout << "id_ " << id_ << endl << flush;
+	//	cout << "id_ " << id_ << endl << flush;
 
 	const SpatialIndex index = htm_->index();
 
 	SpatialVector v = SpatialVector(x,y,z);
 	int idTest = index.idByPoint(v);
 
-//	cout << "idT " << idTest << endl << flush;
+	//	cout << "idT " << idTest << endl << flush;
 
 	ASSERT_EQUALM("idByPoint1",id_,idTest);
 }
@@ -278,7 +278,7 @@ void idByPoint1() {
 /**
  * Try an example found in the source's comments.
  */
- void idByName() {
+void idByName() {
 	int level         = 4;
 	int saveLevel     = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
@@ -373,22 +373,22 @@ void testRange() {
 	cout << "htmR expecting 'N012022..N012023 N012031..N012033',\n        found: '"; htmR->print(3,cout,true); cout << "'" << flush; // 3 == BOTH
 	cout << endl << flush;
 
-	}
+}
 
 void testRangeContains() {
 	HtmRange *h1 = new HtmRange;
 	h1->purge();
 	h1->addRange(50,100);
-//	cout << "10..40 in 50..100? "<< h1->contains(10,40) << endl << flush;
-//	h1->addRange(1,5);
-//	h1->addRange(200,400);
+	//	cout << "10..40 in 50..100? "<< h1->contains(10,40) << endl << flush;
+	//	h1->addRange(1,5);
+	//	h1->addRange(200,400);
 
-//	cout << "10..40 in 50..100 " << endl << h1->contains(10,40) << endl << flush;
-//	cout << "10..60 in 50..100 " << endl << h1->contains(10,60) << endl << flush;
-//	cout << "10..110 in 50..100 " << endl << h1->contains(10,110) << endl << flush;
-//	cout << "100.5..110 in 50..100 " << endl << h1->contains(100.5,110) << endl << flush;
-//	cout << "60..110 in 50..100 " << endl << h1->contains(60,110) << endl << flush;
-//	cout << "60..80 in 50..100 " << endl << h1->contains(60,80) << endl << flush;
+	//	cout << "10..40 in 50..100 " << endl << h1->contains(10,40) << endl << flush;
+	//	cout << "10..60 in 50..100 " << endl << h1->contains(10,60) << endl << flush;
+	//	cout << "10..110 in 50..100 " << endl << h1->contains(10,110) << endl << flush;
+	//	cout << "100.5..110 in 50..100 " << endl << h1->contains(100.5,110) << endl << flush;
+	//	cout << "60..110 in 50..100 " << endl << h1->contains(60,110) << endl << flush;
+	//	cout << "60..80 in 50..100 " << endl << h1->contains(60,80) << endl << flush;
 
 	ASSERT_EQUALM("10..40 in 50..100",0,h1->contains(10,40));
 	ASSERT_EQUALM("10..60 in 50..100",-1,h1->contains(10,60));
@@ -667,12 +667,12 @@ void testEmbeddedLevelNameEncoding() {
 	ASSERT_EQUALM("name to id",0xb000000000000000ull,id);
 
 	id = name->idByName("S33");
-//	cout <<  "id: S33=0x" << hex << id << dec << " " << id << endl << flush;
+	//	cout <<  "id: S33=0x" << hex << id << dec << " " << id << endl << flush;
 	// 13546827679130451969ull
 	ASSERT_EQUALM("name to id",0xbc00000000000001ull,id);
 
 	id = name->idByName("S303");
-//	cout <<  "id: S303=0x" << hex << id << dec << " " << id << endl << flush;
+	//	cout <<  "id: S303=0x" << hex << id << dec << " " << id << endl << flush;
 	// 12898309332789100546ull
 	ASSERT_EQUALM("name to id",0xb300000000000002ull,id);
 
@@ -683,10 +683,10 @@ void testEmbeddedLevelNameEncoding() {
 
 	ASSERT_EQUALM("level of id",4,name->levelById(name->idByName("S00000")));
 
-//	const char *nameString = "N20001123123123123";
+	//	const char *nameString = "N20001123123123123";
 	const char *nameString = "S00000";
 	id = name->idByName(nameString);
-//	cout <<  "id: " << nameString << "=0x" << hex << id << ", " << dec << " " << id << endl << flush;
+	//	cout <<  "id: " << nameString << "=0x" << hex << id << ", " << dec << " " << id << endl << flush;
 
 	name->setName(nameString);
 	//    cout << "name: " << nameString << endl << flush
@@ -697,11 +697,11 @@ void testEmbeddedLevelNameEncoding() {
 
 	uint64 rightId = rightJustified->idByName(nameString);
 
-//	cout << "right       " << hex << setfill('0') << setw(16) << rightId << dec << endl << flush;
-//	cout << "left.right  " << hex << setfill('0') << setw(16) << name->rightJustifiedId() << dec << endl << flush;
-//	cout << "id    0x" << hex << setfill('0') << setw(16) << name->getId() << dec << endl << flush;
-//	cout << "left  0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId_NoDepthBit(rightId) << dec << endl << flush;
-//	cout << "left1 0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId(rightId) << dec << endl << flush;
+	//	cout << "right       " << hex << setfill('0') << setw(16) << rightId << dec << endl << flush;
+	//	cout << "left.right  " << hex << setfill('0') << setw(16) << name->rightJustifiedId() << dec << endl << flush;
+	//	cout << "id    0x" << hex << setfill('0') << setw(16) << name->getId() << dec << endl << flush;
+	//	cout << "left  0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId_NoDepthBit(rightId) << dec << endl << flush;
+	//	cout << "left1 0x" << hex << setfill('0') << setw(16) << rightJustified->leftJustifiedId(rightId) << dec << endl << flush;
 
 	ASSERT_EQUAL(rightJustified->idByName(nameString),name->rightJustifiedId());
 	ASSERT_EQUAL(name->maskOffLevelBit(),rightJustified->leftJustifiedId_NoDepthBit(rightId));
@@ -753,8 +753,8 @@ void testEmbeddedLevelNameEncoding() {
 
 		EmbeddedLevelNameEncoding *n0  = new EmbeddedLevelNameEncoding("N01230");
 		EmbeddedLevelNameEncoding *n1  = new EmbeddedLevelNameEncoding("N0123");
-//		ASSERT_EQUALM("N01230.level < N0123.level?",false,n0->levelLessThan(*n1));
-//		ASSERT_EQUALM("N0123.level < N01230.level?",true,n1->levelLessThan(*n0));
+		//		ASSERT_EQUALM("N01230.level < N0123.level?",false,n0->levelLessThan(*n1));
+		//		ASSERT_EQUALM("N0123.level < N01230.level?",true,n1->levelLessThan(*n0));
 		ASSERT_EQUALM("N01230.level == 4",4,n0->getLevel());
 		ASSERT_EQUALM("N0123.level == 3",3,n1->getLevel());
 		ASSERT_EQUALM("greatest common level N01230 and N0123",3,n0->greatestCommonLevel(*n1));
@@ -763,8 +763,8 @@ void testEmbeddedLevelNameEncoding() {
 		n1->setName("S01230");
 		ASSERT_EQUALM("greatest common level N01230 and S01230",-1,n0->greatestCommonLevel(*n1));
 		n1->setName("N0123");
-//		cout << "'" << n0->greatestCommonName(*n1) << "'" << endl << flush;
-//		cout << "'" << "N0123" << "'" << endl << flush;
+		//		cout << "'" << n0->greatestCommonName(*n1) << "'" << endl << flush;
+		//		cout << "'" << "N0123" << "'" << endl << flush;
 		string expected = "N0123", found=n0->greatestCommonName(*n1);
 		ASSERT_EQUALM("greatest common name N01230 and N0123",expected,found);
 		n1->setName("N02230");
@@ -799,7 +799,7 @@ void testRangeManipulation() {
 		ASSERT_EQUALM("kp.set == 0", 0,kp.set);
 		h.reset();
 		h.defrag();
-//		h.print(HtmRange::BOTH,cout,false);
+		//		h.print(HtmRange::BOTH,cout,false);
 	}
 
 	{
@@ -820,33 +820,33 @@ void testRangeManipulation() {
 
 
 
-//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
-//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
+	//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
+	//	cout << "kp: " << kp.lo << " " << kp.hi << " " << kp.set << endl << flush;
 
-//	h.addRange(12,20);
-//	cout << "10..20-1" << endl << flush;
-//	h.print(HtmRange::BOTH,cout,false);
-//	h.defrag();
-//	cout << "10..20-2" << endl << flush;
-//	h.print(HtmRange::BOTH,cout,false);
-//	HtmRange i;
-//	i.addRange(15,25);
-//	h.addRange(&i);
-//	cout << "10..25-1" << endl << flush;
-//	h.print(HtmRange::BOTH,cout,false);
+	//	h.addRange(12,20);
+	//	cout << "10..20-1" << endl << flush;
+	//	h.print(HtmRange::BOTH,cout,false);
+	//	h.defrag();
+	//	cout << "10..20-2" << endl << flush;
+	//	h.print(HtmRange::BOTH,cout,false);
+	//	HtmRange i;
+	//	i.addRange(15,25);
+	//	h.addRange(&i);
+	//	cout << "10..25-1" << endl << flush;
+	//	h.print(HtmRange::BOTH,cout,false);
 }
 
 void testRangeDuplication() {
 	HtmRange h;
-//	long losCount, hisCount;
+	//	long losCount, hisCount;
 
 	h.addRange(100,110);
-//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
+	//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
 	ASSERT_EQUAL(1,h.my_los->getCount());
 	ASSERT_EQUAL(1,h.my_his->getCount());
 
 	h.addRange(105,110);
-//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
+	//	losCount = h.my_los->getCount(); hisCount = h.my_his->getCount();
 	ASSERT_EQUAL(1,h.my_los->getCount());
 	ASSERT_EQUAL(1,h.my_his->getCount());
 
@@ -859,10 +859,10 @@ void testRangeDuplication() {
 	ASSERT_EQUAL(2,h.my_los->getCount());
 	ASSERT_EQUAL(2,h.my_his->getCount());
 
-//	h.defrag();
-//	ASSERT_EQUAL(2,h.my_los->getCount());
-//	ASSERT_EQUAL(1,h.my_his->getCount());
-//	cout << "101" << endl << flush;
+	//	h.defrag();
+	//	ASSERT_EQUAL(2,h.my_los->getCount());
+	//	ASSERT_EQUAL(1,h.my_his->getCount());
+	//	cout << "101" << endl << flush;
 
 	Key lo, hi;
 	h.reset();
@@ -902,7 +902,7 @@ void testRotation() {
 	//	ASSERT_EQUALM("Failing test",0,1);
 	stringstream msgStream;
 	float64 tolerance = 1.0e-15;
-//	SpatialVector origin(0.0,0.0,0.0);
+	//	SpatialVector origin(0.0,0.0,0.0);
 	const SpatialVector zHat(0.0,0.0,1.0), xHat(1.0,0.0,0.0), yHat(0.0,1.0,0.0);
 
 	float64 theta;
@@ -979,81 +979,81 @@ void testNeighbors() {
 	htmId = 12683;
 	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
 
-//	cout
-//	<< "Neighbors of " << (htmId) << " are "
-//	<< (neighbors[0]) << ", "
-//	<< (neighbors[1]) << ", "
-//	<< (neighbors[2]) << endl << flush;
-//
-//	cout
-//	<< "Neighbors of " << index.nameById(htmId) << " are "
-//	<< index.nameById(neighbors[0]) << ", "
-//	<< index.nameById(neighbors[1]) << ", "
-//	<< index.nameById(neighbors[2]) << endl << flush;
+	//	cout
+	//	<< "Neighbors of " << (htmId) << " are "
+	//	<< (neighbors[0]) << ", "
+	//	<< (neighbors[1]) << ", "
+	//	<< (neighbors[2]) << endl << flush;
+	//
+	//	cout
+	//	<< "Neighbors of " << index.nameById(htmId) << " are "
+	//	<< index.nameById(neighbors[0]) << ", "
+	//	<< index.nameById(neighbors[1]) << ", "
+	//	<< index.nameById(neighbors[2]) << endl << flush;
 
-//	htmId = 12681;
-//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
-//
-//	cout
-//	<< "Neighbors of " << (htmId) << " are "
-//	<< (neighbors[0]) << ", "
-//	<< (neighbors[1]) << ", "
-//	<< (neighbors[2]) << endl << flush;
-//
-//	cout
-//	<< "Neighbors of " << index.nameById(htmId) << " are "
-//	<< index.nameById(neighbors[0]) << ", "
-//	<< index.nameById(neighbors[1]) << ", "
-//	<< index.nameById(neighbors[2]) << endl << flush;
-//
-//	htmId = 13190;
-//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
-//
-//	cout
-//	<< "Neighbors of " << (htmId) << " are "
-//	<< (neighbors[0]) << ", "
-//	<< (neighbors[1]) << ", "
-//	<< (neighbors[2]) << endl << flush;
-//
-//	cout
-//	<< "Neighbors of " << index.nameById(htmId) << " are "
-//	<< index.nameById(neighbors[0]) << ", "
-//	<< index.nameById(neighbors[1]) << ", "
-//	<< index.nameById(neighbors[2]) << endl << flush;
-//
-//	htmId = 12680;
-//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
-//
-//	cout
-//	<< "Neighbors of " << (htmId) << " are "
-//	<< (neighbors[0]) << ", "
-//	<< (neighbors[1]) << ", "
-//	<< (neighbors[2]) << endl << flush;
-//
-//	htmId = 12682;
-//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
-//
-//	cout
-//	<< "Neighbors of " << (htmId) << " are "
-//	<< (neighbors[0]) << ", "
-//	<< (neighbors[1]) << ", "
-//	<< (neighbors[2]) << endl << flush;
+	//	htmId = 12681;
+	//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	//
+	//	cout
+	//	<< "Neighbors of " << (htmId) << " are "
+	//	<< (neighbors[0]) << ", "
+	//	<< (neighbors[1]) << ", "
+	//	<< (neighbors[2]) << endl << flush;
+	//
+	//	cout
+	//	<< "Neighbors of " << index.nameById(htmId) << " are "
+	//	<< index.nameById(neighbors[0]) << ", "
+	//	<< index.nameById(neighbors[1]) << ", "
+	//	<< index.nameById(neighbors[2]) << endl << flush;
+	//
+	//	htmId = 13190;
+	//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	//
+	//	cout
+	//	<< "Neighbors of " << (htmId) << " are "
+	//	<< (neighbors[0]) << ", "
+	//	<< (neighbors[1]) << ", "
+	//	<< (neighbors[2]) << endl << flush;
+	//
+	//	cout
+	//	<< "Neighbors of " << index.nameById(htmId) << " are "
+	//	<< index.nameById(neighbors[0]) << ", "
+	//	<< index.nameById(neighbors[1]) << ", "
+	//	<< index.nameById(neighbors[2]) << endl << flush;
+	//
+	//	htmId = 12680;
+	//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	//
+	//	cout
+	//	<< "Neighbors of " << (htmId) << " are "
+	//	<< (neighbors[0]) << ", "
+	//	<< (neighbors[1]) << ", "
+	//	<< (neighbors[2]) << endl << flush;
+	//
+	//	htmId = 12682;
+	//	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	//
+	//	cout
+	//	<< "Neighbors of " << (htmId) << " are "
+	//	<< (neighbors[0]) << ", "
+	//	<< (neighbors[1]) << ", "
+	//	<< (neighbors[2]) << endl << flush;
 
 	htmId = 12683;
 	uint64 neighborsV[9];
 	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
 
-//	cout << "Neighbors Across Vertices of " << (htmId) << " are ";
-//	for(int i=0; i<9; i++) {
-//		cout << (neighborsV[i]) << " ";
-//	}
-//	cout << endl << flush;
-//
-//	cout << "Neighbors Across Vertices of " << index.nameById(htmId) << " are ";
-//	for(int i=0; i<9; i++) {
-//		cout << index.nameById(neighborsV[i]) << " ";
-//	}
-//	cout << endl << flush;
+	//	cout << "Neighbors Across Vertices of " << (htmId) << " are ";
+	//	for(int i=0; i<9; i++) {
+	//		cout << (neighborsV[i]) << " ";
+	//	}
+	//	cout << endl << flush;
+	//
+	//	cout << "Neighbors Across Vertices of " << index.nameById(htmId) << " are ";
+	//	for(int i=0; i<9; i++) {
+	//		cout << index.nameById(neighborsV[i]) << " ";
+	//	}
+	//	cout << endl << flush;
 
 	ASSERT_EQUALM("Neighbor face 23",12680,neighbors[0]);
 	ASSERT_EQUALM("Neighbor face 13",12681,neighbors[1]);
@@ -1196,7 +1196,7 @@ void HtmRangeIntersection() {
 	ASSERT_EQUAL(12,kp.lo);
 	ASSERT_EQUAL(15,kp.hi);
 
-//	FAIL();
+	//	FAIL();
 }
 
 
@@ -1243,37 +1243,37 @@ void htmRangeMultiLevel() {
 	EmbeddedLevelNameEncoding leftJustified;
 	Key lo, terminator;
 	Key lo1, terminator1;
-//	int level;
-//  Key successor, hi0;
+	//	int level;
+	//  Key successor, hi0;
 	KeyPair A, B;
 
-//	// leftJustified.setName("N0030");
-//	leftJustified.setName("S0012331");
-//	level = leftJustified.getLevel();
-//	terminator = leftJustified.getIdTerminator_NoDepthBit();
-//	// level = 3;
-//	// terminator = 4832362400168542207;
-//	cout << "level: " << level << endl << flush;
-//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
-//	cout << hex << "terminator,lo1: " << terminator << " " << lo1 << dec << endl << flush;
-//	terminator = terminator & ~((uint64) 63);
-//	terminator += level;
-//	cout << "terminator: " << leftJustified.nameById(terminator) << endl << flush;
-//	cout << "lo1:        " << leftJustified.nameById(lo1) << endl << flush;
-//	exit(1);
+	//	// leftJustified.setName("N0030");
+	//	leftJustified.setName("S0012331");
+	//	level = leftJustified.getLevel();
+	//	terminator = leftJustified.getIdTerminator_NoDepthBit();
+	//	// level = 3;
+	//	// terminator = 4832362400168542207;
+	//	cout << "level: " << level << endl << flush;
+	//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
+	//	cout << hex << "terminator,lo1: " << terminator << " " << lo1 << dec << endl << flush;
+	//	terminator = terminator & ~((uint64) 63);
+	//	terminator += level;
+	//	cout << "terminator: " << leftJustified.nameById(terminator) << endl << flush;
+	//	cout << "lo1:        " << leftJustified.nameById(lo1) << endl << flush;
+	//	exit(1);
 
-//#define hexOut(a,b) cout << a << "0x " << hex << setfill('0') << setw(16) << b << dec << endl << flush;
-//	leftJustified.setName("N0030");
-//	level = leftJustified.getLevel();
-//	terminator = leftJustified.getIdTerminator_NoDepthBit();
-//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
-//	hi0        = leftJustified.predecessorToLowerBound_NoDepthBit(lo1,level);
-//
-//	hexOut("lo1",lo1);
-//	hexOut("hi0",hi0);
-//	lo1        = leftJustified.successorToTerminator_NoDepthBit(hi0,level);
-//	hexOut("lo1",lo1);
-//	exit(1);
+	//#define hexOut(a,b) cout << a << "0x " << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+	//	leftJustified.setName("N0030");
+	//	level = leftJustified.getLevel();
+	//	terminator = leftJustified.getIdTerminator_NoDepthBit();
+	//	lo1        = leftJustified.successorToTerminator_NoDepthBit(terminator,level);
+	//	hi0        = leftJustified.predecessorToLowerBound_NoDepthBit(lo1,level);
+	//
+	//	hexOut("lo1",lo1);
+	//	hexOut("hi0",hi0);
+	//	lo1        = leftJustified.successorToTerminator_NoDepthBit(hi0,level);
+	//	hexOut("lo1",lo1);
+	//	exit(1);
 
 	// Test how we can step up or down to the next triangle at a given level.
 
@@ -1288,10 +1288,10 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(0,leftJustified.decrement(A.lo,3));
 
 	A = rangeFromSymbols("N3333333333333333333333333333","N3333333333333333333333333333"); // Level 27
-//#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
-//	cout << "level(A.lo) " << leftJustified.levelById(A.lo) << endl << flush;
-//	hexOut("A.lo ",A.lo);
-//#undef hexOut
+	//#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+	//	cout << "level(A.lo) " << leftJustified.levelById(A.lo) << endl << flush;
+	//	hexOut("A.lo ",A.lo);
+	//#undef hexOut
 	ASSERT_EQUAL(0,leftJustified.increment(A.lo,27));
 
 	A = rangeFromSymbols("N3333","N3333");
@@ -1356,8 +1356,8 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N0001","N0030"); range.addRange(A.lo,A.hi);
 	B = rangeFromSymbols("N0000","N0003"); range.addRange(B.lo,B.hi);
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
 	range.reset();
 	range.getNext(lo1,terminator1);
@@ -1376,8 +1376,8 @@ void htmRangeMultiLevel() {
 
 	int aLevel = leftJustified.levelById(A.lo);
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
 	range.reset();
 	range.getNext(lo1,terminator1);
@@ -1421,15 +1421,15 @@ void htmRangeMultiLevel() {
 	range.purge();
 	A = rangeFromSymbols("N010", "N031"); range.addRange(A.lo,A.hi);
 	B = rangeFromSymbols("N00",  "N02");  range.addRange(B.lo,B.hi);
-//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
-//	hexOut("A ",A.lo,A.hi);
-//	hexOut("B ",B.lo,B.hi);
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
-//#undef hexOut
+	//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	//	hexOut("A ",A.lo,A.hi);
+	//	hexOut("B ",B.lo,B.hi);
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	//#undef hexOut
 	ASSERT_EQUAL(2,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
 	aLevel = leftJustified.levelById(A.lo);
 	range.reset();
@@ -1461,20 +1461,20 @@ void htmRangeMultiLevel() {
 			0x7f00000000000003, 0x7fffffffffffffff
 	};
 
-//	cout << 1000 << endl << flush;
+	//	cout << 1000 << endl << flush;
 	range.purge();
 	for(int i=0; i<16; i++) {
 		range.addRange(ranges[2*i],ranges[2*i+1]);
 	}
-//	cout << 1100 << endl << flush;
+	//	cout << 1100 << endl << flush;
 	ASSERT_EQUAL(16,range.nranges());
-//	cout << 1200 << endl << flush;
+	//	cout << 1200 << endl << flush;
 
 	range.addRange(0x7500000000000002,0x75ffffffffffffff);
-//	cout << 1300 << endl << flush;
+	//	cout << 1300 << endl << flush;
 
-//	ASSERT_EQUAL(17,range.nranges());
-//	cout << 1000 << endl << flush;
+	//	ASSERT_EQUAL(17,range.nranges());
+	//	cout << 1000 << endl << flush;
 
 	int indexp, k;
 
@@ -1548,24 +1548,24 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N00010", "N00300");
 	B = rangeFromSymbols("N0001",  "N0030");   // Note the los are not really equal!
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(A.lo,A.hi);
 	range.addRange(B.lo,B.hi);
 
-//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
-//	cout << endl << "1279 " << endl << flush;
-//	hexOut("A",A.lo,A.hi);
-//	hexOut("B",B.lo,B.hi);
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
-//#undef hexOut
+	//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	//	cout << endl << "1279 " << endl << flush;
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	//#undef hexOut
 
 	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
 
@@ -1586,10 +1586,10 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N0010", "N0020");
 	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(B.lo,B.hi); // old
 	range.addRange(A.lo,A.hi); // new
@@ -1610,10 +1610,10 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N00100", "N00200");
 	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(B.lo,B.hi); // old
 	range.addRange(A.lo,A.hi); // new
@@ -1634,10 +1634,10 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N001",  "N002");
 	B = rangeFromSymbols("N0001", "N0030");   // Note the los are not really equal!
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(B.lo,B.hi); // old
 	range.addRange(A.lo,A.hi); // new
@@ -1663,7 +1663,7 @@ void htmRangeMultiLevel() {
 	range.defrag(); // irreducible
 	ASSERT_EQUAL(3,range.nranges());
 
-//	FAIL();
+	//	FAIL();
 
 	// 4.3 Collision at end. l(a) < l(b)
 	if(verbose) cout << "Test:Case 4.3 Collision at end. l(a) < l(b)" << endl << flush;
@@ -1672,15 +1672,15 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N001",  "N003");
 	B = rangeFromSymbols("N0001", "N0033");   // Note the los are not really equal!
 
-//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
-//	hexOut("A",A.lo,A.hi);
-//	hexOut("B",B.lo,B.hi);
-//#undef hexOut
+	//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+	//#undef hexOut
 
-//	cout << " A " << A.lo << ".." << A.hi << endl;
-//	cout << " B " << B.lo << ".." << B.hi << endl;
+	//	cout << " A " << A.lo << ".." << A.hi << endl;
+	//	cout << " B " << B.lo << ".." << B.hi << endl;
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(B.lo,B.hi); // old
 	ASSERT_EQUAL(1,range.nranges());
@@ -1700,7 +1700,7 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(A.lo,lo1);
 	ASSERT_EQUAL(A.hi,terminator1);
 
-//	FAIL();
+	//	FAIL();
 
 	// Case 4.4 A new, B old. B in A.
 	// 4.4.1 l(a) == l(b)
@@ -1711,7 +1711,7 @@ void htmRangeMultiLevel() {
 	B = rangeFromSymbols("N013",  "N023"); // smaller inside // old
 
 
-//	FAIL();
+	//	FAIL();
 
 	range.addRange(B.lo,B.hi); // old
 
@@ -1719,7 +1719,7 @@ void htmRangeMultiLevel() {
 
 	range.addRange(A.lo,A.hi); // new
 
-//	FAIL();
+	//	FAIL();
 
 	ASSERT_EQUAL(1,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
 
@@ -1851,28 +1851,28 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N013",  "N030"); // bigger // new
 	B = rangeFromSymbols("N0100", "N0230"); // smaller inside // old
 
-//	hexOut("A ",A.lo,A.hi);
-//	hexOut("B ",B.lo,B.hi);
+	//	hexOut("A ",A.lo,A.hi);
+	//	hexOut("B ",B.lo,B.hi);
 
 	range.addRange(B.lo,B.hi); // old
 
-//	cout << endl << "B " << endl << flush;
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
+	//	cout << endl << "B " << endl << flush;
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
 
 	ASSERT_EQUAL(1,range.nranges());
 
 	range.addRange(A.lo,A.hi); // new
 
-//	cout << endl << "B+A " << endl << flush;
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[2] ",lo1,terminator1);
+	//	cout << endl << "B+A " << endl << flush;
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[2] ",lo1,terminator1);
 
 	ASSERT_EQUAL(3,range.nranges()); // Be careful where you call nranges!  Might manipulate internal iterators!
 
@@ -1886,7 +1886,7 @@ void htmRangeMultiLevel() {
 
 	range.getNext(lo1,terminator1);
 	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
-//	ASSERT_EQUAL(B.hi,terminator1); // Oops. Wrong level.
+	//	ASSERT_EQUAL(B.hi,terminator1); // Oops. Wrong level.
 	Key l_1 = leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel);
 	Key h_0 = leftJustified.predecessorToLowerBound_NoDepthBit(l_1,aLevel); // Note this is the right level now.
 	ASSERT_EQUAL(h_0,terminator1);
@@ -1895,50 +1895,50 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(leftJustified.successorToTerminator_NoDepthBit(B.hi,aLevel),lo1); // aLevel < bLevel: aLevel wins.
 	ASSERT_EQUAL(A.hi,terminator1);
 
-//	cout << endl << "original" << endl << flush;
-//	hexOut("A",A.lo,A.hi);
-//	hexOut("B",B.lo,B.hi);
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[2] ",lo1,terminator1);
-////
-//	cout << endl << "defrag" << endl << flush;
-//	range.defrag();
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
+	//	cout << endl << "original" << endl << flush;
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[2] ",lo1,terminator1);
+	////
+	//	cout << endl << "defrag" << endl << flush;
+	//	range.defrag();
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
 
-//	cout << endl << flush;
-//	hexOut("A",A.lo,A.hi);
-//	hexOut("B",B.lo,B.hi);
-//	cout << endl << "defrag" << endl << flush;
-//	range.defrag();
-//	cout << "nranges: " << range.nranges() << endl << flush;
-//	range.reset();
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[0] ",lo1,terminator1);
-//	range.getNext(lo1,terminator1);
-//	hexOut("r[1] ",lo1,terminator1);
-////	range.getNext(lo1,terminator1);
-////	hexOut("r[2] ",lo1,terminator1);
-//
-//	cout << endl << flush;
-////	FAIL();
+	//	cout << endl << flush;
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+	//	cout << endl << "defrag" << endl << flush;
+	//	range.defrag();
+	//	cout << "nranges: " << range.nranges() << endl << flush;
+	//	range.reset();
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[0] ",lo1,terminator1);
+	//	range.getNext(lo1,terminator1);
+	//	hexOut("r[1] ",lo1,terminator1);
+	////	range.getNext(lo1,terminator1);
+	////	hexOut("r[2] ",lo1,terminator1);
+	//
+	//	cout << endl << flush;
+	////	FAIL();
 
 	range.defrag();
 	ASSERT_EQUAL(2,range.nranges());
 
 	range.reset();
 	range.getNext(lo1,terminator1);
-//	hexOut("A",A.lo,A.hi);
-//	hexOut("B",B.lo,B.hi);
-//	hexOut("r[0] ",lo1,terminator1);
+	//	hexOut("A",A.lo,A.hi);
+	//	hexOut("B",B.lo,B.hi);
+	//	hexOut("r[0] ",lo1,terminator1);
 	ASSERT_EQUAL(B.lo,lo1);
 	ASSERT_EQUAL(leftJustified.predecessorToLowerBound_NoDepthBit(A.lo,bLevel),terminator1);
 
@@ -1946,7 +1946,7 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
 	ASSERT_EQUAL(A.hi,terminator1);
 
-//	FAIL();
+	//	FAIL();
 #undef hexOut
 
 	// Case 6.
@@ -2036,10 +2036,10 @@ void htmRangeLeftJustifiedSketch() {
 	id = leftJustified.getId();
 	hstmRange.addRange(id,id);
 
-//	cout << 100 << endl << flush;
-//	cout << " nranges = " << hstmRange.range->nranges() << endl << flush;
-//	hstmRange.range->print(HtmRange::BOTH,cout,false);
-//	cout << 101 << endl << flush;
+	//	cout << 100 << endl << flush;
+	//	cout << " nranges = " << hstmRange.range->nranges() << endl << flush;
+	//	hstmRange.range->print(HtmRange::BOTH,cout,false);
+	//	cout << 101 << endl << flush;
 
 	int const nExpectedMax = 100;
 	KeyPair kp;
@@ -2101,7 +2101,7 @@ void htmRangeLeftJustifiedSketch() {
 	}
 
 	string symbol;
-//	string names[4] = { "S0122", "S2133", "S2210", "S3230" };
+	//	string names[4] = { "S0122", "S2133", "S2210", "S3230" };
 
 	symbol = "S220";
 	leftJustified.setName(symbol.c_str());
@@ -2157,27 +2157,27 @@ void htmRangeLeftJustifiedSketch() {
 	ASSERT_EQUAL(7,hstmRange.range->nranges());
 
 	i=0;
-//	expectedKp[i++] = KeyPair( 468374361246531587,4269412446747230207);  // S0122..S3230
+	//	expectedKp[i++] = KeyPair( 468374361246531587,4269412446747230207);  // S0122..S3230
 	expectedKp[i++] = KeyPair( 468374361246531587,2882303761517117439);  // S0122..S2133 -- S2133 -> S21333_
 	expectedKp[i++] = KeyPair(2882303761517117442,2954361355555045375);  // S220
 	expectedKp[i++] = KeyPair(2954361355555045379,4269412446747230207);  // S2210..S3230 -- S3230 -> S32303_
 
-//	 S33333..N000- N000..N01- N01..N01_ N01+..N020
-//	printIntervalsFromRangeSymbols("S33333","S33333");
-//	printIntervalsFromRangeSymbols("N000","N003");
-//	printIntervalsFromRangeSymbols( "N01", "N01");
-//	printIntervalsFromRangeSymbols("N020","N020");
-//	printIntervalsFromRangeSymbols("","");
+	//	 S33333..N000- N000..N01- N01..N01_ N01+..N020
+	//	printIntervalsFromRangeSymbols("S33333","S33333");
+	//	printIntervalsFromRangeSymbols("N000","N003");
+	//	printIntervalsFromRangeSymbols( "N01", "N01");
+	//	printIntervalsFromRangeSymbols("N020","N020");
+	//	printIntervalsFromRangeSymbols("","");
 
 	expectedKp[i++] = KeyPair(4607182418800017412,4611686018427387903); // S33333..N000-, latter is S3_
 	expectedKp[i++] = KeyPair(4611686018427387906,4899916394579099647); // N000..N01-, latter is N003_
 	expectedKp[i++] = KeyPair(4899916394579099649,5188146770730811391); // N01..N01_
-    expectedKp[i++] = KeyPair(5188146770730811394,5260204364768739327); // N01+ -> N020
+	expectedKp[i++] = KeyPair(5188146770730811394,5260204364768739327); // N01+ -> N020
 
-    for(int j=0; j<i; j++) {
-    	expectedIndex[j] = j;
-    }
-    hstmRange.range->defrag();
+	for(int j=0; j<i; j++) {
+		expectedIndex[j] = j;
+	}
+	hstmRange.range->defrag();
 	ASSERT_EQUAL(i,hstmRange.range->nranges());
 	hstmRange.reset();
 	i = 0;
@@ -2188,7 +2188,7 @@ void htmRangeLeftJustifiedSketch() {
 		i++;
 	}
 
-// /////////////////////////////// bug?
+	// /////////////////////////////// bug?
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 	//	hexOut("A",A.lo,A.hi);
 	//	hexOut("B",B.lo,B.hi);
@@ -2270,8 +2270,237 @@ void htmRangeLeftJustifiedSketch() {
 	hstmRange.getNext(kp);
 	if (verbose) hexOut("r[1] ",kp.lo,kp.hi);
 
-//	FAIL();
+	//	FAIL();
 #undef hexOut
+}
+
+void SciDBIntegration() {
+
+	EmbeddedLevelNameEncoding leftJustified;
+//	Key lo, terminator;
+//	Key lo1, terminator1;
+	KeyPair A, B;
+
+#define hexOut1(a,b) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+#define decOut1(a,b) cout << a << " " << dec << setfill('0') << setw(16) << b << dec << endl << flush;
+
+	leftJustified.setName("S000");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		decOut1("lefd: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		decOut1("lefd: "+string(leftJustified.getName()),(uint64)leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("left: "+string(leftJustified.getName()),(uint64)leftJustified.getSciDBLeftJustifiedFormat());
+	}
+	ASSERT_EQUAL(leftJustified.getId(),0x8000000000000002);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x0000000000000002);
+
+	leftJustified.setName("S1");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+	}
+	ASSERT_EQUAL(leftJustified.getId(),0x9000000000000000);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x0800000000000000);
+
+	leftJustified.setName("S2");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+	}
+	ASSERT_EQUAL(leftJustified.getId(),0xa000000000000000);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x1000000000000000);
+
+	leftJustified.setName("S3");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+	}
+	ASSERT_EQUAL(leftJustified.getId(),0xb000000000000000);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x1800000000000000);
+
+	leftJustified.setName("S01");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+	}
+	ASSERT_EQUAL(leftJustified.getId(),0x8400000000000001);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x0200000000000001);
+
+	if(false) {
+		cout << endl;
+		leftJustified.setName("S001");
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		cout << endl;
+		leftJustified.setName("S300");
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		cout << endl;
+		leftJustified.setName("N000");
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		cout << endl;
+		leftJustified.setName("N0");
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		leftJustified.setName("N1");
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		leftJustified.setName("N2");
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+
+		leftJustified.setName("N3");
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+	}
+
+	leftJustified.setName("N300");
+	if(false) {
+		cout << endl;
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("lTrm: "+string(leftJustified.getName()),leftJustified.getIdTerminator_NoDepthBit());
+		hexOut1("left: "+string(leftJustified.getName()),leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(leftJustified.getSciDBLeftJustifiedFormat());
+		int64 idKlugeTerm = leftJustified.getSciDBLeftJustifiedFormat(leftJustified.getIdTerminator_NoDepthBit());
+		hexOut1("lef': "+string(leftJustified.getName()),leftJustified.getId());
+		hexOut1("lTrm: "+string(leftJustified.getName()),leftJustified.getIdTerminator_NoDepthBit());
+		hexOut1("lTrm' "+string(leftJustified.getName()),idKlugeTerm);
+	}
+
+	ASSERT_EQUAL(leftJustified.getId(),0xf000000000000002);
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x3800000000000002);
+	int64 idKlugeTerm1 = leftJustified.getSciDBLeftJustifiedFormat(leftJustified.getIdTerminator_NoDepthBit());
+	ASSERT_EQUAL(leftJustified.getIdTerminator_NoDepthBit(),0x70ffffffffffffff);
+	ASSERT_EQUAL(idKlugeTerm1,0x387fffffffffffff);
+
+	if(false) {
+		cout << endl;
+		hexOut1(-256,-256);
+		hexOut1(-3,-3);
+		hexOut1(-2,-2);
+		hexOut1(-1,-1);
+		hexOut1(0,0);
+	}
+
+	if(false) {
+		cout << endl;
+		{
+
+			leftJustified.setName("S0");   int64 a0 = leftJustified.getId_NoLevelBit();
+			leftJustified.setName("S00");  int64 a1 = leftJustified.getId_NoLevelBit();
+			leftJustified.setName("S002"); int64 a2 = leftJustified.getId_NoLevelBit();
+			leftJustified.setName("S003"); int64 a3 = leftJustified.getId_NoLevelBit();
+
+			hexOut1("a0",a0);
+			hexOut1("a1",a1);
+			hexOut1("a2",a2);
+			hexOut1("a3",a3);
+
+			cout << endl;
+			cout << " a0 < a1 " << (a0 < a1) << endl;
+			cout << " a0 < a2 " << (a0 < a2) << endl;
+			cout << " a1 < a2 " << (a1 < a2) << endl;
+			cout << " a2 < a3 " << (a2 < a3) << endl;
+
+		}
+
+		cout << endl;
+		{
+
+			leftJustified.setName("S0");   int64 a0 = leftJustified.getSciDBLeftJustifiedFormat();
+			leftJustified.setName("S00");  int64 a1 = leftJustified.getSciDBLeftJustifiedFormat();
+			leftJustified.setName("S002"); int64 a2 = leftJustified.getSciDBLeftJustifiedFormat();
+			leftJustified.setName("S003"); int64 a3 = leftJustified.getSciDBLeftJustifiedFormat();
+
+			hexOut1("a0",a0);
+			hexOut1("a1",a1);
+			hexOut1("a2",a2);
+			hexOut1("a3",a3);
+
+			decOut1("a0",a0);
+			decOut1("a1",a1);
+			decOut1("a2",a2);
+			decOut1("a3",a3);
+
+			cout << endl;
+			cout << " a0 < a1 " << (a0 < a1) << endl;
+			cout << " a0 < a2 " << (a0 < a2) << endl;
+			cout << " a1 < a2 " << (a1 < a2) << endl;
+			cout << " a2 < a3 " << (a2 < a3) << endl;
+
+		}
+	}
+
+	leftJustified.setName("S3333333333333333333333333333");
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x1ffffffffffffffb);
+	leftJustified.setName("N3333333333333333333333333333");
+	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x3ffffffffffffffb);
+
+	if(false) {
+		// TODO:  Why is this not 2**63 -1 instead of 2**62 - 1
+		cout << " max:  " << (1ULL << 62) - 1 << endl;
+		cout << " min: " << ( - static_cast<int64_t>(1ULL << 62)) << endl;
+		int64 indexMax = (1ULL << 62) - 1 ;
+		int64 indexMin = - (static_cast<int64_t>(indexMax));
+		hexOut1("indexMax ",indexMax);
+		hexOut1("indexMin ",indexMin);
+		leftJustified.setName("S3333333333333333333333333333");
+		int64 idS3 = leftJustified.getSciDBLeftJustifiedFormat();
+		hexOut1(" s3: ",leftJustified.getSciDBLeftJustifiedFormat());
+		decOut1(" s3: ",leftJustified.getSciDBLeftJustifiedFormat());
+		leftJustified.setName("N3333333333333333333333333333");
+		hexOut1(" n3: ",leftJustified.getSciDBLeftJustifiedFormat());
+		decOut1(" n3: ",leftJustified.getSciDBLeftJustifiedFormat());
+		cout << " level: " << leftJustified.getLevel() << endl;
+
+		int64 idN3 = leftJustified.getSciDBLeftJustifiedFormat();
+		cout << "idN3 > indexMax : " << (idN3 > indexMax) << endl;
+		cout << "idN3 - indexMax : " << (idN3 - indexMax) << endl;
+		cout << "idN3 - idS3     : " << (idN3 - idS3) << endl;
+		cout << "                  " << (indexMax - indexMin) << endl;
+		cout << endl;
+	}
+
+#undef hexOut1
+#undef decOut1
+
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -2301,8 +2530,9 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(htmRangeLeftJustifiedSketch));
 	s.push_back(CUTE(htmIntersection));
 	s.push_back(CUTE(HtmRangeIntersection));
+	s.push_back(CUTE(SciDBIntegration));
 
-//	s.push_back(CUTE(testRange));
+	//	s.push_back(CUTE(testRange));
 
 	if(false) { // Lots of diagnostic output in the following.
 		s.push_back(CUTE(testRange));

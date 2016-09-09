@@ -67,6 +67,10 @@ public:
 	/// What triangle is just before the lower bound?
 	uint64 predecessorToLowerBound_NoDepthBit(uint64 lowerBound, uint32 lbLevel) const;
 
+	int64 getSciDBLeftJustifiedFormat(uint64 leftId) const;
+	int64 getSciDBLeftJustifiedFormat() const;
+	void setIdFromSciDBLeftJustifiedFormat( int64 id_scidb );
+
 	uint64 increment(uint64 lowerBound, uint32 level) const;
 	uint64 decrement(uint64 lowerBound, uint32 level) const;
 
@@ -175,9 +179,12 @@ public:
 	const uint64 levelMask = 63; // Probably could make do with 31 since each level takes 2 bits.
 	const uint64 one = 1;
 	const uint64 stripMask = ~(one << 63) & ~levelMask; // This 63 is topBitPosition.
-	const uint64 stripLevelBitMask = ~(one << 63); // Do we have every permutation now?
-	const uint64 NorthSouthBit = one << 62;
+	const uint64 LevelBit = (one << 63); // Do we have every permutation now?
+	const uint64 stripLevelBitMask = ~(LevelBit); // one << 63); // Do we have every permutation now?
+	const uint64 NorthSouthBit = (one << 62);
 	const uint64 TopBit = one << topBitPosition;
+
+	const uint64 levelMaskSciDB = 31;
 
 };
 

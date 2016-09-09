@@ -182,6 +182,66 @@ uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 ter
 	return terminatorAtLevel;
 }
 
+
+int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) const {
+
+	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
+	uint64 level             = leftId & levelMask;
+
+	int64 leftId_scidb = id_NoLevelBit;
+	leftId_scidb = leftId_scidb >> 1;
+	// Add the level bits back in.
+	leftId_scidb = leftId_scidb & ~levelMaskSciDB; // Note this covers bits 0-4.
+	leftId_scidb = leftId_scidb | level;
+
+	return leftId_scidb;
+
+}
+
+int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat() const {
+
+	// Left justified
+	// 63 Empty/level bit/valid id
+	// 62 N-S bit
+	// 61-6 Tree traversal
+	// 5 Empty (Masked with levelMask)
+	// 4..0 Level
+
+	// SciDB's new format for indexing. As long as we're keeping HTM indices positive.
+	// 63 Empty/ 0 -> valid; 1 -> invalid
+	// 62 Empty
+	// 61 N-S bit // Positive numbers are in the northern hemisphere.
+	// 60..5 Tree traversal
+	// 4..0 Level (Masked with levelMaskSciDB)
+
+	// *** TODO *** NEED ERROR CHECKING & SIGNALLING FOR INVALID IDs
+
+	int64 leftId_scidb = 0; // Erf... // What's the invalid id now? Anything negative.
+
+	uint64 id_NoLevelBit = this->maskOffLevelBit();
+	int64  level         = this->getLevel();
+//	iTmp = id_NoLevelBit;
+
+	leftId_scidb = id_NoLevelBit;
+	leftId_scidb = leftId_scidb >> 1;
+	// Add the level bits back in.
+	leftId_scidb = leftId_scidb & ~levelMaskSciDB;
+	leftId_scidb = leftId_scidb | level;
+
+	return leftId_scidb;
+}
+
+void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scidb ) {
+	// See bit format in getSciDBLeftJustifiedFormatKluge.
+	// Note this does set this->id.
+	uint64 iTmp = id_scidb & ~levelMaskSciDB;
+	uint64 level = id_scidb & levelMaskSciDB;
+	iTmp = iTmp << 1;
+	iTmp = iTmp | level;
+	iTmp = iTmp | TopBit;
+	this->id = iTmp; // hacking...
+}
+
 // TODO Unit tests
 /// Find terminator+
 uint64 EmbeddedLevelNameEncoding::successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const {
