@@ -188,6 +188,7 @@ int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) cons
 	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
 	uint64 level             = leftId & levelMask;
 
+	// TODO Repent the sin of redundant code.
 	int64 leftId_scidb = id_NoLevelBit;
 	leftId_scidb = leftId_scidb >> 1;
 	// Add the level bits back in.
@@ -222,6 +223,7 @@ int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat() const {
 	int64  level         = this->getLevel();
 //	iTmp = id_NoLevelBit;
 
+	// TODO Repent the sin of redundant code.
 	leftId_scidb = id_NoLevelBit;
 	leftId_scidb = leftId_scidb >> 1;
 	// Add the level bits back in.
