@@ -67,8 +67,26 @@ public:
 	/// What triangle is just before the lower bound?
 	uint64 predecessorToLowerBound_NoDepthBit(uint64 lowerBound, uint32 lbLevel) const;
 
+	/**
+	 * The *SciDB* routines provide an interface to convert
+	 * the 64-bit format to the int64 format.
+	 *
+	 */
+
+	/// Convert a 64-bit left justified ID to a 62-bit int64 ID for SciDB.
+	/// Note this->id is assumes the 64-bit format.
 	int64 getSciDBLeftJustifiedFormat(uint64 leftId) const;
+
+	/// Return the 62-bit int64 ID for SciDB.
+	/// Note this->id is assumed to stay in 64-bit format.
 	int64 getSciDBLeftJustifiedFormat() const;
+
+	/// Return a terminator index in the int64 format.
+	/// Note this->id is assumed to stay in 64-bit format.
+	int64 getSciDBTerminatorLeftJustifiedFormat() const;
+
+	/// Set this->id to correspond to the int64 id from SciDB.
+	/// Note this->id is assumed to stay in 64-bit format.
 	void setIdFromSciDBLeftJustifiedFormat( int64 id_scidb );
 
 	uint64 increment(uint64 lowerBound, uint32 level) const;

@@ -47,4 +47,9 @@ class LINKAGE Htmio  {
 
 };
 
+const std::string OpenRepresentationString = "(";
+const std::string CloseRepresentationString = ")";
+const std::string SymbolicRepresentationString = "HSTMSymbolic";
+const std::string HexRepresentationString = "HSTMHex";
+
 #endif

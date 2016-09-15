@@ -29,6 +29,8 @@ class SpatialSign;
 #include <HtmRange.h>
 
 typedef std::vector<uint64> ValueVectorUint64;
+
+using namespace HtmRange_NameSpace;
  
 /** Enumerator. Define the return values of an intersection */
 

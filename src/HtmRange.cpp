@@ -1,5 +1,6 @@
 #include <iostream> // cout
 #include <iomanip>  // setw()
+#include <Htmio.h> // various *RepresentationString elements
 #include <HtmRange.h>
 #include <SpatialIndex.h> // levelOfId
 
@@ -16,6 +17,7 @@
 #define GAP_HISTO_SIZE 10000
 
 using namespace std;
+using namespace HtmRange_NameSpace;
 
 /**
  * Translate an HtmRange to one at a greater level.  If the desired level is
@@ -555,6 +557,7 @@ void HtmRange::addRange(const Key lo, const Key hi)
 //	my_his->insert(hi, (Value) 0);
 
 	// TODO Simplest thing that might possibly work.
+	// TODO Need some error checking here!
 	mergeRange(lo,hi);
 	return;
 }
@@ -895,11 +898,19 @@ int HtmRange::stats(int desiredSize)
 	return bestgap;
 }
 
-std::ostream& operator<<(std::ostream& os, const HtmRange& range)
-{
+namespace HtmRange_NameSpace {
+
+std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
 	char tmp_buf[256];
 	Key lo, hi;
 	// os << "Start Range " << endl;
+	// Preamble TODO change from symbolicOutput boolean to enumerated type.
+	os << OpenRepresentationString;
+	if (range.symbolicOutput){
+		os << SymbolicRepresentationString << " ";
+	} else {
+		os << HexRepresentationString << " ";
+	}
 	range.my_los->reset();
 	range.my_his->reset();
 	while((lo = range.my_los->getkey()) > 0){
@@ -914,7 +925,7 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range)
 			sprintf(tmp_buf, "%I64d %I64d ", lo, hi);
 			os << tmp_buf;
 #else
-			os << lo << " " << hi;
+			os << "x" << hex << lo << " " << "x" << hi << dec;
 			// sprintf(tmp_buf, "%llu %llu ", lo, hi);
 			// sprintf(tmp_buf, "%llu %lld ", lo, hi);
 #endif
@@ -925,9 +936,166 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range)
 		// os << lo << " " << hi << endl;
 		range.my_los->step();
 		range.my_his->step();
+		if(range.my_los->getkey()>0) {
+			os << ", ";
+		}
 	}
+	os << CloseRepresentationString;
 	// os << "End Range ";
 	return os;
+}
+
+}
+
+HtmRange HtmRange::getSpan() {
+	HtmRange ret;
+	Key lo, hi, first, last;
+	my_los->reset();
+	my_his->reset();
+	lo = my_los->getkey();
+	first = lo;
+	if(lo<0) {
+		throw SpatialFailure("HtmRange::getSpan::EmptyRange!!");
+	}
+	while(lo > 0) {
+		hi = my_his->getkey();
+		my_los->step();
+		my_his->step();
+		lo = my_los->getkey();
+	}
+	last = hi;
+	ret.addRange(first,last);
+	return ret;
+}
+
+void HtmRange::parse(std::string rangeString) {
+	char tmp_buf[256];
+	std::string::size_type pos, lastPos = 0;
+
+//	cout << "x000:" << rangeString << endl;
+
+	pos = 0;
+	std::string s0 = rangeString.substr(pos,1);
+//	cout << "x050: " << s0  << endl;
+//	cout << "x051: " << OpenRepresentationString << endl;
+//	cout << "x052: " << (OpenRepresentationString == s0) << endl;
+//	cout << "x053: " << pos << endl;
+
+	if(s0 != OpenRepresentationString) {
+		throw SpatialFailure("HtmRange::parse::NoOpenRepresentationString");
+	}
+
+	int iSpace = rangeString.find_first_of(' ');
+	// cout << "x120: " << iSpace << endl;
+
+	int posSym = rangeString.find(SymbolicRepresentationString);
+//	cout << "x100: " << posSym << endl;
+	if( posSym > 0 ) {
+		 throw SpatialFailure("HtmRange::parse::Symbolic read not implemented.");
+//		int count = 5;
+//		while(true) {
+//			--count; if(count<0)exit(1);
+//			posHex = rangeString.find("x");
+//			if(posHex<0) {
+//				cout << "x111-return-1" << endl;
+//				return; // No more data -- return
+//				// throw(SpatialFailure("HtmRange::parse::hex::NoData"));
+//			}
+//			int posComma = rangeString.find(",");
+//			std:string endSymbol;
+//			if(posComma<0) {
+//				endSymbol = ")";
+//			} else {
+//				endSymbol = ",";
+//			}
+//			int posClose = rangeString.find(endSymbol);
+//			if(posClose<0) {
+//				// No more data -- return; // Might be a syntax error though...
+//				cout << "x112-return-1, can't find: '" << endSymbol << "'" << endl;
+//				return;
+//			}
+//			std::string first = rangeString.substr(posHex,posClose-posHex);
+//			rangeString = rangeString.substr(posClose+1);
+//			cout << "y100: first: '" << first << "'" << endl;
+//			cout << "y101: rest:  '" << rangeString << "'" << endl;
+//			vector<int64> keys;
+//			//while(true) {
+//			int iSpace = first.find(" ");
+//			int64 i0 = -1, i1 = -1;
+//			int status;
+//			if(iSpace<0) {
+//				status = sscanf(first.c_str(),"x%llx",&i0);
+//				if(status == EOF){
+//					throw SpatialFailure("HtmRange::parse::hex::sscanf one variable yields EOF");
+//				}
+//				addRange(i0,i0);
+//			} else {
+//				status = sscanf(first.c_str(),"x%llx x%llx",&i0, &i1);
+//				if(status == EOF){
+//					throw SpatialFailure("HtmRange::parse::hex::sscanf two variables yields EOF");
+//				}
+//				addRange(i0,i1);
+//			}
+//			cout << "i0,i1: " << i0 << " " << i1 << endl;
+//		}
+	}
+
+	int posHex = rangeString.find(HexRepresentationString);
+//	cout << "x110: " << posHex << endl;
+	rangeString = rangeString.substr(posHex+HexRepresentationString.length()+1);
+//	cout << "x110a:'" << rangeString << "'" << endl;
+	if( posHex > 0 ) {
+		int count = 1024; // TODO Repent the sin of hard coded values.
+		while(true) {
+			--count; if(count<0) {
+				string msg = "HtmRange::parse::hex::scanned more than "+to_string(count)+" items! ";
+				throw SpatialFailure(msg.c_str());
+			}
+			posHex = rangeString.find("x");
+			if(posHex<0) {
+//				cout << "x111-return-1" << endl;
+				return; // No more data -- return
+				// throw(SpatialFailure("HtmRange::parse::hex::NoData"));
+			}
+			int posComma = rangeString.find(",");
+			std:string endSymbol;
+			if(posComma<0) {
+				endSymbol = ")";
+			} else {
+				endSymbol = ",";
+			}
+			int posClose = rangeString.find(endSymbol);
+			if(posClose<0) {
+				// No more data -- return; // Might be a syntax error though...
+//				cout << "x112-return-1, can't find: '" << endSymbol << "'" << endl;
+				return;
+			}
+			std::string first = rangeString.substr(posHex,posClose-posHex);
+			rangeString = rangeString.substr(posClose+1);
+//			cout << "y100: first: '" << first << "'" << endl;
+//			cout << "y101: rest:  '" << rangeString << "'" << endl;
+			vector<int64> keys;
+			//while(true) {
+			int iSpace = first.find(" ");
+			int64 i0 = -1, i1 = -1;
+			int status;
+			if(iSpace<0) {
+				status = sscanf(first.c_str(),"x%llx",&i0);
+				if(status == EOF){
+					throw SpatialFailure("HtmRange::parse::hex::sscanf one variable yields EOF");
+				}
+				addRange(i0,i0);
+			} else {
+				status = sscanf(first.c_str(),"x%llx x%llx",&i0, &i1);
+				if(status == EOF){
+					throw SpatialFailure("HtmRange::parse::hex::sscanf two variables yields EOF");
+				}
+				addRange(i0,i1);
+			}
+//			cout << "i0,i1: " << i0 << " " << i1 << endl;
+		}
+	}
+	// Error if you get here.
 }
 
 int HtmRange::getNext(Key &lo, Key &hi)

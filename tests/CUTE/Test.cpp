@@ -364,6 +364,7 @@ void testRange() {
 	cout << dec;
 	cout << "htmR expecting 'N012022 N012023', found: " << (*htmR) << endl << flush;
 	cout << "htmR expecting 'N012023', found: "; htmR->print(0,cout,true); // Highs
+	cout << endl << flush;
 	cout << "htmR expecting 'N012022', found: "; htmR->print(1,cout,true); // Lows
 	cout << endl << flush;
 	cout << "htmR expecting 'N012022..N012023',\n        found: '"; htmR->print(3,cout,true); cout << "'" << flush; // 3 == BOTH
@@ -1073,19 +1074,161 @@ void testNeighbors() {
 }
 
 void hstmIndexLibrarySketch() {
+
 	HstmIndex hIndex = HstmIndex();
 	// cout << "10 " << flush;
 	// cout << hIndex.range->nranges() << endl << flush;
-	ASSERT_NOT_EQUAL_TO((HtmRange*)0,hIndex.range);
+	ASSERT_NOT_EQUAL_TO((HtmRangeMultiLevel*)0,hIndex.range);
 	ASSERT_EQUAL(0,hIndex.range->nranges());
 	hIndex.range->addRange(1,3);
 	ASSERT_EQUAL(1,hIndex.range->nranges());
 	stringstream ss;
 	ss << "'" << *(hIndex.range) << "'";
 	// cout << "20: "<< ss.str() << endl << flush;
-	ASSERT_EQUAL("'1 3'",ss.str());
+	// old style ASSERT_EQUAL("'1 3'",ss.str());
+	ASSERT_EQUAL("'(HSTMHex x1 x3)'",ss.str());
 	// ASSERT_EQUALM("False test",false,true);
-}
+
+	hIndex.range->addRange(4,5);
+	hIndex.range->addRange(7,9);
+	hIndex.range->addRange(11,42);
+	hIndex.range->reset();
+	ss.str("");	ss << "'" << *(hIndex.range) << "'";
+//	cout << "nranges = " << hIndex.range->nranges() << endl;
+//	cout << "ss.str(): "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("'(HSTMHex x1 x3, x4 x5, x7 x9, xb x2a)'",ss.str());
+
+	hIndex.range->purge();
+	EmbeddedLevelNameEncoding name;
+	name.setName("N333");
+	hIndex.range->addRange(
+			name.getSciDBLeftJustifiedFormat(),
+			name.getSciDBTerminatorLeftJustifiedFormat());
+//	cout << hex << "id_scidb:      "
+//			<< name.getSciDBLeftJustifiedFormat() << " "
+//			<< name.getSciDBTerminatorLeftJustifiedFormat() << dec << endl;
+	hIndex.range->addRange(name.getId_NoLevelBit(),name.getIdTerminator_NoDepthBit());
+//	cout << hex << "id_nolevelbit: "
+//			<< name.getId_NoLevelBit() << " "
+//			<< name.getIdTerminator_NoDepthBit() << dec << endl;
+	hIndex.range->reset();
+	ss.str("");	ss << "'" << *(hIndex.range) << "'";
+//	cout << "nranges = " << hIndex.range->nranges() << endl;
+//	cout << "ss.str(): "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("'(HSTMHex x3f80000000000002 x3fffffffffffffff, x7f00000000000002 x7fffffffffffffff)'",ss.str());
+
+	hIndex.range->purge();
+	// hIndex.range->parse("(HSTMSymbolic");
+	// hIndex.range->parse("(HSTMHex");
+	//	hIndex.range->parse("(HSTMHex x001)");
+//	hIndex.range->parse("(HSTMHex x001 x002)");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("(HSTMHex x001 x002");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("HSTMHex x001 x002)");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("(HSTMHex 001 x002)");
+	hIndex.range->purge();
+	std::string testString = "(HSTMHex x1 x2, x3 x4, x5 x6)";
+	hIndex.range->parse(testString);
+	ss.str(""); ss << *(hIndex.range);
+//	cout << "ss.str(): " << ss.str() << endl;
+	ASSERT_EQUAL(testString,ss.str());
+	hIndex.range->purge();
+	testString = "(HSTMHex x3f80000000000002 x3fffffffffffffff, x7f00000000000002 x7fffffffffffffff)";
+	hIndex.range->parse(testString);
+	ss.str(""); ss << *(hIndex.range);
+//	cout << "ss.str(): " << ss.str() << endl;
+	ASSERT_EQUAL(testString,ss.str());
+	// TODO More error checking.
+//	hIndex.range->purge();
+//	hIndex.range->parse("()");
+	HtmRangeMultiLevel r = hIndex.range->getSpan();
+	ss.str(""); ss << r;
+//	cout << "span: " << r << endl;
+	ASSERT_EQUAL("(HSTMHex x3f80000000000002 x7fffffffffffffff)",ss.str());
+	}
+
+void htmIOFormatting() {
+
+
+	HtmRange *range = new HtmRange;
+	range->purge();
+	range->addRange(1,3);
+	ASSERT_EQUAL(1,range->nranges());
+	stringstream ss;
+	ss << "'" << *(range) << "'";
+	// cout << "20: "<< ss.str() << endl << flush;
+	// old style ASSERT_EQUAL("'1 3'",ss.str());
+	ASSERT_EQUAL("'(HSTMHex x1 x3)'",ss.str());
+	// ASSERT_EQUALM("False test",false,true);
+
+	range->addRange(4,5);
+	range->addRange(7,9);
+	range->addRange(11,42);
+	range->reset();
+	ss.str("");	ss << "'" << *(range) << "'";
+//	cout << "nranges = " << hIndex.range->nranges() << endl;
+//	cout << "ss.str(): "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("'(HSTMHex x1 x3, x4 x5, x7 x9, xb x2a)'",ss.str());
+
+	range->purge();
+	EmbeddedLevelNameEncoding name;
+	name.setName("N333");
+	range->addRange(
+			name.getSciDBLeftJustifiedFormat(),
+			name.getSciDBTerminatorLeftJustifiedFormat());
+//	cout << hex << "id_scidb:      "
+//			<< name.getSciDBLeftJustifiedFormat() << " "
+//			<< name.getSciDBTerminatorLeftJustifiedFormat() << dec << endl;
+	range->addRange(name.getId_NoLevelBit(),name.getIdTerminator_NoDepthBit());
+//	cout << hex << "id_nolevelbit: "
+//			<< name.getId_NoLevelBit() << " "
+//			<< name.getIdTerminator_NoDepthBit() << dec << endl;
+	range->reset();
+	ss.str("");	ss << "'" << *(range) << "'";
+//	cout << "nranges = " << hIndex.range->nranges() << endl;
+//	cout << "ss.str(): "<< ss.str() << endl << flush;
+	ASSERT_EQUAL("'(HSTMHex x3f80000000000002 x3fffffffffffffff, x7f00000000000002 x7fffffffffffffff)'",ss.str());
+
+	range->purge();
+	// hIndex.range->parse("(HSTMSymbolic");
+	// hIndex.range->parse("(HSTMHex");
+	//	hIndex.range->parse("(HSTMHex x001)");
+//	hIndex.range->parse("(HSTMHex x001 x002)");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("(HSTMHex x001 x002");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("HSTMHex x001 x002)");
+//	cout << endl;
+//	hIndex.range->purge();
+//	hIndex.range->parse("(HSTMHex 001 x002)");
+	range->purge();
+	std::string testString = "(HSTMHex x1 x2, x3 x4, x5 x6)";
+	range->parse(testString);
+	ss.str(""); ss << *(range);
+//	cout << "ss.str(): " << ss.str() << endl;
+	ASSERT_EQUAL(testString,ss.str());
+	range->purge();
+	testString = "(HSTMHex x3f80000000000002 x3fffffffffffffff, x7f00000000000002 x7fffffffffffffff)";
+	range->parse(testString);
+	ss.str(""); ss << *(range);
+//	cout << "ss.str(): " << ss.str() << endl;
+	ASSERT_EQUAL(testString,ss.str());
+	// TODO More error checking.
+//	hIndex.range->purge();
+//	hIndex.range->parse("()");
+	HtmRange r = range->getSpan();
+	ss.str(""); ss << r;
+//	cout << "span: " << r << endl;
+	ASSERT_EQUAL("(HSTMHex x3f80000000000002 x7fffffffffffffff)",ss.str());
+	delete(range);
+	}
 
 void htmIntersection() {
 	HtmRange range;
@@ -2013,6 +2156,9 @@ void htmRangeLeftJustifiedSketch() {
 	bool verbose = false;
 
 	HtmRange leftHtmRange = HtmRange(new EmbeddedLevelNameEncoding());
+//	HtmRangeMultiLevel leftHtmRange = HtmRangeMultiLevel(new EmbeddedLevelNameEncoding());
+
+
 	EmbeddedLevelNameEncoding leftJustified;
 	leftJustified.setName("N01");
 	ASSERT_EQUAL("N01",leftJustified.getName());
@@ -2274,6 +2420,14 @@ void htmRangeLeftJustifiedSketch() {
 #undef hexOut
 }
 
+
+/**
+ * Test the change of bit format from the 64-bit format to the 62-bit format.
+ *
+ * SciDB uses 62 bits of an int64 for its array indices to be able to support
+ * arrays of the format -N..+N. If 64 bits were used, the largest arrays would
+ * have asymmetric indices.
+ */
 void SciDBIntegration() {
 
 	EmbeddedLevelNameEncoding leftJustified;
@@ -2470,6 +2624,13 @@ void SciDBIntegration() {
 
 	leftJustified.setName("S3333333333333333333333333333");
 	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x1ffffffffffffffb);
+
+	if(false) {
+		cout << "lj-id:  " << hex << leftJustified.getId() << dec << endl;
+		cout << "lj-lvl: " << leftJustified.getLevel() << endl;
+		cout << "lj-lvl: " << hex << leftJustified.getLevel() << dec << endl;
+	}
+
 	leftJustified.setName("N3333333333333333333333333333");
 	ASSERT_EQUAL(leftJustified.getSciDBLeftJustifiedFormat(),0x3ffffffffffffffb);
 
@@ -2496,6 +2657,24 @@ void SciDBIntegration() {
 		cout << "idN3 - idS3     : " << (idN3 - idS3) << endl;
 		cout << "                  " << (indexMax - indexMin) << endl;
 		cout << endl;
+		/* Original output
+		 * The following gives a few examples to determine if the new IDs
+		 * fit in SciDB's array index convention.
+		 *
+			max:  4611686018427387903
+			min: -4611686018427387904
+			indexMax  0x3fffffffffffffff
+			indexMin  0xc000000000000001
+			 s3:  0x1ffffffffffffffb
+			 s3:  2305843009213693947
+			 n3:  0x3ffffffffffffffb
+			 n3:  4611686018427387899
+			 level: 27
+			idN3 > indexMax : 0
+			idN3 - indexMax : -4
+			idN3 - idS3     : 2305843009213693952
+							  9223372036854775806
+		 */
 	}
 
 #undef hexOut1
@@ -2524,13 +2703,14 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testRangeDuplication));
 	s.push_back(CUTE(testLatLonDegrees));
 	s.push_back(CUTE(testNeighbors));
-	s.push_back(CUTE(hstmIndexLibrarySketch));
 	s.push_back(CUTE(testIndexLevel1));
 	s.push_back(CUTE(htmRangeMultiLevel));
 	s.push_back(CUTE(htmRangeLeftJustifiedSketch));
 	s.push_back(CUTE(htmIntersection));
 	s.push_back(CUTE(HtmRangeIntersection));
 	s.push_back(CUTE(SciDBIntegration));
+	s.push_back(CUTE(htmIOFormatting));
+	s.push_back(CUTE(hstmIndexLibrarySketch));
 
 	//	s.push_back(CUTE(testRange));
 

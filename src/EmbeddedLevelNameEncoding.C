@@ -233,6 +233,10 @@ int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat() const {
 	return leftId_scidb;
 }
 
+int64 EmbeddedLevelNameEncoding::getSciDBTerminatorLeftJustifiedFormat() const {
+	return getSciDBLeftJustifiedFormat(getIdTerminator_NoDepthBit());
+}
+
 void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scidb ) {
 	// See bit format in getSciDBLeftJustifiedFormatKluge.
 	// Note this does set this->id.

@@ -3,6 +3,8 @@
 
 #include <HtmRange.h>
 
+using namespace HtmRange_NameSpace;
+
 class HtmRangeIterator {
  public:
   Key next();

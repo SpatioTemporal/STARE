@@ -55,6 +55,10 @@ class LINKAGE HtmRangeMultiLevel {
   int isIn(Key lo, Key hi);
   int isIn(HtmRangeMultiLevel & otherRange);
   Key bestgap(Key desiredSize);
+
+  HtmRangeMultiLevel getSpan();
+  void parse(std::string rangeString);
+
   int stats(int desiredSize);
   int nranges();
 

@@ -12,6 +12,8 @@
 
 KeyPair HTMRangeAtLevelFromHTMRange(int htmIdLevel, Key lo, Key hi);
 
+namespace HtmRange_NameSpace {
+
 enum InclusionType {
   InclOutside = 0,
   InclInside,
@@ -49,6 +51,9 @@ class LINKAGE HtmRange {
   void addRange(const Key lo, const Key hi);
   void addRange(HtmRange *range);
   void mergeRange(const Key lo, const Key hi);
+
+  HtmRange getSpan();
+
   void defrag();
   void defrag(Key gap);
   void purge();
@@ -105,6 +110,8 @@ class LINKAGE HtmRange {
 
   friend LINKAGE ostream& operator<<(ostream& os, const HtmRange& range);
 
+  void parse(std::string rangeString);
+
  protected:
   TInsideResult tinside(const Key mid) const;
   // const char buffer[256];
@@ -115,5 +122,7 @@ class LINKAGE HtmRange {
 };
 
 #define SKIP_PROB (0.5)
+
+}
 
 #endif

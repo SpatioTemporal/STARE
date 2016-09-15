@@ -19,8 +19,11 @@ HstmRange::~HstmRange() {
 	delete range;
 }
 
-
-
+/**
+ * Add a range to this set of ranges.
+ * @param a_ a Key (int64)
+ * @param b_ a Key (int64)
+ */
 void HstmRange::addRange(Key a_, Key b_) {
 	Key a = leftJustifiedEncoding.maskOffLevelBit(a_);
 	int aLevel = leftJustifiedEncoding.levelById(a_);
@@ -37,6 +40,8 @@ void HstmRange::addRange(Key a_, Key b_) {
 				<< "a = " << a_ << " "
 				<< "b = " << b_ << " "
 				<< endl << flush;
+		// TODO Throw?
+		throw SpatialException("HstmRange::addRange::ERROR::KeyLevelMismatch");
 	}
 
     // Put a into HtmRange without change
