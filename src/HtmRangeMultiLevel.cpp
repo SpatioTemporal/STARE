@@ -1345,7 +1345,69 @@ int HtmRangeMultiLevel::getNext(KeyPair &kp) {
 	return getNext(kp.lo,kp.hi);
 }
 
-// TODO refactor print and << to use the same code.
+// TODO refactor print and << to use common code.
+// TODO Note this format differs from HtmRange!!!
+void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
+{
+	char tmp_buf[256];
+	Key hi, lo;
+
+	os << OpenRepresentationString;
+	if (symbolic){
+		os << SymbolicRepresentationString << " ";
+	} else {
+		os << HexRepresentationString << " ";
+	}
+
+	// Though we always print either low or high here,
+	// the code cycles through both skiplists as if // TODO MLR Why keep two skiplists?
+	// both were printed. Saves code, looks neater
+	// and since it is ascii IO, who cares if it is fast
+	//
+	my_los->reset();
+	my_his->reset();
+
+	/// TODO Need to be careful about all of the different id formats we have, esp
+	/// that anything a user might see is consistent.
+	///
+	/// TODO Add input parser for symbolic format.
+
+	while((lo = my_los->getkey()) > 0){
+		hi = my_his->getkey();
+		if (symbolic){
+			strcpy(tmp_buf,encoding->nameById(lo));
+			strcat(tmp_buf," ");
+			encoding->setId(lo);
+			uint64 level = encoding->getLevel();
+			encoding->setId(hi);
+			uint64 termp = encoding->getLevel();
+			if( termp == 63 ) { // Found a terminator. Rightmost 6 are for the level.
+				// uint64 hi_ = (hi & (~63)) + 27; // 27 is currently the maximum level, could use level here...
+				uint64 hi_ = (hi & (~63)) + level; // 27 is currently the maximum level, could use level here...
+				strcat(tmp_buf,encoding->nameById(hi_));
+			} else {
+				strcat(tmp_buf,encoding->nameById(hi));
+			}
+		} else {
+#ifdef _WIN32
+			// TODO Fix Windows port...
+			sprintf(tmp_buf, "%I64d %I64d",lo,hi);
+#else
+			sprintf(tmp_buf, "x%llx x%llx",lo,hi);
+#endif
+		}
+		os << tmp_buf;
+		my_los->step();
+		my_his->step();
+		if(my_los->getkey()>0) {
+			os << ", ";
+		}
+	}
+	os << CloseRepresentationString;
+	return;
+}
+
+// TODO refactor print and << to use common code.
 void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 {
 

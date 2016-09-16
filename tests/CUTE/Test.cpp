@@ -2682,6 +2682,73 @@ void SciDBIntegration() {
 
 }
 
+void testHstmSymbol(){
+	/*
+	assert_equal::FAILURE: expected: 'N333133333..N333133333 '
+	   .eq. 'symbol(hstmFromLevelLatLon(8,45.0,45.0))'
+	   found ''S0000000000000000000003333133333000000000000000000000033331333330..S0000000000000000000003333133\
+	333000000000000000000000033331333330'
+	*/
+
+	EmbeddedLevelNameEncoding leftJustified;
+	BitShiftNameEncoding      rightJustified;
+//	Key lo, terminator;
+//	Key lo1, terminator1;
+	KeyPair A, B;
+
+#define hexOut1(a,b) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+#define decOut1(a,b) cout << a << " " << dec << setfill('0') << setw(16) << b << dec << endl << flush;
+
+	HstmIndex hIndex;
+	int level = 8;
+	double lat = 45.0, lon = 45.0; // in degrees
+	SpatialIndex index(level);
+	uint64 id_RightJustified = index.idByLatLon(lat,lon);
+
+	// First confirm the above symptom.
+	if(false){hexOut1("id_RJ: ",id_RightJustified);}
+	rightJustified.setId(id_RightJustified);
+	leftJustified.setId(id_RightJustified);  // A right justified id put into a left justified context.
+	if(false){hexOut1(leftJustified.getName(),leftJustified.getId());}
+
+	leftJustified.setId(rightJustified.leftJustifiedId(id_RightJustified));
+	if(false){hexOut1(leftJustified.getName(),leftJustified.getId());}
+
+	HtmRangeMultiLevel r;
+	r.purge();
+	if(false) {cout << "l-id: " << leftJustified.getId() << endl;}
+	r.addRange(leftJustified.getId_NoLevelBit(),leftJustified.getIdTerminator_NoDepthBit());
+
+	if(false) {
+		cout << "lj_nlb: " << hex << leftJustified.getId_NoLevelBit() << dec <<  endl;
+		cout << "lj_ter: " << hex << leftJustified.getIdTerminator_NoDepthBit() << dec << endl;
+
+		cout << "r.nranges " << r.nranges() << endl;
+		cout << "r.encoding " << r.encoding->getEncodingType() << endl;
+
+		cout << "r.print: ";
+		r.print(cout,true);
+		cout << endl;
+
+		cout << "r.print: ";
+		r.print(cout,false);
+		cout << endl;
+	}
+
+	leftJustified.setId(leftJustified.getIdTerminator_NoDepthBit());
+	if(false){cout << "t-level: " << leftJustified.getLevel() << endl;}
+
+	stringstream ss;
+	ss.str("");
+	r.print(ss);
+	if(false){cout << "ss: " << ss.str() << endl;}
+	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
+
+#undef hexOut1
+#undef decOut1
+
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -2711,6 +2778,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(SciDBIntegration));
 	s.push_back(CUTE(htmIOFormatting));
 	s.push_back(CUTE(hstmIndexLibrarySketch));
+	s.push_back(CUTE(testHstmSymbol));
 
 	//	s.push_back(CUTE(testRange));
 

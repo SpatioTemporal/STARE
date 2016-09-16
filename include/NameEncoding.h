@@ -28,6 +28,7 @@ public:
 
 	uint64 getId() const {return id;}
 
+	/// Sets this->id immediately.
 	void setId(uint64 id) {name = nameById(id);this->id = id;}
 
 	virtual uint64 maskOffLevel(uint64 id) = 0;

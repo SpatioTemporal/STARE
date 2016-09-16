@@ -70,6 +70,7 @@ class LINKAGE HtmRangeMultiLevel {
   }
   void reset();
 
+  void print(std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
   void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
 
   int compare(const HtmRangeMultiLevel & other) const;
