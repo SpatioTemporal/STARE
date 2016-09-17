@@ -2704,6 +2704,7 @@ void testHstmSymbol(){
 	double lat = 45.0, lon = 45.0; // in degrees
 	SpatialIndex index(level);
 	uint64 id_RightJustified = index.idByLatLon(lat,lon);
+	uint64 id_LeftJustified;
 
 	// First confirm the above symptom.
 	if(false){hexOut1("id_RJ: ",id_RightJustified);}
@@ -2712,6 +2713,7 @@ void testHstmSymbol(){
 	if(false){hexOut1(leftJustified.getName(),leftJustified.getId());}
 
 	leftJustified.setId(rightJustified.leftJustifiedId(id_RightJustified));
+	id_LeftJustified = leftJustified.getId();
 	if(false){hexOut1(leftJustified.getName(),leftJustified.getId());}
 
 	HtmRangeMultiLevel r;
@@ -2739,10 +2741,42 @@ void testHstmSymbol(){
 	if(false){cout << "t-level: " << leftJustified.getLevel() << endl;}
 
 	stringstream ss;
-	ss.str("");
-	r.print(ss);
+	ss.str("");	r.print(ss);
 	if(false){cout << "ss: " << ss.str() << endl;}
 	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
+
+	if(false) {cout << "lf.term? " << leftJustified.terminatorp() << endl; }
+	ss.str(""); ss << "term? x" << hex << leftJustified.getId_NoLevelBit() << dec;
+	ASSERT_EQUALM(ss.str(),true,leftJustified.terminatorp());
+
+	HtmRangeMultiLevel r1;
+	leftJustified.setId(id_LeftJustified);
+	r1.purge();
+	r1.addRange(leftJustified.getId_NoLevelBit(),leftJustified.getId_NoLevelBit());
+	// hexOut1(leftJustified.getId(),leftJustified.getId());
+	ss.str("");	r1.print(ss);
+	if(false){
+		cout << "100" << endl;
+		cout << "nr: " << r1.nranges() << endl;
+		cout << "ss: " << ss.str() << endl;
+	}
+
+	if(false) {cout << "lf.term? " << leftJustified.terminatorp() << endl; }
+	ss.str(""); ss << "term? x" << hex << leftJustified.getId_NoLevelBit() << dec;
+	ASSERT_EQUALM(ss.str(),false,leftJustified.terminatorp());
+
+//	cout << "199" << endl;
+	leftJustified.setId(id_LeftJustified);
+	r1.purge();
+	r1.addRange(leftJustified.getId_NoLevelBit());
+//	hexOut1(leftJustified.getId(),leftJustified.getId());
+	ss.str("");	r1.print(ss);
+	if(false){
+		cout << "200" << endl;
+		cout << "nr: " << r1.nranges() << endl;
+		cout << "ss: " << ss.str() << endl;
+	}
+	ASSERT_EQUALM("r1.addRange(leftJustified.getId_NoLevelBit())","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
 
 #undef hexOut1
 #undef decOut1

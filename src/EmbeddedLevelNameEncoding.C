@@ -182,7 +182,6 @@ uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 ter
 	return terminatorAtLevel;
 }
 
-
 int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) const {
 
 	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
@@ -295,6 +294,14 @@ uint64 EmbeddedLevelNameEncoding::predecessorToLowerBound_NoDepthBit(uint64 lowe
 	return terminator;
 }
 
+bool EmbeddedLevelNameEncoding::terminatorp() {
+	return terminatorp(this->id);
+}
+
+bool EmbeddedLevelNameEncoding::terminatorp(uint64 terminatorCandidate) {
+	uint64 level = terminatorCandidate & levelMask;
+	return level == 63;
+}
 
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level) const {
 	using namespace std;

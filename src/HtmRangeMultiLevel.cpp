@@ -400,6 +400,17 @@ HtmRangeMultiLevel_NameSpace::TInsideResult HtmRangeMultiLevel::tinside(const Ke
 
 static int errorCount = 0;
 static int const errorCountMax = 100;
+/**
+ * Merge lo..hi into the range.
+ *
+ * Contains logic associated with multiple level ranges.
+ *
+ * Note: TopBit cannot be set for lo & hi, i.e. one should find them using
+ * leftJustified.getId_NoLevelBit() or leftJustified.getIdTerminator_NoDepthBit()
+ *
+ * @param lo
+ * @param hi
+ */
 void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 {
 
@@ -696,6 +707,9 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
  * the positions to keep track of the intervals. This routine makes no attempt
  * to merge or defrag overlapping intervals.
  *
+ * Note: TopBit cannot be set for lo & hi, i.e. one should find them using
+ * leftJustified.getId_NoLevelBit() or leftJustified.getIdTerminator_NoDepthBit()
+ *
  * @param lo
  * @param hi
  */
@@ -703,15 +717,33 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
 //	my_his->insert(hi, (Value) 0);
+//	cout << "x200: " << hex << lo << " " << hi << endl;
+//	cout << "x201: " << (lo == hi) << endl;
 
-	// TODO Simplest thing that might possibly work.
-	mergeRange(lo,hi);
+	if( lo == hi ) {
+		encoding->setId(lo);
+//		cout << "lo,t: " << hex << " " << lo << " " << encoding->getIdTerminator_NoDepthBit() << endl;
+		mergeRange(lo,encoding->getIdTerminator_NoDepthBit());
+	} else {
+		// TODO Simplest thing that might possibly work.
+//		cout << "x250: " << hex << lo << " " << hi << endl;
+		mergeRange(lo,hi);
+	}
+	return;
+}
+void HtmRangeMultiLevel::addRange(const Key lohi)
+{
+//	cout << "x100: " << hex << lohi << endl;
+	addRange(lohi,lohi);
 	return;
 }
 
 /**
  * Merge a range into this by looping over sub ranges and merging them
  * one at a time.
+ *
+ * Note: TopBit cannot be set for lo & hi, i.e. one should find them using
+ * leftJustified.getId_NoLevelBit() or leftJustified.getIdTerminator_NoDepthBit()
  *
  * @param range
  */
@@ -1393,6 +1425,7 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 			// TODO Fix Windows port...
 			sprintf(tmp_buf, "%I64d %I64d",lo,hi);
 #else
+			//sprintf(tmp_buf, "x%llx x%llx",lo,hi);
 			sprintf(tmp_buf, "x%llx x%llx",lo,hi);
 #endif
 		}

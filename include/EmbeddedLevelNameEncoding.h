@@ -61,6 +61,8 @@ public:
 			uint32 aLevel
 			) const; ///< Somewhat dangerous to use.
 	uint64 idFromTerminatorAndLevel_NoDepthBit(uint64 terminator, uint32 level); ///< Also a little dangerous.
+	bool terminatorp();
+	bool terminatorp(uint64 terminatorCandidate);
 
 	/// What triangle is just after the terminator?
 	uint64 successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const;

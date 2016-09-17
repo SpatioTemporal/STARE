@@ -45,6 +45,7 @@ class LINKAGE HtmRangeMultiLevel {
 
   void setSymbolic(bool flag);
 
+  void addRange(const Key lohi);
   void addRange(const Key lo, const Key hi);
   void addRange(HtmRangeMultiLevel *range);
   void mergeRange(const Key lo, const Key hi);
