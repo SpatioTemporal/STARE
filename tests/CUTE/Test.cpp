@@ -2701,8 +2701,8 @@ void testHstmSymbol(){
 
 	HstmIndex hIndex;
 	int level = 8;
-	double lat = 45.0, lon = 45.0; // in degrees
 	SpatialIndex index(level);
+	double lat = 45.0, lon = 45.0; // in degrees
 	uint64 id_RightJustified = index.idByLatLon(lat,lon);
 	uint64 id_LeftJustified;
 
@@ -2777,6 +2777,23 @@ void testHstmSymbol(){
 		cout << "ss: " << ss.str() << endl;
 	}
 	ASSERT_EQUALM("r1.addRange(leftJustified.getId_NoLevelBit())","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
+
+	id_RightJustified = index.idByLatLon(-lat,lon); // Try the other side of the equator.
+	rightJustified.setId(id_RightJustified);
+	ASSERT_EQUAL(rightJustified.leftJustifiedId(id_RightJustified),rightJustified.leftJustifiedId());
+	leftJustified.setId(rightJustified.leftJustifiedId(id_RightJustified));
+	r1.addRange(leftJustified.getId_NoLevelBit());
+	ss.str("");	r1.print(ss,true);
+	if(false){
+		cout << "300" << endl;
+		cout << "nr: " << r1.nranges() << endl;
+		cout << "ss: " << ss.str() << endl;
+
+	}
+	// Not quite sure about the following.
+	ASSERT_EQUAL("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)",ss.str());
+
+
 
 #undef hexOut1
 #undef decOut1

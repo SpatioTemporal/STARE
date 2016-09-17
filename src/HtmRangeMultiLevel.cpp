@@ -727,6 +727,7 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 	} else {
 		// TODO Simplest thing that might possibly work.
 //		cout << "x250: " << hex << lo << " " << hi << endl;
+		// TODO should we coerce hi to be a terminator?
 		mergeRange(lo,hi);
 	}
 	return;

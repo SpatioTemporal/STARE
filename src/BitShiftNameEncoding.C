@@ -157,6 +157,9 @@ uint64 BitShiftNameEncoding::bareId() const {
 	return nodeIndexMinusIOFFSET;
 }
 
+uint64 BitShiftNameEncoding::leftJustifiedId_NoDepthBit() {
+	return leftJustifiedId_NoDepthBit(this->id); // Assume this->id is an htmid in the correct format.
+}
 uint64 BitShiftNameEncoding::leftJustifiedId_NoDepthBit(uint64 htmid) {
 	// See bareId above.
 	// htmid is rightJustified.
@@ -172,6 +175,9 @@ uint64 BitShiftNameEncoding::leftJustifiedId_NoDepthBit(uint64 htmid) {
 	return leftId;
 }
 
+uint64 BitShiftNameEncoding::leftJustifiedId() {
+	return leftJustifiedId(this->id); // Assume this->id is an htmid in the correct format.
+}
 uint64 BitShiftNameEncoding::leftJustifiedId(uint64 htmid) {
 	// See bareId above.
 	// htmid is rightJustified.

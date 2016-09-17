@@ -28,7 +28,9 @@ public:
 
 	uint64 bareId() const; ///< Return id without top (depth) bit set.
 
+	uint64 leftJustifiedId_NoDepthBit();
 	uint64 leftJustifiedId_NoDepthBit(uint64 htmid);
+	uint64 leftJustifiedId();
 	uint64 leftJustifiedId(uint64 htmid);
 
 	const char* getEncodingType() const {return "BitShiftedNameEncoding";}
