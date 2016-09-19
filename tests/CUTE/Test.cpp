@@ -2793,6 +2793,13 @@ void testHstmSymbol(){
 	// Not quite sure about the following.
 	ASSERT_EQUAL("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)",ss.str());
 
+	r1.purge();
+	r1.parse("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)");
+	ss.str(""); r1.print(ss,true);
+//	ASSERT_EQUAL("xxx",ss.str());
+	ASSERT_EQUAL("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)",ss.str());
+
+
 #undef hexOut1
 #undef decOut1
 

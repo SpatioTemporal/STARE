@@ -1076,55 +1076,73 @@ void HtmRangeMultiLevel::parse(std::string rangeString) {
 	// cout << "x120: " << iSpace << endl;
 
 	int posSym = rangeString.find(SymbolicRepresentationString);
+	int posS, posN, posNext;
 //	cout << "x100: " << posSym << endl;
 	if( posSym > 0 ) {
-		throw SpatialFailure("HtmRange::parse::Symbolic read not implemented.");
-//		int count = 5;
-//		while(true) {
-//			--count; if(count<0)exit(1);
-//			posHex = rangeString.find("x");
-//			if(posHex<0) {
-//				cout << "x111-return-1" << endl;
-//				return; // No more data -- return
-//				// throw(SpatialFailure("HtmRange::parse::hex::NoData"));
-//			}
-//			int posComma = rangeString.find(",");
-//			std:string endSymbol;
-//			if(posComma<0) {
-//				endSymbol = ")";
-//			} else {
-//				endSymbol = ",";
-//			}
-//			int posClose = rangeString.find(endSymbol);
-//			if(posClose<0) {
-//				// No more data -- return; // Might be a syntax error though...
+		// throw SpatialFailure("HtmRange::parse::Symbolic read not implemented.");
+		rangeString = rangeString.substr(posSym+SymbolicRepresentationString.length()); // Strip the header.
+		int count = 5;
+		while(true) {
+//			cout << "x200: rangeString:  '" << rangeString << "'" << endl;
+			--count; if(count<0)throw SpatialFailure("HtmRange::parse::Symbolic read error count > 5.");
+			posS = rangeString.find("S");
+			posN = rangeString.find("N");
+			posNext = posS;
+			if(posNext < 0) {   // posS doesn't exist...
+				posNext = posN; // Let the chips fall where they may.
+			} else if( posN >= 0 ){  // posN exists!
+				if( posNext > posN ) {  // and posN occurs earlier than posS, it's the first...
+					posNext = posN;
+				}
+			}
+			if(posNext < 0){
+				return; // No data, so return.
+				//	// throw(SpatialFailure("HtmRange::parse::symbolic::NoData"));
+			}
+			int posComma = rangeString.find(",");
+			std:string endSymbol;
+			if(posComma<0) {
+				endSymbol = ")";
+			} else {
+				endSymbol = ",";
+			}
+			int posClose = rangeString.find(endSymbol);
+			if(posClose<0) {
+				// No more data -- return; // Might be a syntax error though...
 //				cout << "x112-return-1, can't find: '" << endSymbol << "'" << endl;
-//				return;
-//			}
-//			std::string first = rangeString.substr(posHex,posClose-posHex);
-//			rangeString = rangeString.substr(posClose+1);
+				return;
+			}
+			std::string first = rangeString.substr(posNext,posClose-posNext);
+			rangeString = rangeString.substr(posClose+1);
 //			cout << "y100: first: '" << first << "'" << endl;
 //			cout << "y101: rest:  '" << rangeString << "'" << endl;
-//			vector<int64> keys;
-//			//while(true) {
-//			int iSpace = first.find(" ");
-//			int64 i0 = -1, i1 = -1;
-//			int status;
-//			if(iSpace<0) {
-//				status = sscanf(first.c_str(),"x%llx",&i0);
-//				if(status == EOF){
-//					throw SpatialFailure("HtmRange::parse::hex::sscanf one variable yields EOF");
-//				}
-//				addRange(i0,i0);
-//			} else {
-//				status = sscanf(first.c_str(),"x%llx x%llx",&i0, &i1);
-//				if(status == EOF){
-//					throw SpatialFailure("HtmRange::parse::hex::sscanf two variables yields EOF");
-//				}
-//				addRange(i0,i1);
-//			}
+			vector<int64> keys; // Note first and rest are symbolic.
+			//while(true) {
+			int iSpace = first.find(" ");
+			int64 i0 = -1, i1 = -1;
+			int status;
+			char s0[64], s1[64];
+			if(iSpace<0) {
+				status = sscanf(first.c_str(),"%s",s0);
+				if(status == EOF){
+					throw SpatialFailure("HtmRange::parse::symbolic::sscanf one variable yields EOF");
+				}
+				encoding->setName(s0);
+				i0=encoding->getId_NoLevelBit();
+				addRange(i0,i0);
+			} else {
+				status = sscanf(first.c_str(),"%s %s",s0,s1);
+				if(status == EOF){
+					throw SpatialFailure("HtmRange::parse::symbolic::sscanf two variables yields EOF");
+				}
+				encoding->setName(s0);
+				i0=encoding->getId_NoLevelBit();
+				encoding->setName(s1);
+				i1=encoding->getId_NoLevelBit(); // Let addRange make this a terminator.
+				addRange(i0,i1);
+			}
 //			cout << "i0,i1: " << i0 << " " << i1 << endl;
-//		}
+		}
 	}
 
 	int posHex = rangeString.find(HexRepresentationString);
@@ -1145,7 +1163,7 @@ void HtmRangeMultiLevel::parse(std::string rangeString) {
 				// throw(SpatialFailure("HtmRange::parse::hex::NoData"));
 			}
 			int posComma = rangeString.find(",");
-			std:string endSymbol;
+			string endSymbol;
 			if(posComma<0) {
 				endSymbol = ")";
 			} else {
@@ -1157,7 +1175,7 @@ void HtmRangeMultiLevel::parse(std::string rangeString) {
 //				cout << "x112-return-1, can't find: '" << endSymbol << "'" << endl;
 				return;
 			}
-			std::string first = rangeString.substr(posHex,posClose-posHex);
+			string first = rangeString.substr(posHex,posClose-posHex);
 			rangeString = rangeString.substr(posClose+1);
 //			cout << "y100: first: '" << first << "'" << endl;
 //			cout << "y101: rest:  '" << rangeString << "'" << endl;
