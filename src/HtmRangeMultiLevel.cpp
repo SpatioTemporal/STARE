@@ -1055,6 +1055,7 @@ HtmRangeMultiLevel HtmRangeMultiLevel::getSpan() {
 	return ret;
 }
 
+
 void HtmRangeMultiLevel::parse(std::string rangeString) {
 	char tmp_buf[256];
 	std::string::size_type pos, lastPos = 0;
@@ -1203,8 +1204,37 @@ void HtmRangeMultiLevel::parse(std::string rangeString) {
 	// Error if you get here.
 }
 
-
-
+// TODO fix the arguments for more safety. I.e. const...
+bool HtmRangeMultiLevel::equalp(HtmRangeMultiLevel *other) {
+	Key lo0, lo1, hi0, hi1;
+	if( this == other ) return true;
+	int n0, n1;
+	n0 = this->nranges(); n1 = other->nranges();
+	if( n0 == 0 || n1 == 0 ) {
+		return n0 == n1; // Both empty?
+	}
+	int errorCount = 5;
+	this->reset();
+	other->reset();
+	bool equalp = true;
+	while(equalp) {
+		if((--errorCount) < 0) return false;
+		lo0 = my_los->getkey();
+		lo1 = other->my_los->getkey();
+		equalp = equalp && (lo0 == lo1);
+		if(equalp){
+			if(lo0 < 0) return equalp;
+			hi0 = my_his->getkey();
+			hi1 = other->my_his->getkey();
+			equalp = equalp && (hi0 == hi1);
+			my_los->step();
+			my_his->step();
+			other->my_los->step();
+			other->my_his->step();
+		}
+	}
+	return false;
+}
 
 int HtmRangeMultiLevel::stats(int desiredSize)
 {

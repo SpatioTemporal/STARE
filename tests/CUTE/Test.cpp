@@ -2835,6 +2835,31 @@ void testHstmSymbolBug1() {
     ASSERT_EQUALM("The fix...","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
 }
 
+void testHstmEqualp() {
+	HstmIndex hIndex0, hIndex1;
+
+	hIndex0.range->addRange(1,2);
+	hIndex1.range->addRange(1,2);
+	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex0));
+	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex1));
+	hIndex1.range->addRange(3,4);
+	ASSERT_EQUAL(false,hIndex0.equalp(&hIndex1));
+	hIndex0.range->addRange(3,4);
+	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex1));
+
+	hIndex0.range->purge();
+	hIndex1.range->purge();
+
+	hIndex0.range->addRange(1,2);
+	hIndex1.range->addRange(3,4);
+	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex0));
+	ASSERT_EQUAL(false,hIndex0.equalp(&hIndex1));
+	hIndex1.range->addRange(1,2);
+	ASSERT_EQUAL(false,hIndex0.equalp(&hIndex1));
+	hIndex0.range->addRange(3,4);
+	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex1));
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -2866,6 +2891,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(hstmIndexLibrarySketch));
 	s.push_back(CUTE(testHstmSymbol));
 	s.push_back(CUTE(testHstmSymbolBug1));
+	s.push_back(CUTE(testHstmEqualp));
 
 	//	s.push_back(CUTE(testRange));
 

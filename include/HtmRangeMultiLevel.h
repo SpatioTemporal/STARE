@@ -60,6 +60,8 @@ class LINKAGE HtmRangeMultiLevel {
   HtmRangeMultiLevel getSpan();
   void parse(std::string rangeString);
 
+  bool equalp(HtmRangeMultiLevel *other);
+
   int stats(int desiredSize);
   int nranges();
 

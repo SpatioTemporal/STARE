@@ -32,6 +32,13 @@ struct HstmIndex {
 	~HstmIndex() {
 		delete range;
 	}
+
+	bool equalp(HstmIndex *other) {
+		if( this == other ) return true;
+		// cout << 100 << endl << flush;
+		return range->equalp(other->range);
+	}
+
 };
 
 
