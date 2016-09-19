@@ -2793,11 +2793,39 @@ void testHstmSymbol(){
 	// Not quite sure about the following.
 	ASSERT_EQUAL("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)",ss.str());
 
-
-
 #undef hexOut1
 #undef decOut1
 
+}
+
+void testHstmSymbolBug1() {
+
+	HstmIndex hIndex;
+	int level = 8;
+	SpatialIndex index(level);
+	double lat = 45.0, lon = 45.0; // in degrees
+	uint64 id_RightJustified = index.idByLatLon(lat,lon);
+	BitShiftNameEncoding rightJustified(id_RightJustified);
+	uint64 id_LeftJustified = rightJustified.leftJustifiedId();
+	EmbeddedLevelNameEncoding leftJustified(id_LeftJustified);
+	/* wrong!!
+	int64 id_scidb = leftJustified.getSciDBLeftJustifiedFormat();
+	hIndex.range->addRange(id_scidb);
+	*/
+	hIndex.range->addRange(leftJustified.getId_NoLevelBit());
+	stringstream ss;
+	ss.str("");
+
+	hIndex.range->print(ss,true);
+//	cout << "hIndex.range: " << ss.str() << endl;
+	ASSERT_EQUAL("(HSTMSymbolic N333133333 N333133333)",ss.str());
+
+	ss.str("");
+	HtmRangeMultiLevel *r = hIndex.range;
+    ss << showbase << hex << (*r);
+    // cout << ss.str() << endl;
+    // ASSERT_EQUALM("The error...","(HSTMHex x0x7f7ff00000000008 x0x7f7fffffffffffff)",ss.str());
+    ASSERT_EQUALM("The fix...","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -2830,6 +2858,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(htmIOFormatting));
 	s.push_back(CUTE(hstmIndexLibrarySketch));
 	s.push_back(CUTE(testHstmSymbol));
+	s.push_back(CUTE(testHstmSymbolBug1));
 
 	//	s.push_back(CUTE(testRange));
 

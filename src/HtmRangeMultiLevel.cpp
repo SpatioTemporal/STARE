@@ -1078,7 +1078,7 @@ void HtmRangeMultiLevel::parse(std::string rangeString) {
 	int posSym = rangeString.find(SymbolicRepresentationString);
 //	cout << "x100: " << posSym << endl;
 	if( posSym > 0 ) {
-		 throw SpatialFailure("HtmRange::parse::Symbolic read not implemented.");
+		throw SpatialFailure("HtmRange::parse::Symbolic read not implemented.");
 //		int count = 5;
 //		while(true) {
 //			--count; if(count<0)exit(1);
@@ -1287,6 +1287,7 @@ namespace HtmRangeMultiLevel_NameSpace {
 std::ostream& operator<<(std::ostream& os, const HtmRangeMultiLevel& range) {
 	char tmp_buf[256];
 	Key lo, hi;
+	os << noshowbase;
 	// os << "Start Range " << endl;
 	// Preamble TODO change from symbolicOutput boolean to enumerated type.
 	os << OpenRepresentationString;
