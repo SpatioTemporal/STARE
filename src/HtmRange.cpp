@@ -424,33 +424,33 @@ TInsideResult HtmRange::tinside(const Key mid) const
 	// clearly out, inside, share a boundary, off by one to some boundary
 	InclusionType result, t1, t2;
 	Key GH, GL, SH, SL;
-	// cout << "==========" << setw(4) << mid << " is ";
+//	 cout << "==========" << setw(4) << mid << " is ";
 
 	GH = my_his->findMAX(mid);
 	GL = my_los->findMAX(mid);
 
 	if (GH < GL) { // GH < GL
 		t1 = InclInside;
-		// cout << "Inside";
+//		 cout << "Inside";
 	} else {
 		t1 = InclOutside;
-		// cout << "  no  ";
+//		 cout << "  no  ";
 	}
-	// cout << "   ";
+//	 cout << "   ";
 
 	SH = my_his->findMIN(mid);
 	SL = my_los->findMIN(mid);
 	if (SH < SL) { // SH < SL
 		t2 = InclInside;
-		// cout << "Inside";
+//		 cout << "Inside";
 	} else {
 		t2 = InclOutside;
-		// cout << "  no  ";
+//		 cout << "  no  ";
 	}
-	// cout << " GH = " << my_his->findMAX(mid) << " GL = " << my_los->findMAX(mid);
-	// cout << " SH = " << my_his->findMIN(mid) << " SL = " << my_los->findMIN(mid);
+//	 cout << " GH = " << my_his->findMAX(mid) << " GL = " << my_los->findMAX(mid);
+//	 cout << " SH = " << my_his->findMIN(mid) << " SL = " << my_los->findMIN(mid);
 
-	// cout << endl;
+//	 cout << endl;
 	if (t1 == t2){
 		result = t1;
 	} else {
@@ -477,16 +477,22 @@ TInsideResult HtmRange::tinside(const Key mid) const
 void HtmRange::mergeRange(const Key lo, const Key hi)
 {
 
+//	cout << endl;
 //	cout << "8000 " << hex << "0x" << lo << ", 0x" << hi << endl << flush;
 //	cout << "8001 " << dec << "  " << lo << ",   " << hi << endl << flush;
 
 	TInsideResult loFlag = tinside(lo);
+
+//	cout << "8002" << endl << flush;
+
 	int lo_flag = loFlag.incl;
+
+//	cout << "8003" << endl << flush;
 
 	TInsideResult hiFlag = tinside(hi);
 	int hi_flag = hiFlag.incl;
 
-////	cout << "Before freeRange" << endl;
+//	cout << "Before freeRange" << endl;
 //	my_los->list(cout);
 //	my_his->list(cout);
 

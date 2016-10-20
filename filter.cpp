@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 {
   // run as a filter only
   uint64 lo, hi;
-  HtmRange ran;
+  HtmRange_NameSpace::HtmRange ran;
   int desire;
   Key gapsize;
   int lines = 0;

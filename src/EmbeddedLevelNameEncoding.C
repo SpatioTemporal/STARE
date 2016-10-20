@@ -244,7 +244,8 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
 	iTmp = iTmp << 1;
 	iTmp = iTmp | level;
 	iTmp = iTmp | TopBit;
-	this->id = iTmp; // hacking...
+//	this->id = iTmp; // hacking...
+	this->setId(iTmp);
 }
 
 // TODO Unit tests

@@ -555,22 +555,27 @@ RangeConvex::intersect(
 		const SpatialIndex * idx, HtmRange * htmrange, bool varlen,
 		HtmRange *hrInterior, HtmRange *hrBoundary )
 {
+
   hr = htmrange;
   hrInterior_ = hrInterior;
   hrBoundary_ = hrBoundary;
   index_ = idx;
   varlen_ = varlen;
   addlevel_ = idx->maxlevel_ - idx->buildlevel_;
-
+//  cout << "a" << flush;
   simplify();				// don't work too hard...
+//  cout << "b" << flush;
 
   if(constraints_.size()==0)return;   // nothing to intersect!!
 
+//  cout << "c" << flush;
   // Start with root nodes (index = 1-8) and intersect triangles
   // TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
   for(uint32 i = 1; i <= 8; i++){
+//	  cout << i << flush;
     testTrixel(i);
   }
+//  cout << "d" << flush;
 }
 
 ////////////SAVETRIXEL
@@ -593,9 +598,9 @@ inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
   if(varlen_){ // For individuals
     hr->mergeRange(htmid, htmid);
     if( mark == SpatialMarkup::pARTIAL ) {
-  	  hrBoundary_->mergeRange(htmid,htmid);
+    	if(hrBoundary_)hrBoundary_->mergeRange(htmid,htmid);
     } else {
-  	  hrInterior_->mergeRange(htmid,htmid);
+  	  if(hrInterior_)hrInterior_->mergeRange(htmid,htmid);
     }
     return;
   }
@@ -633,12 +638,18 @@ inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
 //	  << " shifts=" << shifts
 //	  << endl << flush;
 
+//  cout << "x0" << flush;
   hr->mergeRange(lo, hi);
+//  cout << "x1" << flush;
   if( mark == SpatialMarkup::pARTIAL ) {
-	  hrBoundary_->mergeRange(lo,hi);
+//	  cout << "x2" << flush;
+//	  cout << "( " << lo << " " << hi << " )" << flush;
+	  if(hrBoundary_) {hrBoundary_->mergeRange(lo,hi);}
   } else {
-	  hrInterior_->mergeRange(lo,hi);
+//	  cout << "x3" << flush;
+	  if(hrInterior_) {hrInterior_->mergeRange(lo,hi);}
   }
+//  cout << "x4" << flush;
 
   return;
 }
@@ -664,7 +675,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
 
-//  cout << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
+//  cout << endl << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
 
   mark = testNode(nodeIndex); // was:(indexNode or  id);
 
@@ -681,7 +692,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
 //    cout << " rejecting id: " << tid << endl << flush;
     return mark;
   default:
-//	  cout << " partial/dontknow/swallowed";
+//    cout << " partial/dontknow/swallowed";
     // if pARTIAL or dONTKNOW, then continue, test children,
     //    but do not reach beyond the leaf nodes.
     //    If Convex is fully contained within one (sWALLOWED),
@@ -698,6 +709,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   }
 
 //  cout << endl << flush;
+//  cout << " check children & partials " << endl << flush;
 
   // NEW NEW algorithm  Disabled when enablenew is 0
   //
@@ -706,16 +718,25 @@ RangeConvex::testTrixel(uint64 nodeIndex)
 	  if ( childID != 0){
 		  ////////////// [ed:split]
 		  tid = N(nodeIndex).id_;
+//		  cout << 0 << endl << flush;
 		  childID = indexNode->childID_[0];  testTrixel(childID); // Note the recursion.
+//		  cout << 1 << endl << flush;
 		  childID = indexNode->childID_[1];  testTrixel(childID);
+//		  cout << 2 << endl << flush;
 		  childID = indexNode->childID_[2];  testTrixel(childID);
+//		  cout << 3 << endl << flush;
 		  childID = indexNode->childID_[3];  testTrixel(childID);
+//		  cout << 4 << endl << flush;
 	  } else { /// No children...
+//		  cout << 5 << endl << flush;
 		  if (addlevel_){
+//			  cout << 6 << endl << flush;
 			  testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
 		  } else {
+//			  cout << 7 << endl << flush;
 			  saveTrixel(N(nodeIndex).id_,mark); // was: plist_->push_back(N(id).id_);
 		  }
+//		  cout << 8 << endl << flush;
 	  }
   } ///////////////////////////// END OF NEW ALGORITHM returns mark below;
 
@@ -731,6 +752,8 @@ RangeConvex::testTrixel(uint64 nodeIndex)
      If two chidlren are rejected, then we stop
      If one or 0 nodes are rejected, then we
   */
+//  cout << " mark: " << mark << endl << flush;
+
   return mark;
 }
 
