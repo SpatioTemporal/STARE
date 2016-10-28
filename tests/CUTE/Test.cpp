@@ -2805,7 +2805,7 @@ void testHstmSymbol(){
 	ASSERT_EQUAL(leftJustified.maskOffLevel(),left2.maskOffLevel());
 
 	left2 = leftJustified.atLevel(6);
-//	hexOut1(leftJustified.getName(),leftJustified.getId());
+	//	hexOut1(leftJustified.getName(),leftJustified.getId());
 //	hexOut1(left2.getName(),left2.getId());
 	ASSERT_EQUAL(6,left2.getLevel());
 	ASSERT_EQUAL("S0331333",left2.getName());
@@ -2814,6 +2814,21 @@ void testHstmSymbol(){
 	left2 = leftJustified.atLevel(12);
 	ASSERT_EQUAL(12,left2.getLevel());
 	ASSERT_EQUAL("N1233210000000",left2.getName());
+
+	{
+		HstmIndex hIndex;
+		int level = 8;
+		SpatialIndex index(level);
+		double lat = 30.0, lon = 30.0;
+		uint64 id_RightJustified = index.idByLatLon(lat,lon);
+		BitShiftNameEncoding rightJustified(id_RightJustified);
+		uint64 id_LeftJustified = rightJustified.leftJustifiedId();
+		EmbeddedLevelNameEncoding leftJustified(id_LeftJustified);
+//		hexOut1(leftJustified.getName(),leftJustified.getId());
+		EmbeddedLevelNameEncoding left2 = leftJustified.atLevel(6);
+//		hexOut1(left2.getName(),left2.getId());
+		ASSERT_EQUAL("N3332023",left2.getName());
+	}
 
 #undef hexOut1
 #undef decOut1
