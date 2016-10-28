@@ -2799,10 +2799,24 @@ void testHstmSymbol(){
 //	ASSERT_EQUAL("xxx",ss.str());
 	ASSERT_EQUAL("(HSTMSymbolic S033133333 S033133333, N333133333 N333133333)",ss.str());
 
+	ASSERT_EQUAL(8,leftJustified.getLevel());
+	EmbeddedLevelNameEncoding left2 = leftJustified.atLevel(10);
+	ASSERT_EQUAL(10,left2.getLevel());
+	ASSERT_EQUAL(leftJustified.maskOffLevel(),left2.maskOffLevel());
+
+	left2 = leftJustified.atLevel(6);
+//	hexOut1(leftJustified.getName(),leftJustified.getId());
+//	hexOut1(left2.getName(),left2.getId());
+	ASSERT_EQUAL(6,left2.getLevel());
+	ASSERT_EQUAL("S0331333",left2.getName());
+
+	leftJustified.setName("N123321");
+	left2 = leftJustified.atLevel(12);
+	ASSERT_EQUAL(12,left2.getLevel());
+	ASSERT_EQUAL("N1233210000000",left2.getName());
 
 #undef hexOut1
 #undef decOut1
-
 }
 
 void testHstmSymbolBug1() {

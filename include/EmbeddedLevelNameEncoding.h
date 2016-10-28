@@ -91,12 +91,20 @@ public:
 	/// Note this->id is assumed to stay in 64-bit format.
 	void setIdFromSciDBLeftJustifiedFormat( int64 id_scidb );
 
+	/// Changes the level, loses info on coarsening.
+	EmbeddedLevelNameEncoding atLevel(uint64 level);
+
 	uint64 increment(uint64 lowerBound, uint32 level) const;
 	uint64 decrement(uint64 lowerBound, uint32 level) const;
 
 	bool terminatorp(uint64 terminator) const {
 		uint64 levelBits = terminator & levelMask;
 		return levelBits == levelMask;
+	}
+
+	EmbeddedLevelNameEncoding& operator=(EmbeddedLevelNameEncoding obj) {
+		this->setId(obj.getId());
+		return *this;
 	}
 
 	/**

@@ -248,6 +248,36 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
 	this->setId(iTmp);
 }
 
+/**
+ * Change the resolution level to level. If the result resolution is coarser, then we lose information.
+ *
+ * @param level
+ */
+EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level) {
+	int oldLevel = this->getLevel();
+	uint64 id_NoLevelBit = this->maskOffLevel();
+	uint64 keepBits = one << 1; // Position 63
+	uint64 newId;
+	if(level < oldLevel) {
+		for(int i=62;i>5;i-=2){
+			int levelAtI = (62-i)/2;
+			keepBits = keepBits << 2;
+			if((level < levelAtI) && (levelAtI < oldLevel)) {
+			}else{
+				keepBits += 3;
+			}
+		}
+		keepBits = keepBits << 4;
+		newId = id_NoLevelBit & keepBits;
+	} else {
+		newId =  id_NoLevelBit;
+	}
+//	newId =  id_NoLevelBit;
+	newId = newId | level;
+	EmbeddedLevelNameEncoding res(newId);
+	return res;
+}
+
 // TODO Unit tests
 /// Find terminator+
 uint64 EmbeddedLevelNameEncoding::successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const {
