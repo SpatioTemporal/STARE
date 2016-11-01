@@ -198,7 +198,7 @@ void printNode(int nodeIndex) const;
   void showVertices(std::ostream & out) const;
 
   /// set the maximum depth of the layer
-  void setMaxlevel(int level);
+  void setMaxlevel(size_t level);
 
 private:
 

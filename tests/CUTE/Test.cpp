@@ -2889,6 +2889,62 @@ void testHstmEqualp() {
 	ASSERT_EQUAL(true,hIndex0.equalp(&hIndex1));
 }
 
+void testIndexBug() {
+	int level       = 4;
+	int idLevel     = 23;
+	int maxLevel    = 5; // aka buildLevel
+
+	SpatialIndex _index = SpatialIndex(idLevel,maxLevel);
+//	cout << "MaxLevel: " << _index.getMaxlevel() << endl << flush;
+	ASSERT_EQUAL(23,_index.getMaxlevel());
+
+	double latDegrees = 30.0, lonDegrees = 30.0;
+	SpatialVector x; x.setLatLonDegrees(latDegrees,lonDegrees);
+//	cout << "x " << x << endl << flush;
+
+	if(_index.getMaxlevel() != level) {
+//		cout << "setting MaxLevel" << endl << flush;
+		_index.setMaxlevel(level);
+//		cout << "done setting MaxLevel" << endl << flush;
+	}
+	ASSERT_EQUAL(level,_index.getMaxlevel());
+
+//	cout << "setting htm_Id " << endl << flush;
+	uint64 htm_Id = _index.idByPoint(x); // TODO Need to convert/ensure we're in the correct format - LeftJustified.
+//	cout << "htm_Id " << htm_Id << endl << flush;
+	ASSERT_EQUAL(4088,htm_Id);
+
+	BitShiftNameEncoding rightJustified(htm_Id);
+//	cout << "rj: " << rightJustified.getName() << endl << flush;
+	ASSERT_EQUAL("N33320",rightJustified.getName());
+
+	HstmIndex *hIndex = new HstmIndex;
+	hIndex->range->addRange(rightJustified.leftJustifiedId_NoDepthBit());
+
+	_index.setMaxlevel(5);
+	htm_Id = _index.idByPoint(x);
+	// cout << "htm_Id " << htm_Id << endl << flush;
+	rightJustified.setId(htm_Id);
+//	cout << "rj: " << rightJustified.getName() << endl << flush;
+	ASSERT_EQUAL("N333202",rightJustified.getName());
+
+	_index.setMaxlevel(1);
+	htm_Id = _index.idByPoint(x);
+	// cout << "htm_Id " << htm_Id << endl << flush;
+	rightJustified.setId(htm_Id);
+//	cout << "rj: " << rightJustified.getName() << endl << flush;
+	ASSERT_EQUAL("N33",rightJustified.getName());
+
+	_index.setMaxlevel(0);
+	htm_Id = _index.idByPoint(x);
+	// cout << "htm_Id " << htm_Id << endl << flush;
+	rightJustified.setId(htm_Id);
+//	cout << "rj: " << rightJustified.getName() << endl << flush;
+	ASSERT_EQUAL("N3",rightJustified.getName());
+
+//	cout << "done" << endl << flush;
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -2921,6 +2977,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testHstmSymbol));
 	s.push_back(CUTE(testHstmSymbolBug1));
 	s.push_back(CUTE(testHstmEqualp));
+	s.push_back(CUTE(testIndexBug));
 
 	//	s.push_back(CUTE(testRange));
 

@@ -862,23 +862,29 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId
 //////////////////IDBYPOINT////////////////////////////////////////////////
 /** Find a leaf node where a vector points to
  *
+ * Previous versions only worked when maxlevel_ was greater than buildlevel_.
+ * TODO Determine if maxlevel_ must be greater than buildlevel_ (elsewhere).
+ * Recall SpatialIndex(idMaxLevel,buildlevel_)
+ * buildlevel_ tells you how deep the index was explicitly built.
+ * maxlevel_ is the depth to which we want to enable searches
+ *
  * @param v The input point whose enclosing triangle we seek
  * @return ID the HTM (external numeric-id) ID
  */
 uint64
 SpatialIndex::idByPoint(SpatialVector & v) const {
-    uint64 index;
+	uint64 index;
 	uint64 ID;
 
-    // start with the 8 root triangles, find the one which v points to
-    for(index=1; index <=8; index++) {
-	if( (V(0) ^ V(1)) * v < -gEpsilon) continue;
-	if( (V(1) ^ V(2)) * v < -gEpsilon) continue;
-	if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
-	break;
-    }
-    // loop through matching child until leaves are reached
-    while(ICHILD(0)!=0) {
+	// start with the 8 root triangles, find the one which v points to
+	for(index=1; index <=8; index++) {
+		if( (V(0) ^ V(1)) * v < -gEpsilon) continue;
+		if( (V(1) ^ V(2)) * v < -gEpsilon) continue;
+		if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
+		break;
+	}
+	// loop through matching child until leaves are reached
+	while(ICHILD(0)!=0) {
 		uint64 oldindex = index;
 		for(size_t i = 0; i < 4; i++) {
 			index = nodes_[oldindex].childID_[i];
@@ -887,33 +893,61 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 			if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
 			break;
 		}
-    }
-    // return if we have reached maxlevel
-    if(maxlevel_ == buildlevel_)return N(index).id_;
+	}
+	// what if we haven't gotten to build level?
+//	cout << "idbp: 100 " << endl << flush;
+	// return if we have reached maxlevel
+	if(maxlevel_ == buildlevel_)return N(index).id_;
 
-    // from now on, continue to build name dynamically.
-    // until maxlevel_ levels depth, continue to append the
-    // correct index, build the index on the fly.
-    char name[HTMNAMEMAX];
-    nameById(N(index).id_,name);  //
-    size_t len = strlen(name);
-    SpatialVector v0 = V(0);
-    SpatialVector v1 = V(1);
-    SpatialVector v2 = V(2);
+//	cout << "idbp: 120 " << endl << flush;
 
-    // BitShifted
-    size_t level = maxlevel_ - buildlevel_;
-    while(level--) {
-		uint64 subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
-		name[len++] = '0'+char(subTriangleIndex);
-    }
-    name[len] = '\0';
+	// from now on, continue to build name dynamically.
+	// until maxlevel_ levels depth, continue to append the
+	// correct index, build the index on the fly.
+	char name[HTMNAMEMAX];
+	nameById(N(index).id_,name);  //
+	//
+
+	//
+	size_t len = strlen(name);
+	SpatialVector v0 = V(0);
+	SpatialVector v1 = V(1);
+	SpatialVector v2 = V(2);
+
+//	cout << "idbp: 200 " << endl << flush;
+//	cout << "idbp: 201 ml_ = " << maxlevel_ << endl << flush;
+//	cout << "idbp: 202 bl_ = " << buildlevel_ << endl << flush;
+//	cout << "idbp: 203 m-b = " << (int)maxlevel_ - (int)buildlevel_ << endl << flush;
+
+	// BitShifted
+	// size_t level = maxlevel_ - buildlevel_;
+	int level = maxlevel_ - buildlevel_;
+
+//	cout << "idbp: 300 maxlevel_-buildlevel_ = " << level << endl << flush;
+
+	// TODO make this whole routine less ad-hoc
+	if(level>0) {
+		while(level--) {
+			uint64 subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
+			name[len++] = '0'+char(subTriangleIndex);
+		}
+	} else {
+		len = len + level;
+		if(len<2) {
+			throw SpatialFailure("SpatialIndex::idByPoint::LevelTooLow len < 2");
+		}
+	}
+	name[len] = '\0';
+
+//	cout << "idbp: 400 " << endl << flush;
 
 	ID = idByName(name); // TODO Didn't we just calculate the bits above?
 
-//    cout
-//	<< "name: " << name
-//	<< " ID " << ID << endl << flush;
+	//    cout
+	//	<< "name: " << name
+	//	<< " ID " << ID << endl << flush;
+
+//	cout << "idbp: 500 " << endl << flush;
 
 	if(0){
 		SpatialVector vec;
@@ -921,6 +955,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 		//cerr << "pointById: ----------------" << endl;
 		//vec.show();
 	}    
+//	cout << "idbp: 600 " << endl << flush;
 	return ID;
 }
 
@@ -995,3 +1030,8 @@ uint64 SpatialIndex::nodeIndexFromName(const char* htmIdName) const {
 	return nodeIndexFromId(idByName(htmIdName));
 }
 
+////////////////////// setMaxlevel /////////////////////////
+//void
+//SpatialIndex::setMaxlevel(size_t level) {
+//	this->maxlevel_ = level;
+//}

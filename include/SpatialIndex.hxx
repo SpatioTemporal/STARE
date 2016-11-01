@@ -105,8 +105,8 @@ inline char*
 SpatialIndex::nameByPoint(SpatialVector & vector, char* name) const {
   return nameById(idByPoint(vector),name);
 }
-//////////////////// setMaxlevel /////////////////////////
+////////////////////// setMaxlevel /////////////////////////
 inline void
-SpatialIndex::setMaxlevel(int level) {
+SpatialIndex::setMaxlevel(size_t level) {
 	this->maxlevel_ = level;
 }
