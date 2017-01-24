@@ -92,10 +92,10 @@ public:
 	void setIdFromSciDBLeftJustifiedFormat( int64 id_scidb );
 
 	/// Changes the level, loses info on coarsening.
-	EmbeddedLevelNameEncoding atLevel(uint64 level);
+	EmbeddedLevelNameEncoding atLevel( uint64 level, bool keepAllBits = false );
 
-	uint64 increment(uint64 lowerBound, uint32 level) const;
-	uint64 decrement(uint64 lowerBound, uint32 level) const;
+	uint64 increment(uint64 lowerBound, uint32 level, int steps = 1) const;
+	uint64 decrement(uint64 lowerBound, uint32 level, int steps = 1) const;
 
 	bool terminatorp(uint64 terminator) const {
 		uint64 levelBits = terminator & levelMask;
@@ -200,6 +200,8 @@ public:
 	// Need some sort of "and" to find the greatest shared root node.
 
 	const char* getEncodingType() const {return "EmbeddedLevelNameEncoding";}
+
+	int getLocalTriangleNumber() const;
 
 // private:
 	const uint32 topBitPosition = 63; //

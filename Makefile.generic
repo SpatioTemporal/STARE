@@ -36,6 +36,7 @@ SKIPOB = \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
    ${OBJ}/EmbeddedLevelNameEncoding.o \
+   ${OBJ}/SpatiallyAdaptiveDataCover.o \
    ${OBJ}/SpatialIndex.o \
    ${TOPDIR}/cc_aux.o 
 
@@ -44,6 +45,7 @@ OBJECTS = \
    ${OBJ}/NameEncoding.o \
    ${OBJ}/BitShiftNameEncoding.o \
    ${OBJ}/EmbeddedLevelNameEncoding.o \
+   ${OBJ}/SpatiallyAdaptiveDataCover.o \
    ${OBJ}/SpatialIndex.o \
    ${OBJ}/SpatialConstraint.o \
    ${OBJ}/sqlInterface.o \
@@ -232,6 +234,9 @@ ${OBJ}/BitShiftNameEncoding.o: ${SRCS}/BitShiftNameEncoding.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
 ${OBJ}/EmbeddedLevelNameEncoding.o: ${SRCS}/EmbeddedLevelNameEncoding.C
+	$(CXX) $(CXX_FLAGS) $< -o $@
+	
+${OBJ}/SpatiallyAdaptiveDataCover.o: ${SRCS}/SpatiallyAdaptiveDataCover.C
 	$(CXX) $(CXX_FLAGS) $< -o $@
 
 ${OBJ}/XXX.o: ${SRCS}/XXX.cpp

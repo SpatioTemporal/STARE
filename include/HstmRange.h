@@ -32,6 +32,7 @@ public:
 	EmbeddedLevelNameEncoding leftJustifiedEncoding;
 
 	void     addRange(Key a, Key b);
+	void     addRange(HstmRange* r);
 
 };
 

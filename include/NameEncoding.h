@@ -26,6 +26,8 @@ public:
 
 	virtual uint64 bareId() const = 0; ///< Return id without top (level) bit set.
 
+	virtual int getLocalTriangleNumber() const = 0; /// Which of the leaf-siblings is this triangle?
+
 	uint64 getId() const {return id;}
 
 	/// Sets this->id immediately.

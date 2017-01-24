@@ -157,6 +157,11 @@ uint64 BitShiftNameEncoding::bareId() const {
 	return nodeIndexMinusIOFFSET;
 }
 
+int BitShiftNameEncoding::getLocalTriangleNumber() const {
+	uint64 ret = ( id & 3 );
+	return ret;
+}
+
 uint64 BitShiftNameEncoding::leftJustifiedId_NoDepthBit() {
 	return leftJustifiedId_NoDepthBit(this->id); // Assume this->id is an htmid in the correct format.
 }

@@ -571,7 +571,7 @@ RangeConvex::intersect(
 //  cout << "c" << flush;
   // Start with root nodes (index = 1-8) and intersect triangles
   // TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
-  for(uint32 i = 1; i <= 8; i++){
+  for(uint64 i = 1; i <= 8; i++){
 //	  cout << i << flush;
     testTrixel(i);
   }
@@ -595,7 +595,7 @@ inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
   IDHIGHBIT = IDHIGHBIT << 63;
   IDHIGHBIT2 = IDHIGHBIT2 << 62;
 #endif
-  if(varlen_){ // For individuals
+  if(varlen_){ // For individuals // TODO 2016-0117 Is this broken?
     hr->mergeRange(htmid, htmid);
     if( mark == SpatialMarkup::pARTIAL ) {
     	if(hrBoundary_)hrBoundary_->mergeRange(htmid,htmid);
@@ -604,6 +604,8 @@ inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
     }
     return;
   }
+
+  // TODO Consider ICOSAHEDRAL transition
 
   // TODO BitShift encoding, no?
   for(i = 0; i < IDSIZE; i+=2) {
@@ -761,6 +763,7 @@ RangeConvex::testTrixel(uint64 nodeIndex)
 /////////////TESTPARTIAL//////////////////////////////////
 // testPartial: test a triangle's subtriangle whether they are partial.
 // if level is nonzero, recurse.
+// TODO This routine is suspect.
 //
 void
 RangeConvex::testPartial(size_t level, uint64 id,

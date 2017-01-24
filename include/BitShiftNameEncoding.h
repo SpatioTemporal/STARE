@@ -35,6 +35,8 @@ public:
 
 	const char* getEncodingType() const {return "BitShiftedNameEncoding";}
 
+	int getLocalTriangleNumber() const ;
+
 };
 
 #endif /* INCLUDE_BITSHIFTNAMEENCODING_H_ */

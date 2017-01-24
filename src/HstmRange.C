@@ -85,6 +85,9 @@ void HstmRange::addRange(Key a_, Key b_) {
 //	cout << dec << 1001 << " : nranges = " << range.nranges() << endl << flush;
 }
 
+void HstmRange::addRange(HstmRange* r) {
+	range->addRange(r->range); // TODO I hope this doesn't make a copy.
+}
 // TODO Add iterators, get/set, parallel HtmRange, Translate out of the funny lo-hi format we're using.
 
 } /* namespace std */

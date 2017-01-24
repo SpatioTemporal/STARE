@@ -94,6 +94,10 @@ uint64 EmbeddedLevelNameEncoding::bareId() const {
 	return shiftId;
 }
 
+int EmbeddedLevelNameEncoding::getLocalTriangleNumber() const {
+	uint64 ret = ( bareId() & 3 );
+	return ret;
+}
 
 uint64 EmbeddedLevelNameEncoding::bareId_NoShift_NoEmbeddedLevel() const {
 	// TODO This is left justified. Is bareId left or right justified?
@@ -253,7 +257,7 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
  *
  * @param level
  */
-EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level) {
+EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool keepAllBits ) {
 	int oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
@@ -264,6 +268,7 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level) {
 			int levelAtI = (62-i)/2;
 			keepBits = keepBits << 2;
 			if((level < levelAtI) && (levelAtI < oldLevel)) {
+				if(keepAllBits) { keepBits += 3; }
 			}else{
 				keepBits += 3;
 			}
@@ -335,7 +340,7 @@ bool EmbeddedLevelNameEncoding::terminatorp(uint64 terminatorCandidate) {
 	return level == 63;
 }
 
-uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level) const {
+uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
 	using namespace std;
 	uint64 successor = lowerBound; // Bump up one, but we still need the level.
 	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
@@ -360,10 +365,10 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level) con
 	if( successor == TopBit ) {
 		return 0; // It's invalid!
 	}
-	successor += level;
+	successor += n*level;
 	return successor;
 }
-uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level) const {
+uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int n) const {
 	using namespace std;
 	uint64 successor = lowerBound; // Bump up one, but we still need the level.
 	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
@@ -391,7 +396,7 @@ uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level) con
 	if( successor == TopBit ) {
 		return 0; // It's invalid!
 	}
-	successor += level;
+	successor += n*level;
 	return successor;
 }
 

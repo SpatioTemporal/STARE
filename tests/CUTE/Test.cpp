@@ -18,6 +18,8 @@
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
 
+#include "SpatiallyAdaptiveDataCover.h"
+
 #include "HtmRangeIterator.h"
 #include "BitShiftNameEncoding.h"
 #include "EmbeddedLevelNameEncoding.h"
@@ -2149,6 +2151,64 @@ void htmRangeMultiLevel() {
 	ASSERT_EQUAL(A.lo,lo1); // aLevel < bLevel: aLevel wins.
 	ASSERT_EQUAL(A.hi,terminator1);
 
+	// Leaf sibling numbers.
+	// A = rangeFromSymbols("N300", "N300");
+	leftJustified.setName("N300");
+	ASSERT_EQUAL(0,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("N301");
+	ASSERT_EQUAL(1,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("N302");
+	ASSERT_EQUAL(2,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("N303");
+	ASSERT_EQUAL(3,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("N3003");
+	ASSERT_EQUAL(3,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("N30123");
+	ASSERT_EQUAL(3,leftJustified.getLocalTriangleNumber());
+
+	leftJustified.setName("S3");
+	ASSERT_EQUAL(3,leftJustified.getLocalTriangleNumber());
+
+	BitShiftNameEncoding rightJustified;
+	rightJustified.setName("N300");
+	ASSERT_EQUAL(0,rightJustified.getLocalTriangleNumber());
+
+	rightJustified.setName("N301");
+	ASSERT_EQUAL(1,rightJustified.getLocalTriangleNumber());
+
+	rightJustified.setName("N302");
+	ASSERT_EQUAL(2,rightJustified.getLocalTriangleNumber());
+
+	rightJustified.setName("N303");
+	ASSERT_EQUAL(3,rightJustified.getLocalTriangleNumber());
+
+	range.purge();
+	/*
+	A = rangeFromSymbols("S000", "S000");
+	range.addRange(A.lo,A.hi);
+
+	A = rangeFromSymbols("S11", "S11");
+	range.addRange(A.lo,A.hi);
+
+	A = rangeFromSymbols("N11", "N11");
+	range.addRange(A.lo,A.hi);
+	*/
+
+	/*
+	A = rangeFromSymbols("N301", "N330");
+	range.addRange(A.lo,A.hi);
+	 */
+	// A = rangeFromSymbols("N1002","N1010"); // smaller inside // old
+	A = rangeFromSymbols("N1001","N1030"); // smaller inside // old
+	range.addRange(A.lo,A.hi);
+//	cout << "nr: " << range.nranges() << endl << flush;
+	range.CompressionPass();
+
 }
 
 void htmRangeLeftJustifiedSketch() {
@@ -2945,6 +3005,75 @@ void testIndexBug() {
 //	cout << "done" << endl << flush;
 }
 
+/**
+ * SpatiallyAdaptiveDataCover realizes Kuo's scheme to embed a resolution scale in
+ * an HTM id. All position bits are kept so that a central point is associated
+ * with the DataCover.
+ *
+ * TODO Construct bounding circle enclosing this triangle.
+ *
+ */
+
+void testSpatiallyAdaptiveDataCover() {
+
+	SpatialVector v;
+	v.setLatLonDegrees(30.0,45.0);
+
+	int buildLevel = 5;
+	int itemLevel  = 12;
+	SpatialIndex index(itemLevel, buildLevel);
+
+	uint64 hid = index.idByPoint(v);
+	int dataLevel = 7;
+
+	BitShiftNameEncoding rightJustified(hid);
+	//	cout << "rj: " << rightJustified.getName() << endl << flush;
+	ASSERT_EQUAL("N3333133330033",rightJustified.getName());
+
+	SpatiallyAdaptiveDataCover cover(hid,dataLevel);
+//	cout << "c rji: " << hex << cover.getRightJustifiedId() << dec << endl << flush;
+//	cout << "c rji: " << cover.getRightJustifiedId() << endl << flush;
+//	cout << "c lji: " << hex << cover.getLeftJustifiedId() << dec << endl << flush;
+	ASSERT_EQUAL(0xffdff0f000000,cover.getRightJustifiedId());
+	ASSERT_EQUAL(0xffdff0f000000018,cover.getLeftJustifiedId());
+
+	// The next two lines set up an hid with a position defined down to level 15.
+	index.setMaxlevel(15);
+	hid = index.idByPoint(v);
+	SpatiallyAdaptiveDataCover cover1(hid,dataLevel);
+
+//	cout << "c1:  " << hex << cover1.getRightJustifiedId() << dec << endl << flush;
+//	cout << "c1:  " << hex << cover1.getLeftJustifiedId() << dec << endl << flush;
+//	cout << "c1A1:  " << hex << cover1.getSciDBLeftJustifiedFormat() << dec << endl << flush;
+//	cout << "c1A2:  " << hex << cover1.getAdaptiveCover_SciDBLeftJustifiedFormat() << dec << endl << flush;
+
+	ASSERT_EQUAL(0x3feff87fe0000007,cover1.getAdaptiveCover_SciDBLeftJustifiedFormat());
+
+	index.setMaxlevel(24); // A fairly high resolution
+	hid = index.idByPoint(v);
+	SpatiallyAdaptiveDataCover cover2(hid,dataLevel);
+
+	index.setMaxlevel(7); // A fairly high resolution
+	hid = index.idByPoint(v);
+	rightJustified.setId(hid);
+	EmbeddedLevelNameEncoding leftJustified(rightJustified.leftJustifiedId());
+
+//	cout << "c2:  " << hex << cover2.getRightJustifiedId() << dec << endl << flush;
+//	cout << "c2:  " << hex << cover2.getLeftJustifiedId() << dec << endl << flush;
+//	cout << "c2a0:  " << hex << leftJustified.getSciDBLeftJustifiedFormat() << dec << endl << flush;
+//	cout << "c2A1:  " << hex << cover2.getSciDBLeftJustifiedFormat() << dec << endl << flush;
+//	cout << "c2A2:  " << hex << cover2.getAdaptiveCover_SciDBLeftJustifiedFormat() << dec << endl << flush;
+//	cout << "c2A3:  " << hex << cover2.getAdaptiveCover_SciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;
+
+	ASSERT_EQUAL(0x3feff87fe0799818,cover2.getSciDBLeftJustifiedFormat());
+	ASSERT_EQUAL(0x3feff87fe0799807,cover2.getAdaptiveCover_SciDBLeftJustifiedFormat());
+	// Note the terminator is based on the data scale level
+	ASSERT_EQUAL(0x3fefffffffffffff,cover2.getAdaptiveCover_SciDBTerminatorLeftJustifiedFormat());
+
+//	FAIL();
+}
+
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -2978,6 +3107,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testHstmSymbolBug1));
 	s.push_back(CUTE(testHstmEqualp));
 	s.push_back(CUTE(testIndexBug));
+	s.push_back(CUTE(testSpatiallyAdaptiveDataCover));
 
 	//	s.push_back(CUTE(testRange));
 

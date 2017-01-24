@@ -676,7 +676,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				// update for iteration
 				lo1 = l_p;
 				hi1 = h_p;
-				my_los->reset(); my_his->reset();
+				my_los->reset(); my_his->reset(); // TODO Is this too conservative? Where should the iter be?
 				}
 //				done = true;
 			}
@@ -927,6 +927,107 @@ void HtmRangeMultiLevel::defrag()
 	// my_his->list(cout);
 }
 
+/// Coalesce triangles and decrease resolution when possible.
+void HtmRangeMultiLevel::CompressionPass() {
+
+//	throw SpatialFailure("HtmRangeMultiLevel::CompressionPass::NotImplemented!!");
+
+	Key lo0, hi0;
+	int triangleNumber0;
+	uint32 level0;
+	my_los->reset(); my_his->reset();
+
+	int nIters = 8;
+	while((lo0 = my_los->getkey()) >= 0) {
+		level0 = encoding->levelById(lo0);
+		hi0 = my_his->getkey();
+
+//		cout << "100: lo-hi-0 " << hex << lo0 << ".." << hi0 << dec << endl << flush;
+
+		encoding->setId(lo0);
+		uint64 bareLo = encoding->bareId();
+		triangleNumber0 = encoding->getLocalTriangleNumber();
+
+//		cout << "110: tNum " << triangleNumber0 << endl << flush;
+
+//		uint64 hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(hi0,level0);
+//		cout << "111: hi0_pred " << hex << hi0_pred << dec << endl << flush;
+//		encoding->setId(hi0_pred);
+
+		Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
+
+		encoding->setId(hi0_id);
+		uint64 bareHi = encoding->bareId();
+
+//		cout << "120: bare-lo-hi " << bareLo << ", " << bareHi << endl << flush;
+
+		uint64 delta = bareHi - bareLo;
+		// triangleNumber0; // if( delta > 3) {}
+//		cout << "200: delta " << delta << endl << flush;
+		if( delta < 3 + triangleNumber0 ) {
+//			cout << "290: " << endl << flush;
+			// No full triangles of leaves in bareLo..bareHi; so skip.
+			my_los->step();
+			my_his->step();
+		} else {
+			// At least one triangle can be coalesced
+			if( triangleNumber0 != 0 ) {
+//				cout << "300: " << endl << flush;
+				// Snip off the front and then recurse
+				Key oldLo = lo0;
+				Key newLo = oldLo;
+				for(int i=triangleNumber0; i<4; i++) {
+					newLo = encoding->increment(newLo,level0);
+				}
+				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
+				// oldLo..newLoPredecessor; newLo..hi0 Modify the skiplists.
+				my_his->insert(newLoPredecessor,1024);
+				my_los->insert(newLo,1024);
+				// Set lists to the new lo
+				my_los->reset(); my_his->reset(); // TODO Until we know better, start over. Bad, bad, bad.
+				// TODO Perhaps instead try a find or a search that would set the iterators.
+			} else {
+//				cout << "400: " << endl << flush;
+				// Snip off as much as possible
+				int numberToCoalesce = (delta+1) / 4;
+				Key oldLo = lo0; Key newLo = oldLo;
+				for(int i=0; i<numberToCoalesce; ++i) {
+					for(int k=0; k<4; ++k) {
+						newLo = encoding->increment(newLo,level0);
+					}
+				}
+				my_los->free(oldLo);
+				--oldLo; // Reduce level
+				my_los->insert(oldLo,1025);
+				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
+				if(newLoPredecessor != hi0) {
+					my_his->insert(newLoPredecessor,1025);
+					my_los->insert(newLo,1025);
+				}
+				my_los->reset(); my_his->reset(); // TODO Reset is too drastic. Prefer to step back a little... Bad, bad, bad.
+			}
+		}
+//		if( !nIters-- ) exit(1);
+	}
+
+//	// my_los->step();
+//
+//	while((lo1 = my_los->getkey())){
+//		level1 = encoding->levelById(lo1);
+//
+//		// Look for full pods of sibling leaves.
+//		if( level0 == level1 ) {
+//			int lo0Id = encoding->getLocalTriangleNumber();
+//			if(lo0Id == 0) { // Found the first triangle
+//				int lo1Id = encoding->getLocalTriangleNumber();
+//			if( lo0Id != lo1Id ) {
+//
+//			}
+//		}
+//	}
+//}
+}
+
 /// Free the range los and his.
 void HtmRangeMultiLevel::purge()
 {
@@ -1042,7 +1143,7 @@ HtmRangeMultiLevel HtmRangeMultiLevel::getSpan() {
 	lo = my_los->getkey();
 	first = lo;
 	if(lo<0) {
-		throw SpatialFailure("HtmRange::getSpan::EmptyRange!!");
+		throw SpatialFailure("HtmRangeMultiLevel::getSpan::EmptyRange!!");
 	}
 	while(lo > 0) {
 		hi = my_his->getkey();
