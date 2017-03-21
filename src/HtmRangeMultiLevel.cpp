@@ -937,7 +937,7 @@ void HtmRangeMultiLevel::CompressionPass() {
 	uint32 level0;
 	my_los->reset(); my_his->reset();
 
-	int nIters = 8;
+//	int nIters = 8;
 	while((lo0 = my_los->getkey()) >= 0) {
 		level0 = encoding->levelById(lo0);
 		hi0 = my_his->getkey();
@@ -1577,7 +1577,13 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 			sprintf(tmp_buf, "%I64d %I64d",lo,hi);
 #else
 			//sprintf(tmp_buf, "x%llx x%llx",lo,hi);
-			sprintf(tmp_buf, "x%llx x%llx",lo,hi);
+			encoding->setId(lo);
+			uint64 loTerm = encoding->getIdTerminator_NoDepthBit();
+			if(hi != loTerm) {
+				sprintf(tmp_buf, "x%llx x%llx",lo,hi);
+			} else {
+				sprintf(tmp_buf, "x%llx",lo);
+			}
 #endif
 		}
 		os << tmp_buf;
