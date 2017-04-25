@@ -15,6 +15,7 @@
 //#include "SpatialGeneral.h"
 #include "SpatialException.h"
 #include "SpatialIndex.h"
+#include "TemporalIndex.h"
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
 
@@ -2803,7 +2804,7 @@ void testHstmSymbol(){
 	stringstream ss;
 	ss.str("");	r.print(ss);
 	if(false){cout << "ss: " << ss.str() << endl;}
-	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
+	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str()); // Expected is not compact... Could be a single, not pair.
 
 	if(false) {cout << "lf.term? " << leftJustified.terminatorp() << endl; }
 	ss.str(""); ss << "term? x" << hex << leftJustified.getId_NoLevelBit() << dec;
@@ -3073,6 +3074,242 @@ void testSpatiallyAdaptiveDataCover() {
 //	FAIL();
 }
 
+void testFirstBitDifferenceFromLeft() {
+	uint64_t
+	one = 1, zero = 0, nOne = - one,
+	k0 = one << 3,
+	k1 = one << 4,
+	k2 = k0 + k1,
+	k3 = one << 62
+	;
+	ASSERT_EQUAL(64,firstBitDifferenceFromLeft(k0,k0));
+	ASSERT_EQUAL(59,firstBitDifferenceFromLeft(k0,k1));
+	ASSERT_EQUAL(60,firstBitDifferenceFromLeft(k1,k2));
+	ASSERT_EQUAL(0,firstBitDifferenceFromLeft(one,nOne));
+	ASSERT_EQUAL(0,firstBitDifferenceFromLeft(zero,nOne));
+	ASSERT_EQUAL(1,firstBitDifferenceFromLeft(zero,k3));
+	// FAIL();
+}
+void testTemporalIndex() {
+
+	TemporalIndex tIndex;
+
+//	cout << 100 << endl;
+//	temporalWordFormat.print();
+//	cout << 200 << endl;
+//	cout << temporalWordFormat.get("Ma").getName() << endl << flush;
+//	cout << 300 << endl;
+//
+//	tIndex.data.print();
+//	cout << 400 << endl;
+
+	tIndex.set_zero();
+	tIndex.set_resolutionLevel(0);
+//	tIndex.checkBitFormat();
+//	cout << "50: " << hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
+	ASSERT_EQUAL( -0x0ll, tIndex.scidbTemporalIndex());
+	tIndex.set_resolutionLevel(7);
+	ASSERT_EQUAL( 0x7ll, tIndex.scidbTemporalIndex());
+	tIndex.set_zero().set_coResolutionLevel(2);
+	ASSERT_EQUAL( 0x5ll, tIndex.scidbTemporalIndex());
+	tIndex.set_coResolutionLevel(7);
+	tIndex.set_millisecond(1);
+	ASSERT_EQUAL( 1, tIndex.get_millisecond());
+	ASSERT_EQUAL(-0x8ll, tIndex.scidbTemporalIndex()); // Note the default is in the past, which is negative... // Maybe use BE - Before Epoch
+
+	TemporalIndex vIndex;
+
+	// Higher resolution -- a higher number
+	tIndex.set_zero()
+			.set_coResolutionLevel(0).set_millisecond(1)
+			.set_BeforeAfterStartBit(0);
+	// Lower resolution -- a lower number
+	vIndex.set_zero()
+			.set_coResolutionLevel(1).set_millisecond(1)
+			.set_BeforeAfterStartBit(0);
+//	cout << "t,v:lvl:t>v = " << dec
+//			<< tIndex.scidbTemporalIndex() << ", "
+//			<< vIndex.scidbTemporalIndex() << ": "
+//			<< tIndex.get_resolutionLevel() << ", "
+//			<< vIndex.get_resolutionLevel() << " : "
+//			<< ( tIndex.scidbTemporalIndex() > vIndex.scidbTemporalIndex())
+//			<< endl;
+
+	// Higher resolution -- a higher number
+	tIndex.set_zero()
+			.set_coResolutionLevel(0).set_millisecond(1)
+			.set_BeforeAfterStartBit(1);
+	// Lower resolution -- a lower number
+	vIndex.set_zero()
+			.set_coResolutionLevel(1).set_millisecond(1)
+			.set_BeforeAfterStartBit(1);
+//	cout << "t,v:lvl:t>v = " << dec
+//			<< tIndex.scidbTemporalIndex() << ", "
+//			<< vIndex.scidbTemporalIndex() << ": "
+//			<< tIndex.get_resolutionLevel() << ", "
+//			<< vIndex.get_resolutionLevel() << " : "
+//			<< ( tIndex.scidbTemporalIndex() > vIndex.scidbTemporalIndex())
+//			<< endl;
+
+
+
+	// tIndex.set_resolutionLevel(0);
+
+	tIndex.set_zero().set_Ma(1).set_coResolutionLevel(0).set_BeforeAfterStartBit(0);
+	ASSERT_EQUAL( 1, tIndex.get_Ma());
+	ASSERT_EQUAL( 0, tIndex.get_millisecond());
+//	cout << 490 << endl;
+//	cout << hex << "tIndex.scidb: " << tIndex.scidbTemporalIndex() << dec << endl << flush;
+//	cout << "-" << endl;
+
+	tIndex.set_zero().set_Ma(1).set_coResolutionLevel(0);
+	ASSERT_EQUAL( 1, tIndex.get_Ma());
+	ASSERT_EQUAL( 0, tIndex.get_millisecond());
+//	cout << 500 << endl;
+//	cout << hex << "tIndex.scidb: " << tIndex.scidbTemporalIndex() << dec << endl << flush;
+//	cout << hex << "expected:     " <<  -0x800000000000000ll+7 << dec << endl << flush;
+//	cout << hex << "delta:        " << -(tIndex.scidbTemporalIndex() + 0x800000000000000ll-7)
+//			<< dec << endl << flush;
+//	cout << hex << "rL:           " << tIndex.get_coResolutionLevel() << dec << endl;
+//	tIndex.checkBitFormat();
+	ASSERT_EQUAL( -0x800000000000000ll+7, tIndex.scidbTemporalIndex());
+	ASSERT_EQUAL( 1, tIndex.get_Ma());
+	tIndex.set_zero().set_BeforeAfterStartBit(1).set_ka(2).set_year(17);
+	ASSERT_EQUAL( 2017, tIndex.get_ka()*1000 + tIndex.get_year());
+
+	try {
+		tIndex.set_zero().set_BeforeAfterStartBit(2);
+		FAIL();
+	} catch (const SpatialException & e) {
+		// cout << "Exception " << e.what() << endl << flush;
+		ASSERT_EQUAL("TemporalIndex:DomainFailure in  : BeforeAfterStartBit",e.what());
+	}
+
+	tIndex.set_zero().set_BeforeAfterStartBit(1).set_ka(2).set_year(17);
+	// cout << "tIndex.scidb: " << tIndex.scidbTemporalIndex() << endl << flush;
+	TemporalIndex uIndex(tIndex.scidbTemporalIndex());
+	ASSERT_EQUAL( 2017, uIndex.get_ka()*1000 + uIndex.get_year());
+	ASSERT_EQUAL( tIndex.scidbTemporalIndex(), uIndex.scidbTemporalIndex() );
+
+	/*
+	cout << "scale_Total: " << scale_Total << " "
+			<< scale_Total/(365.0*24.0*3600.0*1000.0) << endl << flush;
+			*/
+
+	tIndex.set_zero();
+	ASSERT_EQUAL(0,tIndex.getCoResolutionLevel("millisecond"));
+	ASSERT_EQUAL(8,tIndex.getCoResolutionLevel("Ma"));
+
+// tIndex.data.incrementAtLevel("Ma");
+	tIndex.set_Ma(1);
+//	cout << "1000" << endl;
+//	tIndex.checkBitFormat();
+//	cout << "1999" << endl;
+	ASSERT_EQUAL(1,tIndex.get_Ma());
+
+	tIndex.set_zero();
+	tIndex.data.incrementAtLevel("Ma");
+//	cout << "2000" << endl;
+//	tIndex.checkBitFormat();
+//	cout << "2999" << endl;
+	tIndex.data.incrementAtLevel("Ma");
+	ASSERT_EQUAL(2,tIndex.get_Ma());
+
+	tIndex.data.decrementAtLevel("Ma");
+	ASSERT_EQUAL(1,tIndex.get_Ma());
+
+	try {
+		tIndex.set_zero().data.decrementAtLevel("Ma");
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalWordFormat:decrementAtLevel:MaxLevelExceeded",e.what());
+	}
+
+	try {
+		tIndex.set_zero().data.decrementAtLevel("millisecond");
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalWordFormat:UnderflowError",e.what());
+	}
+
+	tIndex.set_zero().set_Ma(2).data.decrementAtLevel("ka");
+	ASSERT_EQUAL(999,tIndex.get_ka());
+	ASSERT_EQUAL(1,tIndex.get_Ma());
+	tIndex.data.incrementAtLevel("ka");
+	ASSERT_EQUAL(0,tIndex.get_ka());
+	ASSERT_EQUAL(2,tIndex.get_Ma());
+
+	tIndex.set_zero().set_ka(999);
+	tIndex.data.incrementAtLevel("ka",5);
+	ASSERT_EQUAL(4,tIndex.get_ka());
+	ASSERT_EQUAL(1,tIndex.get_Ma());
+
+	tIndex.set_zero().set_Ma(1);
+	tIndex.data.decrementAtLevel("ka",5);
+	ASSERT_EQUAL(995,tIndex.get_ka());
+	ASSERT_EQUAL(0,tIndex.get_Ma());
+
+	/*
+	tIndex.set_zero().set_ka(1).set_BeforeAfterStartBit(1);
+	cout << "t0: " << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	tIndex.data.setTerminatorBelowLevel("ka");
+	// tIndex.checkBitFormat();
+	cout << "t1: " << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	// cout << "t2: " << hex << tIndex.scidbTerminator() << dec << endl;
+	tIndex.set_resolutionLevel(2);
+	tIndex.data.incrementAtLevel("resolutionLevel");
+	cout << "tL: " << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	*/
+
+	/*
+	tIndex.set_zero().set_ka(1);
+	uIndex.set_zero().set_ka(1).set_day(2)
+			.set_resolutionLevel(uIndex.getResolutionLevel("year"));
+
+	for( int yr = 2000; yr < 2020; ++yr ) {
+		tIndex.set_zero().set_ka(yr/1000).set_year(yr % 1000)
+				.set_BeforeAfterStartBit(1)
+				.set_resolutionLevel(tIndex.getResolutionLevel("year"));
+				;
+		cout << dec << tIndex.get_ka()*1000 + tIndex.get_year() << " : "
+				<< 	hex << tIndex.scidbTemporalIndex() << dec << endl;
+	}
+	*/
+
+	/*
+	tIndex.set_zero().set_ka(1).set_resolutionLevel(3).set_BeforeAfterStartBit(1);
+	cout << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	cout << hex << tIndex.scidbTerminator() << dec << endl;
+	tIndex.set_resolutionLevel(2);
+	cout << hex << tIndex.scidbTerminator() << dec << endl;
+	tIndex.set_resolutionLevel(1);
+	cout << hex << tIndex.scidbTerminator() << dec << endl;
+	tIndex.set_resolutionLevel(0);
+	cout << hex << tIndex.scidbTerminator() << dec << endl;
+	*/
+
+	/*
+	tIndex.set_zero();
+	tIndex.hackSetTraditionalDate(2,11,31,0,0,0,0); // Note 11 = December!?
+	tIndex.checkBitFormat();
+	cout << "-" << endl;
+	tIndex.hackSetTraditionalDate(3,0,1,0,0,0,0); // Note day starts at 1!?
+	tIndex.checkBitFormat();
+
+	tIndex.set_zero();
+//	tIndex.hackSetTraditionalDate(2017,0,31,0,0,0,0); // Note day starts at 1!?
+//	tIndex.hackSetTraditionalDate(2017,2,31,0,0,0,0); // Note day starts at 1!?
+	tIndex.hackSetTraditionalDate(2017,0,1,0,0,0,0); // Note day starts at 1!?
+	tIndex.checkBitFormat();
+	cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
+//	tIndex.hackSetTraditionalDate(2018,2,31,0,0,0,0); // Note day starts at 1!?
+	tIndex.hackSetTraditionalDate(2018,0,1,0,0,0,0); // Note day starts at 1!?
+	cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	*/
+	tIndex.hackSetTraditionalDate(2019,0,1,0,0,0,0); // Note day starts at 1!?
+//	cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	ASSERT_EQUAL(0x4098000000007ll,tIndex.scidbTemporalIndex());
+
+//	FAIL();
+}
 
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
@@ -3108,6 +3345,8 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testHstmEqualp));
 	s.push_back(CUTE(testIndexBug));
 	s.push_back(CUTE(testSpatiallyAdaptiveDataCover));
+	s.push_back(CUTE(testFirstBitDifferenceFromLeft));
+	s.push_back(CUTE(testTemporalIndex));
 
 	//	s.push_back(CUTE(testRange));
 
