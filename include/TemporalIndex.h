@@ -253,7 +253,12 @@ public:
 		return *this;
 	}
 	int64_t getValue(string name) {
+	  if(name != "resolutionLevel") {
 		return bitFieldMap.at(name).getValue();
+	  } else {
+	    return
+	      resolutionLevelConstraint - bitFieldMap.at("coResolutionLevel").getValue();
+	  }
 	}
 
 	void setZero() {
@@ -717,6 +722,63 @@ public:
 //		cout << "500" << endl << flush;
 
 	}
+
+	string hackStringInTraditionalDate() {
+	  
+	  int64_t
+	    year = 0,
+	    month = 0,
+	    day_of_month = 0,
+	    hour = 0,
+	    minute = 0,
+	    second = 0,
+	    millisecond = 0
+	    ;
+
+	  // Traditional format
+	  hackGetTraditionalDate
+	    ( year,
+	      month,
+	      day_of_month,
+	      hour,
+	      minute,
+	      second,
+	      millisecond
+	      );
+
+	  stringstream ss;
+	  // ss << tIndex;
+	  ss
+	    << setw(4) << setfill('0') << year << "-"
+	    << setw(2) << setfill('0') << month << "-"
+	    << setw(2) << setfill('0') << day_of_month << " "
+	    << setw(2) << hour << ":"
+	    << setw(2) << minute << ":"
+	    << setw(2) << second << "."
+	    << setw(3) << millisecond
+	    << " (" << data.getValue("resolutionLevel") << ")";
+
+	  return ss.str();
+	}
+
+	string stringInNativeDate() {
+
+	  stringstream ss;
+	  ss
+	    << setw(3) << setfill('0') << data.getValue("Ma") << "-"
+		<< setw(3) << setfill('0') << data.getValue("ka")
+		<< setw(3) << setfill('0') << data.getValue("year") << "-"
+	    << setw(2) << setfill('0') << data.getValue("month") << "-"
+		<< setw(1) << setfill('0') << data.getValue("week") << "-"
+		<< setw(1) << setfill('0') << data.getValue("day") << " "
+		<< setw(2) << setfill('0') << data.getValue("hour") << ":"
+		<< setw(4) << setfill('0') << data.getValue("second") << "."
+		<< setw(3) << setfill('0') << data.getValue("millisecond")
+	    << " (" << data.getValue("resolutionLevel") << ")";
+
+	  return ss.str();
+	}
+
 
 };
 
