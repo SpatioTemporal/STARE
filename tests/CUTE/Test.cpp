@@ -3351,9 +3351,18 @@ void testTemporalIndex() {
 	ASSERT_EQUAL(0,_millisecond);
 
 	// cout << "tIndex: " << tIndex.hackStringInTraditionalDate() << endl;
-	ASSERT_EQUAL("2015-06-12 08:10:00.000 (7)",tIndex.hackStringInTraditionalDate());
+	ASSERT_EQUAL("2015-06-12 08:10:00.000 (07)",tIndex.hackStringInTraditionalDate());
 	// cout << "tIndex: " << tIndex.stringInNativeDate() << endl;
-	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (7)",tIndex.stringInNativeDate());
+	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
+
+	tIndex.set_zero();
+	tIndex.hackFromTraditionalString("2015-06-12 08:10:00.000 (07)");
+	ASSERT_EQUAL("2015-06-12 08:10:00.000 (07)",tIndex.hackStringInTraditionalDate());
+	// cout << "tIndex: " << tIndex.hackStringInTraditionalDate() << endl;
+
+	tIndex.set_zero();
+	tIndex.fromNativeString("000-002015-06-3-3 08:0600.000 (07)");
+	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
 
 //	FAIL();
 }

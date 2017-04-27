@@ -756,9 +756,37 @@ public:
 	    << setw(2) << minute << ":"
 	    << setw(2) << second << "."
 	    << setw(3) << millisecond
-	    << " (" << data.getValue("resolutionLevel") << ")";
+	    << " (" << setw(2) << data.getValue("resolutionLevel") << ")";
 
 	  return ss.str();
+	}
+
+	void hackFromTraditionalString(string traditionalString) {
+
+	  // TODO repent the sin of hardcoding
+	  int pos = 0;
+#define PARSE_INT(field,width) \
+	  int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
+	  PARSE_INT(year,4);
+	  PARSE_INT(month,2);
+	  PARSE_INT(day_of_month,2);
+	  PARSE_INT(hour,2);
+	  PARSE_INT(minute,2);
+	  PARSE_INT(second,2);
+	  PARSE_INT(millisecond,3);
+	  ++pos;
+	  PARSE_INT(level,2);
+#undef PARSE_INT
+	  hackSetTraditionalDate
+	    ( year,
+	      month,
+	      day_of_month,
+	      hour,
+	      minute,
+	      second,
+	      millisecond
+	      );
+	  data.setValue("resolutionLevel",level);
 	}
 
 	string stringInNativeDate() {
@@ -766,17 +794,35 @@ public:
 	  stringstream ss;
 	  ss
 	    << setw(3) << setfill('0') << data.getValue("Ma") << "-"
-		<< setw(3) << setfill('0') << data.getValue("ka")
-		<< setw(3) << setfill('0') << data.getValue("year") << "-"
+	    << setw(3) << setfill('0') << data.getValue("ka")
+	    << setw(3) << setfill('0') << data.getValue("year") << "-"
 	    << setw(2) << setfill('0') << data.getValue("month") << "-"
-		<< setw(1) << setfill('0') << data.getValue("week") << "-"
-		<< setw(1) << setfill('0') << data.getValue("day") << " "
-		<< setw(2) << setfill('0') << data.getValue("hour") << ":"
-		<< setw(4) << setfill('0') << data.getValue("second") << "."
-		<< setw(3) << setfill('0') << data.getValue("millisecond")
-	    << " (" << data.getValue("resolutionLevel") << ")";
+	    << setw(1) << setfill('0') << data.getValue("week") << "-"
+	    << setw(1) << setfill('0') << data.getValue("day") << " "
+	    << setw(2) << setfill('0') << data.getValue("hour") << ":"
+	    << setw(4) << setfill('0') << data.getValue("second") << "."
+	    << setw(3) << setfill('0') << data.getValue("millisecond")
+	    << " (" << setw(2) << data.getValue("resolutionLevel") << ")";
 
 	  return ss.str();
+	}
+
+	void fromNativeString(string nativeString) {
+	  // TODO repent the sin of hardcoding
+	  int pos = 0;
+#define PARSE_INT(field,width) \
+	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); pos += width;
+	  PARSE_INT(Ma,3); ++pos;
+	  PARSE_INT(ka,3);
+	  PARSE_INT(year,3); ++pos;
+	  PARSE_INT(month,2); ++pos;
+	  PARSE_INT(week,1); ++pos;
+	  PARSE_INT(day,1); ++pos;
+	  PARSE_INT(hour,2); ++pos;
+	  PARSE_INT(second,4); ++pos;
+	  PARSE_INT(millisecond,3); pos += 2;
+	  PARSE_INT(resolutionLevel,2);
+#undef PARSE_INT
 	}
 
 
