@@ -632,6 +632,92 @@ public:
 		data.setValue("BeforeAfterStartBit",1);
 	}
 
+	void hackGetTraditionalDate(
+			int64_t &_year,
+			int64_t &_month, // 0..11
+			int64_t &_day_of_month, // 1..31
+			int64_t &_hour, // 0..23
+			int64_t &_minute, // 0..59
+			int64_t &_second, // 0..59
+			int64_t &_millisecond // 0..999
+	) {
+
+		int64_t milliseconds_total = 0;
+
+//		cout << "100" << endl << flush;
+
+#define SCALE(field) milliseconds_total += \
+		  data.getValue(#field) * data.get(#field).getScale() \
+		  ;
+		SCALE(Ma);
+		SCALE(ka);
+		SCALE(year);
+		SCALE(month);
+		SCALE(week);
+		SCALE(day);
+		SCALE(hour);
+		SCALE(second);
+		SCALE(millisecond);
+#undef SCALE
+
+		int64_t _day_of_year = 0;
+
+//		cout << "200" << endl << flush;
+
+//#define EXTRACT(field,max_val) cout << #field << " " << flush; \
+//	field = milliseconds_total % max_val; \
+//	cout << "-1-" << flush; \
+//	milliseconds_total -= field ; \
+//	cout << "-2-" << flush; \
+//	milliseconds_total /= max_val; \
+//	cout << "-3-" << endl << flush;
+#define EXTRACT(field,max_val) \
+	field = milliseconds_total % max_val; \
+	milliseconds_total -= field ; \
+	milliseconds_total /= max_val;
+		EXTRACT(_millisecond,1000ll);
+		EXTRACT(_second,     60ll);
+		EXTRACT(_minute,     60ll);
+		EXTRACT(_hour,       24ll);
+		EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
+		_year = milliseconds_total;
+#undef EXTRACT
+
+//		cout << "300" << endl << flush;
+
+		// Be a little silly.
+		// TODO Fix for correct work
+		int days_in_month[] = {
+				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+		};
+
+		// From wikipedia
+		int leapyear_day = 0;
+		if( (_year % 4) != 0 ) {
+			leapyear_day = 0;
+		} else if( (_year % 100) != 0 ) {
+			leapyear_day = 1;
+		} else if( (_year % 400) != 0 ) {
+			leapyear_day = 0;
+		} else { leapyear_day = 1; }
+		days_in_month[1] += leapyear_day;
+
+//		cout << "400" << endl << flush;
+
+		int imo = 0;
+		while( _day_of_year > days_in_month[imo] ) {
+			_day_of_year -= days_in_month[ imo++ ];
+			if( imo > 11 ) {
+				throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");
+			}
+		}
+		_month = imo;
+		_day_of_month = _day_of_year + 1;
+
+//		cout << "500" << endl << flush;
+
+	}
+
 };
 
 } /* namespace std */

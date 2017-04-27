@@ -190,7 +190,7 @@ void idReallyDeep() {
 	for(int i=0;i<1024;i++)expected[i] = 0;
 	expected[0] = 'S';
 	uint64 htmID=2;
-	for(int i=1; i<level+2; i++) { // GOTCHA IN SWITCH TO LEVEL
+	for(uint i=1; i<level+2; i++) { // GOTCHA IN SWITCH TO LEVEL
 		uint64 triangle = rand() % 4;
 		//		triangle = 0;
 		expected[i] = '0' + triangle;
@@ -3305,8 +3305,50 @@ void testTemporalIndex() {
 	cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
 	*/
 	tIndex.hackSetTraditionalDate(2019,0,1,0,0,0,0); // Note day starts at 1!?
-//	cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
+	// cout << "tIndex: x" << hex << tIndex.scidbTemporalIndex() << dec << endl;
 	ASSERT_EQUAL(0x4098000000007ll,tIndex.scidbTemporalIndex());
+
+	int64_t _year;
+	int64_t _month; // 0..11
+	int64_t _day_of_month; // 1..31
+	int64_t _hour; // 0..23
+	int64_t _minute; // 0..59
+	int64_t _second; // 0..59
+	int64_t _millisecond; // 0..999
+	tIndex.hackGetTraditionalDate(
+			 _year,
+			 _month, // 0..11
+			 _day_of_month, // 1..31
+			 _hour, // 0..23
+			 _minute, // 0..59
+			 _second, // 0..59
+			 _millisecond // 0..999
+	);
+	ASSERT_EQUAL(2019,_year);
+	ASSERT_EQUAL(0,_month);
+	ASSERT_EQUAL(1,_day_of_month);
+	ASSERT_EQUAL(0,_hour);
+	ASSERT_EQUAL(0,_minute);
+	ASSERT_EQUAL(0,_second);
+	ASSERT_EQUAL(0,_millisecond);
+
+	tIndex.hackSetTraditionalDate(2015,6,12,8,10,0,0); // Note day starts at 1!?
+	tIndex.hackGetTraditionalDate(
+			 _year,
+			 _month, // 0..11
+			 _day_of_month, // 1..31
+			 _hour, // 0..23
+			 _minute, // 0..59
+			 _second, // 0..59
+			 _millisecond // 0..999
+	);
+	ASSERT_EQUAL(2015,_year);
+	ASSERT_EQUAL(6,_month);
+	ASSERT_EQUAL(12,_day_of_month);
+	ASSERT_EQUAL(8,_hour);
+	ASSERT_EQUAL(10,_minute);
+	ASSERT_EQUAL(0,_second);
+	ASSERT_EQUAL(0,_millisecond);
 
 //	FAIL();
 }
