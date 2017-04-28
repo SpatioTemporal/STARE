@@ -3364,6 +3364,24 @@ void testTemporalIndex() {
 	tIndex.fromNativeString("000-002015-06-3-3 08:0600.000 (07)");
 	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
 
+	TemporalIndex tIndex_0(120003);
+	//cout << "tIndex_0-scidb: " << tIndex_0.scidbTemporalIndex() << " "
+	//	<< "'" << tIndex_0.stringInNativeDate() << "' "
+	//	<< "'" << tIndex_0.hackStringInTraditionalDate() << "' "
+	//	<< endl;
+	ASSERT_EQUAL("000-000000-00-0-0 00:0014.664 (03)",tIndex_0.stringInNativeDate());
+	ASSERT_EQUAL("0000-00-01 00:00:14.664 (03)",tIndex_0.hackStringInTraditionalDate());
+
+	TemporalIndex uIndex_0, uIndex_1;
+	uIndex_0.fromNativeString(tIndex_0.stringInNativeDate());
+	uIndex_1.hackFromTraditionalString(tIndex_0.hackStringInTraditionalDate());
+
+	ASSERT_EQUAL(120003ll,uIndex_0.scidbTemporalIndex());
+	ASSERT_EQUAL(120003ll,uIndex_1.scidbTemporalIndex());
+
+	// cout << "uIndex_0: " << uIndex_0.scidbTemporalIndex() << endl;
+	// cout << "uIndex_1: " << uIndex_1.scidbTemporalIndex() << endl;
+
 //	FAIL();
 }
 

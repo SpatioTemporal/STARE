@@ -811,7 +811,12 @@ public:
 	  // TODO repent the sin of hardcoding
 	  int pos = 0;
 #define PARSE_INT(field,width) \
-	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); pos += width;
+	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); \
+	  pos += width;
+	  // cout << endl \
+	  // << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) \
+	  // << ", '" << nativeString.substr(pos,width) << "'" << endl; \
+
 	  PARSE_INT(Ma,3); ++pos;
 	  PARSE_INT(ka,3);
 	  PARSE_INT(year,3); ++pos;
@@ -823,6 +828,7 @@ public:
 	  PARSE_INT(millisecond,3); pos += 2;
 	  PARSE_INT(resolutionLevel,2);
 #undef PARSE_INT
+	  data.setValue("BeforeAfterStartBit",1);
 	}
 
 
