@@ -3382,6 +3382,42 @@ void testTemporalIndex() {
 	// cout << "uIndex_0: " << uIndex_0.scidbTemporalIndex() << endl;
 	// cout << "uIndex_1: " << uIndex_1.scidbTemporalIndex() << endl;
 
+	tIndex.set_zero();
+	try {
+		tIndex.hackSetTraditionalDate(0,0,0,0,20ll,0,0);
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in _day_of_month",e.what());
+	}
+
+	tIndex.set_zero();
+	tIndex.hackSetTraditionalDate(0,0,1,0,20ll,0,0);
+	tIndex.set_resolutionLevel(3);
+	ASSERT_EQUAL("000-000000-00-0-0 00:1200.000 (03)",tIndex.stringInNativeDate());
+	ASSERT_EQUAL("0000-00-01 00:20:00.000 (03)",tIndex.hackStringInTraditionalDate());
+	/*
+	cout << "tIndex: " << tIndex.hackStringInTraditionalDate() << endl;
+	cout << "tIndex: " << tIndex.stringInNativeDate() << endl;
+	cout << "tIndex: "
+			<< tIndex.get_Ma()
+			<< " "
+			<< tIndex.get_ka()
+			<< " "
+			<< tIndex.get_year()
+			<< " "
+			<< tIndex.get_month()
+			<< " "
+			<< tIndex.get_week()
+			<< " "
+			<< tIndex.get_day()
+			<< " "
+			<< tIndex.get_hour()
+			<< " "
+			<< tIndex.get_second()
+			<< " "
+			<< tIndex.get_millisecond()
+			<< endl;
+			*/
+
 //	FAIL();
 }
 

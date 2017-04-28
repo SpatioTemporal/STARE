@@ -586,6 +586,18 @@ public:
 			int64_t _second, // 0..59
 			int64_t _millisecond // 0..999
 	) {
+
+#define CHECK_BOUND(lo,val,hi) \
+	if ((val < lo) || (hi < val)) \
+	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
+		throw SpatialFailure(ss.str().c_str()); }
+	CHECK_BOUND(0,_month,11);
+	CHECK_BOUND(1,_day_of_month,31);
+	CHECK_BOUND(0,_hour,23);
+	CHECK_BOUND(0,_minute,59);
+	CHECK_BOUND(0,_second,59);
+	CHECK_BOUND(0,_millisecond,999);
+#undef  CHECK_BOUND
 		// Be a little silly.
 		// TODO Fix for correct work
 		int days_in_month[] = {
