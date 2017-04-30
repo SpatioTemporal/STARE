@@ -2804,7 +2804,8 @@ void testHstmSymbol(){
 	stringstream ss;
 	ss.str("");	r.print(ss);
 	if(false){cout << "ss: " << ss.str() << endl;}
-	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str()); // Expected is not compact... Could be a single, not pair.
+	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008)",ss.str()); // Expected is not compact... Could be a single, not pair.
+//	ASSERT_EQUAL("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str()); // Expected is not compact... Could be a single, not pair.
 
 	if(false) {cout << "lf.term? " << leftJustified.terminatorp() << endl; }
 	ss.str(""); ss << "term? x" << hex << leftJustified.getId_NoLevelBit() << dec;
@@ -2837,7 +2838,8 @@ void testHstmSymbol(){
 		cout << "nr: " << r1.nranges() << endl;
 		cout << "ss: " << ss.str() << endl;
 	}
-	ASSERT_EQUALM("r1.addRange(leftJustified.getId_NoLevelBit())","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
+	ASSERT_EQUALM("r1.addRange(leftJustified.getId_NoLevelBit())","(HSTMHex x7f7ff00000000008)",ss.str());
+//	ASSERT_EQUALM("r1.addRange(leftJustified.getId_NoLevelBit())","(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)",ss.str());
 
 	id_RightJustified = index.idByLatLon(-lat,lon); // Try the other side of the equator.
 	rightJustified.setId(id_RightJustified);
