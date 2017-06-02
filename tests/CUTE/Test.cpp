@@ -3418,6 +3418,50 @@ void testTemporalIndex() {
 			<< endl;
 			*/
 
+	tIndex.set_zero();
+	try{
+	tIndex.hackSetTraditionalDate(-1,0,1,0,20ll,0,0);
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 0\nTODO: Correct hackSetTraditionalDate to handle negative years.\n",e.what());
+	}
+
+	tIndex.set_zero();
+	try{
+	tIndex.hackSetTraditionalDate(16000000,0,1,0,20ll,0,0);
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in _year",e.what());
+	}
+
+	try{
+		TemporalIndex pastNotImplemented(0,1,0,0,0,0,0,0,0,0,0);
+	} catch ( const SpatialException & e ) {
+		ASSERT_EQUAL("TemporalIndex::NOT_IMPLEMENTED_ERROR in TemporalIndex(...) BeforeAfterStartBit = 0 (past)\nTODO: Correct index scheme for the past. E.g. years go negative, but not months, weeks, etc.\n",e.what());
+	}
+
+	// From bug mlr 2017-0602
+	tIndex.hackSetTraditionalDate(2009,11,1,0,0,0,0); // Note day starts at 1!?
+	ASSERT_EQUAL("2009-11-01 00:00:00.000 (03)",tIndex.hackStringInTraditionalDate());
+	//?? ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
+	tIndex.hackGetTraditionalDate(
+			 _year,
+			 _month, // 0..11
+			 _day_of_month, // 1..31
+			 _hour, // 0..23
+			 _minute, // 0..59
+			 _second, // 0..59
+			 _millisecond // 0..999
+	);
+	ASSERT_EQUAL(2009,_year);
+	ASSERT_EQUAL(11,_month);
+	ASSERT_EQUAL(1,_day_of_month);
+	ASSERT_EQUAL(0,_hour);
+	ASSERT_EQUAL(0,_minute);
+	ASSERT_EQUAL(0,_second);
+	ASSERT_EQUAL(0,_millisecond);
+
+	// cout << "tIndex: " << tIndex.stringInNativeDate() << endl;
+	ASSERT_EQUAL("000-002009-11-3-5 00:0000.000 (03)",tIndex.stringInNativeDate());
+
 //	FAIL();
 }
 

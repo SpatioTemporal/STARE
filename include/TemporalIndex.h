@@ -420,6 +420,12 @@ public:
 //				millisecond(millisecond),
 //				coResolutionLevel(coResolutionLevel)
 	{
+
+	  if( BeforeAfterStartBit != 1 )
+	    { stringstream ss; ss << "TemporalIndex::NOT_IMPLEMENTED_ERROR in TemporalIndex(...) BeforeAfterStartBit = 0 (past)" << endl;
+	      ss << "TODO: Correct index scheme for the past. E.g. years go negative, but not months, weeks, etc." << endl;
+	      throw SpatialFailure(ss.str().c_str()); }
+	  
 #define SET_VALUE(field) data.setValue(#field,field);
 		SET_VALUE( BeforeAfterStartBit );
 		SET_VALUE( Ma );
@@ -578,7 +584,7 @@ public:
 #undef OUTPUT
 
 	void hackSetTraditionalDate(
-			int64_t _year,
+				    int64_t _year, // > 0
 			int64_t _month, // 0..11
 			int64_t _day_of_month, // 1..31
 			int64_t _hour, // 0..23
@@ -587,10 +593,16 @@ public:
 			int64_t _millisecond // 0..999
 	) {
 
+	  if(_year < 0) 
+	    { stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 0" << endl;
+	      ss << "TODO: Correct hackSetTraditionalDate to handle negative years." << endl;
+	      throw SpatialFailure(ss.str().c_str()); }
+	  
 #define CHECK_BOUND(lo,val,hi) \
 	if ((val < lo) || (hi < val)) \
 	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
 		throw SpatialFailure(ss.str().c_str()); }
+	CHECK_BOUND(0,_year,15999999);
 	CHECK_BOUND(0,_month,11);
 	CHECK_BOUND(1,_day_of_month,31);
 	CHECK_BOUND(0,_hour,23);
@@ -722,7 +734,8 @@ public:
 //		cout << "400" << endl << flush;
 
 		int imo = 0;
-		while( _day_of_year > days_in_month[imo] ) {
+		while( _day_of_year >= days_in_month[imo] ) { // bug mlr 2017-0602 was >
+			// cout << "401 " << _day_of_year << " " << imo << endl;
 			_day_of_year -= days_in_month[ imo++ ];
 			if( imo > 11 ) {
 				throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");

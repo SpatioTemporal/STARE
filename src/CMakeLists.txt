@@ -22,6 +22,7 @@ set (
   SpatialIndex.cpp
   SpatialInterface.cpp
   SpatialVector.cpp
+  TemporalIndex.cpp
   VarStr.C )
   
 # TODO Trouble with VarStr.hpp# TODO Trouble with VarStr.hpp
