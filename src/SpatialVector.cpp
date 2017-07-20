@@ -111,28 +111,35 @@ SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
  */
 bool
 SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
-	if (latlon_) {
-		lat = latDegrees_;
-		lon = lonDegrees_;
-	} else {
-		if(length()!=1) {
-			// TODO A logger would be useful here.
-		    throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
-		}
-		lat = asin(z_)/gPr; // easy.
-		float64 cd = cos(lat*gPr);
-		if(cd>gEpsilon || cd<-gEpsilon)
-			if(y_>gEpsilon || y_<-gEpsilon)
-				if (y_ < 0.0)
-					lon = 360 - acos(x_/cd)/gPr;
-				else
-					lon = acos(x_/cd)/gPr;
-			else
-				lon = (x_ < 0.0 ? 180.0 : 0.0);
-		else
-			lon=0.0;
-	}
-	return latlon_;
+  
+  if (latlon_) {
+    lat = latDegrees_;
+    lon = lonDegrees_;
+  } else {
+    float64 X,Y,Z;
+    X = x_; Y = y_; Z = z_;
+    if(length()!=1) { // TODO: Repent disrespecting machine precision
+      // TODO A logger would be useful here.
+      // throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
+
+      // Deal with it.
+      float64 L = sqrt( X*X + Y*Y + Z*Z );
+      X /= L; Y /= L; Z /= L;
+    } 
+    lat = asin(Z)/gPr; // easy.
+    float64 cd = cos(lat*gPr);
+    if(cd>gEpsilon || cd<-gEpsilon)
+      if(Y>gEpsilon || Y<-gEpsilon)
+	if (Y < 0.0)
+	  lon = 360 - acos(X/cd)/gPr;
+	else
+	  lon = acos(X/cd)/gPr;
+      else
+	lon = (X < 0.0 ? 180.0 : 0.0);
+    else
+      lon=0.0;
+  }
+  return latlon_;
 }
 
 /////////////GET//////////////////////////////////////////
