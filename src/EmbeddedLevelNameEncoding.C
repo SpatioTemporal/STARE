@@ -284,7 +284,6 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool 
 	return EmbeddedLevelNameEncoding(newId);
 }
 
-
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64 level) {
 	int oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
@@ -305,7 +304,6 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64
 	newId = newId | level;
 	return EmbeddedLevelNameEncoding(newId);
 }
-
 
 // TODO Unit tests
 /// Find terminator+
