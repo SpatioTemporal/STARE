@@ -284,6 +284,29 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool 
 	return EmbeddedLevelNameEncoding(newId);
 }
 
+
+EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64 level) {
+	int oldLevel = this->getLevel();
+	uint64 id_NoLevel = this->maskOffLevel();
+	uint64 keepBits = one << 1; // Position 63
+	keepBits++; // Position 62
+	uint64 newId;
+
+	for(int i=62;i>5;i-=2){
+	  int levelAtI = (62-i)/2;
+	  keepBits = keepBits << 2;
+	  if(level >= levelAtI){
+	    keepBits += 3;
+	  }
+	}
+	keepBits = keepBits << 4;
+	newId = id_NoLevel & keepBits;
+
+	newId = newId | level;
+	return EmbeddedLevelNameEncoding(newId);
+}
+
+
 // TODO Unit tests
 /// Find terminator+
 uint64 EmbeddedLevelNameEncoding::successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const {

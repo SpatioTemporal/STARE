@@ -94,6 +94,8 @@ public:
 	/// Changes the level, loses info on coarsening.
 	EmbeddedLevelNameEncoding atLevel( uint64 level, bool keepAllBits = false );
 
+	EmbeddedLevelNameEncoding clearDeeperThanLevel(uint64 level);
+
 	uint64 increment(uint64 lowerBound, uint32 level, int steps = 1) const;
 	uint64 decrement(uint64 lowerBound, uint32 level, int steps = 1) const;
 
