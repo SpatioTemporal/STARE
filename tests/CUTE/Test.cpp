@@ -778,58 +778,59 @@ void testEmbeddedLevelNameEncoding() {
 		expected = "N012"; found=n0->greatestCommonName(*n1);
 		ASSERT_EQUALM("greatest common name N01230 and N01220",expected,found);
 
-		n1->setName("N01230123012301230123");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-
-			int64_t sId = n1->getSciDBLeftJustifiedFormat();
-			cout << "--sId     " << hex << sId << dec << " " << sId << endl;
-			EmbeddedLevelNameEncoding truncSId;
-			truncSId.setIdFromSciDBLeftJustifiedFormat(sId);
-
-			EmbeddedLevelNameEncoding sId1 = truncSId.clearDeeperThanLevel(10);
-			int64_t sId1i = sId1.getSciDBLeftJustifiedFormat();
-			cout << "--sId1    " << hex << sId1i << dec << " " << sId1i << " <-- using clearDeeperThanLevel" << endl;
-
-			EmbeddedLevelNameEncoding sId2 = truncSId.atLevel(10);
-			int64_t sId2i = sId2.getSciDBLeftJustifiedFormat();
-			cout << "--sId2    " << hex << sId2i << dec << " " << sId2i << " <-- using atLevel (false) only" << endl;
-
-			EmbeddedLevelNameEncoding sId3 = truncSId.atLevel(10,true);
-			int64_t sId3i = sId2.getSciDBLeftJustifiedFormat();
-			cout << "--sId3    " << hex << sId3i << dec << " " << sId3i << " <-- using atLevel (true) only" << endl;
-		}
-
-		n1->setName("N01230");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-		}
-
-		n1->setName("N01230");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-		}
+		// Bug analysis on MAS.
+//		n1->setName("N01230123012301230123");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//
+//			int64_t sId = n1->getSciDBLeftJustifiedFormat();
+//			cout << "--sId     " << hex << sId << dec << " " << sId << endl;
+//			EmbeddedLevelNameEncoding truncSId;
+//			truncSId.setIdFromSciDBLeftJustifiedFormat(sId);
+//
+//			EmbeddedLevelNameEncoding sId1 = truncSId.clearDeeperThanLevel(10);
+//			int64_t sId1i = sId1.getSciDBLeftJustifiedFormat();
+//			cout << "--sId1    " << hex << sId1i << dec << " " << sId1i << " <-- using clearDeeperThanLevel" << endl;
+//
+//			EmbeddedLevelNameEncoding sId2 = truncSId.atLevel(10);
+//			int64_t sId2i = sId2.getSciDBLeftJustifiedFormat();
+//			cout << "--sId2    " << hex << sId2i << dec << " " << sId2i << " <-- using atLevel (false) only" << endl;
+//
+//			EmbeddedLevelNameEncoding sId3 = truncSId.atLevel(10,true);
+//			int64_t sId3i = sId2.getSciDBLeftJustifiedFormat();
+//			cout << "--sId3    " << hex << sId3i << dec << " " << sId3i << " <-- using atLevel (true) only" << endl;
+//		}
+//
+//		n1->setName("N01230");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//		}
+//
+//		n1->setName("N01230");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//		}
 	}
 }
 
