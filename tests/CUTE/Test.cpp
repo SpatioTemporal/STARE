@@ -778,58 +778,59 @@ void testEmbeddedLevelNameEncoding() {
 		expected = "N012"; found=n0->greatestCommonName(*n1);
 		ASSERT_EQUALM("greatest common name N01230 and N01220",expected,found);
 
-		n1->setName("N01230123012301230123");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-
-			int64_t sId = n1->getSciDBLeftJustifiedFormat();
-			cout << "--sId     " << hex << sId << dec << " " << sId << endl;
-			EmbeddedLevelNameEncoding truncSId;
-			truncSId.setIdFromSciDBLeftJustifiedFormat(sId);
-
-			EmbeddedLevelNameEncoding sId1 = truncSId.clearDeeperThanLevel(10);
-			int64_t sId1i = sId1.getSciDBLeftJustifiedFormat();
-			cout << "--sId1    " << hex << sId1i << dec << " " << sId1i << " <-- using clearDeeperThanLevel" << endl;
-
-			EmbeddedLevelNameEncoding sId2 = truncSId.atLevel(10);
-			int64_t sId2i = sId2.getSciDBLeftJustifiedFormat();
-			cout << "--sId2    " << hex << sId2i << dec << " " << sId2i << " <-- using atLevel (false) only" << endl;
-
-			EmbeddedLevelNameEncoding sId3 = truncSId.atLevel(10,true);
-			int64_t sId3i = sId2.getSciDBLeftJustifiedFormat();
-			cout << "--sId3    " << hex << sId3i << dec << " " << sId3i << " <-- using atLevel (true) only" << endl;
-		}
-
-		n1->setName("N01230");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-		}
-
-		n1->setName("N01230");
-		{
-			cout << "n1-level " << n1->getLevel() << endl;
-			cout << "n1       " << n1->getName() << endl;
-			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
-			cout << "--Keep   " << chkKeep.getName() << endl;
-			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
-			cout << "--Discard" << chkDiscard.getName() << endl;
-			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
-			cout << "--Clear  " << chkClear.getName() << endl;
-		}
+		// Bug analysis on MAS.
+//		n1->setName("N01230123012301230123");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//
+//			int64_t sId = n1->getSciDBLeftJustifiedFormat();
+//			cout << "--sId     " << hex << sId << dec << " " << sId << endl;
+//			EmbeddedLevelNameEncoding truncSId;
+//			truncSId.setIdFromSciDBLeftJustifiedFormat(sId);
+//
+//			EmbeddedLevelNameEncoding sId1 = truncSId.clearDeeperThanLevel(10);
+//			int64_t sId1i = sId1.getSciDBLeftJustifiedFormat();
+//			cout << "--sId1    " << hex << sId1i << dec << " " << sId1i << " <-- using clearDeeperThanLevel" << endl;
+//
+//			EmbeddedLevelNameEncoding sId2 = truncSId.atLevel(10);
+//			int64_t sId2i = sId2.getSciDBLeftJustifiedFormat();
+//			cout << "--sId2    " << hex << sId2i << dec << " " << sId2i << " <-- using atLevel (false) only" << endl;
+//
+//			EmbeddedLevelNameEncoding sId3 = truncSId.atLevel(10,true);
+//			int64_t sId3i = sId2.getSciDBLeftJustifiedFormat();
+//			cout << "--sId3    " << hex << sId3i << dec << " " << sId3i << " <-- using atLevel (true) only" << endl;
+//		}
+//
+//		n1->setName("N01230");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//		}
+//
+//		n1->setName("N01230");
+//		{
+//			cout << "n1-level " << n1->getLevel() << endl;
+//			cout << "n1       " << n1->getName() << endl;
+//			EmbeddedLevelNameEncoding chkKeep    = n1->atLevel(10,true);
+//			cout << "--Keep   " << chkKeep.getName() << endl;
+//			EmbeddedLevelNameEncoding chkDiscard = n1->atLevel(10,false);
+//			cout << "--Discard" << chkDiscard.getName() << endl;
+//			EmbeddedLevelNameEncoding chkClear   = n1->clearDeeperThanLevel(10);
+//			cout << "--Clear  " << chkClear.getName() << endl;
+//		}
 	}
 }
 
@@ -3160,7 +3161,9 @@ void testTemporalIndex() {
 
 	tIndex.set_zero();
 	tIndex.set_resolutionLevel(0);
-//	tIndex.checkBitFormat();
+	// tIndex.checkBitFormat();
+
+
 //	cout << "50: " << hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
 	ASSERT_EQUAL( -0x0ll, tIndex.scidbTemporalIndex());
 	tIndex.set_resolutionLevel(7);
@@ -3418,6 +3421,14 @@ void testTemporalIndex() {
 	tIndex.set_zero();
 	tIndex.fromNativeString("000-002015-06-3-3 08:0600.000 (07)");
 	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
+	ASSERT_EQUAL("2015-06-12 08:10:00.000 (07)",      tIndex.hackStringInTraditionalDate());
+
+	stringstream ss;
+	ss << "x" << hex << tIndex.scidbTemporalIndex() << dec;
+	ASSERT_EQUAL("x407b6d04b0007",ss.str().c_str());
+//	ss.str("");
+//	ss << "x" << hex << tIndex.<< dec;
+//	ASSERT_EQUAL("x407b6d04b0007",ss.str().c_str());
 
 	TemporalIndex tIndex_0(120003);
 	//cout << "tIndex_0-scidb: " << tIndex_0.scidbTemporalIndex() << " "
@@ -3447,6 +3458,7 @@ void testTemporalIndex() {
 	tIndex.set_zero();
 	tIndex.hackSetTraditionalDate(0,0,1,0,20ll,0,0);
 	tIndex.set_resolutionLevel(3);
+	//??? ASSERT_EQUAL("000-000000-00-0-0 00:1200.000 (03)",tIndex.stringInNativeDate());
 	ASSERT_EQUAL("000-000000-00-0-0 00:1200.000 (03)",tIndex.stringInNativeDate());
 	ASSERT_EQUAL("0000-00-01 00:20:00.000 (03)",tIndex.hackStringInTraditionalDate());
 	/*
@@ -3472,6 +3484,23 @@ void testTemporalIndex() {
 			<< tIndex.get_millisecond()
 			<< endl;
 			*/
+
+//	// 1131260126691328
+//	// 1131260128788480
+//	{
+//	  TemporalIndex tIndex(1131260126691328);
+//	  cout << tIndex.hackStringInTraditionalDate() << endl;
+//	}
+//	{
+//	  TemporalIndex tIndex(1131260128788480);
+//	  cout << tIndex.hackStringInTraditionalDate() << endl;
+//	}
+
+	tIndex.set_zero();
+	tIndex.hackSetTraditionalDate(1,0,1,0,10ll,0,0);
+	tIndex.set_resolutionLevel(3);
+	ASSERT_EQUAL("000-000001-00-0-0 00:0600.000 (03)",tIndex.stringInNativeDate());
+	ASSERT_EQUAL("0001-00-01 00:10:00.000 (03)",tIndex.hackStringInTraditionalDate());
 
 	tIndex.set_zero();
 	try{
@@ -3520,6 +3549,144 @@ void testTemporalIndex() {
 //	FAIL();
 }
 
+void testLevelBugSciDB() {
+	/*
+	 [mrilee@scidb32 tests]$ iquery --port 1239 -aq "build(<val: int64>[i=0:0,1,0], level(hstm('(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)')));"
+	UserException in file: src/query/Expression.cpp function: evaluate line: 710
+	Error id: scidb::SCIDB_SE_QPROC::SCIDB_LE_UNKNOWN_ERROR_IN_UDF
+	Error description: Query processor error. Unknown error in UDF 'level'.
+
+	// hstm from scidb index...
+  int64_t     idx  = args[iarg++]->getInt64();
+  EmbeddedLevelNameEncoding leftJustified;
+  leftJustified.setIdFromSciDBLeftJustifiedFormat(idx);
+  HstmIndex  *hIndex = new HstmIndex;
+  hIndex->range->addRange(leftJustified.getId_NoLevelBit());
+
+  lo_rj  522239
+
+   7f7ff00000000008 9187325647649767432 //
+
+	 */
+
+	// Replicator
+	SpatialIndex indexA(8);
+	uint64       idRJH = indexA.idByLatLon(45,45);
+	if(false){
+		cout << "idRJH: x" << hex << idRJH << dec << " " << idRJH << endl;
+	}
+
+	BitShiftNameEncoding rightJustified(idRJH);
+	if(false){
+		cout << "left(idRJH):     x" << hex << rightJustified.leftJustifiedId() << dec << " " << rightJustified.leftJustifiedId() << endl;
+		cout << "left_nlb(idRJH): x" << hex << rightJustified.leftJustifiedId_NoDepthBit() << dec << " " << rightJustified.leftJustifiedId_NoDepthBit() << endl;
+	}
+
+	// int64_t idx = 4593662823824883720; // level lat lon 8 45 45
+
+	EmbeddedLevelNameEncoding leftJustified(rightJustified.leftJustifiedId_NoDepthBit());
+	if(false){
+		cout << "lj_nlb(idRJH):   x" << hex << leftJustified.getId_NoLevelBit() << dec << " " << leftJustified.getId_NoLevelBit() << endl;
+		cout << "scidb-lj:        x" << hex << leftJustified.getSciDBLeftJustifiedFormat() << dec << " " << leftJustified.getSciDBLeftJustifiedFormat() << endl;
+	}
+	// int64_t idx = 9187325647649767432;
+	// leftJustified.setIdFromSciDBLeftJustifiedFormat(idx);
+	HstmIndex  *hIndex = new HstmIndex;
+	hIndex->range->addRange(leftJustified.getId_NoLevelBit());
+	HtmRangeMultiLevel    *range = hIndex->range;
+
+	int64_t level = -999;
+	try {
+		if(range->nranges() > 0) {
+			Key lo, hi;  // TODO need to treat ranges better.
+			range->reset();
+			range->getNext(lo,hi);
+			if(lo != 0){
+				// Current 2017-0619 -- The old way to get a level.
+				// level = levelOfId(lo); // TODO handle difference between range and id
+				// Try 1 -- the new way now that we have scidb indeces.
+				level = leftJustified.getLevel();
+			}
+		}
+	} catch (const SpatialException &e ) {
+		cout << "Exception " << e.what() << endl << flush;
+	}
+
+
+
+	//	cout << "testLevelBugSciDB: level: " << level << endl;
+	ASSERT_EQUAL(8,level);
+
+	uint64_t id_RightJustified = leftJustified.rightJustifiedId();
+	if(false) {
+		cout << "testLevelBugSciDB: id_rj: x" << hex << id_RightJustified << " " << dec << id_RightJustified << endl;
+	}
+
+	SpatialIndex index(level);
+	SpatialVector v0,v1,v2,v3;
+
+	uint64 one = 1;
+	uint64 depthBit = one << ((2*level)+3);
+
+	uint64_t nodeIndex = index.nodeIndexFromId(id_RightJustified | depthBit);
+
+	if(false) {
+		cout << "idrj+:x" << setw(16) << hex << (depthBit) << dec << " " << (depthBit) << endl;
+		cout << "idrj: x" << setw(16) << hex << id_RightJustified << dec << " " << id_RightJustified << endl;
+		cout << "idrj+:x" << setw(16) << hex << (id_RightJustified | depthBit) << dec << " " << (id_RightJustified | depthBit) << endl;
+		cout << "ni:   x" << setw(16) << hex << nodeIndex << dec << " " << nodeIndex << endl;
+	}
+
+	index.nodeVertex(nodeIndex,v1,v2,v3);
+
+	v0 = (v1 + v2 + v3) * (1.0/3.0); v0.normalize();
+	if(false) {
+		cout << "v0: " << v0 << endl;
+		cout << "v1: " << v1 << endl;
+		cout << "v2: " << v2 << endl;
+		cout << "v3: " << v3 << endl;
+	}
+	float64 lat0,lat1,lat2,lat3;
+	float64 lon0,lon1,lon2,lon3;
+	try {
+		v0.getLatLonDegrees(lat0,lon0);
+		v1.getLatLonDegrees(lat1,lon1);
+		v2.getLatLonDegrees(lat2,lon2);
+		v3.getLatLonDegrees(lat3,lon3);
+	} catch ( const SpatialException &e ) {
+		cout << "Exception " << e.what() << endl << flush;
+	}
+	if(false){
+		cout << "v0-lat-lon: " << lat0 << ", " << lon0 << endl;
+		cout << "v1-lat-lon: " << lat1 << ", " << lon1 << endl;
+		cout << "v2-lat-lon: " << lat2 << ", " << lon2 << endl;
+		cout << "v3-lat-lon: " << lat3 << ", " << lon3 << endl;
+	}
+
+	delete hIndex;
+
+	hIndex = new HstmIndex;
+	hIndex->range->parse("(HSTMHex x7f7ff00000000008 x7f7fffffffffffff)"); // A "load immediate."
+	range = hIndex->range;
+	Key lo,hi;
+	range->reset();
+	range->getNext(lo,hi);
+	if(false){
+		cout << "lo:    " << hex << lo << dec << " " << lo << endl;
+	}
+	ASSERT_EQUAL(0x7f7ff00000000008,lo);
+	EmbeddedLevelNameEncoding left0(lo); // This one is correct.
+	EmbeddedLevelNameEncoding left1; left1.setIdFromSciDBLeftJustifiedFormat(lo);
+	if(false){
+		cout << "left0: " << hex << left0.getId() << dec << " " << left0.getId() << endl;
+		cout << "left1: " << hex << left1.getId() << dec << " " << left1.getId() << endl;
+	}
+	delete hIndex;
+
+	// FAIL();
+
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -3556,6 +3723,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testSpatiallyAdaptiveDataCover));
 	s.push_back(CUTE(testFirstBitDifferenceFromLeft));
 	s.push_back(CUTE(testTemporalIndex));
+	s.push_back(CUTE(testLevelBugSciDB));
 
 	//	s.push_back(CUTE(testRange));
 

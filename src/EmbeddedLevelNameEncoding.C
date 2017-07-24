@@ -305,7 +305,6 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64
 	return EmbeddedLevelNameEncoding(newId);
 }
 
-
 // TODO Unit tests
 /// Find terminator+
 uint64 EmbeddedLevelNameEncoding::successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const {
