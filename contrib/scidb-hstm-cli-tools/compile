@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# HSTM_HOME=/Users/mrilee/git/hstm
+HSTM_HOME=/home/mrilee/git/hstm
+
+CFLAGS_FROM_CONFIGURE_SCRIPT=" -O3 -g -fPIC -Wall -I${INCDIR} -D_BOOL_EXISTS -D__unix -UDIAGNOSE "
+CFLAGS_BASE=${CFLAGS_FROM_CONFIGURE_SCRIPT}
+#CFLAGS=" -c ${CFLAGS_BASE} "
+CFLAGS=" ${CFLAGS_BASE} "
+CXX_FLAGS=" -std=c++11 ${CFLAGS} "
+CLX_FLAGS=" -std=c++11 "
+
+g++ \
+    -o siblings \
+    ${HSTM_HOME}/unix/*.o \
+  ${CXX_FLAGS} \
+  -I${HSTM_HOME}/include \
+  -L${HSTM_HOME}/unix \
+  -lhstm \
+  siblings.cpp
+
+g++ \
+    -o parent \
+    ${HSTM_HOME}/unix/*.o \
+  ${CXX_FLAGS} \
+  -I${HSTM_HOME}/include \
+  -L${HSTM_HOME}/unix \
+  -lhstm \
+  parent.cpp
+
+g++ \
+    -o children \
+    ${HSTM_HOME}/unix/*.o \
+  ${CXX_FLAGS} \
+  -I${HSTM_HOME}/include \
+  -L${HSTM_HOME}/unix \
+  -lhstm \
+  children.cpp
+
+
+

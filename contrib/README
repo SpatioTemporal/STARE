@@ -1,0 +1,20 @@
+
+--
+
+contrib/
+
+Odds and ends in various stages of completion contributed by anyone.
+
+
+contrib/scidb-hstm-cli-tools/
+
+Focused SciDB-hstm index utilities supporting unix-like piping.
+
+contrib/scidb-hstm-TRMM-binary-tools/
+
+Read spatiotemporal information from binary files output by READTRMM_V2, construct STARE index, and write to binary file.
+
+--
+Michael L. Rilee
+mike@rilee.net
+2017-0724
