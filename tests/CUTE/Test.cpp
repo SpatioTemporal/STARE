@@ -1505,6 +1505,22 @@ void htmRangeMultiLevel() {
 	B = rangeFromSymbols("N3300001","N3300001");
 	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,6));
 
+	// cout << "100" << endl;
+	A = rangeFromSymbols("N33000","N33330");
+	B = rangeFromSymbols("N3300011","N3300011");
+	// B = rangeFromSymbols("N33000","N33330");
+	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,6,5));
+	B = rangeFromSymbols("N3233323","N3233323");
+//	#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+//	//	cout << "level(A.lo) " << leftJustified.levelById(A.lo) << endl << flush;
+//	hexOut("A.lo ",A.lo);
+//	hexOut("B.lo ",B.lo);
+//	// hexOut("5inc ",leftJustified.increment(A.lo,6,5));
+//	hexOut("5dec ",leftJustified.decrement(A.lo,6,5));
+//	#undef hexOut
+	ASSERT_EQUAL(B.lo,leftJustified.decrement(A.lo,6,5));
+	// cout << "200" << endl;
+
 	A = rangeFromSymbols("N33000","N33330");
 	B = rangeFromSymbols("N3233333","N3233333");
 	ASSERT_EQUAL(B.lo,leftJustified.decrement(A.lo,6));

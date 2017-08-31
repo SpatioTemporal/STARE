@@ -362,6 +362,7 @@ bool EmbeddedLevelNameEncoding::terminatorp(uint64 terminatorCandidate) {
 }
 
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
+	/// TODO Error checking of overflow not trustworthy here.
 	using namespace std;
 	uint64 successor = lowerBound; // Bump up one, but we still need the level.
 	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
@@ -377,7 +378,7 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 //	one_at_level = one_at_level >> 2;
 
 	successor = successor & (~one_mask_to_level);
-	successor += one_at_level;
+	successor += n*one_at_level;
 
 //	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
 //	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
@@ -385,13 +386,17 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 	// Check for overflow.
 	if( successor == TopBit ) {
 		return 0; // It's invalid!
+	} else if( successor + level <= lowerBound ) {
+		return 0; // It's invalid! Wrap around!
 	}
-	successor += n*level;
+	successor += level;
 	return successor;
 }
 uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int n) const {
+	/// TODO Note cut & paste, decrement should not use term "successor."
+	/// TODO Potential uncaught underflow exception.
 	using namespace std;
-	uint64 successor = lowerBound; // Bump up one, but we still need the level.
+	uint64 successor = lowerBound; // Bump down by one, but we still need the level.
 	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
 	uint64 one_mask_to_level = 0;
 	uint64 one_at_level      = one;
@@ -408,16 +413,18 @@ uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int
 	if( successor == 0 ) {
 		return 0; // It's invald!
 	}
-	successor -= one_at_level;
+	successor -= n*one_at_level;
 
 //	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
 //	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
 
 	// Check for overflow.
-	if( successor == TopBit ) {
-		return 0; // It's invalid!
+	// if( successor == TopBit ) {
+	// Check for underflow
+	if( successor+level >= lowerBound ) {
+		return 0; // It's invalid! Wrap around!
 	}
-	successor += n*level;
+	successor += level;
 	return successor;
 }
 
