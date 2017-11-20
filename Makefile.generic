@@ -3,7 +3,7 @@
 
 ARCH    = @@ARCH##
 
-TOPDIR  ?= /Users/mrilee/git/hstm
+TOPDIR  ?= /home/griessbaum/hstm/
 CXX     = g++
 CC      = gcc
 INCDIR  = $(TOPDIR)/include
@@ -70,7 +70,7 @@ OBJECTS = \
 #  ${OBJ}/SpatialConvex.o 
 #   ${OBJ}/BitList.o
 
-all: intersect filter libs CuteTestsTop
+all: intersect filter libs CuteTestsTop lookup lookupInteractive tesselateTrapezoid
 # example
 
 CuteTestsTop: libs
@@ -120,6 +120,13 @@ range2list: ${OBJ}/range2list.o ${TOPDIR}/cc_aux.o
 #---------------------------------------------
 lookup: ${OBJ}/lookup.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/lookup.o ${OBJECTS} 
+	
+lookupInteractive: ${OBJ}/lookupInteractive.o ${OBJECTS}
+	$(CXX) -g -o $@  ${OBJ}/lookupInteractive.o ${OBJECTS} 
+	
+tesselateTrapezoid: ${OBJ}/tesselateTrapezoid.o ${OBJECTS}
+	$(CXX) -g -o $@  ${OBJ}/tesselateTrapezoid.o ${OBJECTS} 
+	
 
 #filter: filter.o $(SKIPOB)
 #	$(CXX) $(CLX_FLAGS) -o $@ filter.o $(SKIPOB)
@@ -153,6 +160,12 @@ xptest: ${OBJ}/xptest.o ${OBJECTS}
 
 ${OBJ}/lookup.o: ${APP_SRCS}/lookup.cpp
 	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/lookup.cpp -o $@
+
+${OBJ}/lookupInteractive.o: ${APP_SRCS}/lookupInteractive.cpp
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/lookupInteractive.cpp -o $@	
+	
+${OBJ}/tesselateTrapezoid.o: ${APP_SRCS}/tesselateTrapezoid.cpp
+	$(CXX) $(CXX_FLAGS) ${APP_SRCS}/tesselateTrapezoid.cpp -o $@
 
 test1: ${OBJ}/test1.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/test1.o ${OBJECTS}

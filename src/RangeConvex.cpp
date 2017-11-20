@@ -775,15 +775,18 @@ RangeConvex::testPartial(size_t level, uint64 id,
 	SpatialMarkup m[4];
 	int P, F;// count number of partials and fulls
 
+	// Three new nodes 
 	SpatialVector w0 = v1 + v2; w0.normalize();
 	SpatialVector w1 = v0 + v2; w1.normalize();
 	SpatialVector w2 = v1 + v0; w2.normalize();
 
+    //  Ids of the children
 	ids[0] = id0 = id << 2;
 	ids[1] = id0 + 1;
 	ids[2] = id0 + 2;
 	ids[3] = id0 + 3;
-
+    
+    // 4 triangle children
 	m[0] = testNode(v0, w2, w1);
 	m[1] = testNode(v1, w0, w2);
 	m[2] = testNode(v2, w1, w0);
@@ -792,7 +795,6 @@ RangeConvex::testPartial(size_t level, uint64 id,
 	F  = (m[0] == fULL)  + (m[1] == fULL)  + (m[2] == fULL)  + (m[3] == fULL);
 	P = (m[0] == pARTIAL) + (m[1] == pARTIAL) + (m[2] == pARTIAL) + (m[3] == pARTIAL);
 
-	//
 	// Several interesting cases for saving this (the parent) trixel.
 	// Case P==4, all four children are partials, so pretend parent is full, we save and return
 	// Case P==3, and F==1, most of the parent is in, so pretend that parent is full again
@@ -821,8 +823,8 @@ RangeConvex::testPartial(size_t level, uint64 id,
 				saveTrixel(ids[i],pARTIAL);
 			}
 		}
-		// look at the four kids again, for partials
-
+		
+		// look at the four kids for partials
 		if (m[0] == pARTIAL) testPartial(level, ids[0], v0, w2, w1, P);
 		if (m[1] == pARTIAL) testPartial(level, ids[1], v1, w0, w2, P);
 		if (m[2] == pARTIAL) testPartial(level, ids[2], v2, w1, w0, P);

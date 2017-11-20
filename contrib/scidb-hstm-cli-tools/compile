@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # HSTM_HOME=/Users/mrilee/git/hstm
-HSTM_HOME=/home/mrilee/git/hstm
+HSTM_HOME=~/hstm
 
 CFLAGS_FROM_CONFIGURE_SCRIPT=" -O3 -g -fPIC -Wall -I${INCDIR} -D_BOOL_EXISTS -D__unix -UDIAGNOSE "
 CFLAGS_BASE=${CFLAGS_FROM_CONFIGURE_SCRIPT}
