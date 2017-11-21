@@ -839,8 +839,8 @@ public:
 	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); \
 	  pos += width;
 	  // cout << endl \
-	  // << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) \
-	  // << ", '" << nativeString.substr(pos,width) << "'" << endl; \
+	  // << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) *continuation*
+	  // << ", '" << nativeString.substr(pos,width) << "'" << endl; *continuation*
 
 	  PARSE_INT(Ma,3); ++pos;
 	  PARSE_INT(ka,3);

@@ -3438,6 +3438,8 @@ void testTemporalIndex() {
 	ASSERT_EQUAL("2015-06-12 08:10:00.000 (07)",tIndex.hackStringInTraditionalDate());
 	// cout << "tIndex: " << tIndex.stringInNativeDate() << endl;
 	ASSERT_EQUAL("000-002015-06-3-3 08:0600.000 (07)",tIndex.stringInNativeDate());
+	// cout << "a: " << tIndex.stringInNativeDate() << " -> " << hex << tIndex.scidbTemporalIndex() << dec << endl;
+
 
 	tIndex.set_zero();
 	tIndex.hackFromTraditionalString("2015-06-12 08:10:00.000 (07)");
@@ -3571,6 +3573,24 @@ void testTemporalIndex() {
 
 	// cout << "tIndex: " << tIndex.stringInNativeDate() << endl;
 	ASSERT_EQUAL("000-002009-11-3-5 00:0000.000 (03)",tIndex.stringInNativeDate());
+
+	/* MODIS SKETCHING
+
+	tIndex.set_zero();
+	tIndex.set_resolutionLevel(3);
+	tIndex.hackSetTraditionalDate(2009,11,3,2,40,0,0); // Note day starts at 1!?
+
+	cout << "modis-work " << tIndex.hackStringInTraditionalDate() << " -> "
+			<< hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
+
+	tIndex.set_zero();
+	tIndex.set_resolutionLevel(3);
+	tIndex.hackSetTraditionalDate(2009,11,3,2,45,0,0); // Note day starts at 1!?
+
+	cout << "modis-work " << tIndex.hackStringInTraditionalDate() << ", " << tIndex.stringInNativeDate() << " -> "
+			<< hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
+
+	 MODIS */
 
 //	FAIL();
 }
