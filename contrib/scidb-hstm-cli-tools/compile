@@ -11,6 +11,15 @@ CXX_FLAGS=" -std=c++11 ${CFLAGS} "
 CLX_FLAGS=" -std=c++11 "
 
 g++ \
+    -o winter2010blizzard_csv_to_STARE \
+    ${HSTM_HOME}/unix/*.o \
+  ${CXX_FLAGS} \
+  -I${HSTM_HOME}/include \
+  -L${HSTM_HOME}/unix \
+  -lhstm \
+  winter2010blizzard_csv_to_STARE.cpp
+
+g++ \
     -o siblings \
     ${HSTM_HOME}/unix/*.o \
   ${CXX_FLAGS} \
