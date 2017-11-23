@@ -3,7 +3,8 @@
 //# # Date: October 23, 1998 # # Copyright (C) 2000 Peter Z. Kunszt,
 //Alex S. Szalay, Aniruddha R. Thakar # The Johns Hopkins University #
 //# Modification History: # # Oct 18, 2001 : Dennis C. Dinge --
-//Replaced ValVec with std::vector # #define DIAGNOSE
+//Replaced ValVec with std::vector # 
+//#define DIAGNOSE
 
 
 #include "SpatialGeneral.h"
@@ -11,10 +12,10 @@
 #include "Htmio.h"
 
 
-#define N(n)	index_->nodes_[(n)]
-#define NC(n,m)	index_->nodes_[(n)].childID_[(m)]	// the children n->m
-#define NV(m)   index_->nodes_[nodeIndex].v_[(m)]			// the vertices of n
-#define V(m)    index_->vertices_[(m)]				// the vertex vector m
+#define N(n)	  index_->nodes_[(n)]
+#define NC(n,m) index_->nodes_[(n)].childID_[(m)]   // the children n->m
+#define NV(m)   index_->nodes_[nodeIndex].v_[(m)]   // the vertices m of node nodeIndex
+#define V(m)    index_->vertices_[(m)]				      // the vertex vector m
 
 #define SGN(x) ( (x)<0? -1: ( (x)>0? 1:0 ) )		// signum
 
@@ -393,8 +394,10 @@ RangeConvex::simplify0() {
   }
 
 #ifdef DIAGNOSE
+  cout.precision(16);
+  cout  << "lat"             << ", " << "lon"              << " : " <<"x,y,z" << endl;  
   for(i = 0; i < corners_.size(); i++) {
-    cout << corners_[i].ra() << "," << corners_[i].dec() << ":" << corners_[i] << endl;
+    cout << "(" <<corners_[i].dec() << ", " << corners_[i].ra() << ") : " << corners_[i] << endl;
   }
 #endif
 }
@@ -551,31 +554,29 @@ RangeConvex::testConstraints(size_t i, size_t j) {
 // used by intersect.cpp application
 //
 void
-RangeConvex::intersect(
-		const SpatialIndex * idx, HtmRange * htmrange, bool varlen,
-		HtmRange *hrInterior, HtmRange *hrBoundary )
-{
-
+RangeConvex::intersect(const SpatialIndex * idx, 
+                       HtmRange * htmrange, 
+                       bool varlen, 
+                       HtmRange *hrInterior, 
+                       HtmRange *hrBoundary ) {
+  
   hr = htmrange;
   hrInterior_ = hrInterior;
   hrBoundary_ = hrBoundary;
   index_ = idx;
   varlen_ = varlen;
   addlevel_ = idx->maxlevel_ - idx->buildlevel_;
-//  cout << "a" << flush;
-  simplify();				// don't work too hard...
-//  cout << "b" << flush;
+  simplify(); // don't work too hard...
+  
+  if(constraints_.size()==0) {
+    return;   // nothing to intersect!!
+  }
 
-  if(constraints_.size()==0)return;   // nothing to intersect!!
-
-//  cout << "c" << flush;
   // Start with root nodes (index = 1-8) and intersect triangles
   // TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
   for(uint64 i = 1; i <= 8; i++){
-//	  cout << i << flush;
     testTrixel(i);
   }
-//  cout << "d" << flush;
 }
 
 ////////////SAVETRIXEL
@@ -660,9 +661,7 @@ inline void RangeConvex::saveTrixel(uint64 htmid, SpatialMarkup mark)
 // testTrixel: this is the main test of a triangle vs a Convex.  It
 // will properly mark up the flags for the triangular node[index], and
 // all its children
-SpatialMarkup
-RangeConvex::testTrixel(uint64 nodeIndex)
-{
+SpatialMarkup RangeConvex::testTrixel(uint64 nodeIndex) {
   SpatialMarkup mark;
   uint64 childID;
   uint64 tid;
@@ -671,30 +670,26 @@ RangeConvex::testTrixel(uint64 nodeIndex)
   // const struct SpatialIndex::QuadNode &indexNode = index_->nodes_[id];
   const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[nodeIndex];
 
-  //
   // do the face test on the triangle
-
   // was: mark =  testNode(V(NV(0)),V(NV(1)),V(NV(2)));
   // changed to by Gyorgy Fekete. Overall Speedup approx. 2%
-
-//  cout << endl << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
+  // cout << endl << "testTrixel at nodeIndex: " << nodeIndex << " " << flush;
 
   mark = testNode(nodeIndex); // was:(indexNode or  id);
-
-  switch(mark){
-  case fULL:
-    tid = N(nodeIndex).id_;
-//    cout << " saving id: " << tid << endl << flush;
-    saveTrixel(tid);  //was:  plist_->push_back(tid);
-    // fillChildren(id); // [ed:NEW]
-
-    return mark;
-  case rEJECT:
-    tid = N(nodeIndex).id_;
-//    cout << " rejecting id: " << tid << endl << flush;
-    return mark;
-  default:
-//    cout << " partial/dontknow/swallowed";
+  
+  switch(mark) {
+    case fULL:
+      tid = N(nodeIndex).id_;
+      cout << " saving id: " << tid << endl << flush;
+      saveTrixel(tid);  //was:  plist_->push_back(tid);
+      // fillChildren(id); // [ed:NEW]
+      return mark;    
+    case rEJECT:
+      tid = N(nodeIndex).id_;
+      //cout << " rejecting id: " << tid << endl << flush;
+      return mark;
+    default:
+    // cout << " partial/dontknow/swallowed";
     // if pARTIAL or dONTKNOW, then continue, test children,
     //    but do not reach beyond the leaf nodes.
     //    If Convex is fully contained within one (sWALLOWED),
@@ -707,41 +702,34 @@ RangeConvex::testTrixel(uint64 nodeIndex)
     //
     // [ed:algo]
     //
-    break;
-  }
+      break;
+  }  
 
-//  cout << endl << flush;
-//  cout << " check children & partials " << endl << flush;
+  //  cout << endl << flush;
+  //  cout << " check children & partials " << endl << flush;
 
   // NEW NEW algorithm  Disabled when enablenew is 0
-  //
   {
 	  childID = indexNode->childID_[0];
-	  if ( childID != 0){
+	  if (childID != 0) {
 		  ////////////// [ed:split]
 		  tid = N(nodeIndex).id_;
-//		  cout << 0 << endl << flush;
 		  childID = indexNode->childID_[0];  testTrixel(childID); // Note the recursion.
-//		  cout << 1 << endl << flush;
 		  childID = indexNode->childID_[1];  testTrixel(childID);
-//		  cout << 2 << endl << flush;
 		  childID = indexNode->childID_[2];  testTrixel(childID);
-//		  cout << 3 << endl << flush;
 		  childID = indexNode->childID_[3];  testTrixel(childID);
-//		  cout << 4 << endl << flush;
-	  } else { /// No children...
-//		  cout << 5 << endl << flush;
-		  if (addlevel_){
-//			  cout << 6 << endl << flush;
-			  testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
-		  } else {
-//			  cout << 7 << endl << flush;
-			  saveTrixel(N(nodeIndex).id_,mark); // was: plist_->push_back(N(id).id_);
-		  }
+	  } else { // No more children
+        if (addlevel_) {
+          // NG: If we want to find trixels on the fly (beyond depth of index)?           
+          testPartial(addlevel_, N(nodeIndex).id_, V(NV(0)), V(NV(1)), V(NV(2)), 0);
+        } else {
+          // cout << 7 << endl << flush;
+          // Saving trixel of highest level that is partial
+          saveTrixel(N(nodeIndex).id_,mark); // was: plist_->push_back(N(id).id_);
+        }
 //		  cout << 8 << endl << flush;
 	  }
   } ///////////////////////////// END OF NEW ALGORITHM returns mark below;
-
 
 
   /* NEW NEW NEW
@@ -763,34 +751,37 @@ RangeConvex::testTrixel(uint64 nodeIndex)
 /////////////TESTPARTIAL//////////////////////////////////
 // testPartial: test a triangle's subtriangle whether they are partial.
 // if level is nonzero, recurse.
+// NG: Should be doing the same as testTrixel, but on the fly?
 // TODO This routine is suspect.
 //
-void
-RangeConvex::testPartial(size_t level, uint64 id,
-		const SpatialVector & v0,
-		const SpatialVector & v1,
-		const SpatialVector & v2, int PPrev)
-{
-	uint64 ids[4], id0;
-	SpatialMarkup m[4];
-	int P, F;// count number of partials and fulls
+void RangeConvex::testPartial(size_t level, uint64 id,
+    const SpatialVector & v0,
+    const SpatialVector & v1,
+    const SpatialVector & v2, int PPrev) {
+  
+  uint64 ids[4], id0;
+  SpatialMarkup m[4];
+  int P; // count of partials
+  int F; // count of fulls
 
-	// Three new nodes 
-	SpatialVector w0 = v1 + v2; w0.normalize();
-	SpatialVector w1 = v0 + v2; w1.normalize();
-	SpatialVector w2 = v1 + v0; w2.normalize();
+  // Three new nodes (midpoints between old nodes) 
+  SpatialVector w0 = v1 + v2; w0.normalize();
+  SpatialVector w1 = v0 + v2; w1.normalize();
+  SpatialVector w2 = v1 + v0; w2.normalize();
 
-    //  Ids of the children
-	ids[0] = id0 = id << 2;
-	ids[1] = id0 + 1;
-	ids[2] = id0 + 2;
-	ids[3] = id0 + 3;
+  //  Ids of the children
+  ids[0] = id0 = id << 2;
+  ids[1] = id0 + 1;
+  ids[2] = id0 + 2;
+  ids[3] = id0 + 3;
     
-    // 4 triangle children
-	m[0] = testNode(v0, w2, w1);
-	m[1] = testNode(v1, w0, w2);
-	m[2] = testNode(v2, w1, w0);
-	m[3] = testNode(w0, w1, w2);
+  // 4 triangle children
+  m[0] = testNode(v0, w2, w1);
+  m[1] = testNode(v1, w0, w2);
+  m[2] = testNode(v2, w1, w0);
+  m[3] = testNode(w0, w1, w2);
+  
+
 
 	F  = (m[0] == fULL)  + (m[1] == fULL)  + (m[2] == fULL)  + (m[3] == fULL);
 	P = (m[0] == pARTIAL) + (m[1] == pARTIAL) + (m[2] == pARTIAL) + (m[3] == pARTIAL);
@@ -799,48 +790,40 @@ RangeConvex::testPartial(size_t level, uint64 id,
 	// Case P==4, all four children are partials, so pretend parent is full, we save and return
 	// Case P==3, and F==1, most of the parent is in, so pretend that parent is full again
 	// Case P==2 or 3, but the previous testPartial had three partials, so parent was in an arc
-	// as opposed to previous partials being fewer, so parent was in a tiny corner...
-
-
-	if ((level-- <= 0) || ((P == 4) || (F >= 2) || (P == 3 && F == 1) || (P > 1 && PPrev == 3))){
-		// old behavior saveTrixel(id);
-		if (P == 4) {
-			saveTrixel(id,pARTIAL);
-		} else if (F >= 2) {
-			saveTrixel(id,pARTIAL);
-		} else if (P == 3 && F == 1) {
-			saveTrixel(id,pARTIAL);
-		} else if (P > 1 && PPrev == 3) {
-			saveTrixel(id,pARTIAL);
-		}
-		return;
-	} else {
-		// look at each child, see if some need saving;
-		for(int i=0; i<4; i++){
+	// as opposed to previous partials being fewer, so parent was in a tiny corner...  
+	
+  if (level == 0){    
+    // If we are on the last level, save partials and fulls
+    if (F == 4) {            
+      saveTrixel(id);      
+    } else if (P>0){
+      saveTrixel(id,pARTIAL);
+    }
+	} else {     
+    // If we are not on the last level, save the fulls and recurse over children.
+    for(int i=0; i<4; i++){
 			if (m[i] == fULL){
 				saveTrixel(ids[i]);
-			} else if( m[i] == pARTIAL ) {
-				saveTrixel(ids[i],pARTIAL);
 			}
-		}
-		
-		// look at the four kids for partials
-		if (m[0] == pARTIAL) testPartial(level, ids[0], v0, w2, w1, P);
-		if (m[1] == pARTIAL) testPartial(level, ids[1], v1, w0, w2, P);
-		if (m[2] == pARTIAL) testPartial(level, ids[2], v2, w1, w0, P);
-		if (m[3] == pARTIAL) testPartial(level, ids[3], w0, w1, w2, P);
-	}
+		} 
+		// Recurse over the children
+		level --;  
+    if (m[0] == pARTIAL) testPartial(level, ids[0], v0, w2, w1, P);
+    if (m[1] == pARTIAL) testPartial(level, ids[1], v1, w0, w2, P);
+    if (m[2] == pARTIAL) testPartial(level, ids[2], v2, w1, w0, P);
+    if (m[3] == pARTIAL) testPartial(level, ids[3], w0, w1, w2, P);
+  }
 }
 
 /////////////TESTNODE/////////////////////////////////////
 // testNode: tests the QuadNodes for intersections.
 //
-SpatialMarkup
-RangeConvex::testNode(uint64 nodeIndex)
-		      //uint64 id)
-		      // const struct SpatialIndex::QuadNode *indexNode)
-{
+// SpatialMarkup RangeConvex::testNode(uint64 id) {
+// SpatialMarkup RangeConvex::testNode(const struct SpatialIndex::QuadNode *indexNode) {
+SpatialMarkup RangeConvex::testNode(uint64 nodeIndex) {
+
   const SpatialVector *v0, *v1, *v2;
+
   // const struct SpatialIndex::QuadNode &indexNode = index_->nodes_[id];
   const struct SpatialIndex::QuadNode *indexNode = &index_->nodes_[nodeIndex];
   int m;
@@ -867,30 +850,28 @@ RangeConvex::testNode(uint64 nodeIndex)
   int vsum = testVertex(v0) + testVertex(v1) + testVertex(v2);
 
 #ifdef DIAGNOSE
-  char name[10];
-  SpatialVector v = v0 + v1 + v2;
-  cout << index_->nameById(index_->idByPoint(v),name)
-       << " " << vsum << " " << endl;
+  char name[20];  
+  SpatialVector v = *v0 + *v1 + *v2;    
+  index_->nameById(index_->idByPoint(v),name);
+  cout << name << " " << vsum << " ";
 #endif
 
-  SpatialMarkup mark =
-    testTriangle( *v0, *v1, *v2, vsum);
+  SpatialMarkup mark = testTriangle(*v0, *v1, *v2, vsum);
 
 #ifdef DIAGNOSE
   cout << ( mark == pARTIAL ? " partial " :
-	    ( mark ==  fULL ? " full " :
-	      ( mark == rEJECT ? " reject " :
-		" dontknow " ) ) ) << name << endl;
-    /*
-       << v0 << "," << v1 << "," << v2 << " " << endl;
-       << V(NV(0)) << " , " << V(NV(1)) << " , " << V(NV(2)) << endl
-       << " (" << V(NV(0)).ra() << "," << V(NV(0)).dec() << ")"
-       << " (" << V(NV(1)).ra() << "," << V(NV(1)).dec() << ")"
-       << " (" << V(NV(2)).ra() << "," << V(NV(2)).dec() << ")"
-       << endl;
-    */
+          ( mark == fULL    ? " full " :
+          ( mark == rEJECT  ? " reject " :
+            " dontknow " ) ) )  << name << endl;
+      /*
+      << v0 << "," << v1 << "," << v2 << " " << endl;
+      << V(NV(0)) << " , " << V(NV(1)) << " , " << V(NV(2)) << endl
+      << " (" << V(NV(0)).ra() << "," << V(NV(0)).dec() << ")"
+      << " (" << V(NV(1)).ra() << "," << V(NV(1)).dec() << ")"
+      << " (" << V(NV(2)).ra() << "," << V(NV(2)).dec() << ")"
+      << endl;
+      */
 #endif
-
 
   // since we cannot play games using the on-the-fly triangles,
   // substitute dontknow with partial.
@@ -899,38 +880,36 @@ RangeConvex::testNode(uint64 nodeIndex)
 
   return mark;
 }
-SpatialMarkup
-RangeConvex::testNode(const SpatialVector & v0,
+
+
+SpatialMarkup RangeConvex::testNode(const SpatialVector & v0,
 			const SpatialVector & v1,
 			const SpatialVector & v2) {
   // Start with testing the vertices for the QuadNode with this convex.
 
   int vsum = testVertex(v0) + testVertex(v1) + testVertex(v2);
-
+  
 #ifdef DIAGNOSE
   char name[10];
   SpatialVector v = v0 + v1 + v2;
-  cout << index_->nameById(index_->idByPoint(v),name)
-       << " " << vsum << " " << endl;
+  cout << index_->nameById(index_->idByPoint(v),name) << " " << vsum << " " << endl;
 #endif
 
-  SpatialMarkup mark =
-    testTriangle( v0, v1, v2, vsum);
-
+  SpatialMarkup mark = testTriangle(v0, v1, v2, vsum);
 
 #ifdef DIAGNOSE
   cout << ( mark == pARTIAL ? " partial " :
-	    ( mark ==  fULL ? " full " :
-	      ( mark == rEJECT ? " reject " :
-		" dontknow " ) ) ) << name << endl;
-    /*
-       << v0 << "," << v1 << "," << v2 << " " << endl;
-       << V(NV(0)) << " , " << V(NV(1)) << " , " << V(NV(2)) << endl
-       << " (" << V(NV(0)).ra() << "," << V(NV(0)).dec() << ")"
-       << " (" << V(NV(1)).ra() << "," << V(NV(1)).dec() << ")"
-       << " (" << V(NV(2)).ra() << "," << V(NV(2)).dec() << ")"
-       << endl;
-    */
+          ( mark ==  fULL ?   " full " :
+          ( mark == rEJECT ?  " reject " :
+          " dontknow " ) ) ) << name << endl;
+      /*
+      << v0 << "," << v1 << "," << v2 << " " << endl;
+      << V(NV(0)) << " , " << V(NV(1)) << " , " << V(NV(2)) << endl
+      << " (" << V(NV(0)).ra() << "," << V(NV(0)).dec() << ")"
+      << " (" << V(NV(1)).ra() << "," << V(NV(1)).dec() << ")"
+      << " (" << V(NV(2)).ra() << "," << V(NV(2)).dec() << ")"
+      << endl;
+      */
 #endif
 
   // since we cannot play games using the on-the-fly triangles,
@@ -953,7 +932,7 @@ RangeConvex::testTriangle(const SpatialVector & v0,
 
   if(vsum == 1 || vsum == 2) return pARTIAL;
 
-  // If vsum = 3 then we have all vertices inside the convex.
+  // If vsum = 3 then we have all triangle vertices inside the convex.
   // Now use the following decision tree:
   //
   // * If the sign of the convex is pOS or zERO : mark as fULL intersection.
@@ -1051,22 +1030,21 @@ RangeConvex::testTriangle(const SpatialVector & v0,
 /////////////TESTVERTEX/////////////////////////////////////
 // testVertex: same as above, but for any spatialvector, no markup speedup
 //
-int
-RangeConvex::testVertex(const SpatialVector & v)
-{
-  for ( size_t i = 0; i < constraints_.size(); i++)
-    if ( (constraints_[i].a_ * v )  < constraints_[i].d_ )
+int RangeConvex::testVertex(const SpatialVector & v) {  
+  for ( size_t i = 0; i < constraints_.size(); i++) {
+    if ( (constraints_[i].a_ * v )  < constraints_[i].d_ ) { 
       return 0;
-
+    }
+  }
   return 1;
 }
-int
-RangeConvex::testVertex(const SpatialVector *v)
-{
-  for ( size_t i = 0; i < constraints_.size(); i++)
-    if ( (constraints_[i].a_ * *v )  < constraints_[i].d_ )
-      return 0;
 
+int RangeConvex::testVertex(const SpatialVector *v){  
+  for ( size_t i = 0; i < constraints_.size(); i++) {    
+    if ( (constraints_[i].a_ * *v )  < constraints_[i].d_ ) {      
+      return 0;
+    }
+  }
   return 1;
 }
 
@@ -1075,8 +1053,7 @@ RangeConvex::testVertex(const SpatialVector *v)
 //           is inside the triangle, we speak of a hole. Returns true if
 //	     found one.
 //
-bool
-RangeConvex::testHole(const SpatialVector & v0,
+bool RangeConvex::testHole(const SpatialVector & v0,
 			const SpatialVector & v1,
 			const SpatialVector & v2) {
 
