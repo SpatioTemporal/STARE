@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
         //id = iter->next() ;
         symbol = iter.nextSymbolic(buffer);
         if (strlen(symbol)==level+2){
-            cout << symbol << endl;                
-        }
-        }
+            cout << symbol << endl;
+          }
+    }
     //htmRange.print(HtmRange::LOWS, cout, true);
     cout << "done" << endl;            
     
