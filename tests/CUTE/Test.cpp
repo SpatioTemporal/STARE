@@ -3710,7 +3710,56 @@ void testLevelBugSciDB() {
 	delete hIndex;
 
 	// FAIL();
+}
 
+
+void testTesselationBug(){    
+      /* NG: We are testing if we get the same htmRanges if we do 
+    interesects with varying buildlevels, but same searchlevels.
+    
+    We experienced the buildlevel having an influence on the resulting htmRanges
+    due to changes introduced to RangeConvex::testPartial in commit 
+    9210c2537b76d61f49207295a6e82d267b0bb6a0 (First support for multi resolution hstm ranges).
+    This problem was solved in commit 4f7523faa102ede30fa303a1111b6abee73c816d
+    (fixed issues with level-buildlevel > 1).
+    */
+    
+    // Creating convex to be interesected
+    SpatialVector corner2(0.0347738288389, 0.0127308084721, 0.999314118455); 
+    SpatialVector corner1(0.0515441635412, 0.0193857623262, 0.998482544376); 
+    SpatialVector corner4(0.0330035382386, 0.0163594289767, 0.999321337482); 
+    SpatialVector corner3(0.0489487014627, 0.0248000461452, 0.998493356180);
+    
+    RangeConvex convex = RangeConvex(&corner1, &corner2, &corner3, &corner4);    
+       
+    bool varlength = false;        // output variable length HTMids
+
+    for (int searchlevel=1; searchlevel<=8; searchlevel++){
+      
+      for (int buildlevel1=1; buildlevel1<8; buildlevel1++){        
+        HtmRange htmRangeCover1;
+        HtmRange htmRangeInterior1;
+        HtmRange htmRangeBoundary1;
+        
+        SpatialIndex spatialIndex1(searchlevel,buildlevel1);                   
+        convex.intersect(&spatialIndex1, &htmRangeCover1, varlength, &htmRangeInterior1, &htmRangeBoundary1);
+        htmRangeCover1.defrag();        
+        
+        for (int buildlevel2=1; buildlevel2<8; buildlevel2++){
+          HtmRange htmRangeCover2;          
+          HtmRange htmRangeInterior2;
+          HtmRange htmRangeBoundary2;
+          
+          SpatialIndex spatialIndex2(searchlevel,buildlevel2);   
+          convex.intersect(&spatialIndex2, &htmRangeCover2, varlength, &htmRangeInterior2, &htmRangeBoundary2);
+          htmRangeCover2.defrag();
+          
+          ASSERT_EQUAL(htmRangeCover1.compare(htmRangeCover2), 1);
+          ASSERT_EQUAL(htmRangeInterior1.compare(htmRangeInterior2), 1);
+          ASSERT_EQUAL(htmRangeBoundary1.compare(htmRangeBoundary1), 1);          
+        }
+      }
+    }    
 }
 
 void runSuite(int argc, char const *argv[]){
@@ -3750,6 +3799,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testFirstBitDifferenceFromLeft));
 	s.push_back(CUTE(testTemporalIndex));
 	s.push_back(CUTE(testLevelBugSciDB));
+  s.push_back(CUTE(testTesselationBug));
 
 	//	s.push_back(CUTE(testRange));
 

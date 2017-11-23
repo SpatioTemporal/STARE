@@ -680,7 +680,7 @@ SpatialMarkup RangeConvex::testTrixel(uint64 nodeIndex) {
   switch(mark) {
     case fULL:
       tid = N(nodeIndex).id_;
-      cout << " saving id: " << tid << endl << flush;
+      //cout << " saving id: " << tid << endl << flush;
       saveTrixel(tid);  //was:  plist_->push_back(tid);
       // fillChildren(id); // [ed:NEW]
       return mark;    
