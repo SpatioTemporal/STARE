@@ -55,21 +55,21 @@ bool symbolic = false;
 int arg = 2;			// number of required arguments
 
 char *infile;			// infile name
-int depth,savedepth=5;	// depth and stored depth
+int searchlevel,buildlevel=5;	// searchlevel and buildlevel
 int maximum_nrGaps=100;
 int olevel = -1;
 
 char htmidfilename[1024];
 char domainfilename[1024];
 
-size_t i,j;
+size_t i;
 
 void
 usage(char *name) {
 
 	cerr << "usage: " << endl
-			<< name << " [-save savelevel] [-verbose] [-olevel olevel] level domainfile" << endl;
-	cerr << " [-save savelevel]   : store up to this depth (default 2)" << endl
+			<< name << " [-build buildlevel] [-verbose] [-olevel olevel] level domainfile" << endl;
+	cerr << " [-build buildlevel]   : store up to this level (default 2)" << endl
 			<< " [-verbose]          : verbose" << endl
 			<< " [-olevel out_level] : output HTMID level (must be >= level)" << endl
 			<< " [-symbolic]         : output HTMID as a symbolic name, must be used with -varlength" << endl
@@ -77,7 +77,7 @@ usage(char *name) {
 			<< " [-varlength]        : output natural HTMID (conflicts with -olevel)" << endl
 			<< " [-nranges nrages]   : keep number of ranges below this number" << endl
 			//       << " [-visualize domainfile hidfile] : creates two files to be used with htmviz openGL application" << endl
-			<< " level               : Maximal spatialindex depth " << endl
+ 			<< " searchlevel         : Maximal spatialindex level " << endl
 			<< " domainfile          : filename of domain " << endl
 			<< endl;
 	exit(1);
@@ -106,11 +106,11 @@ int init_all(int argc, char *argv[])
 			symbolic = true;
 		} else if (strcmp(argv[args],"-varlength")==0) {
 			varlength = true;
-		} else if(strcmp(argv[args],"-save")==0) {
-			savedepth = atoi(argv[++args]); argc--;
-			if(savedepth < 1 || savedepth > 8) {
-				cerr << "savedepth should be between 1 and 8, is " << savedepth << endl;
-				return -1;
+		} else if(strcmp(argv[args],"-build")==0) {
+			buildlevel = atoi(argv[++args]); argc--;
+			if(buildlevel < 1 || buildlevel > 8) {
+				cerr << "buildlevel should be between 1 and 8, is " << buildlevel << endl;
+			//	return -1;
 			}
 		} else if(strcmp(argv[args],"-olevel")==0) {
 			olevel = atoi(argv[++args]); argc--;
@@ -121,9 +121,9 @@ int init_all(int argc, char *argv[])
 			if( *argv[args] == '-' ) usage(argv[0]);
 			switch(arg) { // How many "bare" arguments are there?  2 are expected.
 			case 2:
-				depth = atoi(argv[args]); // MLR depth is really level, no?
-				if(depth < 1 || depth > HTMMAXDEPTH) {
-					cerr << "depth should be between 1 and " << HTMMAXDEPTH << ", is " << depth << endl;
+				searchlevel = atoi(argv[args]); // MLR searchlevel is really level, no?
+				if(searchlevel < 1 || searchlevel > HTMMAXDEPTH) {
+					cerr << "searchlevel should be between 1 and " << HTMMAXDEPTH << ", is " << searchlevel << endl;
 					return -1;
 				}
 				break;
@@ -139,13 +139,13 @@ int init_all(int argc, char *argv[])
 		args++;
 	} // while (argc > 0)
 
-	if (olevel < depth)
-		olevel = depth;
+	if (olevel < searchlevel)
+		olevel = searchlevel;
 
 	//   if (symbolic && !varlength)
 	//     usage(argv[0]);
 
-	cerr << "Depth = " << depth << ", output level = " << olevel << endl;
+	cerr << "searchlevel = " << searchlevel << ", output searchlevel = " << olevel << endl;
 	return 0;
 }
 // intopends60.lib 
@@ -153,11 +153,11 @@ int init_all(int argc, char *argv[])
 
 int main(int argc, char *argv[]) {
 
-	/*******************************************************
+/*******************************************************
 /
 / Initialization
 /
-	 ******************************************************/
+******************************************************/
 	Key gapsize;
 	int rstat = init_all(argc, argv);
 	if (rstat != 0){
@@ -175,64 +175,73 @@ int main(int argc, char *argv[]) {
 
 	try
 	{
-
-		// construct index with given depth and savedepth
-
-		htmInterface htm(depth,savedepth);  // generate htm interface
+        
+       
+    
+		htmInterface htm(searchlevel,buildlevel);  
 		const SpatialIndex &index = htm.index();
+        
 		HtmRange htmRange;
+        HtmRange htmRangeInterior;
+        HtmRange htmBoundary;
 
-		// Read in domain and echo it to screen
+		
+/*******************************************************
+/
+/ Create Domain
+/
+******************************************************/
+  
+  SpatialDomain domain(&index);   
+    
+  in >> domain;	      // read domainfile
+  // //////////////////////////////////////////////
+  // TODO What is the difference between olevel and searchlevel.
+  // cf. above olevel < searchlevel => olevel = searchlevel
+  // cf. what does it mean for olevel to be greater than searchlevel?
+  // olevel is the output level -- but how does this differ from searchlevel in the index?
+  // domain.setOlevel(olevel); TODO huh? Can olevel differ from the index searchlevel?
+  if(verbose) {
+    cout << domain;
+  }
 
-		SpatialDomain domain(&index);   // initialize empty domain
-		// //////////////////////////////////////////////
-		// Read the domain here.
-		in >> domain;	      // read domainfile
-		// //////////////////////////////////////////////
-		// TODO What is the difference between olevel and depth.
-		// cf. above olevel < depth => olevel = depth
-		// cf. what does it mean for olevel to be greater than depth?
-		// olevel is the output level -- but how does this differ from depth in the index?
-//		domain.setOlevel(olevel); TODO huh? Can olevel differ from the index depth?
-		if(verbose)
-			cout << domain;
+  if (visualize){
+    // A file for hids, and a file for the domain
+    // Write domain to a file
+    ofstream outfile(domainfilename, ios::out);
+      if (outfile){
+        outfile << domain;
+        outfile.close();
+      }
+  }
 
-		if (visualize){
-			// A file for hids, and a file for the domain
-			ofstream outfile(domainfilename, ios::out);
-			if (outfile){
-				outfile << domain;
-				outfile.close();
-			}
-		}
-		// Write domain to a file
-		/*******************************************************
+/*******************************************************
 /
 / Intersection
 /
-		 ******************************************************/
-		// do intersection and time it
-		time_t t0 = clock();
-		j = 1; // Why would you want it more? Timing, perhaps...
+******************************************************/
+  // do intersection and time it
+  time_t t0 = clock();		
 
-		// cerr << "Normal intersect starts here" << endl;
-		htmRange.purge();
-		while(j--) {
-			domain.intersect(&index, &htmRange, varlength);	  // intersect with range
-		}
-		time_t t1 = clock();
-		if(verbose) {
-			printf("%d intersections done at a rate of %f intersections/sec\n",
-					1, ((float)1)/(((double)(t1-t0)/(double)CLOCKS_PER_SEC)));
-		}
+  // cerr << "Normal intersect starts here" << endl;
+  htmRange.purge();
+  htmRangeInterior.purge();
+  htmBoundary.purge();		
+  domain.intersect(&index, &htmRange, varlength, &htmRangeInterior, &htmBoundary);	 
 
-		/*******************************************************
+  time_t t1 = clock();
+  if(verbose) {
+    printf("Intersections done at a rate of %f intersections/sec\n",
+          ((float)1)/(((double)(t1-t0)/(double)CLOCKS_PER_SEC)));
+		}
+        
+/*******************************************************
 /
 / Print result
 /
-		 ******************************************************/
+******************************************************/
 		if (varlength){
-			//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   only print lows (should be same as highs)
+			// only print lows (should be same as highs)
 			htmRange.print(HtmRange::LOWS, cout, symbolic);
 			if (visualize) { 	// print hids to file too
 				ofstream outfile(htmidfilename, ios::out);
@@ -244,7 +253,7 @@ int main(int argc, char *argv[]) {
 		} else {
 			htmRange.defrag();
 			if (compress){
-				//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   find best gap, and merge (defrag) ranges
+				// find best gap, and merge (defrag) ranges
 				gapsize = htmRange.bestgap(maximum_nrGaps);
 				htmRange.defrag(gapsize);
 				cerr << "Combining ranges with gaps <= " << gapsize;
@@ -253,12 +262,13 @@ int main(int argc, char *argv[]) {
 			if (expand){
 				HtmRangeIterator iter(&htmRange);
 				if (!symbolic){
-					while (iter.hasNext()) {
+					while (iter.hasNext()) {                           
 						cout << iter.next() << endl;
+                     
 					}
 				} else {
 					char buffer[80];
-					while (iter.hasNext()) {
+					while (iter.hasNext()) {                        
 						cout << iter.nextSymbolic(buffer) << endl;
 					}
 				}
@@ -267,10 +277,12 @@ int main(int argc, char *argv[]) {
 				cout << htmRange;
 			}
 		}
-	}// Try
+	}
 	catch (SpatialException &x)
 	{
 		printf("%s\n",x.what());
 	}
+	cout << "" << endl;
 	return 0;
+    
 }
