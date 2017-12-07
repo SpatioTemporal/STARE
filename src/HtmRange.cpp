@@ -917,11 +917,13 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
 	} else {
 		os << HexRepresentationString << " ";
 	}
+	
 	range.my_los->reset();
 	range.my_his->reset();
 	while((lo = range.my_los->getkey()) > 0){
 		hi = range.my_his->getkey();
 		if (range.symbolicOutput){
+            os << endl;
 			strcpy(tmp_buf,range.encoding->nameById(lo));
 			strcat(tmp_buf," ");
 			strcat(tmp_buf,range.encoding->nameById(hi));
@@ -932,6 +934,7 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
 			os << tmp_buf;
 #else
 			os << "x" << hex << lo << " " << "x" << hi << dec;
+            
 			// sprintf(tmp_buf, "%llu %llu ", lo, hi);
 			// sprintf(tmp_buf, "%llu %lld ", lo, hi);
 #endif
@@ -1184,7 +1187,8 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 				sprintf(tmp_buf, "%llu..%llu", lo, hi);
 			}
 		}
-
+       
+        
 		os << tmp_buf << flush;
 
 		my_los->step();
@@ -1192,9 +1196,12 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 
 		// Peek ahead.  TODO A Little inefficiency here.
 		if((lo = my_los->getkey()) > 0) {
-			os << " " << flush; //  << endl;
+			os << "\n" << flush; //  << endl;
 		}
+    
+    
 	}
+	os <<endl;
 	return;
 }
 
