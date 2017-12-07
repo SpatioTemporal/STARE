@@ -1070,6 +1070,43 @@ int HtmRangeMultiLevel::nranges()
 	return n_ranges;
 }
 
+/// The number of indexes in the ranges.
+int HtmRangeMultiLevel::nindexes_in_ranges()
+{
+//	cout << "z000" << endl << flush;
+	Key lo, hi;
+	int n_indexes_ranges = 0;
+	my_los->reset();
+	my_his->reset();
+//	cout << "z010" << endl << flush;
+
+	while((lo = my_los->getkey()) > 0){
+		hi = my_his->getkey();
+//		cout << " : " << lo << ", " << hi << " " << flush << endl;
+
+		int levelLo = encoding->levelById(lo);
+		encoding->setId(lo);
+
+		// encoding->setId(hi);
+
+		Key hi_term = hi; // Trust we have a terminator here.
+
+		int nIndexes = 0;
+		Key newLo = lo;
+		while(newLo<hi_term) {
+			++n_indexes_ranges;
+			newLo = encoding->increment(newLo,levelLo);
+		}
+
+		my_los->step();
+		my_his->step();
+	}
+
+//	cout << "z100" << endl << flush;
+
+	return n_indexes_ranges;
+}
+
 //
 // return the smallest gapsize at which rangelist would be smaller than
 // desired size

@@ -2287,8 +2287,25 @@ void htmRangeMultiLevel() {
 	// A = rangeFromSymbols("N1002","N1010"); // smaller inside // old
 	A = rangeFromSymbols("N1001","N1030"); // smaller inside // old
 	range.addRange(A.lo,A.hi);
-//	cout << "nr: " << range.nranges() << endl << flush;
+//	cout << "a. nr: " << range.nranges() << endl << flush;
+//	cout << "a. ni: " << range.nindexes_in_ranges() << endl << flush;
 	range.CompressionPass();
+//	cout << "b. nr: " << range.nranges() << endl << flush;
+//	cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
+
+	range.purge();
+	A = rangeFromSymbols("N300", "N313"); // bigger // new
+	range.addRange(A.lo,A.hi); // new
+	ASSERT_EQUAL(1,range.nranges());
+	ASSERT_EQUAL(8,range.nindexes_in_ranges());
+//	cout << "a. nr: " << range.nranges() << endl << flush;
+//	cout << "a. ni: " << range.nindexes_in_ranges() << endl << flush;
+	range.CompressionPass();
+	ASSERT_EQUAL(1,range.nranges());
+	ASSERT_EQUAL(2,range.nindexes_in_ranges());
+//	cout << "b. nr: " << range.nranges() << endl << flush;
+//	cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
+
 
 }
 

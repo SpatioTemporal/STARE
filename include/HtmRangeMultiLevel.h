@@ -65,6 +65,7 @@ class LINKAGE HtmRangeMultiLevel {
 
   int stats(int desiredSize);
   int nranges();
+  int nindexes_in_ranges();
 
   int getLosLength() {
 	  return my_los->getLength();
