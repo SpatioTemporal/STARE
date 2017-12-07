@@ -1,7 +1,8 @@
-.PHONY: libs version
+.PHONY: libs version  configure
 
 ARCH    = @@ARC##
 
+# Set the following to your default directory, or set TOPDIR make variable.
 TOPDIR  ?= ~/modtools/mod2htm/hstm/
 CXX     = g++
 CC      = gcc
@@ -292,6 +293,11 @@ HtmParse.o: HtmParse.cpp HtmParse.h
 	$(CXX) -c $(CXX_FLAGS) $< -o $@
 	
 version:
-	$(CXX) --version
+	$(CXX) --version; \
+	echo; echo MakeVariables:; echo TOPDIR=${TOPDIR}
+	
+# Update the make file
+configure:
+	./configure
 
 export ARCH
