@@ -321,6 +321,7 @@ SpatialIndex::nodeVertex(
 		//			 ,bool verbose
 ) const {
 
+//	cout << "buildlevel,maxlevel: " << buildlevel_ << ", " << maxlevel_ << " " << flush;
   if(buildlevel_ == maxlevel_) {
 	  // TODO Usually buildlevel_ != maxlevel_, so the following code is suspect.
 	  // TODO Note that the in the original code we use NodeId64 as an index into nodes_ itself.
@@ -328,6 +329,11 @@ SpatialIndex::nodeVertex(
 	  // TODO Need to verify role of IOFFSET here...
 //	cout << "nodeVertex-1000-LookingUpVertices" << endl << flush;
     uint64 nodeId32 = (uint64)nodeId64; // Note no shifting or offsetting.
+    if(maxlevel_ == 0) {
+    	nodeId32 -= (IOFFSET-1); // TODO Why me? It would be nice to analyze and verify this is correct.
+    }
+//    cout << "nodeId32=" << nodeId32 << flush;
+//    cout << ", nnodes=" << nodes_.size() << flush;
 	v0 = vertices_[nodes_[nodeId32].v_[0]];
     v1 = vertices_[nodes_[nodeId32].v_[1]];
     v2 = vertices_[nodes_[nodeId32].v_[2]];
@@ -1019,10 +1025,11 @@ uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 		cout << "si:nifi: id=" << id << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
 		return 0;  // TODO Make this throw an exception?
 	}
-//	cout << "si::nifi: id=" << id << " depth=" << depth << endl << flush;
+//	cout << "si::nifi: id=" << id << " depth=" << depth << " maxlevel=" << maxlevel_ << flush;
 	uint64 one  = 1;
 	uint64 mask = ~(one << (2*depth+1));
 	uint64 nodeIndex = (id & mask) + IOFFSET;
+//	cout << " nodeIndex=" << nodeIndex << flush;
 	return nodeIndex;
 }
 

@@ -303,6 +303,84 @@ void idByName() {
 	ASSERT_EQUALM("nodeIndex(12683) == 4491+IOFFSET == 4500?",nodeIndexExpected,nodeIndex);
 }
 
+void testNodeVertexAtLevelZero() {
+
+	int level         = 0;
+	int saveLevel     = 5;
+	htmInterface *htm_ = new htmInterface(level,saveLevel);
+	const SpatialIndex index = htm_->index();
+	const char *htmName = "S0";
+	uint64 htmID = index.idByName(htmName);
+	uint64 htmIDExpected = 8; // i.e. b0100
+	ASSERT_EQUALM("S0 == 8?",htmIDExpected,htmID);
+	ASSERT_EQUALM("level(S0) == 0",0,levelOfName(htmName));
+	ASSERT_EQUALM("level(S0)   == 0",0,levelOfId(htmID));
+
+	uint64 nodeIndex = index.nodeIndexFromId(htmID);
+	uint64 nodeIndexExpected = 0 + 9; // for N012023
+	ASSERT_EQUALM("nodeIndex(8) == 0 +IOFFSET == 9?",nodeIndexExpected,nodeIndex);
+
+	SpatialVector v0,v1,v2,v3;
+	index.nodeVertex(nodeIndex,v1,v2,v3);
+	v0 = (v1 + v2 + v3) * (1.0/3.0); v0.normalize();
+
+	SpatialVector x(1,0,0),y(0,1,0),z(0,0,1);
+
+	if(false) {
+		cout << endl;
+		cout << "v0: " << v0 << endl;
+		cout << "v1: " << v1 << endl;
+		cout << "v2: " << v2 << endl;
+		cout << "v3: " << v3 << endl;
+	}
+	ASSERT_EQUAL(0,(v1-x).length());
+	ASSERT_EQUAL(0,(v2+z).length());
+	ASSERT_EQUAL(0,(v3-y).length());
+
+	if(true) {
+		index.nodeVertex(nodeIndex+1,v1,v2,v3);
+		v0 = (v1 + v2 + v3) * (1.0/3.0); v0.normalize();
+		if(false) {
+			cout << endl;
+			cout << "v0: " << v0 << endl;
+			cout << "v1: " << v1 << endl;
+			cout << "v2: " << v2 << endl;
+			cout << "v3: " << v3 << endl;
+		}
+		ASSERT_EQUAL(0,(v1-y).length());
+		ASSERT_EQUAL(0,(v2+z).length());
+		ASSERT_EQUAL(0,(v3+x).length());
+
+		index.nodeVertex(nodeIndex+2,v1,v2,v3);
+		v0 = (v1 + v2 + v3) * (1.0/3.0); v0.normalize();
+		if(false) {
+			cout << endl;
+			cout << "v0: " << v0 << endl;
+			cout << "v1: " << v1 << endl;
+			cout << "v2: " << v2 << endl;
+			cout << "v3: " << v3 << endl;
+		}
+		ASSERT_EQUAL(0,(v1+x).length());
+		ASSERT_EQUAL(0,(v2+z).length());
+		ASSERT_EQUAL(0,(v3+y).length());
+
+		index.nodeVertex(nodeIndex+3,v1,v2,v3);
+		v0 = (v1 + v2 + v3) * (1.0/3.0); v0.normalize();
+		if(false) {
+			cout << endl;
+			cout << "v0: " << v0 << endl;
+			cout << "v1: " << v1 << endl;
+			cout << "v2: " << v2 << endl;
+			cout << "v3: " << v3 << endl;
+		}
+		ASSERT_EQUAL(0,(v1+y).length());
+		ASSERT_EQUAL(0,(v2+z).length());
+		ASSERT_EQUAL(0,(v3-x).length());
+	}
+//	FAIL();
+
+}
+
 /**
  * Verify the symbolic name encoding using bit shifting.
  */
@@ -652,6 +730,18 @@ void testIndexLevel1() {
 	ASSERT_EQUAL(1,levelOfName("N01"));
 	ASSERT_EQUAL(2,levelOfName("N012"));
 	ASSERT_EQUAL(3,levelOfName("N0123"));
+
+	string s = "N0";
+	BitShiftNameEncoding *name = new BitShiftNameEncoding(s.c_str());
+	ASSERT_EQUALM("name round trip",s.c_str(),name->getName());
+	delete name;
+
+	s = "S0";
+	name = new BitShiftNameEncoding(s.c_str());
+	ASSERT_EQUALM("name round trip",s.c_str(),name->getName());
+	delete name;
+
+//	FAIL();
 }
 
 void testEmbeddedLevelNameEncoding() {
@@ -1101,17 +1191,19 @@ void testNeighbors() {
 	uint64 neighborsV[9];
 	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
 
-	//	cout << "Neighbors Across Vertices of " << (htmId) << " are ";
-	//	for(int i=0; i<9; i++) {
-	//		cout << (neighborsV[i]) << " ";
-	//	}
-	//	cout << endl << flush;
-	//
-	//	cout << "Neighbors Across Vertices of " << index.nameById(htmId) << " are ";
-	//	for(int i=0; i<9; i++) {
-	//		cout << index.nameById(neighborsV[i]) << " ";
-	//	}
-	//	cout << endl << flush;
+	if(false) {
+		cout << "Neighbors Across Vertices of " << (htmId) << " are ";
+		for(int i=0; i<9; i++) {
+			cout << (neighborsV[i]) << " ";
+		}
+		cout << endl << flush;
+
+		cout << "Neighbors Across Vertices of " << index.nameById(htmId) << " are ";
+		for(int i=0; i<9; i++) {
+			cout << index.nameById(neighborsV[i]) << " ";
+		}
+		cout << endl << flush;
+	}
 
 	ASSERT_EQUALM("Neighbor face 23",12680,neighbors[0]);
 	ASSERT_EQUALM("Neighbor face 13",12681,neighbors[1]);
@@ -3811,6 +3903,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(lookupOnMultipleLevels));
 	s.push_back(CUTE(idReallyDeep));
 	s.push_back(CUTE(idByName));
+
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
 	s.push_back(CUTE(testRangeContains));
 	s.push_back(CUTE(testRangeIterator));
@@ -3836,7 +3929,9 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testFirstBitDifferenceFromLeft));
 	s.push_back(CUTE(testTemporalIndex));
 	s.push_back(CUTE(testLevelBugSciDB));
-  s.push_back(CUTE(testTesselationBug));
+	s.push_back(CUTE(testTesselationBug));
+
+	s.push_back(CUTE(testNodeVertexAtLevelZero));
 
 	//	s.push_back(CUTE(testRange));
 

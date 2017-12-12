@@ -25,3 +25,5 @@
 /Makefile
 /build
 /lookup
+/lookupInteractive
+/tesselateTrapezoid
