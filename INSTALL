@@ -1,0 +1,31 @@
+
+# INSTALL
+
+Notes on installation.
+
+The environment variable TOPDIR is set to the top level of the
+distribution. CUTE-based unit testing is the default, set CUTEDIR to
+CUTE's location.
+
+# In TOPDIR, construct the makefile. The configure script uses uname
+# to try to determine which platform we're on.
+$ ./configure
+$ make
+
+The object files and library archive (libSTARE.a) are in the 'unix' directory.
+
+To use the library, include the files in 'include' and link to 'libSTARE.a'.
+
+###########################################################################
+#
+# STARE SpatioTemporal Adaptive Resolution Encoding
+
+An encoding for high-performance search and subsetting of geospatial data.
+
+Development supported by NASA/ACCESS-17.
+
+Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
+
+Michael Lee Rilee, RSTLLC, mike@rilee.net
+
+###########################################################################

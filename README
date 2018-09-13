@@ -1,4 +1,5 @@
 
+###########################################################################
 # STARE SpatioTemporal Adaptive Resolution Encoding
 
 An encoding for high-performance search and subsetting of geospatial data.
@@ -9,8 +10,7 @@ Copyrights and licenses as asserted in individual files. Legacy HTM distributed 
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net
 
-
-
+###########################################################################
 ## OBSOLETE ##
 # hstm Hierarchical Spherical Triangular Mesh
 

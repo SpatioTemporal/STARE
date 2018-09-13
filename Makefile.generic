@@ -90,9 +90,9 @@ simpleIntersect: ${OBJ}/simpleIntersect.o ${OBJECTS}
 	$(CXX) -g -o $@  ${OBJ}/simpleIntersect.o ${OBJECTS} 
 	
 	
-libs: ${OBJ}/libhstm.a
+libs: ${OBJ}/libSTARE.a
 
-${OBJ}/libhstm.a: ${OBJECTS}
+${OBJ}/libSTARE.a: ${OBJECTS}
 	ar -r $@ ${OBJECTS}
 	ar -s $@
 #---------------------------------------------
@@ -273,7 +273,7 @@ cc_intersect.o: ${TOPDIR}/cc_intersect.c
 	$(CC) -c cc_intersect.c
 
 clean:
-	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/NameEncoding.o ${OBJ}/BitShiftNameEncoding.o ${OBJ}/libhstm.a
+	rm -f $(OBJECTS) ${OBJ}/hello.o  $(OBJ)/intersect.o $(OBJ)/test1.o $(OBJ)/fin.o ${OBJ}/NameEncoding.o ${OBJ}/BitShiftNameEncoding.o ${OBJ}/libSTARE.a
 
 cleanAll:
 	-rm -f $(OBJECTS) ${OBJ}/*.o

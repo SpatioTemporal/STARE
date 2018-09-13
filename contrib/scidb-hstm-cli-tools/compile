@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# HSTM_HOME=/Users/mrilee/git/hstm
-HSTM_HOME=~/hstm
+# STARE_HOME=/Users/mrilee/git/stare
+STARE_HOME=~/stare
 
 CFLAGS_FROM_CONFIGURE_SCRIPT=" -O3 -g -fPIC -Wall -I${INCDIR} -D_BOOL_EXISTS -D__unix -UDIAGNOSE "
 CFLAGS_BASE=${CFLAGS_FROM_CONFIGURE_SCRIPT}
@@ -12,39 +12,36 @@ CLX_FLAGS=" -std=c++11 "
 
 g++ \
     -o winter2010blizzard_csv_to_STARE \
-    ${HSTM_HOME}/unix/*.o \
+    ${STARE_HOME}/unix/*.o \
   ${CXX_FLAGS} \
-  -I${HSTM_HOME}/include \
-  -L${HSTM_HOME}/unix \
-  -lhstm \
+  -I${STARE_HOME}/include \
+  -L${STARE_HOME}/unix \
+  -lSTARE \
   winter2010blizzard_csv_to_STARE.cpp
 
 g++ \
     -o siblings \
-    ${HSTM_HOME}/unix/*.o \
+    ${STARE_HOME}/unix/*.o \
   ${CXX_FLAGS} \
-  -I${HSTM_HOME}/include \
-  -L${HSTM_HOME}/unix \
-  -lhstm \
+  -I${STARE_HOME}/include \
+  -L${STARE_HOME}/unix \
+  -lSTARE \
   siblings.cpp
 
 g++ \
     -o parent \
-    ${HSTM_HOME}/unix/*.o \
+    ${STARE_HOME}/unix/*.o \
   ${CXX_FLAGS} \
-  -I${HSTM_HOME}/include \
-  -L${HSTM_HOME}/unix \
-  -lhstm \
+  -I${STARE_HOME}/include \
+  -L${STARE_HOME}/unix \
+  -lSTARE \
   parent.cpp
 
 g++ \
     -o children \
-    ${HSTM_HOME}/unix/*.o \
+    ${STARE_HOME}/unix/*.o \
   ${CXX_FLAGS} \
-  -I${HSTM_HOME}/include \
-  -L${HSTM_HOME}/unix \
-  -lhstm \
+  -I${STARE_HOME}/include \
+  -L${STARE_HOME}/unix \
+  -lSTARE \
   children.cpp
-
-
-
