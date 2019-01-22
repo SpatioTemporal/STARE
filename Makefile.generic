@@ -294,7 +294,7 @@ HtmParse.o: HtmParse.cpp HtmParse.h
 	
 version:
 	$(CXX) --version; \
-	echo; echo MakeVariables:; echo TOPDIR=${TOPDIR}
+	echo; echo MakeVariables:; echo TOPDIR=${TOPDIR}; echo CUTEDIR=${CUTEDIR}
 	
 # Update the make file
 configure:
