@@ -1,43 +1,12 @@
 
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
+#include "Test.h"
 
-#include "cute.h"
-#include "ide_listener.h"
-#include "xml_listener.h"
-#include "cute_runner.h"
-
-#include "HstmIndex.h"
-
-// TODO #include the headers for the code you want to test
-//#include "SpatialGeneral.h"
-#include "SpatialException.h"
-#include "SpatialIndex.h"
-#include "TemporalIndex.h"
-#include "SpatialVector.h"
-#include "SpatialInterface.h"
-
-#include "SpatiallyAdaptiveDataCover.h"
-
-#include "HtmRangeIterator.h"
-#include "BitShiftNameEncoding.h"
-#include "EmbeddedLevelNameEncoding.h"
-
-#include "HtmRangeMultiLevel.h"
-#include "HtmRangeMultiLevelIterator.h"
-
-#include "HstmRange.h"
-
-// TODO Add your test functions
-
+// Convenience functions for the tests.
 double square(SpatialVector x){	return x*x; }
 double norm(SpatialVector x){ return sqrt(square(x)); }
-#define ASSERT_EQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,norm(a-b),tol);
-#define ASSERT_NOTEQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,tol,norm(a-b));
 
-#define componentCheck(xxx) 	{cout << setprecision(17); cout << "  xxx: " << xxx << endl << flush; cout << "v.xxx: " << v_.xxx() << endl << flush; cout << "delta: " << xxx - v_.xxx() << endl << flush;}
+// TODO Add your test functions
+// ...
 
 void precisionTest(){
 	// Check that we understand the precision of the variables.
@@ -3932,6 +3901,8 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testTesselationBug));
 
 	s.push_back(CUTE(testNodeVertexAtLevelZero));
+
+	s.push_back(CUTE(SpatialRotation_test));
 
 	//	s.push_back(CUTE(testRange));
 
