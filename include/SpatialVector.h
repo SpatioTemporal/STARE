@@ -40,6 +40,7 @@ public:
   SpatialVector(float64 x,
 		float64 y,
 		float64 z);
+  SpatialVector(float64 *x);
 
   /// Constructor from ra/dec, this is always normed to 1
   SpatialVector(float64 ra,
@@ -111,6 +112,8 @@ public:
 
   const char* toString();
 
+  float64* toArray();
+
   /// Comparison
   int operator ==(const SpatialVector & ) const;
 
@@ -158,6 +161,8 @@ private:
 };
 
 #include "SpatialVector.hxx"
+
+void SpatialVector_test();
 
 #endif
 

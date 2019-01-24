@@ -30,12 +30,17 @@ SpatialVector::SpatialVector() :
   x_(1), y_(0), z_(0), ra_(0), dec_(0), okRaDec_(true) {
 }
 
-
+/////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Maybe we should create a Coordinate class to handle R3, RA-DEC, LatLon, etc.
 SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
   x_(x), y_(y), z_(z), okRaDec_(false) {
 }
 
+/////////////CONSTRUCTOR//////////////////////////////////
+/// TODO Strengthen the following input type.
+SpatialVector::SpatialVector(float64 *x) :
+	x_(x[0]), y_(x[1]), z_(x[2]), okRaDec_(false) {
+}
 /////////////CONSTRUCTOR//////////////////////////////////
 //
 SpatialVector::SpatialVector(float64 ra, float64 dec) :
@@ -375,6 +380,17 @@ SpatialVector::toString()
 	char *buffer = new char[40];
 	int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
 	return buffer;
+}
+
+float64*
+SpatialVector::toArray()
+{
+	float64 *buffer = new float64[3];
+	buffer[0] = x_;
+	buffer[1] = y_;
+	buffer[2] = z_;
+	return buffer;
+
 }
 
 /////////////READ/////////////////////////////////////////
