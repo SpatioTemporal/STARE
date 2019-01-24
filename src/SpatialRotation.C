@@ -6,7 +6,6 @@
  */
 
 #include "SpatialRotation.h"
-#include "SpatialVector.h"
 
 SpatialRotation::SpatialRotation(const SpatialVector axis, const float64 theta)
 : axis(axis), theta(theta){
@@ -14,6 +13,20 @@ SpatialRotation::SpatialRotation(const SpatialVector axis, const float64 theta)
 	mu     = cos(theta);
 	muComp = mu - 1.0;
 	lambda = sin(theta);
+	matrix_flag = false;
+
+}
+
+SpatialRotation::SpatialRotation(const SpatialVector body_zhat, const SpatialVector body_xhat) {
+	if (abs(body_zhat*body_xhat) > tol) {
+		throw SpatialFailure("Body x and z axes are not orthogonal.");
+	}
+	SpatialVector body_yhat = body_zhat^body_xhat;
+	rotation_matrix_dual_x = SpatialVector(body_xhat.x(),body_yhat.x(),body_zhat.x());
+	rotation_matrix_dual_y = SpatialVector(body_xhat.y(),body_yhat.y(),body_zhat.y());
+	rotation_matrix_dual_z = SpatialVector(body_xhat.z(),body_yhat.z(),body_zhat.z());
+	matrix_flag = true;
+
 }
 
 SpatialRotation::~SpatialRotation() {
@@ -22,9 +35,20 @@ SpatialRotation::~SpatialRotation() {
 
 SpatialVector SpatialRotation::rotated_from(const SpatialVector v) {
 	// TODO Special treatment for identity.
-	// Use Rodrigues's formula
+
 	SpatialVector vRot;
-	vRot = (v)*mu + (axis^(v))*lambda + axis*((axis*(v))*muComp);
+
+	if (matrix_flag) {
+		// Matrix
+		vRot.set(
+				rotation_matrix_dual_x*v,
+				rotation_matrix_dual_y*v,
+				rotation_matrix_dual_z*v
+				);
+	} else {
+		// Use Rodrigues's formula
+		vRot = (v)*mu + (axis^(v))*lambda + axis*((axis*(v))*muComp);
+	}
 	return vRot;
 }
 
