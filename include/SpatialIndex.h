@@ -23,6 +23,7 @@
 #include <time.h>
 #include <SpatialGeneral.h>
 #include <SpatialVector.h>
+#include <SpatialRotation.h>
 #include <SpatialEdge.h>
 #include <SpatialException.h>
   // begin add dcd
@@ -78,9 +79,9 @@ public:
       , that many levels are generated on the fly each time the index
       is called. */
   SpatialIndex() {};
-  SpatialIndex(size_t maxlevel, size_t buildlevel = 5);
-  SpatialIndex(const char* htmIdName, int buildlevel = 5) :
-	  SpatialIndex(levelOfName(htmIdName),buildlevel) {};
+  SpatialIndex(size_t maxlevel, size_t buildlevel = 5, SpatialRotation rot = rot_identity);
+  SpatialIndex(const char* htmIdName, int buildlevel = 5, SpatialRotation rot = rot_identity) :
+	  SpatialIndex(levelOfName(htmIdName),buildlevel,rot) {};
 
   size_t getMaxlevel() const { return maxlevel_; }
   size_t getLeafLevel() const { return maxlevel_; }

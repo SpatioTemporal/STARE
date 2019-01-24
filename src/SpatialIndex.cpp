@@ -197,8 +197,9 @@ void SpatialIndex::printNode(int nodeIndex) const {
  * @param [in] buildlevel The level to which nodes are stored in nodes_.
  */
 
-SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxlevel), 
-  buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
+SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation rot) :
+		maxlevel_(maxlevel),
+		buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
 {
 //	debug = false;
 
@@ -221,6 +222,7 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
   layers_[0].firstVertex_ = 0;
 
   // set the first 6 vertices // TODO Change for icosahedron.
+  /*
   float64 v[6][3] = {
     {0.0L,  0.0L,  1.0L}, // 0 k
     {1.0L,  0.0L,  0.0L}, // 1 i
@@ -229,6 +231,19 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel) : maxlevel_(maxle
     {0.0L, -1.0L,  0.0L}, // 4 -j
     {0.0L,  0.0L, -1.0L}  // 5 -k
   };
+  */
+
+  SpatialVector body_xhat = rot.rotated_from(xhat);
+  SpatialVector body_yhat = rot.rotated_from(yhat);
+  SpatialVector body_zhat = rot.rotated_from(zhat);
+
+  float64 *v[6];
+  v[0]=       body_zhat.toArray();
+  v[1]=       body_xhat.toArray();
+  v[2]=       body_yhat.toArray();
+  v[3]=(-1.0*body_xhat).toArray();
+  v[4]=(-1.0*body_yhat).toArray();
+  v[5]=(-1.0*body_zhat).toArray();
 
   for(int i = 0; i < 6; i++)
     vertices_[i].set( v[i][0], v[i][1], v[i][2]);

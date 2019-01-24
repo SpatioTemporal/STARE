@@ -16,10 +16,6 @@ public:
 
 	const float64 tol = 1.0e-14;
 
-	const SpatialVector xhat = SpatialVector(1.0,0.0,0.0);
-	const SpatialVector yhat = SpatialVector(0.0,1.0,0.0);
-	const SpatialVector zhat = SpatialVector(0.0,0.0,1.0);
-
 	SpatialVector body_xhat = xhat;
 	SpatialVector body_yhat = yhat;
 	SpatialVector body_zhat = zhat;
@@ -47,5 +43,6 @@ public:
 };
 
 void SpatialRotation_test();
+const SpatialRotation rot_identity = SpatialRotation(SpatialVector(0.0,0.0,1.0),0.0);
 
 #endif /* INCLUDE_SPATIALROTATION_H_ */

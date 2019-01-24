@@ -17,6 +17,11 @@
 #include "SpatialVector.h"
 #include "SpatialException.h"
 
+SpatialVector
+	xhat(1.0,0.0,0.0),
+	yhat(0.0,1.0,0.0),
+	zhat(0.0,0.0,1.0);
+
 //==============================================================
 //
 // This 3D vector lives on the surface of the sphere.
@@ -413,4 +418,7 @@ SpatialVector::write(std::ostream &out) const
 {
   out << x_ << ' ' << y_ << ' ' << z_ ;
 }
+
+
+
 

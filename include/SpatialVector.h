@@ -160,9 +160,11 @@ private:
   friend class sxSpatialDomain;
 };
 
-#include "SpatialVector.hxx"
-
 void SpatialVector_test();
+
+extern SpatialVector xhat, yhat, zhat;
+
+#include "SpatialVector.hxx"
 
 #endif
 
