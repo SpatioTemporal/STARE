@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.4)
 
 set (
   CuteTestsSrcFiles
@@ -7,5 +8,5 @@ set (
 
 add_executable(tests ${CuteTestsSrcFiles})
 target_link_libraries(tests hstm)
-
+target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute)
 

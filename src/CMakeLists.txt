@@ -21,6 +21,7 @@ set (
   SpatialGeneral.C
   SpatialIndex.cpp
   SpatialInterface.cpp
+  SpatiallyAdaptiveDataCover.C
   SpatialVector.cpp
   TemporalIndex.cpp
   VarStr.C )
