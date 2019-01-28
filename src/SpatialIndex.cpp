@@ -889,6 +889,8 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId
  * buildlevel_ tells you how deep the index was explicitly built.
  * maxlevel_ is the depth to which we want to enable searches
  *
+ * The inverse of idByPoint is pointByHtmId, not pointById.
+ *
  * @param v The input point whose enclosing triangle we seek
  * @return ID the HTM (external numeric-id) ID
  */

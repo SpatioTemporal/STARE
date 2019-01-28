@@ -133,10 +133,17 @@ void printNode(int nodeIndex) const;
       */
   char * nameByLeafNumber(uint64 n, char * name = 0) const;
 
-  /** find the vector to the centroid of a triangle represented by 
-	  the ID */
-  void pointByHtmId(SpatialVector & vector, uint64 ID) const;
-  void pointById(SpatialVector & vector, uint64 ID) const;
+  /** Find the vector to the centroid of a triangle represented by the htmID
+   *
+   * */
+  void pointByHtmId(SpatialVector & vector, uint64 htmID) const;
+
+  /** Find the vector to the centroid of a triangle represented by the nodeID64.
+   *
+   *
+   *
+   * */
+  void pointById(SpatialVector & vector, uint64 nodeID64) const;
 
   /** Find the neighbors across the edges of the triangles htmId */
   void
@@ -145,7 +152,8 @@ void printNode(int nodeIndex) const;
   void
   NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const;
 
-  /** find a node by giving a vector. 
+  /** find a node by giving a vector.
+   *
       The ID of the node is returned.
 
       Find the leaf triangle containing the vector.
@@ -281,4 +289,7 @@ private:
 
 
 #include "SpatialIndex.hxx"
+
+void SpatialIndex_test();
+
 #endif

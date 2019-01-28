@@ -54,4 +54,9 @@ void SpatialRotation_test() {
 
 	ASSERT_EQUALDM("rot0 vs _m",rot0.rotated_from(xhat),rot0_m.rotated_from(xhat),tol);
 
+	ASSERT_EQUALDM("rot zhat by pi around xhat: ",-1.0*zhat,SpatialRotation(xhat,gPi).rotated_from(zhat),tol);
+
+	ASSERT_EQUALDM("rot xhat by pi around xhat: ",xhat,SpatialRotation(xhat,gPi).rotated_from(xhat),tol);
+
+
 }

@@ -101,6 +101,9 @@ public:
   /// Normalize vector length to r
   void normalize(float64 r);
 
+  // Return the reverse of the spatial vector.
+  SpatialVector reverse();
+
   /// Printf it to stdout
   void show() const;
 

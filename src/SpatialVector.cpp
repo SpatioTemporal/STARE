@@ -17,6 +17,7 @@
 #include "SpatialVector.h"
 #include "SpatialException.h"
 
+// TODO Figure hout how to make the hats constant.
 SpatialVector
 	xhat(1.0,0.0,0.0),
 	yhat(0.0,1.0,0.0),
@@ -191,12 +192,13 @@ float64 SpatialVector::dec() {
   return dec_;
 }
 
-
 SpatialVector SpatialVector::rotatedAbout(const SpatialVector axis, const float64 theta) const {
 	// Use Rodrigues's formula
 	// Inefficient in that we're calling the transcendental functions each time.
 	const float64 mu     = cos(theta);
-	const float64 muComp = mu - 1.0;
+	// muComp = mu - 1.0; // error? Wikipedia says -- sign error.
+	// const float64 muComp = mu - 1.0;
+	const float64 muComp = 1.0 - mu;
 	const float64 lambda = sin(theta);
 
 	SpatialVector vRot;
@@ -225,6 +227,13 @@ float64 sum, scale;
    x_ *= scale;
    y_ *= scale;
    z_ *= scale;
+}
+
+/////////////REVERSE//////////////////////////////////////
+//
+SpatialVector
+SpatialVector::reverse(){
+	return -1.0*(*this);
 }
 
 /////////////LENGTH///////////////////////////////////////

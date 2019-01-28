@@ -63,7 +63,8 @@ void lookupOnTwoSaveLevels() {
 
 }
 
-#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_0(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
 #define INDEX_(name){htm[levelOfName(name)]->index();}
 #define PRINT_ID(msg,htm,name) {	SpatialIndex index = htm[levelOfName(name)]->index(); cout << msg << " indexLevel: " << index.getMaxlevel() << " id: " << flush; cout << index.idByName(name) << " name: " << name << " nameLevel: " << levelOfName(name); SpatialVector v; index.pointById(v,index.idByName(name)); cout << " v: " << v << endl << flush;}
 
@@ -84,7 +85,7 @@ void lookupOnMultipleLevels() {
 	char name0[1024], name1[1024];
 
 	int level          = 3;
-	int saveLevel      = 2;
+	// int saveLevel      = 2;
 
 	index0_ = htm[level]->index();
 	id0 =     htm[level]->lookupID(x,y,z);
@@ -92,7 +93,7 @@ void lookupOnMultipleLevels() {
 	ASSERT_EQUALM("S3333: id0==767: ",767,id0);
 
 	level          = 4;
-	saveLevel      = 5;
+	// saveLevel      = 5;
 	index1_ = htm[level]->index();
 	id1 =     htm[level]->lookupID(x,y,z);
 
@@ -362,11 +363,12 @@ void checkBitShiftNameEncoding0() {
 	ASSERT_EQUALM("12683 == N012023?",12683,bitShiftName.idByName("N012023"));
 	ASSERT_EQUALM("level(N012023)",5,bitShiftName.levelById(htmId));
 
-	uint64 testId = 0;
+	// uint64 testId = 0;
 	string failureMessage = "'";
 	try {
-		testId = bitShiftName.idByName("N012024");
-	} catch (SpatialFailure failure) {
+		// testId = bitShiftName.idByName("N012024");
+		bitShiftName.idByName("N012024");
+	} catch (SpatialFailure& failure) {
 		failureMessage += failure.what();
 	}
 	failureMessage += "'";
@@ -383,7 +385,7 @@ void checkBitShiftNameEncoding0() {
 	ASSERT_EQUALM("Construct using name.",12683,htm->getId());
 	try {
 		htm = new BitShiftNameEncoding("N012823");
-	} catch (SpatialFailure failure) {
+	} catch (SpatialFailure& failure) {
 		ASSERT_EQUALM("Bad construction","BitShiftName:idByName-InvalidDigit",failure.what());
 	}
 	htm->setName("N012022");
@@ -507,7 +509,7 @@ void testLatLonDegrees() {
 	float64 l0 = -1, l1 = -1;
 	try {
 		u.getLatLonDegrees(l0,l1);
-	} catch(SpatialException e) {
+	} catch(const SpatialException& e) {
 		ASSERT_EQUALM("LatLon from non-unit vector.",
 				"SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.",
 				e.what());
@@ -789,7 +791,7 @@ void testEmbeddedLevelNameEncoding() {
 		string foundName ="'";
 		try {
 			foundName += name->nameById(0);
-		} catch (SpatialFailure failure) {
+		} catch (const SpatialFailure& failure) {
 			failureMessage += failure.what();
 		}
 		foundName += "'";
@@ -1020,18 +1022,17 @@ void testRotation() {
 	stringstream msgStream;
 	float64 tolerance = 1.0e-15;
 	//	SpatialVector origin(0.0,0.0,0.0);
-	const SpatialVector zHat(0.0,0.0,1.0), xHat(1.0,0.0,0.0), yHat(0.0,1.0,0.0);
 
 	float64 theta;
 	SpatialVector start, axis, rot, expected;
 
 	theta = gPi;
-	start = xHat;
-	axis  = zHat;
-	expected = -1.0*xHat;
+	start = xhat;
+	axis  = zhat;
+	expected = -1.0*xhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Reverse xHat: <";
+	msgStream << "Reverse xhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -1042,12 +1043,12 @@ void testRotation() {
 	msgStream.str(string()); msgStream.clear();
 
 	theta = gPi*0.5;
-	start = xHat;
-	axis  = zHat;
-	expected = yHat;
+	start = xhat;
+	axis  = zhat;
+	expected = yhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Rotate xHat to yHat: <";
+	msgStream << "Rotate xhat to yhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -1058,12 +1059,28 @@ void testRotation() {
 	msgStream.str(string()); msgStream.clear();
 
 	theta = -gPi*0.5;
-	start = zHat;
-	axis  = xHat;
-	expected = yHat;
+	start = zhat;
+	axis  = xhat;
+	expected = yhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Rotate zHat to yHat: <";
+	msgStream << "Rotate zhat to yhat: <";
+	msgStream << "start: " << start << ", ";
+	msgStream << "axis: " << axis << ", ";
+	msgStream << "th: " << theta << ", ";
+	msgStream << "r: " << rot << ", ";
+	msgStream << "tol: " << tolerance;
+	msgStream << ">";
+	ASSERT_EQUALDM(msgStream.str().c_str(),expected,rot,tolerance);
+	msgStream.str(string()); msgStream.clear();
+
+	theta = gPi;
+	start = zhat;
+	axis  = xhat;
+	expected = -1.0*zhat;
+	rot = start.rotatedAbout(axis,theta);
+	tolerance = 1.0e-15;
+	msgStream << "Rotate zhat to yhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -3111,7 +3128,7 @@ void testHstmEqualp() {
 }
 
 void testIndexBug() {
-	int level       = 4;
+	uint level       = 4;
 	int idLevel     = 23;
 	int maxLevel    = 5; // aka buildLevel
 
@@ -3904,6 +3921,7 @@ void runSuite(int argc, char const *argv[]){
 
 	s.push_back(CUTE(SpatialRotation_test));
 	s.push_back(CUTE(SpatialVector_test));
+	s.push_back(CUTE(SpatialIndex_test));
 
 	//	s.push_back(CUTE(testRange));
 

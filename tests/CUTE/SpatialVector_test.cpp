@@ -26,4 +26,7 @@ void SpatialVector_test() {
 
 	ASSERT_EQUAL(v,SpatialVector(v.toArray()));
 
+	ASSERT_EQUAL(-1*xhat,xhat.reverse());
+	ASSERT_EQUAL(SpatialVector(-0.5,1.0,-0.25),SpatialVector(0.5,-1.0,0.25).reverse());
+
 }
