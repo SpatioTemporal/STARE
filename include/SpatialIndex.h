@@ -135,12 +135,13 @@ void printNode(int nodeIndex) const;
 
   /** Find the vector to the centroid of a triangle represented by the htmID
    *
+   * Note this is the inverse of idByPoint.
+   *
    * */
   void pointByHtmId(SpatialVector & vector, uint64 htmID) const;
 
+
   /** Find the vector to the centroid of a triangle represented by the nodeID64.
-   *
-   *
    *
    * */
   void pointById(SpatialVector & vector, uint64 nodeID64) const;
@@ -154,7 +155,9 @@ void printNode(int nodeIndex) const;
 
   /** find a node by giving a vector.
    *
-      The ID of the node is returned.
+      The htmID of the node is returned.
+
+      // TODO rename idByPoint by htmIdPoint. Everywhere.
 
       Find the leaf triangle containing the vector.
       */

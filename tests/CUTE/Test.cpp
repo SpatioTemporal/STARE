@@ -231,9 +231,14 @@ void idByPoint1() {
 	int level          = 8;
 	int saveLevel      = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
-	float64 x = 0.50350942389316267;
+	/* Original point, a little off triangle center at level 8.
+	float64 x =  0.50350942389316267;
 	float64 y = -0.61093299962057024;
 	float64 z = -0.61093299962057024;
+	*/
+	float64 x =  0.50350998334076424;
+	float64 y = -0.61093276908191108;
+	float64 z = -0.61093276908191108;
 	int id_ = htm_->lookupID(x,y,z);
 
 	//	cout << "id_ " << id_ << endl << flush;
@@ -246,6 +251,20 @@ void idByPoint1() {
 	//	cout << "idT " << idTest << endl << flush;
 
 	ASSERT_EQUALM("idByPoint1",id_,idTest);
+
+	SpatialVector u;
+	index.pointByHtmId(u, idTest);
+	/*
+	cout << setprecision(17);
+	cout << "v     = " << v << endl << flush;
+	cout << "u     = " << u << endl << flush;
+	cout << "|v-u| = " << (v-u).length() << endl << flush;
+	*/
+	ASSERT_EQUALDM("Inverse check.",v,u,1.0e-16);
+
+	// The following is incorrect and may segfault!
+	// index.pointById(u, idTest);
+
 }
 
 /**
