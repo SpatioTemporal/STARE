@@ -392,7 +392,8 @@ const char*
 SpatialVector::toString()
 {
 	char *buffer = new char[40];
-	int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
+	// int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
+	sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
 	return buffer;
 }
 

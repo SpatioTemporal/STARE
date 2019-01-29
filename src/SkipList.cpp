@@ -182,8 +182,8 @@ Key SkipList::findMIN(const Key searchKey) const
   // quite entirely unlike a search ...
 {
   int i;
-  SkipListElement* element;
-  SkipListElement* nextElement;
+  SkipListElement* element     = NULL;
+  SkipListElement* nextElement = NULL;
   Key retKey;
 
   element = myHeader;

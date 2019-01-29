@@ -3941,6 +3941,7 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(SpatialRotation_test));
 	s.push_back(CUTE(SpatialVector_test));
 	s.push_back(CUTE(SpatialIndex_test));
+	s.push_back(CUTE(SpatialFailure_test));
 
 	//	s.push_back(CUTE(testRange));
 

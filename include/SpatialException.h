@@ -66,7 +66,7 @@ public:
    void clear();
 
   /// default error string
-   static char *defaultstr[];
+   static const char *defaultstr[];
 
 protected:
   /// error string to assemble
@@ -164,5 +164,7 @@ public:
   /// Copy constructor.
    SpatialInterfaceError( const SpatialInterfaceError& ) throw();
 };
+
+void SpatialFailure_test();
 
 #endif /* _SpatialException_h */

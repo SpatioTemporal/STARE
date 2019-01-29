@@ -770,7 +770,7 @@ SpatialIndex::pointByHtmId(SpatialVector &vec, uint64 htmId) const {
 void
 SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
 	float64 center_x, center_y, center_z, sum;
-	char name[HTMNAMEMAX];
+	// char name[HTMNAMEMAX];
 	SpatialVector v0, v1, v2; //
 	// TODO nodeVertex is expecting something like a leafId
 	// TODO nodeVertex might not account for an offset.
@@ -1037,7 +1037,7 @@ int levelOfId(uint64 htmId) {
 uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// This nodeIndex is only valid if depth == maxlevel+1
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
-	int depth = depthOfId(id);
+	uint depth = depthOfId(id);
 	if (depth != maxlevel_+1) {
 		cout << "si:nifi: id=" << id << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
 		return 0;  // TODO Make this throw an exception?

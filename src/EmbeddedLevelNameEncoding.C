@@ -258,14 +258,14 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
  * @param level
  */
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool keepAllBits ) {
-	int oldLevel = this->getLevel();
+	uint oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
 	keepBits++; // Position 62
 	uint64 newId;
 	if(level < oldLevel) {
 		for(int i=62;i>5;i-=2){
-			int levelAtI = (62-i)/2;
+			uint levelAtI = (62-i)/2;
 			keepBits = keepBits << 2;
 			if((level < levelAtI) && (levelAtI < oldLevel)) {
 				if(keepAllBits) { keepBits += 3; }
@@ -285,14 +285,14 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool 
 }
 
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64 level) {
-	int oldLevel = this->getLevel();
+	// uint64 oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
 	keepBits++; // Position 62
 	uint64 newId;
 
 	for(int i=62;i>5;i-=2){
-	  int levelAtI = (62-i)/2;
+	  uint64 levelAtI = (62-i)/2;
 	  keepBits = keepBits << 2;
 	  if(level >= levelAtI){
 	    keepBits += 3;

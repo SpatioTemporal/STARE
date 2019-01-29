@@ -322,15 +322,17 @@ size_t	VarStr::insert( size_t count, size_t offset, char c )
       if ( oldVec )
 	 free( oldVec );
    }
-   else if ( count )
-      if ( offset ) {
-	// bitwise move displaced portion of occupied region
-	memmove(vector_+start+count, vector_+start, offset );
+   else if ( count ) {
+	   if ( offset ) {
+		   // bitwise move displaced portion of occupied region
+		   memmove(vector_+start+count, vector_+start, offset );
 
-	// construct vacated region with fill or default
-	for ( i = 0; i < count; ++i ) vector_[start+i] = c;
-      } else 
-	for ( i = 0; i < count; ++i ) vector_[length_+i] = c;
+		   // construct vacated region with fill or default
+		   for ( i = 0; i < count; ++i ) vector_[start+i] = c;
+	   } else {
+		   for ( i = 0; i < count; ++i ) vector_[length_+i] = c;
+	   }
+   }
 
    return length_ = newLength;
 }
