@@ -385,6 +385,7 @@ VarStrToken::VarStrToken( const StdStr & vstr ) :
   delimiters_(NULL), start_(true) {
   str_ = new char[ vstr.length() + 1];
   strcpy( str_, vstr.vector_ );
+  save_ = NULL;
 }
 
 // Construct from a standard string
@@ -393,6 +394,7 @@ VarStrToken::VarStrToken( const char *str ) :
   delimiters_(NULL), start_(true) {
   str_ = new char[ strlen(str) + 1 ];
   strcpy( str_, str );
+  save_ = NULL;
 }
 
 /** Destructor. */

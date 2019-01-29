@@ -39,13 +39,13 @@ SpatialVector::SpatialVector() :
 /////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Maybe we should create a Coordinate class to handle R3, RA-DEC, LatLon, etc.
 SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
-  x_(x), y_(y), z_(z), okRaDec_(false) {
+  x_(x), y_(y), z_(z), ra_(0), dec_(0) okRaDec_(false) {
 }
 
 /////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Strengthen the following input type.
 SpatialVector::SpatialVector(float64 *x) :
-	x_(x[0]), y_(x[1]), z_(x[2]), okRaDec_(false) {
+	x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
 }
 /////////////CONSTRUCTOR//////////////////////////////////
 //
