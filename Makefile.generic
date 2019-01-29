@@ -52,6 +52,7 @@ OBJECTS = \
    ${OBJ}/SpatialConstraint.o \
    ${OBJ}/sqlInterface.o \
    ${OBJ}/SpatialVector.o \
+   ${OBJ}/SpatialRotation.o \
    ${OBJ}/SpatialInterface.o \
    ${OBJ}/SpatialEdge.o \
    ${OBJ}/SpatialException.o \
@@ -208,6 +209,9 @@ ${OBJ}/sqlInterface.o: ${SRCS}/sqlInterface.cpp
 
 ${OBJ}/SpatialVector.o: ${SRCS}/SpatialVector.cpp
 	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialVector.cpp -o $@
+	
+${OBJ}/SpatialRotation.o: ${SRCS}/SpatialRotation.C
+	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialRotation.C -o $@
 
 ${OBJ}/SpatialInterface.o: ${SRCS}/SpatialInterface.cpp
 	$(CXX) $(CXX_FLAGS) ${SRCS}/SpatialInterface.cpp -o $@

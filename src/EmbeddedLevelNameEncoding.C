@@ -27,7 +27,7 @@ char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 		throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
 	}
 
-	int nameSize = levelById(id)+3; ///< levelById is local to the encoding
+	uint nameSize = levelById(id)+3; ///< levelById is local to the encoding
 	char *returnedName = new char[nameSize];
 	if(id & NorthSouthBit) {
 		returnedName[0] = 'N';
