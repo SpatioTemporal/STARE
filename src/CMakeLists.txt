@@ -1,7 +1,7 @@
 
 set (
-  HSTMSrcFiles
-  ${HSTMSrcFiles}
+  STARE_SrcFiles
+  ${STARE_SrcFiles}
   BitShiftNameEncoding.C
   EmbeddedLevelNameEncoding.C
   HtmRange.cpp
@@ -23,6 +23,7 @@ set (
   SpatialInterface.cpp
   SpatiallyAdaptiveDataCover.C
   SpatialVector.cpp
+  SpatialRotation.C
   TemporalIndex.cpp
   VarStr.C )
   
@@ -30,4 +31,4 @@ set (
 # Var.Str.C is a kluge because I don't know how to get CMake to handle the hpp files correctly.
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 
-add_library( hstm STATIC ${HSTMSrcFiles} )
+add_library( STARE STATIC ${STARE_SrcFiles} )
