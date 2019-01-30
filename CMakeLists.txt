@@ -41,6 +41,8 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR}/include )
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+
 #target_include_directories(hstm PUBLIC ${CUTE_INCLUDE_DIR}/cute)
 
 #file(GLOB SOURCES "/src/")
