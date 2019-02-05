@@ -7,6 +7,7 @@ set (
   SpatialIndex_test.cpp
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
+  STARE_test.cpp
   Test.h 
   )
 

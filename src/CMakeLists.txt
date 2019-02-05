@@ -24,6 +24,7 @@ set (
   SpatiallyAdaptiveDataCover.C
   SpatialVector.cpp
   SpatialRotation.C
+  STARE.C
   TemporalIndex.cpp
   VarStr.C )
   
