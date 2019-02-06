@@ -10,6 +10,8 @@
  */
 
 #include "STARE.h"
+#include "RangeConvex.h"
+#include "SpatialDomain.h"
 #include <iostream>
 
 STARE::STARE() {
@@ -56,7 +58,7 @@ uint32 STARE::ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStare
 /**
  * Extract location information from the spatial array index value.
  */
-LatLon STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
+LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
 
 /*	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
@@ -76,9 +78,11 @@ LatLon STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
 
-	LatLon latlon = {.lat = lat, .lon = lon };
+	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
+	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };
 
-	return latlon;
+	// return latlon;
+	return LatLonDegrees64(lat, lon);
 
 /*	BitShiftNameEncoding rightJustified(hid);
 	index.setMaxlevel(7); // A fairly high resolution
@@ -102,6 +106,7 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 
 	SpatialVector vc,v1,v2,v3;
 
+	/*100
 	// Supersede old default behavior.
 	// if( resolutionLevel < 0 ) {
 	//	resolutionLevel = search_level;
@@ -123,6 +128,11 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	sIndexes[resolutionLevel].pointByHtmId(vc,htmID);
 	// std::cout << 210 << std::endl;
 	sIndexes[resolutionLevel].nodeVertexByHtmId(v1, v2, v3, htmID);
+	100*/
+
+	SpatialIndex si = getIndex(resolutionLevel);
+	si.pointByHtmId(vc,htmID);
+	si.nodeVertexByHtmId(v1, v2, v3, htmID);
 	// std::cout << 220 << std::endl;
 	Vertices vertices; vertices.push_back(v1); vertices.push_back(v2); vertices.push_back(v3);
 	// std::cout << 230 << std::endl;
@@ -158,11 +168,87 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
 
+bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
+	// TODO Figure out how to avoid unneeded reformatting.
+	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+	return leftJustifiedWithResolution.terminatorp();
+}
+
+/**
+ * Return a vector of index values. Very preliminary. Needs verification.
+ */
+STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
+	LatLonDegrees64ValueVector corners, int force_resolution_level) {
+	int resolution_level; // for the match
+	STARE_Intervals intervals;
+	SpatialIndex index;
+	if( corners.size() != 4) {
+		return intervals;
+	}
+	if( force_resolution_level > -1 ) {
+		index = getIndex(force_resolution_level);
+	} else {
+		index = getIndex(8); /// TODO Hardcoded...
+	}
+	Vertices vCorners;
+	for(LatLonDegrees64ValueVector::iterator cit = corners.begin(); cit != corners.end(); ++cit) {
+		SpatialVector v; v.setLatLonDegrees(cit->lat, cit->lon); // TODO change setLLD from void to an SV ref.
+		vCorners.push_back(v);
+	};
+
+	// EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL
+	// EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL
+	// EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL EXPERIMENTAL
+
+	// RangeConvex rc = RangeConvex(&v0,&v1,&v2,&v3);
+	// std::cout << 100 << std::endl;
+	RangeConvex rc = RangeConvex(
+			&vCorners[0],
+			&vCorners[1],
+			&vCorners[2],
+			&vCorners[3]);
+	// std::cout << 200 << std::endl;
+	SpatialDomain d; d.add(rc);
+	// std::cout << 300 << std::endl;
+	HtmRange r; r.purge();
+	bool varlen_false = false;
+	bool overlap = d.intersect(&index,&r,&varlen_false);
+	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
+	r.defrag();
+	r.reset();
+
+	Key lo = -999, hi = -999;
+	uint64 id0, id1;
+	int indexp = r.getNext(lo,hi);
+	if(indexp) {
+		do {
+			id0 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(lo).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+			intervals.push_back(id0);
+			// If id0,id1 is a singlet then don't do the following.
+			if( lo != hi ) {
+				id1 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat();
+				intervals.push_back(id1);
+			}
+		} while( r.getNext(lo,hi) );
+	}
+
+	return intervals;
+
+}
+
+SpatialIndex STARE::getIndex(int resolutionLevel) {
+	if( sIndexes.find(resolutionLevel) == sIndexes.end() ) {
+		sIndexes.insert(std::make_pair(resolutionLevel,SpatialIndex(resolutionLevel, build_level, rotate_root_octahedron)));
+	}
+	return sIndexes[resolutionLevel];
+}
+
 /**
  * Return the htmID value from the spatialStareId.
  *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
- * This is important when calling into the legacy htm foundation.
+ * This is important when calling into the legacy htm foundation and why it's kept private.
  */
 uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level) {
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;

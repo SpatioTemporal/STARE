@@ -16,7 +16,8 @@ void STARE_test() {
 
 //	ASSERT_EQUAL(1,index.ValueFromLatLonDegrees(45.0, 45.0));
 
-	LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
+	LatLonDegrees64 latlon0(45.0,45.0);
+	// LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
 	// cout << "latlon0: " << latlon0.lat << " " << latlon0.lon << endl;
 
 	/// TODO Need multiple indexes to handle array index values with different resolution levels.
@@ -26,7 +27,7 @@ void STARE_test() {
 	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
 	*/
 
-	LatLon latlon1 = index.LatLonDegreesFromValue(aIndex);
+	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex);
 	// cout << "latlon1: " << latlon1.lat << " " << latlon1.lon << endl;
 
 	// float64 tol = 1.0e-14; /// What's our floating point error?
@@ -66,6 +67,21 @@ void STARE_test() {
 	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05*0.25,index.AreaFromValue(aIndex,level+1),tol);
 	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05/0.25,index.AreaFromValue(aIndex,level-1),tol);
 
+	LatLonDegrees64ValueVector latlonbox;
+
+	latlonbox.push_back(LatLonDegrees64(0,0));
+	latlonbox.push_back(LatLonDegrees64(2,0));
+	latlonbox.push_back(LatLonDegrees64(2,2));
+	latlonbox.push_back(LatLonDegrees64(0,2));
+
+	// STARE_Intervals intervals = index.BoundingBoxFromLatLonDegrees(latlonbox,6);
+	STARE_Intervals intervals = index.BoundingBoxFromLatLonDegrees(latlonbox);
+
+	// TODO Why are the first few triangles at level 7 and not 8 for the default level = 8?
+	for( STARE_Intervals::iterator it = intervals.begin(); it != intervals.end(); ++it ) {
+		cout << hex << "interval: 0x" << *it << dec << endl;
+	}
+	cout << "intervals size: " << intervals.size() << endl;
 
 	// FAIL();
 }

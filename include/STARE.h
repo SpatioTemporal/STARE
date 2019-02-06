@@ -39,14 +39,19 @@ public:
 
 	// Spatial array index functions. [Maybe change the name StareId to spatialStareId in the following...]
 	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, uint32 resolutionLevel = 27);
-	LatLon LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
+	LatLonDegrees64 LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 
 	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 
 	SpatialIndex getIndex() { return sIndex; }
+	SpatialIndex getIndex(int resolutionLevel);
 	uint64       getMaximumSearchLevel() { return 27; } // TODO Ugh. See search_level in the privates...
+
+	bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
+
+	STARE_Intervals BoundingBoxFromLatLonDegrees(LatLonDegrees64ValueVector corners, int force_resolution_level = -1);
 
 	// uint32 tResolutionLevel() const;
 
