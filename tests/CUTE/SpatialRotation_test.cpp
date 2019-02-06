@@ -58,5 +58,25 @@ void SpatialRotation_test() {
 
 	ASSERT_EQUALDM("rot xhat by pi around xhat: ",xhat,SpatialRotation(xhat,gPi).rotated_from(xhat),tol);
 
+	SpatialVector nhat = 0.5*(zhat+yhat); nhat.normalize();
+	SpatialRotation rot(nhat,xhat);
+
+	/*
+	cout << "nhat:              " << nhat << endl;
+	cout << "yhat:              " << yhat << endl;
+	cout << "rot.yhat:          " << rot.rotated_from(yhat) << endl;
+	cout << "inv_rot(rot.yhat): " << rot.inverse_rotated_from(rot.rotated_from(yhat)) << endl;
+	*/
+
+	ASSERT_EQUALDM("inverse rotation, matrix 1: ",yhat,rot.inverse_rotated_from(rot.rotated_from(yhat)),tol);
+	ASSERT_EQUALDM("inverse rotation, matrix 2: ",zhat,rot.inverse_rotated_from(rot.rotated_from(zhat)),tol);
+	ASSERT_EQUALDM("inverse rotation, matrix 3: ",xhat,rot.inverse_rotated_from(rot.rotated_from(xhat)),tol);
+
+	rot = SpatialRotation(nhat,0.25*gPi);
+	ASSERT_EQUALDM("inverse rotation, Rodrigues 1: ",yhat,rot.inverse_rotated_from(rot.rotated_from(yhat)),tol);
+	ASSERT_EQUALDM("inverse rotation, Rodrigues 2: ",zhat,rot.inverse_rotated_from(rot.rotated_from(zhat)),tol);
+	ASSERT_EQUALDM("inverse rotation, Rodrigues 3: ",xhat,rot.inverse_rotated_from(rot.rotated_from(xhat)),tol);
+
+	// TODO Test the two rotation methods against each other.
 
 }

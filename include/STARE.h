@@ -16,6 +16,8 @@
 #include "SpatialIndex.h"
 #include "SpatialRotation.h"
 #include "EmbeddedLevelNameEncoding.h"
+#include <map>
+#include <vector>
 
 // #include "TemporalIndex.h"
 
@@ -23,7 +25,10 @@
 
 /// A lightweight type for the STARE spatial index
 typedef uint64 STARE_ArrayIndexSpatialValue;
-struct LatLon {float64 lat, lon;};
+typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_Intervals;
+// struct LatLon   {float64 lat, lon;};
+// typedef std::vector<SpatialVector> Vertices;
+// struct Triangle {SpatialVector centroid;  Vertices vertices;};
 
 class STARE {
 public:
@@ -34,13 +39,21 @@ public:
 
 	// Spatial array index functions. [Maybe change the name StareId to spatialStareId in the following...]
 	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, uint32 resolutionLevel = 27);
-	LatLon LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue StareId);
-	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue StareId);
+	LatLon LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
+	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
+
+	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
+	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
+
+	SpatialIndex getIndex() { return sIndex; }
 
 	// uint32 tResolutionLevel() const;
 
 private:
-	SpatialIndex    sIndex;
+	/// TODO memoize sIndex in case we need to cache multiple resolutions.
+	SpatialIndex    sIndex; // The current (default) index
+	std::map<int,SpatialIndex> sIndexes;
+
 	SpatialRotation rotate_root_octahedron;
 	/**
 	 * Set the underlying htm index to the maximum level to keep the
@@ -48,8 +61,13 @@ private:
 	 * STARE and htm is that the level corresponds to a resolution,
 	 * not the level of location precision.
 	 */
+
+	/// Set the search level of the default index. Note: roundoff error corrupts calculations at level 27, e.g. area(...).
 	uint64          search_level = 27; /// Also known as max_level.
+	// uint64          search_level = 26; /// Also known as max_level.
 	uint64          build_level  = 5;  /// How deep to build the lookup table. Memory hog. Space vs. time...
+
+	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 
 	// TemporalIndex tIndex;
 };
