@@ -89,11 +89,24 @@ LatLon STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId
 }
 
 Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel) {
-	uint64 htmID = htmIDFromValue(spatialStareId,resolutionLevel);
-	SpatialVector vc,v1,v2,v3;
+	// Users are going to expect the default resolution level to be that embedded in the sStareId.
+	uint64 htmID = -1;
 	if( resolutionLevel < 0 ) {
-		resolutionLevel = search_level;
+		// Use the level embedded in the index value.
+		resolutionLevel = ResolutionLevelFromValue(spatialStareId);
+		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
+	} else {
+		// Use the coerced level, which may be set to the search_level.
+		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
 	}
+
+	SpatialVector vc,v1,v2,v3;
+
+	// Supersede old default behavior.
+	// if( resolutionLevel < 0 ) {
+	//	resolutionLevel = search_level;
+	//}
+
 	/// TODO Fix redundant operations in the following two calls.
 	// std::cout << 200 << std::endl;
 	SpatialIndex *si;
@@ -116,11 +129,28 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	return {.centroid=vc, .vertices=vertices};
 }
 
+/**
+ * Return the area associated with the index value based on the embedded resolution level, by default.
+ * The calculation may be coerced to another resolution level, e.g. search_level.
+ *
+ * NOTE: The calculation suffers from floating point error at a resolution level of 27. 2019-0206 MLR
+ */
 float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel) {
-	uint64 htmID = htmIDFromValue(spatialStareId,resolutionLevel); /// Coerce to resolutionLevel
-	if( resolutionLevel <= 0 ) {
-		resolutionLevel = search_level;
+
+	uint64 htmID = -1;
+	if( resolutionLevel < 0 ) {
+		// Use the level embedded in the index value.
+		resolutionLevel = ResolutionLevelFromValue(spatialStareId);
+		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
+	} else {
+		// Use the coerced level, which may be set to the search_level.
+		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
 	}
+
+	// Supersede old default behavior
+	// if( resolutionLevel <= 0 ) {
+	// 	resolutionLevel = search_level;
+	// }
 	/// TODO Fix redundant operations in the following two calls.
 	if( sIndexes.find(resolutionLevel) == sIndexes.end() ) {
 		sIndexes.insert(std::make_pair(resolutionLevel,SpatialIndex(resolutionLevel, build_level, rotate_root_octahedron)));
@@ -128,6 +158,12 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
 
+/**
+ * Return the htmID value from the spatialStareId.
+ *
+ * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
+ * This is important when calling into the legacy htm foundation.
+ */
 uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level) {
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);

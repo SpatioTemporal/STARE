@@ -46,6 +46,7 @@ public:
 	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 
 	SpatialIndex getIndex() { return sIndex; }
+	uint64       getMaximumSearchLevel() { return 27; } // TODO Ugh. See search_level in the privates...
 
 	// uint32 tResolutionLevel() const;
 
@@ -63,7 +64,7 @@ private:
 	 */
 
 	/// Set the search level of the default index. Note: roundoff error corrupts calculations at level 27, e.g. area(...).
-	uint64          search_level = 27; /// Also known as max_level.
+	uint64          search_level = 27; /// Also known as max_level. // TODO How to make const?
 	// uint64          search_level = 26; /// Also known as max_level.
 	uint64          build_level  = 5;  /// How deep to build the lookup table. Memory hog. Space vs. time...
 

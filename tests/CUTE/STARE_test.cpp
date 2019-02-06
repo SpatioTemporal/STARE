@@ -21,7 +21,10 @@ void STARE_test() {
 
 	/// TODO Need multiple indexes to handle array index values with different resolution levels.
 	STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
-	// cout << "aIndex: " << aIndex << endl;
+	/*
+	cout << "aIndex: " << hex << aIndex << dec << endl;
+	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
+	*/
 
 	LatLon latlon1 = index.LatLonDegreesFromValue(aIndex);
 	// cout << "latlon1: " << latlon1.lat << " " << latlon1.lon << endl;
@@ -39,22 +42,30 @@ void STARE_test() {
 	// int level = 26; // works-ish...
 	int level = 8; // Doesn't work
 	// cout << 100 << endl;
-	Triangle tr0 = index.TriangleFromValue(aIndex,level);
+	//Triangle tr0 = index.TriangleFromValue(aIndex,level);
+	// Test default
+
 	/*
+	Triangle tr0 = index.TriangleFromValue(aIndex);
 	cout << "centroid: " << tr0.centroid    << endl;
 	cout << "tr0.0:    " << tr0.vertices[0] << endl;
 	cout << "tr0.1:    " << tr0.vertices[1] << endl;
 	cout << "tr0.2:    " << tr0.vertices[2] << endl;
-	*/
 
-	float64 area = index.AreaFromValue(aIndex,level);
-	/*
+	// float64 area = index.AreaFromValue(aIndex,level);
+	// Test default
+	float64 area = index.AreaFromValue(aIndex);
+
 	cout << "area:      " << area            << endl;
 	cout << "area(tr0): " << index.getIndex().area(tr0.vertices[0],tr0.vertices[1],tr0.vertices[2]) << endl;
 	*/
 
 	// Regression tests.
+	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05,index.AreaFromValue(aIndex),tol);
 	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05,index.AreaFromValue(aIndex,level),tol);
+	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05*0.25,index.AreaFromValue(aIndex,level+1),tol);
+	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05/0.25,index.AreaFromValue(aIndex,level-1),tol);
+
 
 	// FAIL();
 }
