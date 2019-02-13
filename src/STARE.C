@@ -176,7 +176,12 @@ bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 }
 
 /**
- * Return a vector of index values. Very preliminary. Needs verification.
+ * Return a vector of index values of potentially varying sizes (resolution levels) covering the bounding box.
+ *
+ * Very preliminary. Needs verification.
+ *
+ * @param force_resolution_level - the smallest triangles to use in the covering
+ *
  */
 STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
@@ -216,7 +221,7 @@ STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
 	bool overlap = d.intersect(&index,&r,&varlen_false);
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
-	r.reset();
+	r.reset(); // Move the skip-list iterator back to the beginning.
 
 	Key lo = -999, hi = -999;
 	uint64 id0, id1;

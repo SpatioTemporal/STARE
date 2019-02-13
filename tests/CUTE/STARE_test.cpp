@@ -83,6 +83,13 @@ void STARE_test() {
 	}
 	cout << "intervals size: " << intervals.size() << endl;
 
+	cout << "0x" << hex << intervals[0] << dec << endl;
+	Triangle tr0 = index.TriangleFromValue(intervals[0]);
+	cout << "centroid: " << tr0.centroid    << endl;
+	cout << "tr0.0:    " << tr0.vertices[0] << endl;
+	cout << "tr0.1:    " << tr0.vertices[1] << endl;
+	cout << "tr0.2:    " << tr0.vertices[2] << endl;
+
 	// FAIL();
 }
 

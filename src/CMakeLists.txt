@@ -33,3 +33,23 @@ set (
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
+
+find_package(Boost)
+if(Boost_FOUND)
+  include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python2.7"  )
+  set(Boost_USE_STATIC_LIBS OFF)
+  set(Boost_USE_MULTITHREADED ON)
+  set(Boost_USE_STATIC_RUNTIME OFF)
+  find_package(Boost COMPONENTS python)
+
+  set( STARE_PYTHON_SrcFiles
+	SSTARE.cpp
+  )
+  # add_library( SSTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
+  add_library( SSTARE SHARED ${STARE_PYTHON_SrcFiles} )
+  target_link_libraries( SSTARE ${Boost_LIBRARIES} )  
+else()
+  message("Boost not found, not creating shared object SSTARE, including python API. Was BOOST_ROOT set?")  
+endif()
+
+

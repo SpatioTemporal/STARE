@@ -15,6 +15,14 @@
 
 namespace std {
 
+/**
+ * for keeping a skip-list of left-justified intervals.
+ *
+ * Special treatment is necessary, because embedding the level complicates the comparison of index values.
+ *
+ * HstmRange strips the level off a index values (aka KeyPairs) before adding them to this->range.
+ *
+ */
 class HstmRange {
 public:
 	HstmRange();
