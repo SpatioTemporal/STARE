@@ -208,6 +208,8 @@ float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
 struct LatLonDegrees64 {
 	float64 lat, lon;
 	LatLonDegrees64(float64 lat, float64 lon) : lat(lat), lon(lon) {}
+	// float64 getLat() { return lat; }
+	// float64 getLon() { return lon; }
 };
 typedef std::vector<LatLonDegrees64> LatLonDegrees64ValueVector ;
 

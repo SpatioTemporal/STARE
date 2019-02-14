@@ -46,7 +46,7 @@ if(Boost_FOUND)
 	SSTARE.cpp
   )
   # add_library( SSTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
-  add_library( SSTARE SHARED ${STARE_PYTHON_SrcFiles} )
+  add_library( SSTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
   target_link_libraries( SSTARE ${Boost_LIBRARIES} )  
 else()
   message("Boost not found, not creating shared object SSTARE, including python API. Was BOOST_ROOT set?")  
