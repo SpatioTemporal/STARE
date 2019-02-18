@@ -47,6 +47,16 @@ public:
 		return result;
 	}
 
+	bn::ndarray testUI64_1(bn::ndarray v, uint64 delta) {
+		bn::dtype dtype =  v.get_dtype();
+		const Py_intptr_t *shape = {v.get_shape()};
+		bn::ndarray result = bn::zeros(1,shape,dtype);
+		for(int i=0; i<shape[0]; ++i) {
+			result[i] = v[i] + delta;
+		}
+		return result;
+	}
+
 };
 
 BOOST_PYTHON_MODULE(libSSTARE)
@@ -73,6 +83,7 @@ BOOST_PYTHON_MODULE(libSSTARE)
 		.def("testD", &SSTARE::testD)
 		.def("testF64", &SSTARE::testF64)
 		.def("testUI64", &SSTARE::testUI64)
+		.def("testUI64_1", &SSTARE::testUI64_1)
 			;
 
 
