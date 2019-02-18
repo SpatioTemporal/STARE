@@ -36,11 +36,12 @@ add_library( STARE STATIC ${STARE_SrcFiles} )
 
 find_package(Boost)
 if(Boost_FOUND)
-  include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python2.7"  )
+  # include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python2.7"  )
+  include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.7m"  )
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_USE_STATIC_RUNTIME OFF)
-  find_package(Boost COMPONENTS python)
+  find_package(Boost COMPONENTS python3 COMPONENTS numpy3 REQUIRED)
 
   set( STARE_PYTHON_SrcFiles
 	SSTARE.cpp

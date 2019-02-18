@@ -8,22 +8,60 @@
  */
 
 #include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
 #include "STARE.h"
 
-char const* SSTARE() {
-	return "SSTARE";
-}
+namespace bp = boost::python;
+namespace bn = boost::python::numpy;
+
+class SSTARE {
+public:
+
+	SSTARE() {};
+	~SSTARE() {};
+
+	bn::ndarray testD() {
+		std::vector<double> v;
+		v.push_back(1); v.push_back(2); v.push_back(3);
+		Py_intptr_t shape[1] = { v.size() };
+		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<double>());
+		std::copy(v.begin(), v.end(), reinterpret_cast<double*>(result.get_data()));
+		return result;
+	}
+
+	bn::ndarray testF64() {
+		std::vector<float64> v;
+		v.push_back(1); v.push_back(2); v.push_back(3);
+		Py_intptr_t shape[1] = { v.size() };
+		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
+		std::copy(v.begin(), v.end(), reinterpret_cast<float64*>(result.get_data()));
+		return result;
+	}
+
+	bn::ndarray testUI64() {
+		std::vector<STARE_ArrayIndexSpatialValue> v;
+		v.push_back(1); v.push_back(2); v.push_back(3);
+		Py_intptr_t shape[1] = { v.size() };
+		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
+		std::copy(v.begin(), v.end(), reinterpret_cast<STARE_ArrayIndexSpatialValue*>(result.get_data()));
+		return result;
+	}
+
+};
 
 BOOST_PYTHON_MODULE(libSSTARE)
 {
-	using namespace boost::python;
 
-	class_<LatLonDegrees64>("LatLonDegrees64",init<float64,float64>() )
+	bn::initialize();
+
+	// using namespace boost::python;
+
+	bp::class_<LatLonDegrees64>("LatLonDegrees64",bp::init<float64,float64>() )
 			;
 	 // class_<LatLonDegrees64ValueVector>( "", init<>() )
 			// ;
 
-	class_<STARE>( "STARE", init<>() )
+	bp::class_<STARE>( "STARE", bp::init<>() )
 		.def("ValueFromLatLonDegrees", &STARE::ValueFromLatLonDegrees)
 		.def("LatLonDegreesFromValue", &STARE::LatLonDegreesFromValue)
 		.def("TriangleFromValue",      &STARE::TriangleFromValue)
@@ -31,7 +69,12 @@ BOOST_PYTHON_MODULE(libSSTARE)
 		.def("BoundingBoxFromLatLonDegrees", &STARE::BoundingBoxFromLatLonDegrees)
 			;
 
-	def("SSTARE",SSTARE);
+	bp::class_<SSTARE>( "SSTARE", bp::init<>() )
+		.def("testD", &SSTARE::testD)
+		.def("testF64", &SSTARE::testF64)
+		.def("testUI64", &SSTARE::testUI64)
+			;
+
 
 }
 /*
