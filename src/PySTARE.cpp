@@ -14,11 +14,11 @@
 namespace bp = boost::python;
 namespace bn = boost::python::numpy;
 
-class SSTARE {
+class PySTARE {
 public:
 
-	SSTARE() {};
-	~SSTARE() {};
+	PySTARE() {};
+	~PySTARE() {};
 
 	bn::ndarray testD() {
 		std::vector<double> v;
@@ -57,9 +57,19 @@ public:
 		return result;
 	}
 
+	bn::ndarray testUI64_2(bn::ndarray v, int64 delta) {
+		bn::dtype dtype =  v.get_dtype();
+		const Py_intptr_t *shape = {v.get_shape()};
+		bn::ndarray result = bn::zeros(1,shape,dtype);
+		for(int i=0; i<shape[0]; ++i) {
+			result[i] = v[i] + delta;
+		}
+		return result;
+	}
+
 };
 
-BOOST_PYTHON_MODULE(libSSTARE)
+BOOST_PYTHON_MODULE(PySTARE)
 {
 
 	bn::initialize();
@@ -79,13 +89,13 @@ BOOST_PYTHON_MODULE(libSSTARE)
 		.def("BoundingBoxFromLatLonDegrees", &STARE::BoundingBoxFromLatLonDegrees)
 			;
 
-	bp::class_<SSTARE>( "SSTARE", bp::init<>() )
-		.def("testD", &SSTARE::testD)
-		.def("testF64", &SSTARE::testF64)
-		.def("testUI64", &SSTARE::testUI64)
-		.def("testUI64_1", &SSTARE::testUI64_1)
+	bp::class_<PySTARE>( "SSTARE", bp::init<>() )
+		.def("testD", &PySTARE::testD)
+		.def("testF64", &PySTARE::testF64)
+		.def("testUI64", &PySTARE::testUI64)
+		.def("testUI64_1", &PySTARE::testUI64_1)
+		.def("testUI64_2", &PySTARE::testUI64_2)
 			;
-
 
 }
 /*

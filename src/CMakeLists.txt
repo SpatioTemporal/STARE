@@ -36,7 +36,6 @@ add_library( STARE STATIC ${STARE_SrcFiles} )
 
 find_package(Boost)
 if(Boost_FOUND)
-  # include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python2.7"  )
   include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.7m"  )
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
@@ -44,13 +43,13 @@ if(Boost_FOUND)
   find_package(Boost COMPONENTS python3 COMPONENTS numpy3 REQUIRED)
 
   set( STARE_PYTHON_SrcFiles
-	SSTARE.cpp
+	PySTARE.cpp
   )
-  # add_library( SSTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
-  add_library( SSTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
-  target_link_libraries( SSTARE ${Boost_LIBRARIES} )  
+  add_library( PySTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
+  set_target_properties( PySTARE PROPERTIES PREFIX "" )
+  target_link_libraries( PySTARE ${Boost_LIBRARIES} )
 else()
-  message("Boost not found, not creating shared object SSTARE, including python API. Was BOOST_ROOT set?")  
+  message("Boost not found, not creating shared object PySTARE, including python API. Was BOOST_ROOT set?")  
 endif()
 
 
