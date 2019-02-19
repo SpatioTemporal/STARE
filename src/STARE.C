@@ -35,7 +35,7 @@ uint32 STARE::sSearchLevel() const {
 }
 
 STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
-		float64 latDegrees, float64 lonDegrees, uint32 resolutionLevel) {
+		float64 latDegrees, float64 lonDegrees, int resolutionLevel) {
 
 	BitShiftNameEncoding       rightJustified(sIndex.idByLatLon(latDegrees,lonDegrees)); // Dip into the legacy code
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());

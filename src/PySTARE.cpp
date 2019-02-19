@@ -17,6 +17,8 @@ namespace bn = boost::python::numpy;
 class PySTARE {
 public:
 
+	STARE index;
+
 	PySTARE() {};
 	~PySTARE() {};
 
@@ -66,8 +68,23 @@ public:
 		}
 		return result;
 	}
-
+// bp::tuple
+	bn::ndarray ValueFromLatLonDegreesNP(bn::ndarray lat, bn::ndarray lon, int level = 8) {
+		const Py_intptr_t *shape = {lat.get_shape()}; // TODO Fix assumption shape is 1d and stride is 1.
+		// TODO Check shape & type of lat & lon and throw exception if bad.
+		Py_intptr_t const * strides = lat.get_strides();
+		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
+		// STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(
+		for(int i=0; i<shape[0]; ++i) {
+			float64 lat_ = *reinterpret_cast<float64*>( lat.get_data() + i*strides[0] );
+			float64 lon_ = *reinterpret_cast<float64*>( lon.get_data() + i*strides[0] );
+			result[i]    = index.ValueFromLatLonDegrees(lat_,lon_,level);
+		}
+		return result;
+	}
 };
+
+
 
 BOOST_PYTHON_MODULE(PySTARE)
 {
@@ -90,11 +107,12 @@ BOOST_PYTHON_MODULE(PySTARE)
 			;
 
 	bp::class_<PySTARE>( "SSTARE", bp::init<>() )
-		.def("testD", &PySTARE::testD)
-		.def("testF64", &PySTARE::testF64)
-		.def("testUI64", &PySTARE::testUI64)
+		.def("testD",      &PySTARE::testD)
+		.def("testF64",    &PySTARE::testF64)
+		.def("testUI64",   &PySTARE::testUI64)
 		.def("testUI64_1", &PySTARE::testUI64_1)
 		.def("testUI64_2", &PySTARE::testUI64_2)
+		.def("ValueFromLatLonDegreesNP", &PySTARE::ValueFromLatLonDegreesNP)
 			;
 
 }

@@ -38,7 +38,7 @@ public:
 	uint32 sSearchLevel() const; /// Location precision level in the sIndex.
 
 	// Spatial array index functions. [Maybe change the name StareId to spatialStareId in the following...]
-	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, uint32 resolutionLevel = 27);
+	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, int resolutionLevel = 27);
 	LatLonDegrees64 LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 
