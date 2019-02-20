@@ -15,7 +15,7 @@
 #include <iostream>
 
 STARE::STARE() {
-	// TODO Auto-generated constructor stub
+	// TODO Fix the hardwired rotation -- want to bump it over a 26-level triangle.
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
 	float64       theta    = 0.25*gPi;
 	rotate_root_octahedron = SpatialRotation(axis,theta);
@@ -37,13 +37,13 @@ uint32 STARE::sSearchLevel() const {
 STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 		float64 latDegrees, float64 lonDegrees, int resolutionLevel) {
 
-	cout << "svflld: lat,lon,rL: " << latDegrees << " " << lonDegrees << " " << resolutionLevel << endl << flush;
+	// cout << "svflld: lat,lon,rL: " << latDegrees << " " << lonDegrees << " " << resolutionLevel << endl << flush;
 
 	BitShiftNameEncoding       rightJustified(sIndex.idByLatLon(latDegrees,lonDegrees)); // Dip into the legacy code
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
 	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolutionLevel, true);
 
-	cout << "svflld: result: " << leftJustifiedWithResolution.getSciDBLeftJustifiedFormat() << endl << flush;
+	// cout << "svflld: result: " << leftJustifiedWithResolution.getSciDBLeftJustifiedFormat() << endl << flush;
 
 	// NOTE: This is returning a SciDB-formatted index.
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
@@ -73,7 +73,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	BitShiftNameEncoding rightJustified(leftJustifiedPositionOnly.rightJustifiedId());
 	uint64 htmID = rightJustified.getId();*/
 
-	cout << "sid: " << spatialStareId << endl << flush;
+	// cout << "sid: " << spatialStareId << endl << flush;
 
 	uint64 htmID = htmIDFromValue(spatialStareId);
 
@@ -84,7 +84,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
 
-	cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
+	// cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
 
 	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
 	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };
@@ -186,12 +186,14 @@ bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 /**
  * Return a vector of index values of potentially varying sizes (resolution levels) covering the bounding box.
  *
+ * NOTE The calls to the underlying legacy HTM calls automatically convey resolution information in the triangles they find.
+ *
  * Very preliminary. Needs verification.
  *
  * @param force_resolution_level - the smallest triangles to use in the covering
  *
  */
-STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
+STARE_Intervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
 	int resolution_level; // for the match
 	STARE_Intervals intervals;
@@ -202,7 +204,7 @@ STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
 	if( force_resolution_level > -1 ) {
 		index = getIndex(force_resolution_level);
 	} else {
-		index = getIndex(8); /// TODO Hardcoded...
+		index = getIndex(8); /// TODO Hardcoded search level for the cover...
 	}
 	Vertices vCorners;
 	for(LatLonDegrees64ValueVector::iterator cit = corners.begin(); cit != corners.end(); ++cit) {
@@ -245,11 +247,59 @@ STARE_Intervals STARE::BoundingBoxFromLatLonDegrees(
 			}
 		} while( r.getNext(lo,hi) );
 	}
-
 	return intervals;
-
 }
 
+/**
+ * Returns a cover for a spherical circle centered at lat, lon with an angular radius in degrees.
+ *
+ * Uses triangles down to resolution level 8, unless forced to a different resolution.
+ *
+ * TODO Requires testing & presentation
+ */
+STARE_Intervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level) {
+
+	SpatialIndex index;
+	if( force_resolution_level > -1 ) {
+		index = getIndex(force_resolution_level);
+	} else {
+		index = getIndex(8); /// TODO Hardcoded search level for the cover...
+	}
+
+	SpatialVector v; v.setLatLonDegrees(latDegrees,lonDegrees);
+
+	SpatialConstraint c(v,cos(radius_degrees*piDiv180));
+
+	RangeConvex rc; rc.add(c);
+	SpatialDomain d; d.add(rc);
+	HtmRange r;	r.purge(); // TODO Review this use of legacy code
+
+	// TODO The following pattern repeats...
+	bool varlen_false = false;
+	bool overlap = d.intersect(&index,&r,&varlen_false);
+	r.reset();
+
+	STARE_Intervals intervals;
+	Key lo=-999, hi=-999;
+	uint64 id0, id1;
+	int indexp = r.getNext(lo,hi);
+	if(indexp) {
+		do {
+			id0 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(lo).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+			intervals.push_back(id0);
+			// If id0,id1 is a singlet then don't do the following.
+			if( lo != hi ) {
+				id1 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat();
+				intervals.push_back(id1);
+			}
+		} while(r.getNext(lo,hi));
+	}
+	return intervals;
+}
+
+/*
+ * Return a spatial index object with a given search level. If one does not already exist, construct and memoize.
+ */
 SpatialIndex STARE::getIndex(int resolutionLevel) {
 	if( sIndexes.find(resolutionLevel) == sIndexes.end() ) {
 		sIndexes.insert(std::make_pair(resolutionLevel,SpatialIndex(resolutionLevel, build_level, rotate_root_octahedron)));

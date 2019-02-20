@@ -76,8 +76,8 @@ void STARE_test() {
 	latlonbox.push_back(LatLonDegrees64(2,2));
 	latlonbox.push_back(LatLonDegrees64(0,2));
 
-	// STARE_Intervals intervals = index.BoundingBoxFromLatLonDegrees(latlonbox,6);
-	STARE_Intervals intervals = index.BoundingBoxFromLatLonDegrees(latlonbox);
+	// STARE_Intervals intervals = index.CoverBoundingBoxFromLatLonDegrees(latlonbox,6);
+	STARE_Intervals intervals = index.CoverBoundingBoxFromLatLonDegrees(latlonbox);
 
 	// TODO Why are the first few triangles at level 7 and not 8 for the default level = 8?
 	for( STARE_Intervals::iterator it = intervals.begin(); it != intervals.end(); ++it ) {
@@ -95,8 +95,19 @@ void STARE_test() {
 	*/
 
 	/*
-	 * Python integration bug
-	 */
+	 * Cover circle test
+	 *
+
+	// STARE_Intervals intervals = index.CoverCircleFromLatLonRadiusDegrees(30.0, 45.0, 1.0, 6);
+	STARE_Intervals intervals = index.CoverCircleFromLatLonRadiusDegrees(30.0, 45.0, 1.0, 8);
+	for( STARE_Intervals::iterator it = intervals.begin(); it != intervals.end(); ++it ) {
+		cout << hex << "interval: 0x" << *it << dec << endl;
+	}
+	*/
+
+	/*
+	 * Python integration bug. Turned out to be a type casting problem.
+	 *
 	{
 	LatLonDegrees64 latlon0(30.0,45.0);
 	// LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
@@ -114,6 +125,7 @@ void STARE_test() {
 	FAIL();
 
 	}
+	*/
 
 	// FAIL();
 }

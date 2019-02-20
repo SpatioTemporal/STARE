@@ -114,7 +114,7 @@ public:
 				ok = false;
 			}
 			if( ok ) {
-				result[i]    = index.ValueFromLatLonDegrees(lat_,lon_,level);
+				result[i] = index.ValueFromLatLonDegrees(lat_,lon_,level);
 			}
 		}
 		return result;
@@ -157,7 +157,8 @@ BOOST_PYTHON_MODULE(PySTARE)
 		.def("LatLonDegreesFromValue", &STARE::LatLonDegreesFromValue)
 		.def("TriangleFromValue",      &STARE::TriangleFromValue)
 		.def("AreaFromValue",          &STARE::AreaFromValue)
-		.def("BoundingBoxFromLatLonDegrees", &STARE::BoundingBoxFromLatLonDegrees)
+		.def("CoverBoundingBoxFromLatLonDegrees", &STARE::CoverBoundingBoxFromLatLonDegrees)
+		.def("CoverCircleFromLatLonDegrees", &STARE::CoverCircleFromLatLonRadiusDegrees)
 			;
 
 	bp::class_<PySTARE>( "SSTARE", bp::init<>() )
