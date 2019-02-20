@@ -67,6 +67,8 @@ void STARE_test() {
 	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05*0.25,index.AreaFromValue(aIndex,level+1),tol);
 	ASSERT_EQUAL_DELTAM("Area test",2.1138539736228398e-05/0.25,index.AreaFromValue(aIndex,level-1),tol);
 
+	/* bbox test
+
 	LatLonDegrees64ValueVector latlonbox;
 
 	latlonbox.push_back(LatLonDegrees64(0,0));
@@ -89,6 +91,29 @@ void STARE_test() {
 	cout << "tr0.0:    " << tr0.vertices[0] << endl;
 	cout << "tr0.1:    " << tr0.vertices[1] << endl;
 	cout << "tr0.2:    " << tr0.vertices[2] << endl;
+
+	*/
+
+	/*
+	 * Python integration bug
+	 */
+	{
+	LatLonDegrees64 latlon0(30.0,45.0);
+	// LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
+	cout << "latlon0: " << latlon0.lat << " " << latlon0.lon << endl;
+
+	/// TODO Need multiple indexes to handle array index values with different resolution levels.
+	STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
+
+	cout << "aIndex: " << hex << aIndex << dec << aIndex << endl;
+	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
+
+	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex);
+	cout << "latlon1: " << latlon1.lat << " " << latlon1.lon << endl;
+
+	FAIL();
+
+	}
 
 	// FAIL();
 }

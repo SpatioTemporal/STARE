@@ -37,9 +37,13 @@ uint32 STARE::sSearchLevel() const {
 STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 		float64 latDegrees, float64 lonDegrees, int resolutionLevel) {
 
+	cout << "svflld: lat,lon,rL: " << latDegrees << " " << lonDegrees << " " << resolutionLevel << endl << flush;
+
 	BitShiftNameEncoding       rightJustified(sIndex.idByLatLon(latDegrees,lonDegrees)); // Dip into the legacy code
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
 	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolutionLevel, true);
+
+	cout << "svflld: result: " << leftJustifiedWithResolution.getSciDBLeftJustifiedFormat() << endl << flush;
 
 	// NOTE: This is returning a SciDB-formatted index.
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
@@ -69,6 +73,8 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	BitShiftNameEncoding rightJustified(leftJustifiedPositionOnly.rightJustifiedId());
 	uint64 htmID = rightJustified.getId();*/
 
+	cout << "sid: " << spatialStareId << endl << flush;
+
 	uint64 htmID = htmIDFromValue(spatialStareId);
 
 	SpatialVector v;
@@ -77,6 +83,8 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
+
+	cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
 
 	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
 	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };

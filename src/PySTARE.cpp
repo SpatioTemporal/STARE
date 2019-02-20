@@ -14,6 +14,13 @@
 namespace bp = boost::python;
 namespace bn = boost::python::numpy;
 
+/*
+ * https://stackoverflow.com/questions/1008343/boost-python-and-python-exceptions
+
+void my_runtime_exception_translator(bp::RuntimeException const& ex)
+{ PyErr_SetString(PyExc_RuntimeError, ex.toString().c_str()); }
+*/
+
 class PySTARE {
 public:
 
@@ -73,14 +80,61 @@ public:
 		const Py_intptr_t *shape = {lat.get_shape()}; // TODO Fix assumption shape is 1d and stride is 1.
 		// TODO Check shape & type of lat & lon and throw exception if bad.
 		Py_intptr_t const * strides = lat.get_strides();
+		std::cout << "vfldnp: strides: " << strides[0] << std::endl << std::flush;
+
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
-		// STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(
-		for(int i=0; i<shape[0]; ++i) {
-			float64 lat_ = *reinterpret_cast<float64*>( lat.get_data() + i*strides[0] );
-			float64 lon_ = *reinterpret_cast<float64*>( lon.get_data() + i*strides[0] );
-			result[i]    = index.ValueFromLatLonDegrees(lat_,lon_,level);
+		bn::dtype lat_dtype = lat.get_dtype();
+		bn::dtype lon_dtype = lon.get_dtype();
+
+//		switch (lat_dtype) {
+//		case bn::dtype::get_builtin<float64>() :
+//						break;
+//		case bn::dtype::get_builtin<int64>() :
+//						break;
+//		default:
+//			0;
+//		}
+
+		float64 lat_ = -999, lon_ = -999; bool ok = true;
+
+		// TODO Maybe cut down on the logic testing inside the loop
+		for(int i=0; ok && (i<shape[0]); ++i) {
+			if ( bn::dtype::get_builtin<float64>() == lat_dtype ) {
+				lat_ = *reinterpret_cast<float64 const *>( lat.get_data() + i*strides[0] );
+			} else if ( bn::dtype::get_builtin<int64>() == lat_dtype ) {
+				lat_ = *reinterpret_cast<int64 const *>( lat.get_data() + i*strides[0] );
+			} else {
+				ok = false;
+			}
+			if ( bn::dtype::get_builtin<float64>() == lon_dtype ) {
+				lon_ = *reinterpret_cast<float64 const *>( lon.get_data() + i*strides[0] );
+			} else if ( bn::dtype::get_builtin<int64>() == lat_dtype ) {
+				lon_ = *reinterpret_cast<int64 const *>( lon.get_data() + i*strides[0] );
+			} else {
+				ok = false;
+			}
+			if( ok ) {
+				result[i]    = index.ValueFromLatLonDegrees(lat_,lon_,level);
+			}
 		}
 		return result;
+	}
+
+	bp::tuple LatLonDegreesFromValueNP(bn::ndarray values) {
+		// TODO Add support for ndarray input that is not 1-d.
+		const Py_intptr_t *shape = {values.get_shape()};
+		Py_intptr_t const * strides = values.get_strides();
+		bn::ndarray result_lat = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
+		bn::ndarray result_lon = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
+		for(int i=0; i<shape[0]; ++i) {
+			STARE_ArrayIndexSpatialValue idx = *reinterpret_cast<STARE_ArrayIndexSpatialValue*>(values.get_data() + i*strides[0]);
+			std::cout << "idx: " << idx << std::endl << std::flush;
+			LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(idx);
+			std::cout << "ll1: " << latlon1.lat << ", " << latlon1.lon << std::endl << std::flush;
+			result_lat[i] = latlon1.lat;
+			result_lon[i] = latlon1.lon;
+		}
+		return bp::make_tuple(result_lat,result_lon);
 	}
 };
 
@@ -113,7 +167,12 @@ BOOST_PYTHON_MODULE(PySTARE)
 		.def("testUI64_1", &PySTARE::testUI64_1)
 		.def("testUI64_2", &PySTARE::testUI64_2)
 		.def("ValueFromLatLonDegreesNP", &PySTARE::ValueFromLatLonDegreesNP)
+		.def("LatLonDegreesFromValueNP", &PySTARE::LatLonDegreesFromValueNP)
 			;
+
+	/*
+	register_exception_translator<RuntimeException>(my_runtime_exception_translator);
+	 */
 
 }
 /*
