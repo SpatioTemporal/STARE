@@ -6,6 +6,9 @@ An encoding for high-performance search and subsetting of geospatial data.
 
 Development supported by NASA/ACCESS-17.
 
+*** THIS CODE IS UNDER HEAVY DEVELOPMENT.
+*** IT'S API AND NUMERICAL RESULTS ARE BOUND TO CHANGE.
+
 Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net
