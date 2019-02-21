@@ -116,7 +116,7 @@ void STARE_test() {
 	/// TODO Need multiple indexes to handle array index values with different resolution levels.
 	STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
 
-	cout << "aIndex: " << hex << aIndex << dec << aIndex << endl;
+	cout << "aIndex: " << hex << aIndex << " " << dec << aIndex << endl;
 	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
 
 	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex);

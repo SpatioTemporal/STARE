@@ -1,3 +1,13 @@
+/**
+ * HtmRangeMultiLevel.cpp
+ *
+ * A heavily modified version of HtmRange.cpp to support left-justified spatial index values, intervals, from multiple levels.
+ *
+ * 2016 June - M. Rilee
+ *
+ */
+
+
 #include <iostream> // cout
 #include <iomanip>  // setw()
 #include <Htmio.h> // various *RepresentationString elements

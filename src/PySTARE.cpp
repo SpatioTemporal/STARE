@@ -1,5 +1,28 @@
 /*
- * SSTARE.cpp
+ * PySTARE.cpp
+ *
+ * Example usage:
+ *
+ 	Python 3.7.2 (default, Jan 16 2019, 19:49:22)
+	[GCC 8.2.1 20181215 (Red Hat 8.2.1-6)] on linux
+	Type "help", "copyright", "credits" or "license" for more information.
+	>>> import numpy as np; from PySTARE import SSTARE; s = SSTARE(); idx=s.ValueFromLatLonDegreesNP(np.array([30,45]),np.array([45,60]),8); lat,lon=s.LatLonDegreesFromValueNP(idx)
+	vfldnp: strides: 8
+	idx: 4151504989081014792
+	ll1: 30, 45
+	idx: 4161865161846704136
+	ll1: 45, 60
+	>>> lat
+	array([30.00000057, 45.00000161])
+	>>> lon
+	array([44.99999922, 59.99999917])
+	>>>
+ *
+ * The round-trip errors are around 0.1 m.
+ *
+ * Note the error in this round-trip. Some of this could be due to floating point,
+ * while some is due to a mismatch between the input location and the nearest
+ * triangle center. At level 27 and float64, it's hard to tell these apart.
  *
  *  Created on: Feb 12, 2019
  *      Author: mrilee
@@ -85,15 +108,6 @@ public:
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
 		bn::dtype lat_dtype = lat.get_dtype();
 		bn::dtype lon_dtype = lon.get_dtype();
-
-//		switch (lat_dtype) {
-//		case bn::dtype::get_builtin<float64>() :
-//						break;
-//		case bn::dtype::get_builtin<int64>() :
-//						break;
-//		default:
-//			0;
-//		}
 
 		float64 lat_ = -999, lon_ = -999; bool ok = true;
 
