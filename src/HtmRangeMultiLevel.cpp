@@ -1,3 +1,13 @@
+/**
+ * HtmRangeMultiLevel.cpp
+ *
+ * A heavily modified version of HtmRange.cpp to support left-justified spatial index values, intervals, from multiple levels.
+ *
+ * 2016 June - M. Rilee
+ *
+ */
+
+
 #include <iostream> // cout
 #include <iomanip>  // setw()
 #include <Htmio.h> // various *RepresentationString elements
@@ -22,6 +32,8 @@ using namespace HtmRangeMultiLevel_NameSpace;
  * less that the level implicit in the input range (lo & hi), then just return
  * an HtmRangeMultiLevel constructed from the input range without modification.
  * Note: Currently hardcoded for bit-shifted encoding
+ * Note: One sad part is that when we're working with left-justified outside, we probably convert to right-justified and then we do this levelOfId stuff below.
+ * TODO Currently hardcoded for bit-shifted encoding, aka right-justified. Maybe extend API for left-justified? Might be more efficient.
  * @param htmIdLevel
  * @param lo the low end of the range
  * @param hi the high end of the range

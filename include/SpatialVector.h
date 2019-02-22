@@ -167,6 +167,12 @@ void SpatialVector_test();
 
 extern SpatialVector xhat, yhat, zhat;
 
+/// A collection of vertices
+typedef std::vector<SpatialVector> Vertices;
+/// A Triangle struct for convenience & typing. Note vertices must have the appropriate ordering.
+// TODO Consider a full-fledged Triangle class to refactor some geometry out of index, etc.
+struct Triangle {SpatialVector centroid;  Vertices vertices;};
+
 #include "SpatialVector.hxx"
 
 #endif

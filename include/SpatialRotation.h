@@ -14,7 +14,8 @@
 class SpatialRotation {
 public:
 
-	const float64 tol = 1.0e-14;
+	// const -- requires specialized = operator
+	float64 tol = 1.0e-14;
 
 	SpatialVector body_xhat = xhat;
 	SpatialVector body_yhat = yhat;
@@ -33,12 +34,18 @@ public:
 	SpatialVector rotation_matrix_dual_y = SpatialVector(body_xhat.y(),body_yhat.y(),body_zhat.y());
 	SpatialVector rotation_matrix_dual_z = SpatialVector(body_xhat.z(),body_yhat.z(),body_zhat.z());
 
+	SpatialVector inverse_rotation_matrix_dual_x = SpatialVector(body_xhat);
+	SpatialVector inverse_rotation_matrix_dual_y = SpatialVector(body_yhat);
+	SpatialVector inverse_rotation_matrix_dual_z = SpatialVector(body_zhat);
+
+	SpatialRotation() {};
 	SpatialRotation(const SpatialVector axis, const float64 theta);
 	SpatialRotation(const SpatialVector body_zhat, SpatialVector body_xhat);
 
 	virtual ~SpatialRotation();
 
 	SpatialVector rotated_from(const SpatialVector v);
+	SpatialVector inverse_rotated_from(const SpatialVector v);
 
 };
 

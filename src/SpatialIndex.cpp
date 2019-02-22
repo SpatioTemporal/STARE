@@ -336,6 +336,8 @@ SpatialIndex::nodeVertex(
 		//			 ,bool verbose
 ) const {
 
+	// cout << "nodeVertex-100" << endl << flush;
+
 //	cout << "buildlevel,maxlevel: " << buildlevel_ << ", " << maxlevel_ << " " << flush;
   if(buildlevel_ == maxlevel_) {
 	  // TODO Usually buildlevel_ != maxlevel_, so the following code is suspect.
@@ -358,17 +360,28 @@ SpatialIndex::nodeVertex(
 	uint64 sid = (nodeId64 - IOFFSET) >> ((maxlevel_ - buildlevel_)*2);
 	uint64 nodeId32 = (uint64)( sid );
 
-//  cout << "NOTE: building vertices..." << endl;
+  // cout << "NOTE: building vertices..." << endl;
 
   // TODO What stored leaf are we in?  We should cut the extra off of id to get idx.
+  // cout << "v0 " << flush;
+  // cout << endl << flush;
+  // cout << " buildlevel, maxlevel: " << buildlevel_ << ", " << maxlevel_ << endl << flush;
+  // cout << " nodeId32, IOFFSET " << hex << nodeId32 << dec << " " << IOFFSET << endl << flush;
+  // cout << " nodeId64, IOFFSET " << hex << nodeId64 << dec << endl << flush;
   v0 = vertices_[nodes_[nodeId32+IOFFSET].v_[0]];
+  // cout << "v1 " << flush;
   v1 = vertices_[nodes_[nodeId32+IOFFSET].v_[1]];
+  // cout << "v2 " << flush;
   v2 = vertices_[nodes_[nodeId32+IOFFSET].v_[2]];
+  // cout << " done " << endl;
+
+  // cout << "nv-200" << endl;
 
   // loop through additional levels,
   // pick the correct triangle accordingly, storing the
   // vertices in v1,v2,v3
   for(uint32 i = buildlevel_ + 1; i <= maxlevel_; i++) {
+	  // cout << "nv-210 " << i << endl;
     uint64 j = ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) ) & 3;
     partitionTriangle(v0,v1,v2,j);
   }
@@ -482,17 +495,26 @@ Many thanks to Eduard Masana, emasana@pchpc10.am.ub.es.
 
  * @param[in] v0, v1, v2  vertices of the spherical triangular area.
  * @return The area of the spherical triangle in steradians.
+ *
+ * TODO Need to validate vectors and throw if wrong.
+ * TODO Consider a SpatialUnitVector class. Also, has someone done this already?
  */
 float64
 SpatialIndex::area(const SpatialVector & v0, 
 		   const SpatialVector & v1,
 		   const SpatialVector & v2) const {
 
-  float64 a = acos( v0 * v1);
-  float64 b = acos( v1 * v2);
-  float64 c = acos( v2 * v0);
+	// SpatialVector u0 = v0; u0.normalize();
+	// SpatialVector u1 = v1; u1.normalize();
+
+  float64 a = acos( v0 * v1 );
+  float64 b = acos( v1 * v2 );
+  float64 c = acos( v2 * v0 );
 
   float64 s = (a + b + c)/2.0;
+
+  // std::cout << "0*1, 1*2, 2*0: " << v0*v1 << " " << v1*v2 << " " << v2*v0 << std::endl;
+  // std::cout << "a,b,c,s: " << " " << a << " " << b << " " << c << " " << s << std::endl;
 
   float64 area = 4.0*atan(sqrt(tan(s/2.0)*
 			       tan((s-a)/2.0)*
@@ -758,8 +780,28 @@ void
 SpatialIndex::pointByHtmId(SpatialVector &vec, uint64 htmId) const {
 // TODO Check out index->nodeVertex for a possibly correct way to get the right point.
 // TODO The way done below may depend on the bitlist and not correctly handle the dynamically created "leaf" index.
-	uint64 leafID = this->leafNumberById(htmId)+IOFFSET;
-	this->pointById(vec,leafID);
+	// uint64 leafID = this->leafNumberById(htmId)+IOFFSET;
+	// this->pointById(vec,leafID);
+	this->pointById(vec,NodeID64FromHtmId(htmId));
+}
+
+void
+SpatialIndex::nodeVertexByHtmId(SpatialVector &v1, SpatialVector &v2, SpatialVector &v3, uint64 htmId) const {
+	// uint64 leafID = this->leafNumberById(htmId)+IOFFSET;
+	// this->nodeVertex(leafID,v1,v2,v3); // leafID is a nodeID64
+	this->nodeVertex(NodeID64FromHtmId(htmId),v1,v2,v3);
+}
+
+float64 SpatialIndex::areaByHtmId(uint64 htmId) const {
+	// uint64 leafID = this->leafNumberById(htmId)+IOFFSET;
+	// return this->area(leafID);
+	return this->area(NodeID64FromHtmId(htmId));
+}
+/**
+ * Return a leafID, i.e. a NodeID64 from an HtmId.
+ */
+uint64 SpatialIndex::NodeID64FromHtmId(uint64 htmId) const {
+	return this->leafNumberById(htmId)+IOFFSET;
 }
 
 /**

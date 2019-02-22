@@ -20,6 +20,12 @@ namespace std {
  *
  * HstmRange is used when you can handle everything in spatial STARE index space. Translations to lat-lon or SpatialVector are handled elsewhere.
  *
+ * For keeping a skip-list of left-justified intervals.
+ *
+ * Special treatment is necessary, because embedding the level complicates the comparison of index values.
+ *
+ * HstmRange strips the level off a index values (aka KeyPairs) before adding them to this->range.
+ *
  */
 class HstmRange {
 public:

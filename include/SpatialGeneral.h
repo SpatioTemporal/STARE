@@ -198,6 +198,9 @@ LINKAGE ostream& operator<<(ostream& os, const int64 &i64);
 LINKAGE ostream& operator<<(ostream& os, const uint64 &ui64);
 #endif
 
+// TODO The future. Maybe.
+// struct LatLon   {float64 lat, lon;};
+
 unsigned long lg2(unsigned long v);
 float64* xyzFromLatLonRadians(float64 lat,float64 lon);
 float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
@@ -205,6 +208,8 @@ float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
 struct LatLonDegrees64 {
 	float64 lat, lon;
 	LatLonDegrees64(float64 lat, float64 lon) : lat(lat), lon(lon) {}
+	// float64 getLat() { return lat; }
+	// float64 getLon() { return lon; }
 };
 typedef std::vector<LatLonDegrees64> LatLonDegrees64ValueVector ;
 

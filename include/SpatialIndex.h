@@ -140,6 +140,21 @@ void printNode(int nodeIndex) const;
    * */
   void pointByHtmId(SpatialVector & vector, uint64 htmID) const;
 
+  /** Return the vertices associated with the triangle of htmID
+   *
+   */
+  void nodeVertexByHtmId(SpatialVector &v1, SpatialVector &v2, SpatialVector &v3, uint64 htmId) const;
+
+  /** Return the area associated with an htmId.
+   *
+   */
+  float64 areaByHtmId(uint64 htmId) const;
+
+  /**
+   * Return a leafID, i.e. a NodeID64 from an HtmId.
+   */
+  uint64 NodeID64FromHtmId(uint64 htmId) const;
+
 
   /** Find the vector to the centroid of a triangle represented by the nodeID64.
    *

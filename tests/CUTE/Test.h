@@ -38,6 +38,8 @@
 
 #include "HstmRange.h"
 
+#include "STARE.h"
+
 
 #ifndef TESTS_CUTE_TEST_H_
 #define TESTS_CUTE_TEST_H_
@@ -48,5 +50,8 @@ double norm(SpatialVector x);
 #define ASSERT_EQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,norm(a-b),tol);
 #define ASSERT_NOTEQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,tol,norm(a-b));
 #define componentCheck(xxx) 	{cout << setprecision(17); cout << "  xxx: " << xxx << endl << flush; cout << "v.xxx: " << v_.xxx() << endl << flush; cout << "delta: " << xxx - v_.xxx() << endl << flush;}
+
+// #define hexOut1(a,b) cout << (a) << " 0x" << hex << setfill('0') << setw(16) << (b) << dec << endl << flush;
+// #define decOut1(a,b) cout << (a) << " " << dec << setfill('0') << setw(16) << (b) << dec << endl << flush;
 
 #endif /* TESTS_CUTE_TEST_H_ */
