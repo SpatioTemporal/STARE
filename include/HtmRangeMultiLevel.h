@@ -1,3 +1,13 @@
+/**
+ * HtmRangeMultiLevel.h
+ *
+ * A heavily modified version of HtmRange.cpp to support left-justified spatial index values, intervals, from multiple levels.
+ *
+ * 2016 June - M. Rilee
+ *
+ */
+
+
 #ifndef _HtmRangeMultiLevelMULTILEVEL_H_
 #define _HtmRangeMultiLevelMULTILEVEL_H_
 
@@ -31,6 +41,9 @@ struct TInsideResult {
 
 /**
  * Maintain a set of htm intervals.
+ *
+ * The legacy HtmRange was fixed to a specific search level, because its leaf-IDs are right-justified.
+ *
  */
 class LINKAGE HtmRangeMultiLevel {
 

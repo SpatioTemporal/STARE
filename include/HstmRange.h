@@ -15,6 +15,12 @@
 
 namespace std {
 
+/**
+ * A range class, i.e. skip list of spatial STARE intervals. Essentially a container for sSTARE index values. The HtmRangeMultiLevel handles the extensions to the legacy code needed to handle the logic for left-justified indexes.
+ *
+ * HstmRange is used when you can handle everything in spatial STARE index space. Translations to lat-lon or SpatialVector are handled elsewhere.
+ *
+ */
 class HstmRange {
 public:
 	HstmRange();
