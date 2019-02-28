@@ -308,7 +308,7 @@ SpatialIndex STARE::getIndex(int resolutionLevel) {
 }
 
 /**
- * Return the htmID value from the spatialStareId.
+ * Return the legacy htmID value from the spatialStareId.
  *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
  * This is important when calling into the legacy htm foundation and why it's kept private.
@@ -327,3 +327,33 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	uint64 htmID = rightJustified.getId();
 	return htmID;
 }
+/**
+ * Return the spatialStareId from the legacy htmID.
+ *
+ * This is the inverse of htmIDFromValue and should not be so useful.
+ */
+STARE_ArrayIndexSpatialValue STARE::ValueFromHtmID(uint64 htmID) {
+	return EmbeddedLevelNameEncoding(BitShiftNameEncoding(htmID).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+}
+
+/**
+ * Return a vector of spatial STARE index values containing all 12 neighboring triangles.
+ *
+ * Uses htmID legacy encoding under the hood.
+ */
+STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
+	STARE_ArrayIndexSpatialValue spatialStareId) {
+	// TODO make htmID it's own type so we can lean a bit on the compiler.
+	int level = ResolutionLevelFromValue(spatialStareId);
+	uint64 htmID = htmIDFromValue          (spatialStareId,level); // TODO verify this line is correct. We've got to watch out for the extra precision bits during the conversion.
+	SpatialIndex index = getIndex(ResolutionLevelFromValue(spatialStareId));
+	uint64 neighbors[9+3];
+	index.NeighborsAcrossVerticesFromHtmId(neighbors, htmID);
+	index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID);
+	for(int i=0; i < 9+3; ++i ) {
+		neighbors[i] = ValueFromHtmID(neighbors[i]);
+	}
+	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
+}
+
+

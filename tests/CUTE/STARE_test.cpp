@@ -127,6 +127,77 @@ void STARE_test() {
 	}
 	*/
 
+	//
+	// spatialStareId = EmbeddedLevelNameEncoding(BitShiftNameEncoding(htmID).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+
+	uint64 htmId = 12683;
+	level = 5;
+
+	// std::cout << 100 << std::endl << std::flush;
+	aIndex = EmbeddedLevelNameEncoding(BitShiftNameEncoding(htmId).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+	// std::cout << 110 << std::endl << std::flush;
+	STARE_ArrayIndexSpatialValues neighbors_found = index.NeighborsOfValue(aIndex);
+	// std::cout << 120 << std::endl << std::flush;
+
+	uint64 neighbors_htmid_expected[12]	= { 12685, 12687, 12684, 12725, 12727, 12724, 13188, 13191, 13190, 12680, 12681, 12682 };
+	uint64 neighbors_expected[12];
+	// A little legacy voodoo.
+	for( int i = 0; i < 12; ++i ) {
+		// std::cout << 120+i << std::endl << std::flush;
+		uint64 htmId_i = neighbors_htmid_expected[i];
+		neighbors_expected[i] = EmbeddedLevelNameEncoding(BitShiftNameEncoding(htmId_i).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+	}
+	// std::cout << 200 << std::endl << std::flush;
+
+	string neighbor_test_messages[12] =
+	{
+			"Neighbor across vertex 1,13",
+			"Neighbor across vertex 1",
+			"Neighbor across vertex 1,12",
+			"Neighbor across vertex 2,12",
+			"Neighbor across vertex 2",
+			"Neighbor across vertex 2,23",
+			"Neighbor across vertex 3,23",
+			"Neighbor across vertex 3",
+			"Neighbor across vertex 3,13",
+			"Neighbor face 23",
+			"Neighbor face 13",
+			"Neighbor face 12"
+	};
+
+	// std::cout << 210 << std::endl << std::flush;
+
+	for( int i = 0; i < 12; ++i ) {
+		// std::cout << 220+i << std::endl << std::flush;
+		ASSERT_EQUALM(neighbor_test_messages[i],neighbors_expected[i],neighbors_found[i]);
+	}
+
+	/*
+	ASSERT_EQUALM("Neighbor face 23",12680,neighbors[0]);
+	ASSERT_EQUALM("Neighbor face 13",12681,neighbors[1]);
+	ASSERT_EQUALM("Neighbor face 12",12682,neighbors[2]);
+
+	ASSERT_EQUALM("Neighbor across vertex 1,13",12685,neighborsV[0]);
+	ASSERT_EQUALM("Neighbor across vertex 1",   12687,neighborsV[1]);
+	ASSERT_EQUALM("Neighbor across vertex 1,12",12684,neighborsV[2]);
+
+	ASSERT_EQUALM("Neighbor across vertex 2,12",12725,neighborsV[3]);
+	ASSERT_EQUALM("Neighbor across vertex 2",   12727,neighborsV[4]);
+	ASSERT_EQUALM("Neighbor across vertex 2,23",12724,neighborsV[5]);
+
+	ASSERT_EQUALM("Neighbor across vertex 3,23",13188,neighborsV[6]);
+	ASSERT_EQUALM("Neighbor across vertex 3",   13191,neighborsV[7]);
+	ASSERT_EQUALM("Neighbor across vertex 3,13",13190,neighborsV[8]);
+
+	index.getIndex(level).NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	index.
+
+	htmId = 12683;
+	uint64 neighborsV[9];
+	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
+
+	*/
+
 	// FAIL();
 }
 

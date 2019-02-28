@@ -26,6 +26,7 @@
 /// A lightweight type for the STARE spatial index
 typedef uint64 STARE_ArrayIndexSpatialValue;
 typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_Intervals;
+typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_ArrayIndexSpatialValues;
 // struct LatLon   {float64 lat, lon;};
 // typedef std::vector<SpatialVector> Vertices;
 // struct Triangle {SpatialVector centroid;  Vertices vertices;};
@@ -54,6 +55,8 @@ public:
 	STARE_Intervals CoverBoundingBoxFromLatLonDegrees(LatLonDegrees64ValueVector corners, int force_resolution_level = -1);
 	STARE_Intervals CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level = -1);
 
+	STARE_ArrayIndexSpatialValues NeighborsOfValue(STARE_ArrayIndexSpatialValue spatialStareId);
+
 	// uint32 tResolutionLevel() const;
 
 private:
@@ -75,6 +78,7 @@ private:
 	uint64          build_level  = 5;  /// How deep to build the lookup table. Memory hog. Space vs. time...
 
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
+	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
 	// TemporalIndex tIndex;
 };
