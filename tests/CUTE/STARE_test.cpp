@@ -227,13 +227,12 @@ void STARE_test() {
 
 		uint64 np_htmid = index.htmIDFromValue(north_pole_sid, level);
 
-		SpatialVector workspace_v[15];
-		uint64 neighbors_v[9];
-		sIndex.NeighborsAcrossVerticesFromHtmId(neighbors_v, np_htmid, workspace_v);
-
-		SpatialVector workspace_e[9];
+		SpatialVector workspace_ev[18];
 		uint64 neighbors_e[3];
-		sIndex.NeighborsAcrossEdgesFromHtmId(neighbors_e, np_htmid, workspace_e);
+		sIndex.NeighborsAcrossEdgesFromHtmId(neighbors_e, np_htmid, workspace_ev);
+
+		uint64 neighbors_v[9];
+		sIndex.NeighborsAcrossVerticesFromEdges(neighbors_v, neighbors_e, np_htmid, workspace_ev);
 
 		uint64 neighbors_[12];
 		for(int i=0; i<9; ++i) {
@@ -245,21 +244,13 @@ void STARE_test() {
 
 		cout << 90 << endl << flush;
 
-		for(int i=0; i<3; ++i) {
-			cout << i << " v vs. e "
-					<< setprecision(17)
-					<< setw(20)
-					<< scientific
-					<< workspace_v[i] << " -- " << workspace_e[i] << endl << flush;
-		}
-
 		cout << endl << flush;
 		for(int i=3; i<6; ++i) {
 			cout << i << " m "
 					<< setprecision(17)
 					<< setw(20)
 					<< scientific
-					<< workspace_v[i] << " -- " << workspace_e[i] << endl << flush;
+					<< workspace_ev[i] << endl << flush;
 		}
 
 		cout << endl << flush;
@@ -268,7 +259,7 @@ void STARE_test() {
 				<< setprecision(17)
 				<< setw(20)
 				<< scientific
-				<< workspace_v[9] << " -- " << workspace_e[8] << endl << flush;
+				<< workspace_ev[9+3] << " -- " << workspace_ev[8] << endl << flush;
 
 
 		cout << endl << flush;

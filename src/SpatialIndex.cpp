@@ -846,7 +846,7 @@ void
 SpatialIndex::NeighborsAcrossEdgesFromHtmId(
 		uint64 neighbors[3],
 		uint64 htmId,
-		SpatialVector workspace[9]
+		SpatialVector workspace[18]
 		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13, q1, q2, q3;
 	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
@@ -898,22 +898,33 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(
  * @param htmId
  */
 void
-SpatialIndex::NeighborsAcrossVerticesFromHtmId(
+SpatialIndex::NeighborsAcrossVerticesFromEdges(
 		uint64 neighbors[9],
+		uint64 neighbors_edge[3],
 		uint64 htmId,
-		SpatialVector workspace[15]
+		SpatialVector workspace[18]
 		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13;
 	SpatialVector q0, q1, q2, q3, q4, q5, q6, q7, q8;
-	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
-	//	SpatialVector center = pointByHtmId(htmId);
+
+	// See NeighborsAcrossEdgesFromHtmId.
+	int jw = 0;
+	v1  = workspace[jw++];
+	v2  = workspace[jw++];
+	v3  = workspace[jw++];
+	m12 = workspace[jw++];
+	m13 = workspace[jw++];
+	m23 = workspace[jw++];
+
 	SpatialVector center = v1 + v2 + v3; center.normalize();
+	/*
 	m12 = v1 + v2; m12.normalize();
 	m23 = v2 + v3; m23.normalize();
 	m13 = v1 + v3; m13.normalize();
+	 */
 
-	// float64 alpha = 1.1;
-	// float64 beta  = 0.1;
+	float64 alpha = 1.1;
+	float64 beta  = 0.1;
 
 	// float64 alpha = 1.25;
 	// float64 beta  = 0.25;
@@ -921,8 +932,8 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(
 	// float64 alpha = 1.5;
 	// float64 beta =  0.5;
 
-	float64 alpha = 1.75;
-	float64 beta =  0.75;
+	// float64 alpha = 1.001;
+	// float64 beta =  0.001;
 
 	SpatialVector centerAlpha = center * ( 1-alpha );
 
@@ -948,6 +959,38 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(
 	neighbors[7] = idByPoint(q7);
 	neighbors[8] = idByPoint(q8);
 
+	for( int iv=0; iv<9; ++iv ) {
+		for( int ie=0; ie<3; ++ ie) {
+			if( neighbors[iv] == neighbors_edge[ie] ) {
+				// Look around for the correct neighbor.
+				uint64 neighbors_[3]; SpatialVector workspace_[18];
+				NeighborsAcrossEdgesFromHtmId(neighbors_,neighbors[iv],workspace_);
+				int j=0; bool found=false;
+				while(not found && j < 3) {
+					uint64 test_id = neighbors_[j];
+					if( test_id == htmId ) {
+						++j;
+					} else {
+						int k=0; bool k_found=false;
+						while( not k_found && k < 9 ) {
+							if( test_id == neighbors[k] ) {
+								k_found = true;
+							} else {
+								++k;
+							}
+						}
+						if( not k_found ) {
+							found = true;
+							neighbors[iv] = test_id;
+						}
+					}
+				}
+				// TODO if not found, fail silently.
+			}
+		}
+	}
+
+
 //	cout << "c  " << center << endl << flush;
 //	cout << "m12 " << m12 << endl << flush;
 //	cout << "m23 " << m23 << endl << flush;
@@ -969,22 +1012,27 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(
 	cout << "q8 " << q8 << " - 0x" << hex << neighbors[8] << dec << endl << flush;
 	*/
 
-	int j = 0;
-	workspace[j++] = v1;
-	workspace[j++] = v2;
-	workspace[j++] = v3;
-	workspace[j++] = m12;
-	workspace[j++] = m13;
-	workspace[j++] = m23;
-	workspace[j++] = q0;
-	workspace[j++] = q1;
-	workspace[j++] = q2;
-	workspace[j++] = q3;
-	workspace[j++] = q4;
-	workspace[j++] = q5;
-	workspace[j++] = q6;
-	workspace[j++] = q7;
-	workspace[j++] = q8;
+//	int j = 0;
+//	workspace[j++] = v1;
+//	workspace[j++] = v2;
+//	workspace[j++] = v3;
+//	workspace[j++] = m12;
+//	workspace[j++] = m13;
+//	workspace[j++] = m23;
+//	workspace[j++] = q0;
+//	workspace[j++] = q1;
+//	workspace[j++] = q2;
+	jw+=3; // Skip past the edge neighbors
+	// Add the vertex neighbor guesses to the end of the workspace
+	workspace[jw++] = q0;
+	workspace[jw++] = q1;
+	workspace[jw++] = q2;
+	workspace[jw++] = q3;
+	workspace[jw++] = q4;
+	workspace[jw++] = q5;
+	workspace[jw++] = q6;
+	workspace[jw++] = q7;
+	workspace[jw++] = q8;
 }
 
 
