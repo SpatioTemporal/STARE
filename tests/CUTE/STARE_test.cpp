@@ -13,6 +13,7 @@
 void STARE_test() {
 
 	STARE index;
+	STARE index1(index.getSearchLevel(),index.getBuildLevel(),index.getRotation());
 
 //	ASSERT_EQUAL(1,index.ValueFromLatLonDegrees(45.0, 45.0));
 
@@ -21,11 +22,16 @@ void STARE_test() {
 	// cout << "latlon0: " << latlon0.lat << " " << latlon0.lon << endl;
 
 	/// TODO Need multiple indexes to handle array index values with different resolution levels.
-	STARE_ArrayIndexSpatialValue aIndex = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
+	STARE_ArrayIndexSpatialValue aIndex  = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
 	/*
-	cout << "aIndex: " << hex << aIndex << dec << endl;
+	cout << "aIndex:  " << hex << aIndex << dec << endl;
+	*/
+	STARE_ArrayIndexSpatialValue aIndex1 = index1.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
+	/*
+	cout << "aIndex1: " << hex << aIndex1 << dec << endl;
 	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
 	*/
+	ASSERT_EQUALM("Compare default and specified constructors",aIndex,aIndex1);
 
 	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex);
 	// cout << "latlon1: " << latlon1.lat << " " << latlon1.lon << endl;
@@ -167,36 +173,166 @@ void STARE_test() {
 
 	// std::cout << 210 << std::endl << std::flush;
 
+	/* */
 	for( int i = 0; i < 12; ++i ) {
 		// std::cout << 220+i << std::endl << std::flush;
 		ASSERT_EQUALM(neighbor_test_messages[i],neighbors_expected[i],neighbors_found[i]);
+
+		if(false) {
+			Triangle tr0 = index.TriangleFromValue(neighbors_found[i], 5);
+			cout << "--" << endl << flush;
+			for(int j = 0; j < 3; ++j ) {
+				cout << j
+						<< " tr0.v: "
+						<< setprecision(17)
+						<< setw(20)
+						<< scientific
+						<< tr0.vertices[j] << endl << flush;
+			}
+			cout << "c" << " tr0.c: " << tr0.centroid << endl << flush;
+		}
 	}
+	/* */
 
 	/*
-	ASSERT_EQUALM("Neighbor face 23",12680,neighbors[0]);
-	ASSERT_EQUALM("Neighbor face 13",12681,neighbors[1]);
-	ASSERT_EQUALM("Neighbor face 12",12682,neighbors[2]);
-
-	ASSERT_EQUALM("Neighbor across vertex 1,13",12685,neighborsV[0]);
-	ASSERT_EQUALM("Neighbor across vertex 1",   12687,neighborsV[1]);
-	ASSERT_EQUALM("Neighbor across vertex 1,12",12684,neighborsV[2]);
-
-	ASSERT_EQUALM("Neighbor across vertex 2,12",12725,neighborsV[3]);
-	ASSERT_EQUALM("Neighbor across vertex 2",   12727,neighborsV[4]);
-	ASSERT_EQUALM("Neighbor across vertex 2,23",12724,neighborsV[5]);
-
-	ASSERT_EQUALM("Neighbor across vertex 3,23",13188,neighborsV[6]);
-	ASSERT_EQUALM("Neighbor across vertex 3",   13191,neighborsV[7]);
-	ASSERT_EQUALM("Neighbor across vertex 3,13",13190,neighborsV[8]);
-
-	index.getIndex(level).NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
-	index.
-
-	htmId = 12683;
-	uint64 neighborsV[9];
-	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
-
+	for(int level=0; level<28; ++level) {
+		cout << level << " l,scale(m) "<< index.lengthMeterScaleFromEdgeFromLevel(level) << endl << flush;
+	}
 	*/
+
+	if( true ){
+		SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
+		float64       theta    = 0.25*gPi;
+		// theta = 0.0;
+		// theta    = 0.125*gPi;
+		// theta    = 0.5*gPi + 0.00001;
+		theta    = 0.5*gPi;
+		SpatialRotation rotate_root_octahedron = SpatialRotation(axis,theta);
+		int search_level = 27, build_level = 5;
+		STARE index = STARE(search_level, build_level, rotate_root_octahedron);
+
+		// STARE index;
+
+		cout << ".." << endl << flush;
+
+		int level = 6;
+
+		float64 lat0 = 90, lon0 = 0.0;
+		STARE_ArrayIndexSpatialValue north_pole_sid = index.ValueFromLatLonDegrees(lat0,lon0,level);
+
+		// STARE_ArrayIndexSpatialValues neighbors;
+		STARE_ArrayIndexSpatialValues neighbors = index.NeighborsOfValue(north_pole_sid);
+
+		SpatialIndex sIndex = index.getIndex(level);
+
+		uint64 np_htmid = index.htmIDFromValue(north_pole_sid, level);
+
+		SpatialVector workspace_v[15];
+		uint64 neighbors_v[9];
+		sIndex.NeighborsAcrossVerticesFromHtmId(neighbors_v, np_htmid, workspace_v);
+
+		SpatialVector workspace_e[9];
+		uint64 neighbors_e[3];
+		sIndex.NeighborsAcrossEdgesFromHtmId(neighbors_e, np_htmid, workspace_e);
+
+		uint64 neighbors_[12];
+		for(int i=0; i<9; ++i) {
+			neighbors_[i] = neighbors_v[i];
+		}
+		for(int i=9; i<12; ++i) {
+			neighbors_[i] = neighbors_e[i-9];
+		}
+
+		cout << 90 << endl << flush;
+
+		for(int i=0; i<3; ++i) {
+			cout << i << " v vs. e "
+					<< setprecision(17)
+					<< setw(20)
+					<< scientific
+					<< workspace_v[i] << " -- " << workspace_e[i] << endl << flush;
+		}
+
+		cout << endl << flush;
+		for(int i=3; i<6; ++i) {
+			cout << i << " m "
+					<< setprecision(17)
+					<< setw(20)
+					<< scientific
+					<< workspace_v[i] << " -- " << workspace_e[i] << endl << flush;
+		}
+
+		cout << endl << flush;
+
+		cout << 0 << " q "
+				<< setprecision(17)
+				<< setw(20)
+				<< scientific
+				<< workspace_v[9] << " -- " << workspace_e[8] << endl << flush;
+
+
+		cout << endl << flush;
+		for( int i = 0; i < 12; ++i ) {
+			cout << i << " neighbors_ 0x"<< hex << neighbors_[i] << dec << endl << flush;
+		}
+
+		cout << endl << flush;
+		for( int i = 0; i < 12; ++i ) {
+			cout << i << " neighbors 0x"<< hex << neighbors[i] << dec << endl << flush;
+		}
+
+		level = index.ResolutionLevelFromValue(north_pole_sid);
+		Triangle ta[12];
+		for(int i=0; i<12; ++i) {
+			ta[i] = index.TriangleFromValue(neighbors[i],level);
+		}
+		cout << ".." << endl << flush;
+		// for(int i = 8; i >= 0; --i ) {
+		// for(int i = 0; i < 9; ++i ) {
+		// for(int i = 4; i < 8; ++i ) {
+		for(int i = 0; i < 12; ++i ) {
+			Triangle tr0 = ta[i];
+			cout << "-- neighbor = " << i << " --" << endl << flush;
+			for(int j = 0; j < 3; ++j ) {
+				cout << j
+						<< " tr0.v: "
+						<< setprecision(17)
+						<< setw(20)
+						<< scientific
+						<< tr0.vertices[j]
+										<< " - "
+										<< hex << neighbors[i] << dec
+										<< endl << flush;
+			}
+			cout << "c" << " tr0.c: " << tr0.centroid << endl << flush;
+
+		}
+		cout << ".." << endl << flush;
+		stringstream ss;
+		for(int i=0; i<12; ++i) {
+			for(int j=0; j <= i; ++j ) {
+				cout << i << "," << j << " delta = "
+						<< (ta[i].centroid-ta[j].centroid) << ", length = "
+						<< (ta[i].centroid-ta[j].centroid).length()
+						<< endl << flush;
+				float64 delta = (ta[i].centroid-ta[j].centroid).length();
+				ss.clear();
+				ss.str(string());
+				if( i == j ) {
+					ss << "neighbor-neighbor check i == j for " << i << "," << j ;
+					ASSERT_EQUAL_DELTAM(ss.str().c_str(),0,delta,tol);
+				} else {
+					ss << "neighbor-neighbor check i != j for " << i << "," << j ;
+					ASSERT_GREATERM(ss.str().c_str(),delta,0);
+				}
+			}
+		}
+
+
+	}
+
+
+	/* */
 
 	// FAIL();
 }

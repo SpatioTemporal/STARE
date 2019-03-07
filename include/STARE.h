@@ -34,6 +34,7 @@ typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_ArrayIndexSpatialValues;
 class STARE {
 public:
 	STARE();
+	STARE( int search_level, int build_level, SpatialRotation rotate_root_octahedron );
 	virtual ~STARE();
 
 	uint32 sSearchLevel() const; /// Location precision level in the sIndex.
@@ -49,6 +50,9 @@ public:
 	SpatialIndex getIndex() { return sIndex; }
 	SpatialIndex getIndex(int resolutionLevel);
 	uint64       getMaximumSearchLevel() { return 27; } // TODO Ugh. See search_level in the privates...
+	uint64       getSearchLevel() { return this->search_level; } // TODO Ugh. See search_level in the privates...
+	uint64       getBuildLevel()  { return this->build_level; }
+	SpatialRotation getRotation() { return this->rotate_root_octahedron; }
 
 	bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
 
@@ -57,9 +61,13 @@ public:
 
 	STARE_ArrayIndexSpatialValues NeighborsOfValue(STARE_ArrayIndexSpatialValue spatialStareId);
 
+	float64 lengthMeterScaleFromEdgeFromLevel(int level){
+		return 6371.0e3*gPio2*pow(2.0,-level);
+	}
+
 	// uint32 tResolutionLevel() const;
 
-private:
+// private:
 	/// TODO memoize sIndex in case we need to cache multiple resolutions.
 	SpatialIndex    sIndex; // The current (default) index
 	std::map<int,SpatialIndex> sIndexes;

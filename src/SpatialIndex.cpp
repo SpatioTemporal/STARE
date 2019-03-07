@@ -843,7 +843,11 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
  * @param htmId
  */
 void
-SpatialIndex::NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const {
+SpatialIndex::NeighborsAcrossEdgesFromHtmId(
+		uint64 neighbors[3],
+		uint64 htmId,
+		SpatialVector workspace[9]
+		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13, q1, q2, q3;
 	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
 	//	SpatialVector center = pointByHtmId(htmId);
@@ -851,11 +855,13 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) c
 	m12 = v1 + v2; m12.normalize();
 	m23 = v2 + v3; m23.normalize();
 	m13 = v1 + v3; m13.normalize();
-	float64 alpha = 1.1;
+	// float64 alpha = 1.1;
+	float64 alpha = 1.25;
+	// float64 alpha = 1.5;
 	SpatialVector centerAlpha = center * ( 1-alpha );
-	q1 = centerAlpha + m23 * alpha;
-	q2 = centerAlpha + m13 * alpha;
-	q3 = centerAlpha + m12 * alpha;
+	q1 = centerAlpha + m23 * alpha; // q1.normalize();
+	q2 = centerAlpha + m13 * alpha; // q2.normalize();
+	q3 = centerAlpha + m12 * alpha; // q3.normalize();
 	neighbors[0] = idByPoint(q1);
 	neighbors[1] = idByPoint(q2);
 	neighbors[2] = idByPoint(q3);
@@ -866,7 +872,22 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) c
 //	cout << "m13 " << m13 << endl << flush;
 //	cout << "q1 " << q1 << endl << flush;
 //	cout << "q2 " << q2 << endl << flush;
-//	cout << "q3 " << q3 << endl << flush;
+	/*
+	cout << "q1 " << q1 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
+	cout << "q2 " << q2 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
+	*/
+	cout << "q3 edge " << q3 << " - 0x" << hex << neighbors[2] << dec << endl << flush;
+
+	int j = 0;
+	workspace[j++] = v1;
+	workspace[j++] = v2;
+	workspace[j++] = v3;
+	workspace[j++] = m12;
+	workspace[j++] = m13;
+	workspace[j++] = m23;
+	workspace[j++] = q1;
+	workspace[j++] = q2;
+	workspace[j++] = q3;
 }
 
 /**
@@ -877,7 +898,11 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) c
  * @param htmId
  */
 void
-SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const {
+SpatialIndex::NeighborsAcrossVerticesFromHtmId(
+		uint64 neighbors[9],
+		uint64 htmId,
+		SpatialVector workspace[15]
+		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13;
 	SpatialVector q0, q1, q2, q3, q4, q5, q6, q7, q8;
 	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
@@ -886,21 +911,32 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId
 	m12 = v1 + v2; m12.normalize();
 	m23 = v2 + v3; m23.normalize();
 	m13 = v1 + v3; m13.normalize();
-	float64 alpha = 1.1;
+
+	// float64 alpha = 1.1;
+	// float64 beta  = 0.1;
+
+	// float64 alpha = 1.25;
+	// float64 beta  = 0.25;
+
+	// float64 alpha = 1.5;
+	// float64 beta =  0.5;
+
+	float64 alpha = 1.75;
+	float64 beta =  0.75;
+
 	SpatialVector centerAlpha = center * ( 1-alpha );
-	float64 beta = 0.1;
 
-	q0 = v1 + (m13-center) * beta; q1.normalize();
-	q1 = centerAlpha + v1 * alpha;
-	q2 = v1 + (m12-center) * beta; q2.normalize();
+	q0 = v1 + (m13-center) * beta; //q0.normalize();
+	q1 = centerAlpha + v1 * alpha; //q1.normalize();
+	q2 = v1 + (m12-center) * beta; //q2.normalize();
 
-	q3 = v2 + (m12-center) * beta; q3.normalize();
-	q4 = centerAlpha + v2 * alpha;
-	q5 = v2 + (m23-center) * beta; q4.normalize();
+	q3 = v2 + (m12-center) * beta; //q3.normalize();
+	q4 = centerAlpha + v2 * alpha; //q4.normalize();
+	q5 = v2 + (m23-center) * beta; //q5.normalize();
 
-	q6 = v3 + (m23-center) * beta; q8.normalize();
-	q7 = centerAlpha + v3 * alpha;
-	q8 = v3 + (m13-center) * beta; q7.normalize();
+	q6 = v3 + (m23-center) * beta; //q6.normalize();
+	q7 = centerAlpha + v3 * alpha; //q7.normalize();
+	q8 = v3 + (m13-center) * beta; //q8.normalize();
 
 	neighbors[0] = idByPoint(q0);
 	neighbors[1] = idByPoint(q1);
@@ -918,7 +954,37 @@ SpatialIndex::NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId
 //	cout << "m13 " << m13 << endl << flush;
 //	cout << "q1 " << q1 << endl << flush;
 //	cout << "q2 " << q2 << endl << flush;
-//	cout << "q3 " << q3 << endl << flush;
+	//	cout << "q3 " << q3 << endl << flush;
+	/*
+	cout << "q0 " << q0 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
+	cout << "q1 " << q1 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
+	cout << "q2 " << q2 << " - 0x" << hex << neighbors[2] << dec << endl << flush;
+	*/
+	cout << "q3 vert " << q3 << " - 0x" << hex << neighbors[3] << dec << endl << flush;
+	/*
+	cout << "q4 " << q4 << " - 0x" << hex << neighbors[4] << dec << endl << flush;
+	cout << "q5 " << q5 << " - 0x" << hex << neighbors[5] << dec << endl << flush;
+	cout << "q6 " << q6 << " - 0x" << hex << neighbors[6] << dec << endl << flush;
+	cout << "q7 " << q7 << " - 0x" << hex << neighbors[7] << dec << endl << flush;
+	cout << "q8 " << q8 << " - 0x" << hex << neighbors[8] << dec << endl << flush;
+	*/
+
+	int j = 0;
+	workspace[j++] = v1;
+	workspace[j++] = v2;
+	workspace[j++] = v3;
+	workspace[j++] = m12;
+	workspace[j++] = m13;
+	workspace[j++] = m23;
+	workspace[j++] = q0;
+	workspace[j++] = q1;
+	workspace[j++] = q2;
+	workspace[j++] = q3;
+	workspace[j++] = q4;
+	workspace[j++] = q5;
+	workspace[j++] = q6;
+	workspace[j++] = q7;
+	workspace[j++] = q8;
 }
 
 
@@ -1081,7 +1147,7 @@ uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
 	uint depth = depthOfId(id);
 	if (depth != maxlevel_+1) {
-		cout << "si:nifi: id=" << id << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
+		cout << "si:nifi: id=" << hex << id << dec << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
 		return 0;  // TODO Make this throw an exception?
 	}
 //	cout << "si::nifi: id=" << id << " depth=" << depth << " maxlevel=" << maxlevel_ << flush;

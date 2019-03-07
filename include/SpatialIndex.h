@@ -163,10 +163,10 @@ void printNode(int nodeIndex) const;
 
   /** Find the neighbors across the edges of the triangles htmId */
   void
-  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const;
+  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId, SpatialVector workspace[9]) const;
 
   void
-  NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const;
+  NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId, SpatialVector workspace[15]) const;
 
   /** find a node by giving a vector.
    *

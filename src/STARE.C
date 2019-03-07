@@ -26,6 +26,17 @@ STARE::STARE() {
 	}*/
 }
 
+STARE::STARE(
+		int search_level, int build_level, SpatialRotation rotate_root_octahedron ) {
+
+	this->search_level = search_level;
+	this->build_level  = build_level;
+	this->rotate_root_octahedron = rotate_root_octahedron;
+
+	sIndex                 = SpatialIndex(search_level, build_level, this->rotate_root_octahedron);
+	sIndexes.insert(std::make_pair(search_level,sIndex));
+}
+
 STARE::~STARE() {
 	// TODO Auto-generated destructor stub
 }
@@ -348,9 +359,13 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	uint64 htmID = htmIDFromValue          (spatialStareId,level); // TODO verify this line is correct. We've got to watch out for the extra precision bits during the conversion.
 	SpatialIndex index = getIndex(ResolutionLevelFromValue(spatialStareId));
 	uint64 neighbors[9+3];
-	index.NeighborsAcrossVerticesFromHtmId(neighbors, htmID);
-	index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID);
+	SpatialVector workspace_v[15], workspace_e[9];
+
+	index.NeighborsAcrossVerticesFromHtmId(neighbors, htmID, workspace_v);
+	index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID, workspace_e);
+
 	for(int i=0; i < 9+3; ++i ) {
+		cout << i << " s::nov: " << hex << "0x" << neighbors[i] << dec << endl << flush;
 		neighbors[i] = ValueFromHtmID(neighbors[i]);
 	}
 	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));

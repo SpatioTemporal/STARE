@@ -1125,12 +1125,13 @@ void testNeighbors() {
 	ASSERT_EQUALM("level(N012023) == 5",5,levelOfName(htmName));
 	ASSERT_EQUALM("level(12683)   == 5",5,levelOfId(htmID));
 
+	SpatialVector workspace_e[9];
 	uint64 neighbors[3];
 	uint64 htmId;
 	htmId = htmID;
 
 	htmId = 12683;
-	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId, workspace_e);
 
 	//	cout
 	//	<< "Neighbors of " << (htmId) << " are "
@@ -1194,7 +1195,8 @@ void testNeighbors() {
 
 	htmId = 12683;
 	uint64 neighborsV[9];
-	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
+	SpatialVector workspaceV[15];
+	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId, workspaceV);
 
 	if(false) {
 		cout << "Neighbors Across Vertices of " << (htmId) << " are ";
