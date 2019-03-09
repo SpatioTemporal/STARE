@@ -849,7 +849,8 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(
 		SpatialVector workspace[18]
 		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13, q1, q2, q3;
-	nodeVertex(nodeIndexFromId(htmId),v1,v2,v3);
+	uint64 nodeId = nodeIndexFromId(htmId);
+	nodeVertex(nodeId,v1,v2,v3);
 	//	SpatialVector center = pointByHtmId(htmId);
 	SpatialVector center = v1 + v2 + v3; center.normalize();
 	m12 = v1 + v2; m12.normalize();
@@ -859,7 +860,7 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(
 	float64 alpha = 1.25;
 	// float64 alpha = 1.5;
 	SpatialVector centerAlpha = center * ( 1-alpha );
-	q1 = centerAlpha + m23 * alpha; // q1.normalize();
+	q1 = centerAlpha + m23 * alpha; q1.normalize();
 	q2 = centerAlpha + m13 * alpha; // q2.normalize();
 	q3 = centerAlpha + m12 * alpha; // q3.normalize();
 	neighbors[0] = idByPoint(q1);
@@ -872,10 +873,11 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(
 //	cout << "m13 " << m13 << endl << flush;
 //	cout << "q1 " << q1 << endl << flush;
 //	cout << "q2 " << q2 << endl << flush;
-	/*
-	cout << "q1 " << q1 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
-	cout << "q2 " << q2 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
-	*/
+
+	cout << "." << endl << flush;
+	cout << "htmId   " << center << " - 0x" << hex << htmId << dec << endl << flush;
+	cout << "q1 edge " << q1 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
+	cout << "q2 edge " << q2 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
 	cout << "q3 edge " << q3 << " - 0x" << hex << neighbors[2] << dec << endl << flush;
 
 	int j = 0;
@@ -906,7 +908,7 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 		) const {
 	SpatialVector v1, v2, v3, m12, m23, m13;
 	SpatialVector q0, q1, q2, q3, q4, q5, q6, q7, q8;
-
+	uint64 nodeId = nodeIndexFromId(htmId);
 	// See NeighborsAcrossEdgesFromHtmId.
 	int jw = 0;
 	v1  = workspace[jw++];
@@ -923,11 +925,11 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 	m13 = v1 + v3; m13.normalize();
 	 */
 
-	float64 alpha = 1.1;
-	float64 beta  = 0.1;
+	// float64 alpha = 1.1;
+	// float64 beta  = 0.1;
 
-	// float64 alpha = 1.25;
-	// float64 beta  = 0.25;
+	float64 alpha = 1.25;
+	float64 beta  = 0.25;
 
 	// float64 alpha = 1.5;
 	// float64 beta =  0.5;
@@ -968,9 +970,7 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 				int j=0; bool found=false;
 				while(not found && j < 3) {
 					uint64 test_id = neighbors_[j];
-					if( test_id == htmId ) {
-						++j;
-					} else {
+					if( test_id != htmId ) {
 						int k=0; bool k_found=false;
 						while( not k_found && k < 9 ) {
 							if( test_id == neighbors[k] ) {
@@ -984,8 +984,10 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 							neighbors[iv] = test_id;
 						}
 					}
+					++j;
 				}
 				// TODO if not found, fail silently.
+				cout << "SpatialIndex::NeighborsAcrossVerticesFromEdges::ERROR neighbor not found!!!" << endl << flush;
 			}
 		}
 	}

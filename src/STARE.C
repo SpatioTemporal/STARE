@@ -365,7 +365,7 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	index.NeighborsAcrossVerticesFromEdges(neighbors, &neighbors[9], htmID, workspace);
 
 	for(int i=0; i < 9+3; ++i ) {
-		cout << i << " s::nov: " << hex << "0x" << neighbors[i] << dec << endl << flush;
+		// cout << i << " s::nov: " << hex << "0x" << neighbors[i] << dec << endl << flush;
 		neighbors[i] = ValueFromHtmID(neighbors[i]);
 	}
 	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
