@@ -873,13 +873,13 @@ SpatialIndex::NeighborsAcrossEdgesFromHtmId(
 //	cout << "m13 " << m13 << endl << flush;
 //	cout << "q1 " << q1 << endl << flush;
 //	cout << "q2 " << q2 << endl << flush;
-
+/*
 	cout << "." << endl << flush;
 	cout << "htmId   " << center << " - 0x" << hex << htmId << dec << endl << flush;
 	cout << "q1 edge " << q1 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
 	cout << "q2 edge " << q2 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
 	cout << "q3 edge " << q3 << " - 0x" << hex << neighbors[2] << dec << endl << flush;
-
+*/
 	int j = 0;
 	workspace[j++] = v1;
 	workspace[j++] = v2;
@@ -1004,9 +1004,7 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 	cout << "q0 " << q0 << " - 0x" << hex << neighbors[0] << dec << endl << flush;
 	cout << "q1 " << q1 << " - 0x" << hex << neighbors[1] << dec << endl << flush;
 	cout << "q2 " << q2 << " - 0x" << hex << neighbors[2] << dec << endl << flush;
-	*/
 	cout << "q3 vert " << q3 << " - 0x" << hex << neighbors[3] << dec << endl << flush;
-	/*
 	cout << "q4 " << q4 << " - 0x" << hex << neighbors[4] << dec << endl << flush;
 	cout << "q5 " << q5 << " - 0x" << hex << neighbors[5] << dec << endl << flush;
 	cout << "q6 " << q6 << " - 0x" << hex << neighbors[6] << dec << endl << flush;

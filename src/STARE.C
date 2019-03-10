@@ -358,13 +358,16 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	int level = ResolutionLevelFromValue(spatialStareId);
 	uint64 htmID = htmIDFromValue          (spatialStareId,level); // TODO verify this line is correct. We've got to watch out for the extra precision bits during the conversion.
 	SpatialIndex index = getIndex(ResolutionLevelFromValue(spatialStareId));
-	uint64 neighbors[9+3];
+	uint64 neighbors[3+9];
 	SpatialVector workspace[18];
 
-	index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID, workspace);
-	index.NeighborsAcrossVerticesFromEdges(neighbors, &neighbors[9], htmID, workspace);
+	// index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID, workspace);
+	// index.NeighborsAcrossVerticesFromEdges(neighbors, &neighbors[9], htmID, workspace);
 
-	for(int i=0; i < 9+3; ++i ) {
+	index.NeighborsAcrossEdgesFromHtmId(neighbors, htmID, workspace);
+	index.NeighborsAcrossVerticesFromEdges(&neighbors[3], neighbors, htmID, workspace);
+
+	for(int i=0; i < 3+9; ++i ) {
 		// cout << i << " s::nov: " << hex << "0x" << neighbors[i] << dec << endl << flush;
 		neighbors[i] = ValueFromHtmID(neighbors[i]);
 	}

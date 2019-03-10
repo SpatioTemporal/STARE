@@ -145,7 +145,7 @@ void STARE_test() {
 	STARE_ArrayIndexSpatialValues neighbors_found = index.NeighborsOfValue(aIndex);
 	// std::cout << 120 << std::endl << std::flush;
 
-	uint64 neighbors_htmid_expected[12]	= { 12685, 12687, 12684, 12725, 12727, 12724, 13188, 13191, 13190, 12680, 12681, 12682 };
+	uint64 neighbors_htmid_expected[12]	= { 12680, 12681, 12682, 12685, 12687, 12684, 12725, 12727, 12724, 13188, 13191, 13190  };
 	uint64 neighbors_expected[12];
 	// A little legacy voodoo.
 	for( int i = 0; i < 12; ++i ) {
@@ -213,7 +213,7 @@ void STARE_test() {
 
 		// STARE index;
 
-		cout << ".." << endl << flush;
+		// cout << ".." << endl << flush;
 
 		int level = 6;
 
@@ -242,8 +242,9 @@ void STARE_test() {
 			neighbors_[i] = neighbors_e[i-9];
 		}
 
-		cout << 90 << endl << flush;
+		// cout << 90 << endl << flush;
 
+		/* Diagnostic output
 		cout << endl << flush;
 		for(int i=3; i<6; ++i) {
 			cout << i << " m "
@@ -271,18 +272,21 @@ void STARE_test() {
 		for( int i = 0; i < 12; ++i ) {
 			cout << i << " neighbors 0x"<< hex << neighbors[i] << dec << endl << flush;
 		}
+		 */
+
 
 		level = index.ResolutionLevelFromValue(north_pole_sid);
 		Triangle ta[12];
 		for(int i=0; i<12; ++i) {
 			ta[i] = index.TriangleFromValue(neighbors[i],level);
 		}
-		cout << ".." << endl << flush;
+		// cout << ".." << endl << flush;
 		// for(int i = 8; i >= 0; --i ) {
 		// for(int i = 0; i < 9; ++i ) {
 		// for(int i = 4; i < 8; ++i ) {
 		for(int i = 0; i < 12; ++i ) {
 			Triangle tr0 = ta[i];
+			/*
 			cout << "-- neighbor = " << i << " --" << endl << flush;
 			for(int j = 0; j < 3; ++j ) {
 				cout << j
@@ -296,16 +300,18 @@ void STARE_test() {
 										<< endl << flush;
 			}
 			cout << "c" << " tr0.c: " << tr0.centroid << endl << flush;
-
+			 */
 		}
-		cout << ".." << endl << flush;
+		// cout << ".." << endl << flush;
 		stringstream ss;
 		for(int i=0; i<12; ++i) {
 			for(int j=0; j <= i; ++j ) {
+				/*
 				cout << i << "," << j << " delta = "
 						<< (ta[i].centroid-ta[j].centroid) << ", length = "
 						<< (ta[i].centroid-ta[j].centroid).length()
 						<< endl << flush;
+				 */
 				float64 delta = (ta[i].centroid-ta[j].centroid).length();
 				ss.clear();
 				ss.str(string());
