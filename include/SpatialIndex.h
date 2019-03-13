@@ -99,7 +99,7 @@ public:
   ///Print the node information in nodes_ at nodeIndex.
 void printNode(int nodeIndex) const;
 
-  /// NodeName conversion to integer ID
+  /// NodeName conversion to integer ID (but which one?)
   static uint64 idByName(const char *);
 
   /// Legacy code
@@ -277,8 +277,15 @@ private:
 
   // Test whether a vector v is inside a triangle v0,v1,v2. Input
   // triangle has to be sorted in a counter-clockwise direction.
-  bool isInside(const SpatialVector & v, const SpatialVector & v0,
-		const SpatialVector & v1, const SpatialVector & v2) const;
+  bool isInside(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2
+		  ) const;
+
+  bool isInsideBarycentric(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2
+		  ) const;
 
   // VARIABLES
 

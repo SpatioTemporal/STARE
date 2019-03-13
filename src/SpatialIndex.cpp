@@ -16,6 +16,7 @@
 //#
 
 #include <iostream>
+#include <iomanip>
 
 #include "SpatialIndex.h"
 
@@ -77,6 +78,82 @@ isInside(const SpatialVector & v, const SpatialVector & v0,
   if( (v1 ^ v2) * v < -gEpsilon) return false;
   if( (v2 ^ v0) * v < -gEpsilon) return false;
   return true;
+}
+
+/*
+ * A discussion of determining if the projection of a point is within a triangle on a plane.
+ * https://math.stackexchange.com/questions/544946/determine-if-projection-of-3d-point-onto-plane-is-within-a-triangle
+ *
+ * The Barycentric calculation used below is mentioned below.
+ * https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
+ * http://realtimecollisiondetection.net
+ * Real-Time Collision Detection by Christer Ericson (Morgan Kaufmann, 2005).
+  */
+// Compute barycentric coordinates (u, v, w) for
+// point p with respect to triangle (a, b, c)
+void Barycentric(
+		SpatialVector p, SpatialVector a, SpatialVector b, SpatialVector c,
+		float64 &u, float64 &v, float64 &w)
+{
+    SpatialVector v0 = b - a, v1 = c - a, v2 = p - a;
+    float64 d00 = v0*v0;
+    float64 d01 = v0*v1;
+    float64 d11 = v1*v1;
+    float64 d20 = v2*v0;
+    float64 d21 = v2*v1;
+    float64 denom = d00 * d11 - d01 * d01;
+    v = (d11 * d20 - d01 * d21) / denom;
+    w = (d00 * d21 - d01 * d20) / denom;
+    u = 1.0f - v - w;
+}
+bool
+SpatialIndex::isInsideBarycentric(
+		const SpatialVector & v, const SpatialVector & v0,
+	    const SpatialVector & v1, const SpatialVector & v2) const {
+	float64 u,w,vv;
+	Barycentric(v,v0,v1,v2,u,vv,w);
+	return
+			((0 <= u) && (u <= 1)) &&
+			((0 <= w) && (w <= 1)) &&
+			((0 <= vv) && (vv <= 1)) ;
+}
+bool
+isInsideBarycentric(
+		const SpatialVector & v, const SpatialVector & v0,
+	    const SpatialVector & v1, const SpatialVector & v2) {
+	float64 u,w,vv;
+	Barycentric(v,v0,v1,v2,u,vv,w);
+	return
+			((0 <= u) && (u <= 1)) &&
+			((0 <= w) && (w <= 1)) &&
+			((0 <= vv) && (vv <= 1)) ;
+}
+
+void
+checkVectors(const SpatialVector & v, const SpatialVector & v0,
+	       const SpatialVector & v1, const SpatialVector & v2)
+{
+
+	float64
+	a = (v0 ^ v1) * v,
+	b = (v1 ^ v2) * v,
+	c =  (v2 ^ v0) * v;
+
+	bool d =
+			(( a >= 0 )) &&
+			(( b >= 0 )) &&
+			(( c >= 0 ));
+
+	cout
+	<< setprecision(17)
+	<< setw(20)
+	<< scientific
+	<< "checkVectors" << endl
+	<< " 01 " << a << endl
+	<< " 12 " << b << endl
+	<< " 20 " << c << endl
+	<< "res " << d << endl
+	<< flush;
 }
 
 /**
@@ -142,20 +219,90 @@ uint64 subTriangleIndexByPoint(
 	SpatialVector w1 = v0 + v2; w1.normalize();
 	SpatialVector w2 = v1 + v0; w2.normalize();
 
+	SpatialVector
+	v0_ = v0,
+	v1_ = v1,
+	v2_ = v2,
+	w0_ = w0,
+	w1_ = w1,
+	w2_ = w2;
+
 	if(isInside(v, v0, w2, w1)) {
-		v1 = w2; v2 = w1;
-		subTriangleIndex = 0;
+		v1 = w2; v2 = w1; subTriangleIndex = 0;
 	} else if(isInside(v, v1, w0, w2)) {
-		v0 = v1; v1 = w0; v2 = w2;
-		subTriangleIndex = 1;
+		v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
 	} else if(isInside(v, v2, w1, w0)) {
-		v0 = v2; v1 = w1; v2 = w0;
-		subTriangleIndex = 2;
+		v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
 	} else if(isInside(v, w0, w1, w2)) {
-		v0 = w0; v1 = w1; v2 = w2;
-		subTriangleIndex = 3;
+		v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
 	}
 
+	if( subTriangleIndex == -1  ) {
+		// If the preceding fails, try the Barycentric approach. Should we warn?
+		/*
+		cout << "SpatialIndex::subTriangleIndexByPoint ERROR INDEX NOT FOUND " << endl
+				<< " v: " << v << endl
+				<< " v0: " << v0 << endl
+				<< " v1: " << v1 << endl
+				<< " v2: " << v2 << endl
+				<< " w0: " << w0 << endl
+				<< " w1: " << w1 << endl
+				<< " w2: " << w2 << endl << flush;
+		cout << endl << flush;
+		cout << "0 checkVectors " << endl; checkVectors(v,v0,w2,w1);
+		cout << "1 checkVectors " << endl; checkVectors(v,v1,w0,w2);
+		cout << "2 checkVectors " << endl; checkVectors(v,v2,w1,w0);
+		cout << "3 checkVectors " << endl; checkVectors(v,w0,w1,w2);
+
+		cout << "0 Barycentric test: " << isInsideBarycentric(v,v0,w2,w1) << endl << flush;
+		cout << "1 Barycentric test: " << isInsideBarycentric(v,v1,w0,w2) << endl << flush;
+		cout << "2 Barycentric test: " << isInsideBarycentric(v,v2,w1,w0) << endl << flush;
+		cout << "3 Barycentric test: " << isInsideBarycentric(v,w0,w1,w2) << endl << flush;
+		*/
+
+		if(isInsideBarycentric(v,v0,w2,w1)) {
+			v1 = w2; v2 = w1; subTriangleIndex = 0;
+		} else if(isInsideBarycentric(v,v1,w0,w2)) {
+			v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
+		} else if(isInsideBarycentric(v,v2,w1,w0)) {
+			v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
+		} else if(isInsideBarycentric(v,w0,w1,w2)) {
+			v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
+		}
+
+		// cout << "subTriangleIndex = " << subTriangleIndex << endl << flush;
+
+		if(subTriangleIndex == -1) {
+			// TODO If sub triangle index fails, maybe we should throw an exception instead...
+			cout << "SpatialIndex::subTriangleIndexByPoint FAILED INDEX NOT FOUND" << endl << flush;
+			// cout << endl << "Exiting..." << endl << flush;
+			// exit(1);
+			throw SpatialFailure("SpatialIndex::subTriangleIndexByPoint: INDEX NOT FOUND");
+		}
+	} /* else if(true) {
+        // See if the Barycentric calculation matches the triple product.
+        // TODO Determine if we should switch to the Barycentric calculation...
+
+		int subTriangleIndexSave = subTriangleIndex;
+		subTriangleIndex = -1;
+		if(isInsideBarycentric(v,v0_,w2_,w1_)) {
+			subTriangleIndex = 0;
+		} else if(isInsideBarycentric(v,v1_,w0_,w2_)) {
+			subTriangleIndex = 1;
+		} else if(isInsideBarycentric(v,v2_,w1_,w0_)) {
+			subTriangleIndex = 2;
+		} else if(isInsideBarycentric(v,w0_,w1_,w2_)) {
+			subTriangleIndex = 3;
+		}
+		if( subTriangleIndex < 0) {
+			cout << "SpatialIndex::subTriangleIndexByPoint Barycentric Test Fails! Exiting!" << endl << flush;
+			exit(1);
+		} else if(subTriangleIndex != subTriangleIndexSave){
+			cout << "SpatialIndex::subTriangleIndexByPoint Barycentric Test disagrees with Triple Product! Exiting!" << endl << flush;
+			cout << " Barycentric: " << subTriangleIndex << ", Triple Product: " << subTriangleIndexSave << endl << flush;
+			exit(1);
+		}
+	} */
 	return subTriangleIndex;
 }
 
@@ -617,7 +764,7 @@ SpatialIndex::sortIndex() {
   }
 }
 
-// TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we go to 64 easy?
+// TODO Review IDBYNAME -- uses uint32 works only to 15 levels.  Can we go to 64 easily?
 
 //////////////////IDBYNAME/////////////////////////////////////////////////
 /**
@@ -654,6 +801,8 @@ succeeding character corresponds to the next level of resolution.
 
 The number of triangles at a given level is 8*4**level.
 
+NOTE: This returns an "external" HTM index, with NO OFFESTS OR OTHER INTERNAL INDEXING.
+
 - Legacy 32-bit information:
 	-- WARNING: This works only up to 15 levels.
               	 (we probably never need more than 7)
@@ -666,7 +815,7 @@ TODO factor out the part for name encoding.
 */
 uint64
 SpatialIndex::idByName(const char *name) {
-// Return the external HTM index. No offsets or other internal indexing.
+// Return the external HTM index. NO OFFSETS OR OTHER INDEXING
 //	cout << "idByName-1000" << endl << flush;
 	uint64 out=0, i;
 	uint32 size = 0;
@@ -1074,11 +1223,11 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 		}
 	}
 	// what if we haven't gotten to build level?
-//	cout << "idbp: 100 " << endl << flush;
+	// cout << "idbp: 100 " << endl << flush;
 	// return if we have reached maxlevel
 	if(maxlevel_ == buildlevel_)return N(index).id_;
 
-//	cout << "idbp: 120 " << endl << flush;
+	// cout << "idbp: 120 " << endl << flush;
 
 	// from now on, continue to build name dynamically.
 	// until maxlevel_ levels depth, continue to append the
@@ -1089,11 +1238,13 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 
 	//
 	size_t len = strlen(name);
+	// cout << "idbp: 180 name = '" << name << "', len = " << len << endl << flush;
+	//
 	SpatialVector v0 = V(0);
 	SpatialVector v1 = V(1);
 	SpatialVector v2 = V(2);
 
-//	cout << "idbp: 200 " << endl << flush;
+	// cout << "idbp: 200 " << endl << flush;
 //	cout << "idbp: 201 ml_ = " << maxlevel_ << endl << flush;
 //	cout << "idbp: 202 bl_ = " << buildlevel_ << endl << flush;
 //	cout << "idbp: 203 m-b = " << (int)maxlevel_ - (int)buildlevel_ << endl << flush;
@@ -1102,13 +1253,16 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	// size_t level = maxlevel_ - buildlevel_;
 	int level = maxlevel_ - buildlevel_;
 
-//	cout << "idbp: 300 maxlevel_-buildlevel_ = " << level << endl << flush;
+	// cout << "idbp: 300 maxlevel_-buildlevel_ = " << level << endl << flush;
 
 	// TODO make this whole routine less ad-hoc
 	if(level>0) {
+		int level0 = buildlevel_;
 		while(level--) {
 			uint64 subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
+			// cout << "idbp: 350 level = " << level << ", level0 = " << level0++ << ", subTriangleIndex = " << subTriangleIndex << ", name = " << name;
 			name[len++] = '0'+char(subTriangleIndex);
+			// cout << ", name'= " << name << endl << flush;
 		}
 	} else {
 		len = len + level;
@@ -1118,7 +1272,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	}
 	name[len] = '\0';
 
-//	cout << "idbp: 400 " << endl << flush;
+	// cout << "idbp: 400 name = '" << name << "', len = " << len << endl << flush;
 
 	ID = idByName(name); // TODO Didn't we just calculate the bits above?
 

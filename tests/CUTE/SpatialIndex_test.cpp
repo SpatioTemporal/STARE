@@ -12,10 +12,12 @@
 
 void SpatialIndex_test() {
 
-	cout << setprecision(17);
+	// cout << setprecision(17);
 
 	int maxlevel   = 5;
 	int buildlevel = 5;
+
+	// cout << 100 << endl << flush;
 
 	ASSERT_EQUAL("S010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,gPi)).nameByPoint(zhat)).c_str());
 	// SpatialVector zhat_r = -1.0*zhat;
@@ -43,6 +45,8 @@ void SpatialIndex_test() {
 
 	BitShiftNameEncoding rightJustified(htm_Id_rot);
 
+	// cout << 200 << endl << flush;
+
 	/*
 	cout << "v:           " << v << endl;
 	cout << "v.rot:       " << rot.rotated_from(v) << endl;
@@ -68,6 +72,8 @@ void SpatialIndex_test() {
 	SpatialRotation rot1  (axis,theta);
 	SpatialRotation rot1_i(axis,-theta);
 
+	// cout << 300 << endl << flush;
+
 	// Reset the SpatialIndex
 	maxlevel   = 27;
 	buildlevel = 5;
@@ -80,17 +86,28 @@ void SpatialIndex_test() {
 	v.setLatLonDegrees(lat, lon);
 	// cout << "v:   " << v << endl << flush;
 
+	// cout << 400 << endl << flush;
+
 	uint64 htm_Id_0h = index_0.idByPoint(v);
+
+	// cout << 500 << endl << flush;
+
 	// cout << "hi0h:" << htm_Id_0h << endl << flush;
 	SpatialVector vch; index_0.pointByHtmId(vch, htm_Id_0h);
 	// cout << "vch: " << vch << endl << flush;
+
+	// cout << 600 << endl << flush;
 
 	// cout << "delta vch - v:   " << (vch-v) << endl << flush;
 	// cout << "|vch - v|:       " << (vch-v).length() << endl << flush;
 	// cout << "|vch - vch_rr|:  " << (vch-rot_i.rotated_from(rot.rotated_from(vch))) << endl << flush;
 
+	// cout << 700 << endl << flush;
+
 	htm_Id_rot = index_rot.idByPoint(vch);
 	// cout << "hir: " << htm_Id_rot << endl << flush;
+
+	// cout << 800 << endl << flush;
 
 	SpatialVector uch;
 	index_0.pointByHtmId(uch, htm_Id_rot);
@@ -98,10 +115,15 @@ void SpatialIndex_test() {
 	// cout << "ucr: " << rot1.rotated_from(uch) << endl << flush;
 	// cout << "delta vch-uch: " << (vch-uch) << endl << flush;
 
+	// cout << 900 << endl << flush;
+
 	// The triangles don't line up exactly for arbitrary rotations, so
 	// Let's see if we get to within a fraction of a triangle.
 	const float64 tol = 0.5*(vch-v).length();
 	ASSERT_EQUALDM("Feed rotated indice to unrotated index.",vch,rot1.rotated_from(uch),tol);
+
+	// cout << 1000 << endl << flush;
+
 
 	// cout << "ucri:" << rot_i.rotated_from(uch) << endl << flush;
 

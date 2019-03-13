@@ -17,7 +17,7 @@
 STARE::STARE() {
 	// TODO Fix the hardwired rotation -- want to bump it over a 26-level triangle.
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
-	float64       theta    = 0.25*gPi;
+	float64       theta    = 0.25*gPi - 12.0e-9;
 	rotate_root_octahedron = SpatialRotation(axis,theta);
 	sIndex                 = SpatialIndex(search_level, build_level, rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(search_level,sIndex));
