@@ -14,8 +14,14 @@
 #include "SpatialDomain.h"
 #include <iostream>
 
+/**
+ *
+ * Major change: The default octahedral rotation is now theta    = 0.25*gPi - 12.0e-9.
+ * The 7.6 cm shift puts the north pole in the center of a trixel.
+ *
+ */
 STARE::STARE() {
-	// TODO Fix the hardwired rotation -- want to bump it over a 26-level triangle.
+	// TODO Fix the hardwired rotation -- want to bump it over a 27-level triangle.
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
 	float64       theta    = 0.25*gPi - 12.0e-9;
 	rotate_root_octahedron = SpatialRotation(axis,theta);
