@@ -79,6 +79,19 @@ isInside(const SpatialVector & v, const SpatialVector & v0,
   if( (v2 ^ v0) * v < -gEpsilon) return false;
   return true;
 }
+float64 triple_product(const SpatialVector &a, const SpatialVector &b, const SpatialVector &c)
+{
+	return (a ^ b) * c;
+}
+float64 min_triangle_quality(
+		const SpatialVector & v, const SpatialVector & v0,
+		const SpatialVector & v1, const SpatialVector & v2)
+{
+	float64 d01 = triple_product(v0,v1,v);
+	float64 d12 = triple_product(v1,v2,v);
+	float64 d20 = triple_product(v2,v0,v);
+	return min(d01,min(d12,d20));
+}
 
 /*
  * A discussion of determining if the projection of a point is within a triangle on a plane.
@@ -89,29 +102,77 @@ isInside(const SpatialVector & v, const SpatialVector & v0,
  * http://realtimecollisiondetection.net
  * Real-Time Collision Detection by Christer Ericson (Morgan Kaufmann, 2005).
   */
+
+void print_vector(string name, SpatialVector v) {
+	cout
+	<< setprecision(17)
+	<< setw(20)
+	<< scientific;
+
+	cout << "SpatialVector " << name << " = SpatialVector( "
+			<< v.x() << ", "
+			<< v.y() << ", "
+			<< v.z() << " );" << endl << flush;
+}
+
 // Compute barycentric coordinates (u, v, w) for
 // point p with respect to triangle (a, b, c)
 void Barycentric(
 		SpatialVector p, SpatialVector a, SpatialVector b, SpatialVector c,
-		float64 &u, float64 &v, float64 &w)
+		float64 &u, float64 &v, float64 &w, bool verbose)
 {
-    SpatialVector v0 = b - a, v1 = c - a, v2 = p - a;
+	SpatialVector v0 = b - a, v1 = c - a, v2 = p - a;
     float64 d00 = v0*v0;
     float64 d01 = v0*v1;
     float64 d11 = v1*v1;
     float64 d20 = v2*v0;
     float64 d21 = v2*v1;
-    float64 denom = d00 * d11 - d01 * d01;
-    v = (d11 * d20 - d01 * d21) / denom;
-    w = (d00 * d21 - d01 * d20) / denom;
-    u = 1.0f - v - w;
+    float64 idenom = 1.0/(d00 * d11 - d01 * d01);
+    v = (d11 * d20 - d01 * d21) * idenom;
+    w = (d00 * d21 - d01 * d20) * idenom;
+    u = 1.0 - v - w;
+
+    if(verbose) {
+    	cout
+		<< setprecision(17)
+		<< setw(20)
+		<< scientific
+    	<< endl;
+    	cout << " - " <<  endl << flush;
+    	print_vector("a",a);
+    	print_vector("b",b);
+    	print_vector("c",c);
+    	print_vector("p",p);
+    	cout << " - " <<  endl << flush;
+    	cout << " - " <<  endl << flush;
+    	cout << "a " << a << endl << flush;
+    	cout << "b " << b << endl << flush;
+    	cout << "c " << c << endl << flush;
+    	cout << endl << flush;
+    	cout << "v0 = " << v0 << ", l = " << v0.length() << endl << flush;
+    	cout << "v1 = " << v1 << ", l = " << v1.length() << endl << flush;
+    	cout << "v2 = " << v2 << ", l = " << v2.length() << endl << flush;
+    	cout << endl << flush;
+    	cout << "d00    " << d00 << endl << flush;
+    	cout << "d01    " << d01 << endl << flush;
+    	cout << "d11    " << d11 << endl << flush;
+    	cout << "d20    " << d20 << endl << flush;
+    	cout << "d21    " << d21 << endl << flush;
+    	cout << "idenom " << idenom << endl << flush;
+    	cout << "v      " << v << endl << flush;
+    	cout << "w      " << w << endl << flush;
+    	cout << "u      " << u << endl << flush;
+    	cout << endl << flush;
+    }
 }
 bool
 SpatialIndex::isInsideBarycentric(
 		const SpatialVector & v, const SpatialVector & v0,
-	    const SpatialVector & v1, const SpatialVector & v2) const {
+	    const SpatialVector & v1, const SpatialVector & v2,
+		bool verbose
+		) const {
 	float64 u,w,vv;
-	Barycentric(v,v0,v1,v2,u,vv,w);
+	Barycentric(v,v0,v1,v2,u,vv,w,verbose);
 	return
 			((0 <= u) && (u <= 1)) &&
 			((0 <= w) && (w <= 1)) &&
@@ -120,9 +181,11 @@ SpatialIndex::isInsideBarycentric(
 bool
 isInsideBarycentric(
 		const SpatialVector & v, const SpatialVector & v0,
-	    const SpatialVector & v1, const SpatialVector & v2) {
+	    const SpatialVector & v1, const SpatialVector & v2,
+		bool verbose
+		) {
 	float64 u,w,vv;
-	Barycentric(v,v0,v1,v2,u,vv,w);
+	Barycentric(v,v0,v1,v2,u,vv,w,verbose);
 	return
 			((0 <= u) && (u <= 1)) &&
 			((0 <= w) && (w <= 1)) &&
@@ -227,17 +290,64 @@ uint64 subTriangleIndexByPoint(
 	w1_ = w1,
 	w2_ = w2;
 
-	if(isInside(v, v0, w2, w1)) {
-		v1 = w2; v2 = w1; subTriangleIndex = 0;
-	} else if(isInside(v, v1, w0, w2)) {
-		v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
-	} else if(isInside(v, v2, w1, w0)) {
-		v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
-	} else if(isInside(v, w0, w1, w2)) {
-		v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
+	if(true){
+		if(isInside(v, v0, w2, w1)) {
+			v1 = w2; v2 = w1; subTriangleIndex = 0;
+		} else if(isInside(v, v1, w0, w2)) {
+			v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
+		} else if(isInside(v, v2, w1, w0)) {
+			v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
+		} else if(isInside(v, w0, w1, w2)) {
+			v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
+		}
+	}
+
+	if(true && subTriangleIndex == -1){
+		// cout << "SpatialIndex::subTriangleIndexByPoint WARNING TRYING BARYCENTRIC" << endl << flush;
+//		float64 lat,lon;
+//		v.getLatLonDegrees(lat, lon);
+//		cout << " v = " << v << ", lat,lon = " << lat << ", " << lon << endl << flush;
+		bool verbose = false;
+		if(isInsideBarycentric(v,v0,w2,w1,verbose)) {
+			v1 = w2; v2 = w1; subTriangleIndex = 0;
+		} else if(isInsideBarycentric(v,v1,w0,w2,verbose)) {
+			v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
+		} else if(isInsideBarycentric(v,v2,w1,w0,verbose)) {
+			v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
+		} else if(isInsideBarycentric(v,w0,w1,w2,verbose)) {
+			v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
+		}
 	}
 
 	if( subTriangleIndex == -1  ) {
+		// Okay, we're in trouble. A point which should be inside the triangle is not.
+		// We assume that the point is in a subtriangle, though it may not appear so
+		// because of floating point error. For example, consider points lying on edges--
+		// for which case we would need to be more careful.
+
+		float64 q0 = min_triangle_quality(v, v0, w2, w1);
+		float64 q1 = min_triangle_quality(v, v1, w0, w2);
+		float64 q2 = min_triangle_quality(v, v2, w1, w0);
+		float64 q3 = min_triangle_quality(v, w0, w1, w2);
+		float64 qmax = max(q0,max(q1,max(q2,q3)));
+		if(q0 == qmax) {
+			v1 = w2; v2 = w1; subTriangleIndex = 0;
+		} else if(q1 == qmax) {
+			v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
+		} else if(q2 == qmax) {
+			v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
+		} else if(q3 == qmax) {
+			v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
+		} else {
+			throw SpatialFailure("SpatialIndex::subTriangleIndexByPoint: UNREACHABLE POINT");
+		}
+		cout << "SpatialIndex::subTriangleIndexByPoint WARNING NO GOOD TRIANGLE FOUND" << endl << flush;
+		cout << "SpatialIndex::subTriangleIndexByPoint SUSPECT POINT LIES ON EDGE OR VERTEX" << endl << flush;
+		cout << "SpatialIndex::subTriangleIndexByPoint ATTEMPTING BEST CHOICE ASSUMING POINT IN TRIXEL" << endl << flush;
+		cout << "SpatialIndex::subTriangleIndexByPoint MAX-MIN TRIXEL QUALITY = " << qmax << endl << flush;
+
+		//		float64 lat,lon;
+
 		// If the preceding fails, try the Barycentric approach. Should we warn?
 		/*
 		cout << "SpatialIndex::subTriangleIndexByPoint ERROR INDEX NOT FOUND " << endl
@@ -260,13 +370,15 @@ uint64 subTriangleIndexByPoint(
 		cout << "3 Barycentric test: " << isInsideBarycentric(v,w0,w1,w2) << endl << flush;
 		*/
 
-		if(isInsideBarycentric(v,v0,w2,w1)) {
+		/*
+		bool verbose = true;
+		if(isInsideBarycentric(v,v0,w2,w1,verbose)) {
 			v1 = w2; v2 = w1; subTriangleIndex = 0;
-		} else if(isInsideBarycentric(v,v1,w0,w2)) {
+		} else if(isInsideBarycentric(v,v1,w0,w2,verbose)) {
 			v0 = v1; v1 = w0; v2 = w2; subTriangleIndex = 1;
-		} else if(isInsideBarycentric(v,v2,w1,w0)) {
+		} else if(isInsideBarycentric(v,v2,w1,w0,verbose)) {
 			v0 = v2; v1 = w1; v2 = w0; subTriangleIndex = 2;
-		} else if(isInsideBarycentric(v,w0,w1,w2)) {
+		} else if(isInsideBarycentric(v,w0,w1,w2,verbose)) {
 			v0 = w0; v1 = w1; v2 = w2; subTriangleIndex = 3;
 		}
 
@@ -275,10 +387,14 @@ uint64 subTriangleIndexByPoint(
 		if(subTriangleIndex == -1) {
 			// TODO If sub triangle index fails, maybe we should throw an exception instead...
 			cout << "SpatialIndex::subTriangleIndexByPoint FAILED INDEX NOT FOUND" << endl << flush;
+			float64 lat,lon;
+			v.getLatLonDegrees(lat, lon);
+			cout << " v = " << v << ", lat,lon = " << lat << ", " << lon << endl << flush;
 			// cout << endl << "Exiting..." << endl << flush;
 			// exit(1);
 			throw SpatialFailure("SpatialIndex::subTriangleIndexByPoint: INDEX NOT FOUND");
 		}
+		*/
 	} /* else if(true) {
         // See if the Barycentric calculation matches the triple product.
         // TODO Determine if we should switch to the Barycentric calculation...

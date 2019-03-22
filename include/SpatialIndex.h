@@ -284,7 +284,8 @@ private:
 
   bool isInsideBarycentric(
 		  const SpatialVector & v, const SpatialVector & v0,
-		  const SpatialVector & v1, const SpatialVector & v2
+		  const SpatialVector & v1, const SpatialVector & v2,
+		  bool verbose
 		  ) const;
 
   // VARIABLES

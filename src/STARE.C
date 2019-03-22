@@ -21,9 +21,9 @@
  *
  */
 STARE::STARE() {
-	// TODO Fix the hardwired rotation -- want to bump it over a 27-level triangle.
+
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
-	float64       theta    = 0.25*gPi - 12.0e-9;
+	float64       theta    = 0.25*gPi - 12.0e-9; // bump it over a 27-level triangle
 	rotate_root_octahedron = SpatialRotation(axis,theta);
 	sIndex                 = SpatialIndex(search_level, build_level, rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(search_level,sIndex));
@@ -210,10 +210,10 @@ bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
  * @param force_resolution_level - the smallest triangles to use in the covering
  *
  */
-STARE_Intervals STARE::CoverBoundingBoxFromLatLonDegrees(
+STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
 	int resolution_level; // for the match
-	STARE_Intervals intervals;
+	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
 		return intervals;
@@ -274,7 +274,7 @@ STARE_Intervals STARE::CoverBoundingBoxFromLatLonDegrees(
  *
  * TODO Requires testing & presentation
  */
-STARE_Intervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level) {
+STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level) {
 
 	SpatialIndex index;
 	if( force_resolution_level > -1 ) {
@@ -296,7 +296,7 @@ STARE_Intervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, fl
 	bool overlap = d.intersect(&index,&r,&varlen_false);
 	r.reset();
 
-	STARE_Intervals intervals;
+	STARE_SpatialIntervals intervals;
 	Key lo=-999, hi=-999;
 	uint64 id0, id1;
 	int indexp = r.getNext(lo,hi);

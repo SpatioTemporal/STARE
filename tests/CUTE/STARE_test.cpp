@@ -328,6 +328,27 @@ void STARE_test() {
 
 	}
 
+	{
+
+//		LatLonDegrees64 latlon1(
+//				3.25734748840332031e+01,-1.00050041198730469e+02
+//		);
+		LatLonDegrees64 latlon1(
+				3.23248138427734375e+01,-1.02840789794921875e+02
+		);
+
+		// LatLonDegrees64 latlon1(32.5735,-100.05);
+		// STARE index1;
+		STARE index2(index.getSearchLevel(),index.getBuildLevel(),index.getRotation());
+		STARE_ArrayIndexSpatialValue idx = index2.ValueFromLatLonDegrees(latlon1.lat,latlon1.lon);
+
+		cout << "latlon1: "
+				<< setprecision(17)
+				<< setw(20)
+				<< scientific
+				<< latlon1.lat << "," << latlon1.lon << " idx = " << idx << endl << flush;
+	}
+
 
 	/* */
 
