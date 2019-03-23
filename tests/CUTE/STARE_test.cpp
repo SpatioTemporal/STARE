@@ -333,6 +333,8 @@ void STARE_test() {
 //		LatLonDegrees64 latlon1(
 //				3.25734748840332031e+01,-1.00050041198730469e+02
 //		);
+
+		/* Bug exploration. points on edges.
 		LatLonDegrees64 latlon1(
 				3.23248138427734375e+01,-1.02840789794921875e+02
 		);
@@ -347,6 +349,8 @@ void STARE_test() {
 				<< setw(20)
 				<< scientific
 				<< latlon1.lat << "," << latlon1.lon << " idx = " << idx << endl << flush;
+
+				*/
 	}
 
 

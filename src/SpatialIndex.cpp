@@ -341,10 +341,14 @@ uint64 subTriangleIndexByPoint(
 		} else {
 			throw SpatialFailure("SpatialIndex::subTriangleIndexByPoint: UNREACHABLE POINT");
 		}
-		cout << "SpatialIndex::subTriangleIndexByPoint WARNING NO GOOD TRIANGLE FOUND" << endl << flush;
-		cout << "SpatialIndex::subTriangleIndexByPoint SUSPECT POINT LIES ON EDGE OR VERTEX" << endl << flush;
-		cout << "SpatialIndex::subTriangleIndexByPoint ATTEMPTING BEST CHOICE ASSUMING POINT IN TRIXEL" << endl << flush;
-		cout << "SpatialIndex::subTriangleIndexByPoint MAX-MIN TRIXEL QUALITY = " << qmax << endl << flush;
+
+		// TODO Get a proper logger & properties system going.
+		if(false) {
+//		cout << "SpatialIndex::subTriangleIndexByPoint WARNING NO GOOD TRIANGLE FOUND" << endl << flush;
+//		cout << "SpatialIndex::subTriangleIndexByPoint SUSPECT POINT LIES ON EDGE OR VERTEX" << endl << flush;
+//		cout << "SpatialIndex::subTriangleIndexByPoint ATTEMPTING BEST CHOICE ASSUMING POINT IN TRIXEL" << endl << flush;
+		cout << "SpatialIndex::subTriangleIndexByPoint WARNING MAX-MIN TRIXEL QUALITY = " << qmax << endl << flush;
+		}
 
 		//		float64 lat,lon;
 
