@@ -127,6 +127,87 @@ void SpatialIndex_test() {
 
 	// cout << "ucri:" << rot_i.rotated_from(uch) << endl << flush;
 
+
+	/*
+	LEVEL ZERO BUG 2019-0325
+
+	cout << 1000 << "kp.lo: " << hex << kp.lo << dec << endl;
+	cout << 1000 << "kp.hi: " << hex << kp.hi << dec << endl;
+	leftJustified.setId(kp.lo);
+	cout << 1001 << endl;
+	level = leftJustified.getLevel();
+	cout << 1002 << "level: " << level << endl;
+	string loName = leftJustified.getName();
+	cout << 1003 << "loName: " << loName << endl;
+	uint64 termId = leftJustified.idFromTerminatorAndLevel_NoDepthBit(kp.hi,level);
+	cout << 1004 << "termId: " << hex << termId << dec << endl << flush;
+	leftJustified.setId(termId);
+
+	cout << 1005 << endl << flush;
+	string hiName = leftJustified.getName();
+
+
+	 latlon = -34,10, idx0: 1c0508ca216dd580, idx: 1c0508ca216dd584, idx_gfx: b80a119442dbab00
+130
+1000kp.lo: 380a119442dbab00
+1000kp.hi: 3fffffffffffffff
+1001
+1002level: 0
+1003loName: S3
+1004termId: 3000000000000000
+1005
+1100 lo,hi name: S3 S3
+1101 level:      0
+1102 kp:         380a119442dbab00 3fffffffffffffff
+140
+1000kp.lo: 38029883332414c4
+1000kp.hi: 380fffffffffffff
+1001
+1002level: 4
+1003loName: S32000
+1004termId: 3800000000000004
+1005
+1100 lo,hi name: S32000 S32000
+1101 level:      4
+1102 kp:         38029883332414c4 380fffffffffffff
+120
+ latlon = -32,10, idx0: 1c014c4199920a60, idx: 1c014c4199920a64, idx_gfx: b8029883332414c0
+130
+1000kp.lo: 38029883332414c0
+1000kp.hi: 3fffffffffffffff
+1001
+1002level: 0
+1003loName: S3
+1004termId: 3000000000000000
+1005
+1100 lo,hi name: S3 S3
+1101 level:      0
+1102 kp:         38029883332414c0 3fffffffffffffff
+140
+1000kp.lo: a2901367184
+1000kp.hi: fffffffffffff
+1001
+1002level: 4
+1003loName: S00000
+1004termId: 4
+1005
+1100 lo,hi name: S00000 S00000
+1101 level:      4
+1102 kp:         a2901367184 fffffffffffff
+120
+ latlon = -30,10, idx0: 514809b38c0, idx: 514809b38c4, idx_gfx: 80000a2901367180
+130
+1000kp.lo: a2901367180
+1000kp.hi: fffffffffffffff
+1001
+1002level: 0
+1003loName: S0
+1004termId: 0
+terminate called after throwing an instance of 'SpatialFailure'
+
+
+	*/
+
 	// FAIL();
 }
 

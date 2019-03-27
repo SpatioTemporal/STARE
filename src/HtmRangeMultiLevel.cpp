@@ -448,6 +448,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	if( my_los->myHeader->getElement(0) == NIL ) {
 		my_los->insert(lo,100);
 		my_his->insert(hi,100);
+		cout << 8002 << " First one inserted. " << endl << flush;
 		return;
 	}
 
@@ -739,16 +740,16 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
 //	my_his->insert(hi, (Value) 0);
-//	cout << "x200: " << hex << lo << " " << hi << endl;
-//	cout << "x201: " << (lo == hi) << endl;
+	cout << "x200: " << hex << lo << " " << hi << endl;
+	cout << "x201: " << (lo == hi) << endl;
 
 	if( lo == hi ) {
 		encoding->setId(lo);
-//		cout << "lo,t: " << hex << " " << lo << " " << encoding->getIdTerminator_NoDepthBit() << endl;
+		cout << "lo,t: " << hex << " " << lo << " " << encoding->getIdTerminator_NoDepthBit() << endl;
 		mergeRange(lo,encoding->getIdTerminator_NoDepthBit());
 	} else {
 		// TODO Simplest thing that might possibly work.
-//		cout << "x250: " << hex << lo << " " << hi << endl;
+		cout << "x250: " << hex << lo << " " << hi << endl;
 		// TODO should we coerce hi to be a terminator?
 		mergeRange(lo,hi);
 	}
@@ -1081,6 +1082,8 @@ int HtmRangeMultiLevel::nranges()
 	my_his->reset();
 //	cout << "z010" << endl << flush;
 
+	// This is a problem when lo can be zero. Is it?
+	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327
 	while((lo = my_los->getkey()) > 0){
 		n_ranges++;
 //		cout << "z020 " << n_ranges << flush;

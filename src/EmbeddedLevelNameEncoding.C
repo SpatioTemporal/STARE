@@ -399,7 +399,9 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 //#undef hexOut
 //	cout << endl;
 
-	if( successor < (( lowerBound & stripMask ) + level) ) {
+	// if( successor < (( lowerBound & stripMask ) + level) ) {
+	// if( (successor & ~levelMask) < (( lowerBound & ~levelMask )) ) {
+	if( (successor & stripMask) < ( lowerBound & stripMask ) ) {
 		return 0; // It's invalid! Wrap around!
 	}
 
@@ -429,19 +431,28 @@ uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int
 	successor -= n*one_at_level;
 
 	if( successor == 0 ) {
-		return 0; // It's invald!
+		return 0; // It's invalid!
 	}
 
 	successor += level;
 
-//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
-//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+	/*
+	cout << setw(20);
+	cout << "lowerBound:   "<< hex << lowerBound << dec << endl << flush;
+	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+	cout << "successor':   "<< hex << successor << dec << endl << flush;
+	cout << "threshold:    "<< hex << (lowerBound & ~levelMask)+level << dec << endl << flush;
+	*/
+
+	// cout << "threshold:    "<< hex << (lowerBound & stripMask)+level << dec << endl << flush;
 
 	// Check for overflow.
 	// if( successor == TopBit ) {
 
 	// Check for underflow
-	if( successor > (lowerBound & stripMask)+level) {
+	if( (successor & stripMask) > (lowerBound & stripMask)) {
+	// if( successor > (lowerBound & ~levelMask)+level) {
 		return 0; // It's invalid! Wrap around!
 	}
 	return successor;

@@ -3897,6 +3897,83 @@ void testTesselationBug(){
     }    
 }
 
+void LeftJustifiedDecrementBug() {
+	EmbeddedLevelNameEncoding lj;
+	lj.setName("S00000");
+	uint64 lj0 = lj.getId();
+	lj.setName("N33333");
+	uint64 lj1 = lj.getId();
+
+	ASSERT_EQUALM("Min left justified set by name",0x8000000000000004,lj0);
+	ASSERT_EQUALM("Max left justified set by name",0xfff0000000000004,lj1);
+
+	// cout << "lj0,lj1: " << hex << lj0 << "," << lj1 << dec << endl << flush;
+	// cout << "--" << endl;
+
+	uint64 ljx = lj1;
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left dec",0xffe0000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left dec2",0xffd0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc dec2",0xffe0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc2 dec2",0xfff0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc3 dec2",0,ljx);
+
+	// cout << "--" << endl;
+
+	ljx = lj0;
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left inc",0x8010000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	cout << hex;
+	ASSERT_EQUALM("Min left inc2",0x8020000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec inc2",0x8010000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec2 inc2",0x8000000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec3 inc2",0,ljx);
+
+	// FAIL();
+}
+
+void HstmRangeAddZeroBug() {
+
+	HtmRangeMultiLevel range_ml;
+	// range_ml.addRange(0x8000000000000000,0x8000000000000000);
+	range_ml.addRange(0x0,0xfffffffffffffff);
+	ASSERT_EQUALM("Pushed S0",1,range_ml.nranges());
+
+	HstmRange range;
+	range.addRange(0x8000000000000000,0x8000000000000000);
+	ASSERT_EQUALM("Pushed S0",1,range.range->nranges());
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -3945,6 +4022,8 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(SpatialFailure_test));
 
 	s.push_back(CUTE(STARE_test));
+	s.push_back(CUTE(LeftJustifiedDecrementBug));
+	s.push_back(CUTE(HstmRangeAddZeroBug));
 
 	//	s.push_back(CUTE(testRange));
 
