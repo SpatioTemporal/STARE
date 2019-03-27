@@ -194,7 +194,7 @@ Key SkipList::findMIN(const Key searchKey) const
       nextElement = element->getElement(i);
     }
   }
-  // now nextElement is > searhcKey
+  // now nextElement is > searchKey
   // element is <= , make it >
   //
   element = nextElement;

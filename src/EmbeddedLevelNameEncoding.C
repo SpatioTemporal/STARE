@@ -24,7 +24,8 @@ EmbeddedLevelNameEncoding::~EmbeddedLevelNameEncoding() {}
 char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 	if(id == 0) {
 		// Throw an exception?
-		throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
+		std::cout << "EmbeddedLevelNameEncoding::nameById WARNING ID == 0 -> 'S0'...";
+		// throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
 	}
 
 	uint nameSize = levelById(id)+3; ///< levelById is local to the encoding

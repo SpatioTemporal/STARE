@@ -3967,11 +3967,17 @@ void HstmRangeAddZeroBug() {
 	HtmRangeMultiLevel range_ml;
 	// range_ml.addRange(0x8000000000000000,0x8000000000000000);
 	range_ml.addRange(0x0,0xfffffffffffffff);
-	ASSERT_EQUALM("Pushed S0",1,range_ml.nranges());
+	ASSERT_EQUALM("Pushed S0 to underlying HtmRangeMultiLevel",1,range_ml.nranges());
 
 	HstmRange range;
 	range.addRange(0x8000000000000000,0x8000000000000000);
-	ASSERT_EQUALM("Pushed S0",1,range.range->nranges());
+	ASSERT_EQUALM("Pushed S0 to HstmRange",1,range.range->nranges());
+
+	EmbeddedLevelNameEncoding lj;
+	// cout << "lj.nameById(0) = " << lj.nameById(0) << endl << flush;
+	char tmp_buf[256];
+	strcpy(tmp_buf,lj.nameById(0));
+	ASSERT_EQUALM("Extending left justified to handle S0 == 0","S0",tmp_buf);
 }
 
 void runSuite(int argc, char const *argv[]){

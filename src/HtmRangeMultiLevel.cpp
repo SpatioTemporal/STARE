@@ -74,7 +74,7 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::HtmRangeMultiLevelAtLevelFromIntersectio
 	resultRange->purge();
 	Key lo1,hi1,lo2,hi2;
 	range1->reset();
-	uint64 indexp1 = range1->getNext(lo1,hi1);
+	uint64 indexp1 = range1->getNext(lo1,hi1); // TODO indexp1 is actually a return code, with 0 == false -- "none found"
 	if (!indexp1) return 0;
 
 	if(htmIdLevel<0) {
@@ -303,7 +303,10 @@ int HtmRangeMultiLevel::isIn(HtmRangeMultiLevel & otherRange)
 	//
 	sav_rel = rel = -2;			// nothing
 
-	while((a = o.my_los->getkey()) > 0){
+	// TODO 2019-0327 ->getkey is suspect, esp. with > 0 here. Implicit assumption of key != 0...??? MLR
+	// OLD while((a = o.my_los->getkey()) > 0){
+	// TODO Add unit test.
+	while((a = o.my_los->getkey()) >= 0){
 		b = o.my_his->getkey();
 
 		rel = isIn(a, b); // TODO MLR Am I in that other guy's sub-interval? I think a design pattern is near...
@@ -448,7 +451,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	if( my_los->myHeader->getElement(0) == NIL ) {
 		my_los->insert(lo,100);
 		my_his->insert(hi,100);
-		cout << 8002 << " First one inserted. " << endl << flush;
+		// cout << 8002 << " First one inserted. " << endl << flush;
 		return;
 	}
 
@@ -740,16 +743,16 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
 //	my_his->insert(hi, (Value) 0);
-	cout << "x200: " << hex << lo << " " << hi << endl;
-	cout << "x201: " << (lo == hi) << endl;
+	// cout << "x200: " << hex << lo << " " << hi << endl;
+	// cout << "x201: " << (lo == hi) << endl;
 
 	if( lo == hi ) {
 		encoding->setId(lo);
-		cout << "lo,t: " << hex << " " << lo << " " << encoding->getIdTerminator_NoDepthBit() << endl;
+		// cout << "lo,t: " << hex << " " << lo << " " << encoding->getIdTerminator_NoDepthBit() << endl;
 		mergeRange(lo,encoding->getIdTerminator_NoDepthBit());
 	} else {
 		// TODO Simplest thing that might possibly work.
-		cout << "x250: " << hex << lo << " " << hi << endl;
+		// cout << "x250: " << hex << lo << " " << hi << endl;
 		// TODO should we coerce hi to be a terminator?
 		mergeRange(lo,hi);
 	}
@@ -1084,7 +1087,9 @@ int HtmRangeMultiLevel::nranges()
 
 	// This is a problem when lo can be zero. Is it?
 	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327
-	while((lo = my_los->getkey()) > 0){
+	// TODO skiplist works for keys above and below zero. Here using only positives. Fix.
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
 		n_ranges++;
 //		cout << "z020 " << n_ranges << flush;
 		// hi = my_his->getkey();
@@ -1109,7 +1114,8 @@ int HtmRangeMultiLevel::nindexes_in_ranges()
 	my_his->reset();
 //	cout << "z010" << endl << flush;
 
-	while((lo = my_los->getkey()) > 0){
+	// OLD while((lo = my_los->getkey()) > 0){ // MLR
+	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 //		cout << " : " << lo << ", " << hi << " " << flush << endl;
 
@@ -1155,7 +1161,8 @@ Key HtmRangeMultiLevel::bestgap(Key desiredSize)
 	my_los->reset();
 	my_his->reset();
 
-	while((lo = my_los->getkey()) > 0){
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 		n_ranges++;
 		if (oldhi > 0){
@@ -1427,7 +1434,8 @@ int HtmRangeMultiLevel::stats(int desiredSize)
 	my_los->reset();
 	my_his->reset();
 
-	while((lo = my_los->getkey()) > 0){
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
 		// cerr << "Compare lo = "  << lo;
 		n_ranges++;
 		hi = my_his->getkey();
@@ -1515,7 +1523,8 @@ std::ostream& operator<<(std::ostream& os, const HtmRangeMultiLevel& range) {
 	}
 	range.my_los->reset();
 	range.my_his->reset();
-	while((lo = range.my_los->getkey()) > 0){
+	// OLD while((lo = range.my_los->getkey()) > 0){
+	while((lo = range.my_los->getkey()) >= 0){
 		hi = range.my_his->getkey();
 		if (range.symbolicOutput){
 			strcpy(tmp_buf,range.encoding->nameById(lo));
@@ -1538,7 +1547,8 @@ std::ostream& operator<<(std::ostream& os, const HtmRangeMultiLevel& range) {
 		// os << lo << " " << hi << endl;
 		range.my_los->step();
 		range.my_his->step();
-		if(range.my_los->getkey()>0) {
+		// OLD if(range.my_los->getkey()>0) {
+		if(range.my_los->getkey()>=0) {
 			os << ", ";
 		}
 	}
@@ -1552,20 +1562,29 @@ std::ostream& operator<<(std::ostream& os, const HtmRangeMultiLevel& range) {
 
 int HtmRangeMultiLevel::getNext(Key &lo, Key &hi)
 {
+	// TODO Question: Can we have a key of 0? Or negative?
+	// Clearly at one time I was not expecting a Key of 0, and it is written somewhere that
+	// a key of zero is the "error" key. However, it is a valid rep of S0 in some contexts.
+	// NEGATIVE is still an error... I think.
+	// The real problem is when 0 is valid and then Key hi has meaning...
 //	cout << "a" << flush;
 	lo = my_los->getkey();
-	if (lo <= (Key) 0){
-		hi = lo = (Key) 0;
+	// OLD if (lo <= (Key) 0){
+	if (lo < (Key) 0){
+		// hi = lo = (Key) 0;
+		hi = lo = (Key) -1;
 		return 0;
 	}
 //	cout << "b" << flush;
 //	cout << " " << lo << " " << flush;
 	hi = my_his->getkey();
 //	cout << " " << hi << " " << flush;
-	if (hi <= (Key) 0){
+	// OLD if (hi <= (Key) 0){
+	if (hi < (Key) 0){
 		cout << endl;
 		cout << " getNext error!! " << endl << flush;
-		hi = lo = (Key) 0;
+		// hi = lo = (Key) 0;
+		hi = lo = (Key) -1;
 		return 0;
 	}
 	my_his->step();
@@ -1577,8 +1596,10 @@ int HtmRangeMultiLevel::getNext(Key &lo, Key &hi)
 int HtmRangeMultiLevel::getNext(Key *lo, Key *hi)
 {
 	*lo = my_los->getkey();
-	if (*lo <= (Key) 0){
-		*hi = *lo = (Key) 0;
+	// OLD if (*lo <= (Key) 0){
+	// OLD	*hi = *lo = (Key) 0;
+	if (*lo < (Key) 0){
+		*hi = *lo = (Key) -1;
 		return 0;
 	}
 	*hi = my_his->getkey();
@@ -1623,7 +1644,8 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 	///
 	/// TODO Add input parser for symbolic format.
 
-	while((lo = my_los->getkey()) > 0){
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 		if (symbolic){
 			strcpy(tmp_buf,encoding->nameById(lo));
@@ -1657,7 +1679,8 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 		os << tmp_buf;
 		my_los->step();
 		my_his->step();
-		if(my_los->getkey()>0) {
+		// OLD if(my_los->getkey()>0) {
+		if(my_los->getkey()>=0) {
 			os << ", ";
 		}
 	}
@@ -1679,7 +1702,8 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 	my_los->reset();
 	my_his->reset();
 
-	while((lo = my_los->getkey()) > 0){
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 		if (what != BOTH) {
 			if (symbolic){
