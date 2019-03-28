@@ -808,6 +808,7 @@ void testEmbeddedLevelNameEncoding() {
 	{
 		string failureMessage = "'";
 		string foundName ="'";
+		/* Left justified can now handle an id value of 0, equaling S0.
 		try {
 			foundName += name->nameById(0);
 		} catch (const SpatialFailure& failure) {
@@ -816,6 +817,7 @@ void testEmbeddedLevelNameEncoding() {
 		foundName += "'";
 		failureMessage += "'";
 		ASSERT_EQUALM("INVALID ID 0","'EmbeddedLevelNameEncoding::nameById-INVALID_ID_0'",failureMessage);
+		*/
 
 		foundName ="'";
 		foundName += name->nameById(name->idByName("N3"));

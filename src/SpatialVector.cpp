@@ -123,34 +123,49 @@ SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
 bool
 SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
   
-  if (latlon_) {
-    lat = latDegrees_;
-    lon = lonDegrees_;
-  } else {
-    float64 X,Y,Z;
-    X = x_; Y = y_; Z = z_;
-    if(length()!=1) { // TODO: Repent disrespecting machine precision
-      // TODO A logger would be useful here.
-      // throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
+	if (latlon_) {
+		lat = latDegrees_;
+		lon = lonDegrees_;
+	} else {
+		float64 X,Y,Z;
+		X = x_; Y = y_; Z = z_;
+		if(length()!=1) { // TODO: Repent disrespecting machine precision
+			// TODO A logger would be useful here.
+			// throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
 
-      // Deal with it.
-      float64 L = sqrt( X*X + Y*Y + Z*Z );
-      X /= L; Y /= L; Z /= L;
-    } 
-    lat = asin(Z)/gPr; // easy.
-    float64 cd = cos(lat*gPr);
-    if(cd>gEpsilon || cd<-gEpsilon)
-      if(Y>gEpsilon || Y<-gEpsilon)
-	if (Y < 0.0)
-	  lon = 360 - acos(X/cd)/gPr;
-	else
-	  lon = acos(X/cd)/gPr;
-      else
-	lon = (X < 0.0 ? 180.0 : 0.0);
-    else
-      lon=0.0;
-  }
-  return latlon_;
+			// Deal with it.
+			float64 L = sqrt( X*X + Y*Y + Z*Z );
+			X /= L; Y /= L; Z /= L;
+		}
+
+		lat = asin(Z); // easy.
+		float64 cd = cos(lat);
+		lat /= gPr;
+
+		if(cd>gEpsilon || cd<-gEpsilon) {
+			if(Y>gEpsilon || Y<-gEpsilon) {
+//				if(abs(X) < 1.0e-7) {
+//					std::cout << 1000 << " x_,X,cd,X/cd: " << x_ << "," << X  << "," << cd << "," << X/cd << std::endl << std::flush;
+//				}
+				float64 mu = X/cd; // Note, we normalized above so this should be within [-1,1] to within machine error.
+				if( abs(mu) > 1 ) {
+					lon = (X < 0.0 ? 180.0 : 0.0);
+				} else {
+					if (Y < 0.0) {
+						lon = 360 - acos(mu)/gPr;
+					} else {
+						lon = acos(mu)/gPr;
+					}
+				}
+			} else {
+				lon = (X < 0.0 ? 180.0 : 0.0);
+			}
+		} else {
+			lon=0.0;
+		}
+	}
+
+	return latlon_;
 }
 
 /////////////GET//////////////////////////////////////////
