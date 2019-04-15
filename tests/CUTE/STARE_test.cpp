@@ -7,6 +7,7 @@
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
 
+#include <iostream>
 #include "Test.h"
 
 
@@ -234,6 +235,7 @@ void STARE_test() {
 		uint64 neighbors_v[9];
 		sIndex.NeighborsAcrossVerticesFromEdges(neighbors_v, neighbors_e, np_htmid, workspace_ev);
 
+		/*
 		uint64 neighbors_[12];
 		for(int i=0; i<9; ++i) {
 			neighbors_[i] = neighbors_v[i];
@@ -241,6 +243,7 @@ void STARE_test() {
 		for(int i=9; i<12; ++i) {
 			neighbors_[i] = neighbors_e[i-9];
 		}
+		*/
 
 		// cout << 90 << endl << flush;
 
@@ -353,6 +356,126 @@ void STARE_test() {
 				*/
 	}
 
+
+	if(false) { // Try a lookup at a number of levels to verify center latlon vs. geolocation...
+		LatLonDegrees64 latlon1(32.5735,-100.05);
+		STARE index2;
+		// STARE index2(index.getSearchLevel(),index.getBuildLevel(),index.getRotation());
+		STARE_ArrayIndexSpatialValue idx = index2.ValueFromLatLonDegrees(latlon1.lat,latlon1.lon);
+
+		cout << "latlon1: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon1.lat << "," << latlon1.lon << " idx = " << hex << idx << dec << " rLevel = default = 27 " << endl << flush;
+
+		LatLonDegrees64 latlon2 = index2.LatLonDegreesFromValue(idx);
+		cout << "latlon2: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon2.lat << "," << latlon2.lon-360
+				<< endl << flush;
+
+		Triangle tr = index2.TriangleFromValue(idx);
+		float64 tLat,tLon;
+		bool ok = tr.centroid.getLatLonDegrees(tLat, tLon);
+		cout << "latlonT: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<<  tLat << "," << tLon-360
+				<< endl << flush;
+		/* --- */
+
+		int rLevel = 20;
+		idx = index2.ValueFromLatLonDegrees(latlon1.lat,latlon1.lon,rLevel);
+
+		cout << "latlon1: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon1.lat << "," << latlon1.lon << " idx = " << hex << idx << dec << " rLevel = " << rLevel << endl << flush;
+
+		latlon2 = index2.LatLonDegreesFromValue(idx);
+		cout << "latlon2: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon2.lat << "," << latlon2.lon-360
+				<< endl << flush;
+
+		tr = index2.TriangleFromValue(idx);
+		ok = tr.centroid.getLatLonDegrees(tLat, tLon);
+				cout << "latlonT: "
+						<< setprecision(18)
+						<< setw(20)
+						<< scientific
+						<<  tLat << "," << tLon-360
+						<< endl << flush;
+
+		if(false) {
+			cout << ok;
+		}
+
+		/* --- */
+
+		rLevel = 26;
+		idx = index2.ValueFromLatLonDegrees(latlon1.lat,latlon1.lon,rLevel);
+
+		cout << "latlon1: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon1.lat << "," << latlon1.lon << " idx = " << hex << idx << dec << " rLevel = " << rLevel << endl << flush;
+
+		latlon2 = index2.LatLonDegreesFromValue(idx);
+		cout << "latlon2: "
+				<< setprecision(18)
+				<< setw(20)
+				<< scientific
+				<< latlon2.lat << "," << latlon2.lon-360
+				<< endl << flush;
+
+		tr = index2.TriangleFromValue(idx);
+		ok = tr.centroid.getLatLonDegrees(tLat, tLon);
+				cout << "latlonT: "
+						<< setprecision(18)
+						<< setw(20)
+						<< scientific
+						<<  tLat << "," << tLon-360
+						<< endl << flush;
+
+		/* --- */
+
+				rLevel = 5;
+				idx = index2.ValueFromLatLonDegrees(latlon1.lat,latlon1.lon,rLevel);
+
+				cout << "latlon1: "
+						<< setprecision(18)
+						<< setw(20)
+						<< scientific
+						<< latlon1.lat << "," << latlon1.lon << " idx = " << hex << idx << dec << " rLevel = " << rLevel << endl << flush;
+
+				latlon2 = index2.LatLonDegreesFromValue(idx);
+				cout << "latlon2: "
+						<< setprecision(18)
+						<< setw(20)
+						<< scientific
+						<< latlon2.lat << "," << latlon2.lon-360
+						<< endl << flush;
+
+				tr = index2.TriangleFromValue(idx);
+				ok = tr.centroid.getLatLonDegrees(tLat, tLon);
+						cout << "latlonT: "
+								<< setprecision(18)
+								<< setw(20)
+								<< scientific
+								<<  tLat << "," << tLon-360
+								<< endl << flush;
+
+				/* --- */
+	}
 
 	/* */
 
