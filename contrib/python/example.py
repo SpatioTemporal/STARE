@@ -26,6 +26,8 @@ for i in range(len(lat_array)):
     print('output')
     print( ' lat,lon:   ',lat[i],lon[i] )
     print( ' idx:       ',hex(idx[i]))
-    print( " ll-tool:   ",os.popen("~/workspace/STARE-CMAKE/build/default/app/lowlevel-lookup-tool --quiet --STARE --latlon 8 30 45",'r',1).read() )
+    print( " ll-tool:   ",os.popen("~/workspace/STARE-CMAKE/build/default/app/lowlevel-lookup-tool --quiet --STARE --latlon "+str(level)+" "+str(lat_array[i])+" "+str(lon_array[i]),'r',1).read() )
+
+
 
 
