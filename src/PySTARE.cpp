@@ -142,9 +142,9 @@ public:
 		bn::ndarray result_lon = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
 		for(int i=0; i<shape[0]; ++i) {
 			STARE_ArrayIndexSpatialValue idx = *reinterpret_cast<STARE_ArrayIndexSpatialValue*>(values.get_data() + i*strides[0]);
-			std::cout << "idx: " << idx << std::endl << std::flush;
+			// std::cout << "idx: " << idx << " " << std::hex << idx << std::dec << std::endl << std::flush;
 			LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(idx);
-			std::cout << "ll1: " << latlon1.lat << ", " << latlon1.lon << std::endl << std::flush;
+			// std::cout << "ll1: " << latlon1.lat << ", " << latlon1.lon << std::endl << std::flush;
 			result_lat[i] = latlon1.lat;
 			result_lon[i] = latlon1.lon;
 		}
