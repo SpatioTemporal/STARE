@@ -160,7 +160,7 @@ void idReallyDeep() {
 	for(int i=0;i<1024;i++)expected[i] = 0;
 	expected[0] = 'S';
 	uint64 htmID=2;
-	for(uint i=1; i<level+2; i++) { // GOTCHA IN SWITCH TO LEVEL
+	for(uint32 i=1; i<level+2; i++) { // GOTCHA IN SWITCH TO LEVEL
 		uint64 triangle = rand() % 4;
 		//		triangle = 0;
 		expected[i] = '0' + triangle;
@@ -366,6 +366,8 @@ void testNodeVertexAtLevelZero() {
 		ASSERT_EQUAL(0,(v2+z).length());
 		ASSERT_EQUAL(0,(v3-x).length());
 	}
+
+//	ASSERT_EQUAL(1,2);
 //	FAIL();
 
 }
@@ -374,9 +376,11 @@ void testNodeVertexAtLevelZero() {
  * Verify the symbolic name encoding using bit shifting.
  */
 void checkBitShiftNameEncoding0() {
+//	ASSERT_EQUAL(1,2);
+
 	BitShiftNameEncoding bitShiftName = BitShiftNameEncoding();
 
-	uint htmId = 12683;
+	int htmId = 12683;
 	string found = "'"+string(bitShiftName.nameById(htmId))+"'";
 	ASSERT_EQUALM("N012023 == 12683?","'N012023'",found);
 	ASSERT_EQUALM("12683 == N012023?",12683,bitShiftName.idByName("N012023"));
@@ -3150,7 +3154,7 @@ void testHstmEqualp() {
 }
 
 void testIndexBug() {
-	uint level       = 4;
+	uint32 level       = 4;
 	int idLevel     = 23;
 	int maxLevel    = 5; // aka buildLevel
 

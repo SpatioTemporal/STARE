@@ -16,10 +16,15 @@ endif()
 
 message("\n------------ Running cmake for project STARE ------------\n")
 
+# Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
 if(EXISTS "${CUTE_INCLUDE_DIR}")
-     message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
+    message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
+    # enable_testing()
+    include(CTest)
+    message( " CUTE Testing Enabled\n" )
 else()
-     message( FATAL_ERROR " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\n ")
+     # message( FATAL_ERROR " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\n ")
+     message( WARNING " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\nContinuing without configuring tests...\n")
 endif()
 
 # Set CC and CXX before calling cmake...
@@ -39,12 +44,15 @@ endif()
 #add_subdirectory is used when the subdirectory has its own CMakeLists.txt
 # Otherwise, include_directories is used to access files in the directory
 include_directories(${PROJECT_SOURCE_DIR}/include )
-add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)
+if(BUILD_TESTING)
+  message( "Adding tests...\n" )
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)
+endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 
-#target_include_directories(hstm PUBLIC ${CUTE_INCLUDE_DIR}/cute)
-
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
+
+
 

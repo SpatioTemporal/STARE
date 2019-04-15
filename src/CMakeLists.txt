@@ -49,7 +49,7 @@ if(Boost_FOUND)
   set_target_properties( PySTARE PROPERTIES PREFIX "" )
   target_link_libraries( PySTARE ${Boost_LIBRARIES} )
 else()
-  message("Boost not found, not creating shared object PySTARE, including python API. Was BOOST_ROOT set?")  
+  message("Boost not found, not creating shared object PySTARE, including the python 3 API. Was BOOST_ROOT set?\nContinuing...\n")  
 endif()
 
 

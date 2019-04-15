@@ -28,14 +28,14 @@ char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 		// throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
 	}
 
-	uint nameSize = levelById(id)+3; ///< levelById is local to the encoding
+	int nameSize = levelById(id)+3; ///< levelById is local to the encoding
 	char *returnedName = new char[nameSize];
 	if(id & NorthSouthBit) {
 		returnedName[0] = 'N';
 	} else {
 		returnedName[0] = 'S';
 	}
-	for(uint64 i=1;i<nameSize-1;i++) {
+	for(int i=1;i<nameSize-1;i++) {
 		int c = '0' + (int) ((id >> (62 - 2*i)) & (uint32) 3);
 		returnedName[i] = (char) c;
 	}
@@ -259,14 +259,14 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
  * @param level
  */
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool keepAllBits ) {
-	uint oldLevel = this->getLevel();
+	uint32 oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
 	keepBits++; // Position 62
 	uint64 newId;
 	if(level < oldLevel) {
 		for(int i=62;i>5;i-=2){
-			uint levelAtI = (62-i)/2;
+			int levelAtI = (62-i)/2;
 			keepBits = keepBits << 2;
 			if((level < levelAtI) && (levelAtI < oldLevel)) {
 				if(keepAllBits) { keepBits += 3; }
