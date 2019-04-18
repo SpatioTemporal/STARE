@@ -26,6 +26,7 @@ set (
   SpatialRotation.C
   STARE.C
   TemporalIndex.cpp
+  TemporalWordFormat1.cpp
   VarStr.C )
   
 # TODO Trouble with VarStr.hpp# TODO Trouble with VarStr.hpp
