@@ -92,7 +92,9 @@ public:
 		return ss.str();
 	}
 
-	string   getName()   const { cout << "y100 '" << name << "'" << endl << flush; return name; }
+	string   getName()   const {
+		// cout << "y100 '" << name << "'" << endl << flush;
+		return name; }
 	int64_t  getMask()   const { return mask; }
 	int64_t  getOffset() const { return offset; }
 	int64_t  getMaxValue() const { return maxValue; }
@@ -101,10 +103,10 @@ public:
 
 	int64_t  getValue()  const { return value; }
 	void     setValue(int64_t value) {
-		cout << "- setValue - " << value << endl << flush;
-		cout << "- setValue 0 " << this->value << endl << flush;
+		// cout << "- setValue - " << value << endl << flush;
+		// cout << "- setValue 0 " << this->value << endl << flush;
 		this->value = value;
-		cout << "- setValue 1 " << this->value << endl << flush;
+		// cout << "- setValue 1 " << this->value << endl << flush;
 	}
 	int64_t getCoFieldId() const { return coFieldId; }
 };

@@ -57,7 +57,7 @@ public:
 		bitFields.push_back(
 				new BitField("year",
 						pow(2,20)-1, // maxValue
-						20, // width
+						19, // width
 						offset_base,
 						(13ll*28+1)*24*3600*1000,
 						coFieldId--
@@ -144,8 +144,8 @@ public:
 
 		bitFields.push_back(
 				new BitField("resolution",
-						32, // maxValue
-						5, // width
+						pow(2,6)-1, // maxValue
+						6, // width
 						offset_base,
 						-1, // time unit, not applicable
 						coFieldId-- // coResolutionLevel-- // -1, i.e. N/A
@@ -212,7 +212,7 @@ public:
 	TemporalIndex() {
 		data = temporalWordFormat; // Copy the format
 		// data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
-		data.setValue("resolution",64);
+		data.setValue("resolution",63);
 	};
 	virtual ~TemporalIndex();
 	TemporalIndex(
@@ -333,7 +333,7 @@ public:
 			// past
 			idx_ = -idx_;
 		} // else future...
-		idx_ = idx_ | MASK_AND_SHIFT_RESOLUTION(coResolutionLevel);
+		// old idx_ = idx_ | MASK_AND_SHIFT_RESOLUTION(coResolutionLevel);
 		return idx_;
 	};
 #undef MASK_AND_SHIFT

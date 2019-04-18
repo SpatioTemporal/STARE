@@ -50,9 +50,9 @@ public:
 	}
 	TemporalWordFormat1& setValue(string name, int64_t value) {
 		if(name != "resolutionLevel") {
-			cout << "setting " << name << " to " << value << endl << flush;
+			// cout << "setting " << name << " to " << value << endl << flush;
 			bitFieldMap.at(name)->setValue(value);
-			cout << name << " set to " << bitFieldMap.at(name)->getValue() << endl << flush;
+			// cout << name << " set to " << bitFieldMap.at(name)->getValue() << endl << flush;
 		} else {
 			bitFieldMap.at("coResolutionLevel")->setValue(resolutionLevelConstraint-value);
 		}
@@ -68,16 +68,17 @@ public:
 	}
 
 	void setZero() {
+		// Note we save type here.
 		int64_t type = bitFieldMap.at("type")->getValue();
-		int64_t coResolutionLevel = bitFieldMap.at("coResolutionLevel")->getValue();
+		// int64_t coResolutionLevel = bitFieldMap.at("coResolutionLevel")->getValue();
 		for(map<string,BitField*>::iterator it = bitFieldMap.begin(); it != bitFieldMap.end(); ++it) {
 			(*it).second->setValue(0);
 		}
 		bitFieldMap.at("type")->setValue(type);
-		bitFieldMap.at("coResolutionLevel")->setValue(coResolutionLevel);
+		// bitFieldMap.at("coResolutionLevel")->setValue(coResolutionLevel);
 	}
 
-	// TODO throw excpetion if levelName is not a resolution level, i.e. a non-level field
+	// TODO throw exception if levelName is not a resolution level, i.e. a non-level field
 	int64_t getCoFieldId(string levelName) {
 		return bitFieldMap.at(levelName)->getCoFieldId();
 	}
