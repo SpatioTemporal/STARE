@@ -8,7 +8,7 @@ set (
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
   STARE_test.cpp
-  STARE_Temporal_test.cpp
+  TemporalIndex_test.cpp
   Test.h 
   )
 

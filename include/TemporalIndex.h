@@ -25,16 +25,14 @@ namespace std {
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
 public:
 	TemporalWordFormat() {
-
-		maxCoResolutionLevelValue =  9;  // Would be const in a perfect universe.
-		minCoResolutionLevelValue = -1; // Corresponds to "Ma"
-		resolutionLevelConstraint =  7; // Counts the number of levels, including
+		// resolutionLevelConstraint =  7; // Counts the number of levels, including
 		nonDataLevels             =  3;
 
 		// maxCoResolutionLevelValue = 9; // Is actually more than we count in resLevel.
 		int64_t offset_base = 64;
-		int64_t coResolutionLevel = maxCoResolutionLevelValue;
-		int64_t coFieldId = maxCoResolutionLevelValue;
+//		int64_t coResolutionLevel = maxCoResolutionLevelValue;
+//		int64_t coFieldId = maxCoResolutionLevelValue;
+		int64_t fieldId = 0;
 		// int64_t resolutionLevel = -2;  // TODO Fix hackery
 		// resolutionLevelConstraint = coResolutionLevel + resolutionLevel;
 		/// coResolutionLevel + resolutionLevel = maxCoResolutionLevelValue - 2
@@ -49,18 +47,19 @@ public:
 						1, // width
 						offset_base, // address/offset // in: 64; set to: 63 out: 63
 						-2,   // scale -- really need N/A here
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
+		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
 				new BitField("year",
-						pow(2,20)-1, // maxValue
+						pow(2,19)-1, // maxValue
 						19, // width
 						offset_base,
 						(13ll*28+1)*24*3600*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -71,7 +70,7 @@ public:
 						4, // width
 						offset_base,
 						28ll*24*3600*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -82,7 +81,7 @@ public:
 						2, // width
 						offset_base,
 						7*24*3600*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -93,7 +92,7 @@ public:
 						3, // width
 						offset_base,
 						24*3600*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -104,7 +103,7 @@ public:
 						5, // width
 						offset_base,
 						3600*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -115,7 +114,7 @@ public:
 						6, // width
 						offset_base,
 						60*1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -126,18 +125,19 @@ public:
 						6, // width
 						offset_base,
 						1000,
-						coFieldId--
+						fieldId++
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
+		pos_FinestResolutionLevel = fieldId;
 		bitFields.push_back(
 				new BitField("millisecond",
 						999, // maxValue
 						10, // width
 						offset_base,
 						1, // time unit
-						coFieldId-- // the actual low, should equal zero
+						fieldId++ // the actual low, should equal zero
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -148,7 +148,7 @@ public:
 						6, // width
 						offset_base,
 						-1, // time unit, not applicable
-						coFieldId-- // coResolutionLevel-- // -1, i.e. N/A
+						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
@@ -159,10 +159,14 @@ public:
 						2, // width
 						offset_base,
 						-1, // time unit, not applicable
-						-1 // N/A
+						fieldId++ // N/A
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+
+
+		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
+		setFieldMaxId(fieldId-1);
 
 		/*
 		bitFields.push_back(
@@ -264,16 +268,32 @@ public:
 
 // #define SHIFT_AND_MASK(field) field = mask_##field & (idx_ >> offset_##field ) ;
 #define SHIFT_AND_MASK(field) data.setValue(#field,data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset()));
-#define SHIFT_AND_MASK_RESOLUTION(field) \
-		data.setValue(#field, \
-				data.resolutionLevelConstraint \
-				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
+#define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
+
+
+	int leapYearDay(int64_t _year) {
+		// From wikipedia
+		int leapyear_day = 0;
+		if( (_year % 4) != 0 ) {
+			leapyear_day = 0;
+		} else if( (_year % 100) != 0 ) {
+			leapyear_day = 1;
+		} else if( (_year % 400) != 0 ) {
+			leapyear_day = 0;
+		} else { leapyear_day = 1; }
+		return leapyear_day;
+	}
+
+//#define SHIFT_AND_MASK_RESOLUTION(field) \
+//		data.setValue(#field, \
+//				data.resolutionLevelConstraint \
+//				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
 
 	TemporalIndex(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
-		SHIFT_AND_MASK_RESOLUTION(coResolutionLeee)
+		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
 		if(idx_<0) {
 			idx_ = - idx_;
 		}
@@ -282,13 +302,46 @@ public:
 		SHIFT_AND_MASK(week)
 		SHIFT_AND_MASK(day)
 		SHIFT_AND_MASK(hour)
-		SHIFT_AND_MASK(minute);
+		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
+		SHIFT_AND_MASK(resolution)
 		SHIFT_AND_MASK(type)
+
+		// Note: data.getValue("resolution") == 63 for a terminator.
+
+		// TODO Come up with a better leap year handler
+		// TODO Think through temporal design re: translation to & from dates.
+
+		if( data.getValue("resolution") == 63 ) {
+//			// Fix things up if this is a terminator
+			if(data.getValue("year") > 0) {
+				data.setValue("month",13);
+				data.setValue("week",0);
+				data.setValue("day",0);
+				// data.setValue("day",leapYearDay(data.getValue("year")));
+			}
+			SET_MAX(year);
+			if(data.getValue("month") > 12) {
+				data.setValue("month",13);
+				data.setValue("week",0);
+				data.setValue("day",0);
+				// data.setValue("day",leapYearDay(data.getValue("year")));
+			}
+			SET_MAX(month);
+			SET_MAX(week);   // ok
+			SET_MAX(day);    // ok
+			SET_MAX(hour);   // ok
+			SET_MAX(minute); // ok
+			SET_MAX(second); // ok
+			SET_MAX(millisecond); // ok
+
+		}
 	};
+#undef SET_MAX
 #undef SHIFT_AND_MASK
-#undef SHIFT_AND_MASK_RESOLUTION
+
+// #undef SHIFT_AND_MASK_RESOLUTION
 
 	/*
 	int64_t getCoResolutionLevel(string levelName) {
@@ -303,15 +356,15 @@ public:
 		return data.getCoFieldId(levelName);
 	}
 	int64_t getFieldId(string levelName) {
-		return data.resolutionLevelConstraint - data.getCoFieldId(levelName);
+		return data.getFieldId(levelName);
 	}
 
 	// TODO Check for errors/integrity of data value.
 // #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
 #define MASK_AND_SHIFT(field) (( data.get(#field)->getMask() & data.getValue(#field) ) \
 		<< data.get(#field)->getOffset() )
-#define MASK_AND_SHIFT_RESOLUTION(field) (( data.get(#field)->getMask() & (data.resolutionLevelConstraint-data.getValue(#field)) ) \
-		<< data.get(#field)->getOffset() )
+// #define MASK_AND_SHIFT_RESOLUTION(field) (( data.get(#field)->getMask() & (data.resolutionLevelConstraint-data.getValue(#field)) ) \
+//		<< data.get(#field)->getOffset() )
 	int64_t scidbTemporalIndex() {
 		int64_t idx_;
 //		cout << "100 ms: " << millisecond << " " << (0x3ffll  & millisecond) << endl << flush;
@@ -339,15 +392,31 @@ public:
 #undef MASK_AND_SHIFT
 #undef MASK_AND_SHIFT_RESOLUTION
 
+/*
+ * Keep the level
+ * Use resolution full (all bits set) to flag terminator.
+ */
 	int64_t scidbTerminator() {
 //		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
+		// cout << "a";
 		TemporalIndex tmpIndex(this->scidbTemporalIndex());
+		// cout << "b";
 		// tmpIndex.data.setTerminatorBelowLevel(get_coResolutionLevel());
-		tmpIndex.data.setTerminatorBelowLevel(get_resolution());
+		tmpIndex.data.setTerminatorBelowResolution(get_resolution());
+		// cout << "c";
 		int64_t idx_ = tmpIndex.scidbTemporalIndex();
-		idx_ = idx_ | tmpIndex.data.get("coResolutionLevel")->getMask();
+		// cout << "d";
+		idx_ = idx_
+				| (tmpIndex.data.get("resolution")->getMask() <<  tmpIndex.data.get("resolution")->getOffset())
+				| ( (tmpIndex.data.get("type")->getValue() <<  tmpIndex.data.get("type")->getOffset()) )
+				;
 		return idx_;
 	};
+
+	bool scidbTerminatorp() {
+		int64_t resolution = this->data.getValue("resolution");
+		return resolution == 63;
+	}
 
 	TemporalIndex &set_zero() {
 		data.setZero();
@@ -371,10 +440,11 @@ public:
 	SET(type)
 	// SET(coResolutionLevel)
 #undef  SET
-	TemporalIndex &set_resolutionLevel(int64_t level) {
-		data.setValue("coResolutionLevel",data.resolutionLevelConstraint - level); // TODO refactor
-		return *this;
-	}
+	// below is obsolete and wrong
+//	TemporalIndex &set_resolutionLevel(int64_t level) {
+//		data.setValue("coResolutionLevel",data.resolutionLevelConstraint - level); // TODO refactor
+//		return *this;
+//	}
 
 #define GET(field) int64_t get_##field() { return data.getValue(#field); }
 	GET(BeforeAfterStartBit)
@@ -452,17 +522,8 @@ public:
 		int days_in_month[] = {
 				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 		};
-		// From wikipedia
-		int leapyear_day = 0;
-		if( (_year % 4) != 0 ) {
-			leapyear_day = 0;
-		} else if( (_year % 100) != 0 ) {
-			leapyear_day = 1;
-		} else if( (_year % 400) != 0 ) {
-			leapyear_day = 0;
-		} else { leapyear_day = 1; }
 
-		days_in_month[1] += leapyear_day;
+		days_in_month[1] += leapYearDay(_year);
 
 		int64_t days_in_months = 0;
 
@@ -488,10 +549,11 @@ public:
 		SCALE(week);
 		SCALE(day);
 		SCALE(hour);
+		SCALE(minute);
 		SCALE(second);
 #undef SCALE
-		data.incrementAtLevel("ka",   0);
-		data.incrementAtLevel("year", 0);
+		// data.incrementAtName("ka",   0);
+		data.incrementAtName("year", 0);
 		data.setValue("millisecond",_millisecond);
 		data.setValue("BeforeAfterStartBit",1);
 	}
@@ -518,6 +580,7 @@ public:
 		SCALE(week);
 		SCALE(day);
 		SCALE(hour);
+		SCALE(minute);
 		SCALE(second);
 		SCALE(millisecond);
 #undef SCALE
@@ -608,17 +671,20 @@ public:
 
 	  stringstream ss;
 	  // ss << tIndex;
+	  // << setw(4) << setfill('0') << year << "-"
 	  ss
-	    << setw(4) << setfill('0') << year << "-"
+	    << setw(9) << setfill('0') << year << "-"
 	    << setw(2) << setfill('0') << month << "-"
 	    << setw(2) << setfill('0') << day_of_month << " "
 	    << setw(2) << hour << ":"
 	    << setw(2) << minute << ":"
 	    << setw(2) << second << "."
 	    << setw(3) << millisecond
-	    << " (" << setw(2) << data.getValue("resolutionLevel") << ")";
+		<< " (" << setw(2) << data.getValue("resolution") << ")"
+		<< " (" << setw(1) << data.getValue("type") << ")"
+		;
 
-	  return ss.str();
+	  return ss.str(); // Traditional date
 	}
 
 	void hackFromTraditionalString(string traditionalString) {
@@ -659,9 +725,11 @@ public:
 	    << setw(1) << setfill('0') << data.getValue("day") << " "
 		<< setw(2) << setfill('0') << data.getValue("hour") << ":"
 		<< setw(2) << setfill('0') << data.getValue("minute") << ":"
-	    << setw(4) << setfill('0') << data.getValue("second") << "."
+	    << setw(2) << setfill('0') << data.getValue("second") << "."
 	    << setw(3) << setfill('0') << data.getValue("millisecond")
-	    << " (" << setw(2) << data.getValue("resolution") << ")";
+	    << " (" << setw(2) << data.getValue("resolution") << ")"
+	    << " (" << setw(1) << data.getValue("type") << ")"
+		;
 
 	  return ss.str();
 	}
@@ -693,5 +761,7 @@ public:
 };
 
 } /* namespace std */
+
+void TemporalIndex_test();
 
 #endif /* SRC_TEMPORALINDEX_H_ */

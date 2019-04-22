@@ -37,7 +37,8 @@ class BitField {
 	int64_t offset;
 	int64_t scale;
 	int64_t headroom;
-	int64_t coFieldId; /// Index bit fields from the right of the word.
+	int64_t fieldId; /// Index bit fields from the right of the word.
+	int64_t maxFieldId = 0;
 public:
 	BitField();
 	BitField(
@@ -46,14 +47,14 @@ public:
 			int64_t width,
 			int64_t &offset,
 			int64_t scale,
-			int64_t coFieldId
+			int64_t fieldId
 			) :
 	name(name),
 	maxValue(maxValue),
 	width(width),
 	offset(offset-width),
 	scale(scale),
-	coFieldId(coFieldId)
+	fieldId(fieldId)
 	{
 		mask = pow(2ll,width) -1;
 		headroom = mask - maxValue;
@@ -70,10 +71,12 @@ public:
 			<< setw(12) << "maxValue"
 			<< setw(9)  << "headroom"
 			<< setw(7)  << "width"
+			<< setw(8)  << "mask"
 			<< setw(8)  << "offset"
 			<< setw(20) << "scale"
-			<< setw(11)  << "coFieldId";
-
+			<< setw(4)  << "fId"
+			<< setw(8)  << "max-fId"
+			;
 		return ss.str();
 	}
 
@@ -85,10 +88,12 @@ public:
 			<< setw(12) << maxValue
 			<< setw(9)  << headroom
 			<< setw(7)  << width
+			<< setw(8)  << mask
 			<< setw(8)  << offset
 			<< setw(20) << scale
-			<< setw(11) << coFieldId;
-
+			<< setw(4)  << fieldId
+			<< setw(8)  << maxFieldId
+			;
 		return ss.str();
 	}
 
@@ -108,7 +113,11 @@ public:
 		this->value = value;
 		// cout << "- setValue 1 " << this->value << endl << flush;
 	}
-	int64_t getCoFieldId() const { return coFieldId; }
+
+	void setMaxFieldId(int64_t maxFieldId) { this->maxFieldId = maxFieldId;	}
+	int64_t getMaxFieldId()const { return maxFieldId;	}
+	int64_t getFieldId()   const { return fieldId; }
+	int64_t getCoFieldId() const { return maxFieldId - fieldId; }
 };
 
 }

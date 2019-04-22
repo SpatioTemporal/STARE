@@ -19,9 +19,13 @@ public:
 	vector<BitField*>     bitFields;   // Construct order... Verify object identity?
 	map<string,BitField*> bitFieldMap; // Holds the data, can we have the same obj as previous?
 
+	// It is assumed that pos_FinestResolutionLevel < pos_CoarsestResolutionLevel
+	int64_t pos_CoarsestResolutionLevel = -1;
+	int64_t pos_FinestResolutionLevel = -1;
+
 	int64_t maxCoResolutionLevelValue =  9;  // Would be const in a perfect universe.
 	int64_t minCoResolutionLevelValue = -1; // Corresponds to "Ma"
-	int64_t resolutionLevelConstraint =  7;
+	// int64_t resolutionLevelConstraint =  7;
 	int64_t nonDataLevels             =  3; // Was 2 when there was no type.
 
 	TemporalWordFormat1(); // Overload this
@@ -30,7 +34,7 @@ public:
 	void print() const {
 
 		bool first = true;
-		int i = 10;
+		int i = 0;
 		for(vector<BitField*>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
 			if(first) {
 				cout << "    " << (*it)->toStringHeader() << endl << flush;
@@ -38,127 +42,171 @@ public:
 			}
 			cout
 			<< setw(4)
-			<< dec << --i << hex << " "
+			<< dec << i++ << hex << " "
 			<< (*it)->toString() << endl << flush;
 			// << (*it).toString() << endl << flush;
 		}
 	}
+
+	void setFieldMaxId(int64_t fieldMaxId) {
+		for(vector<BitField*>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
+			(*it)->setMaxFieldId(fieldMaxId);
+		}
+	}
+
 	BitField* get(string name) const {
 		// cout << "x100 '" << endl << flush;
 		// << bitFieldMap.at(name).getName() << "'" << endl << flush;
 		return bitFieldMap.at(name);
 	}
 	TemporalWordFormat1& setValue(string name, int64_t value) {
-		if(name != "resolutionLevel") {
-			// cout << "setting " << name << " to " << value << endl << flush;
-			bitFieldMap.at(name)->setValue(value);
-			// cout << name << " set to " << bitFieldMap.at(name)->getValue() << endl << flush;
-		} else {
-			bitFieldMap.at("coResolutionLevel")->setValue(resolutionLevelConstraint-value);
-		}
+		bitFieldMap.at(name)->setValue(value);
 		return *this;
 	}
 	int64_t getValue(string name) {
-	  if(name != "resolutionLevel") {
 		return bitFieldMap.at(name)->getValue();
-	  } else {
-	    return
-	      resolutionLevelConstraint - bitFieldMap.at("coResolutionLevel")->getValue();
-	  }
 	}
 
 	void setZero() {
 		// Note we save type here.
 		int64_t type = bitFieldMap.at("type")->getValue();
-		// int64_t coResolutionLevel = bitFieldMap.at("coResolutionLevel")->getValue();
 		for(map<string,BitField*>::iterator it = bitFieldMap.begin(); it != bitFieldMap.end(); ++it) {
 			(*it).second->setValue(0);
 		}
 		bitFieldMap.at("type")->setValue(type);
-		// bitFieldMap.at("coResolutionLevel")->setValue(coResolutionLevel);
 	}
 
 	// TODO throw exception if levelName is not a resolution level, i.e. a non-level field
 	int64_t getCoFieldId(string levelName) {
 		return bitFieldMap.at(levelName)->getCoFieldId();
 	}
-
-	BitField* getBitFieldAtLevel(int64_t coResolutionLevel) {
-		// TODO Repent hard coding here
-		// int idx_coResolutionLevel = 9;
-		int idx_coResolutionLevel = bitFields.size(); // rL should be the last one.
-		int idx = idx_coResolutionLevel-nonDataLevels-coResolutionLevel; // Assume levels consecutive
-		// int idx = idx_coResolutionLevel-2-coResolutionLevel; // Assume levels consecutive
-		return bitFieldMap.at(bitFields[idx]->getName());
+	int64_t getFieldId(string levelName) {
+		return bitFieldMap.at(levelName)->getFieldId();
 	}
 
-	void incrementAtLevel(int64_t level,int64_t delta) {
-		if( (level < minCoResolutionLevelValue)
-			|| (maxCoResolutionLevelValue < level) )
+	BitField* getBitFieldAtId(int64_t id) {
+		return bitFieldMap.at(bitFields[id]->getName());
+	}
+
+	void incrementAtId(int64_t id,int64_t delta) {
+		if( (id < pos_CoarsestResolutionLevel)
+			|| (pos_FinestResolutionLevel < id) )
 		{
-			throw SpatialFailure("TemporalWordFormat:incrementAtLevel:LevelOutOfBounds");
+			throw SpatialFailure("TemporalWordFormat:incrementAtLevel:LevelIdOutOfBounds");
 		}
 //		cout << "10000: " << level << endl;
-		int64_t oldValue = getBitFieldAtLevel(level)->getValue();
+		int64_t oldValue = getBitFieldAtId(id)->getValue();
 //		cout << "10010: " << oldValue << endl;
 		int64_t newValue = oldValue + delta;
 
 		// TODO Check for overflow & underflow? Carry?
-		if(newValue>getBitFieldAtLevel(level)->getMaxValue()) {
+		if(newValue>getBitFieldAtId(id)->getMaxValue()) {
 			// Carry!
 			// TODO 8 is the "top" level here, even though we have a 3-bit level field here.
 			// TODO fix hardcode
-			if(level >= maxCoResolutionLevelValue) { // == 9 //
+			if(id < pos_CoarsestResolutionLevel) { // == 9 //
 				throw SpatialFailure("TemporalWordFormat:OverflowError");
 			}
 //			cout << "10100: " << newValue << endl;
-			incrementAtLevel(level+1,1); // level = 0 => highest resolution, greatest depth
-			newValue-=getBitFieldAtLevel(level)->getMaxValue()+1;
+			incrementAtId(id-1,1); // level = 0 => highest resolution, greatest depth
+			newValue-=getBitFieldAtId(id)->getMaxValue()+1;
 //			cout << "10110: " << newValue << endl;
 		}
 //		cout << "19000: " << newValue << endl;
-		getBitFieldAtLevel(level)->setValue(newValue);
+		getBitFieldAtId(id)->setValue(newValue);
 //		cout << "19001: " << getBitFieldAtLevel(level).getValue() << endl;
 	}
-	void incrementAtLevel(string levelName, int64_t delta=1) {
+	void incrementAtName(string name, int64_t delta=1) {
 		// incrementAtLevel(getCoResolutionLevel(levelName),delta);
-		incrementAtLevel(getCoFieldId(levelName),delta);
+		incrementAtId(getFieldId(name),delta);
 	}
 
-	void decrementAtLevel(int64_t level, int64_t delta) {
-		if(level >= maxCoResolutionLevelValue) {
-			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:MaxLevelExceeded");
-		}
-		if( (level < minCoResolutionLevelValue)
-			|| (maxCoResolutionLevelValue < level) )
+	void decrementAtId(int64_t id, int64_t delta) {
+//		if(level >= maxCoResolutionLevelValue) {
+//			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:MaxLevelExceeded");
+//		}
+		if( (id < pos_CoarsestResolutionLevel)
+			|| ( pos_FinestResolutionLevel < id) )
 		{
 			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:LevelOutOfBounds");
 		}
-		int64_t oldValue = getBitFieldAtLevel(level)->getValue();
+		int64_t oldValue = getBitFieldAtId(id)->getValue();
 		int64_t newValue = oldValue - delta;
 		// TODO Check for overflow & underflow? Carry?
 		if(newValue<0){
-			if(level==0) {
+			if(id==pos_CoarsestResolutionLevel) {
 				throw SpatialFailure("TemporalWordFormat:UnderflowError");
 			}
-			decrementAtLevel(level+1,1); // level = 0 => highest resolution, greatest depth
-			newValue+=getBitFieldAtLevel(level)->getMaxValue()+1;
+			decrementAtId(id-1,1); // level = 0 => highest resolution, greatest depth
+			newValue+=getBitFieldAtId(id)->getMaxValue()+1;
 		}
-		getBitFieldAtLevel(level)->setValue(newValue);
+		getBitFieldAtId(id)->setValue(newValue);
 	}
-	void decrementAtLevel(string levelName, int64_t delta = 1) {
-		// decrementAtLevel(getCoResolutionLevel(levelName), delta);
-		decrementAtLevel(getCoFieldId(levelName), delta);
+	void decrementAtName(string name, int64_t delta = 1) {
+		decrementAtId(getFieldId(name), delta);
 	}
 
 	// TODO Shift from level to bit position.
-	void setTerminatorBelowLevel(int64_t level){
-		// TODO Biggest abs-value possible in the field?
-		while( level-- > 0) {
-			int64_t newValue = getBitFieldAtLevel(level)->getMask(); // negation handled elsewhere
-			// int64_t newValue = getBitFieldAtLevel(level).getMaxValue();
-			getBitFieldAtLevel(level)->setValue(newValue);
+	// TODO 2019-0419 MLR FIX
+	void setTerminatorBelowResolution(int64_t resolution){
+		int64_t bitPosition;
+
+		// cout << 1 << flush;
+		int64_t offsetTop =
+				bitFields[pos_CoarsestResolutionLevel]->getOffset() +
+				bitFields[pos_CoarsestResolutionLevel]->getWidth()-1;
+		int64_t offsetResolution = offsetTop - resolution;
+		int64_t offsetBottom = bitFields[pos_FinestResolutionLevel]->getOffset();
+
+		// cout << 2 << flush;
+
+		if( offsetResolution > offsetTop
+				|| offsetBottom > offsetResolution ) {
+			throw SpatialFailure("TemporalWordFormat:setTerminatorBelowResolution:ResolutionOutOfBounds");
 		}
+
+		// cout << 3 << flush;
+
+//		int64_t termMask = 0;
+//		for( int i = offsetResolution; i >= 0; --i ){
+//			termMask = termMask << 1;
+//			if( i > offsetBottom ) {
+//				++termMask;
+//			}
+//		}
+
+		// cout << 4 << endl << flush;
+
+		int iBit = offsetBottom;
+		int iPos = pos_FinestResolutionLevel;
+
+//		cout << endl << flush;
+//		cout << "offsetTop:        " << dec << offsetTop        << hex << endl << flush;
+//		cout << "offsetResolution: " << dec << offsetResolution << hex << endl << flush;
+//		cout << "offsetBottom:     " << dec << offsetBottom     << hex << endl << flush;
+
+		while( iBit <= offsetResolution ) {
+			int64_t iWidth = bitFields[iPos]->getWidth();
+
+//			cout << dec << "iBit,iPos: "
+//					<< iBit << "," << iPos << hex
+//					<< " mask0: " << bitFields[iPos]->getMask()
+//					<< ", mask1: "	<< (long long int) pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1
+//					<< ", oR,chk: "
+//					<< dec << offsetResolution << "," << bitFields[iPos]->getOffset() + iWidth
+//					<< hex << endl << flush;
+
+			if( offsetResolution >= bitFields[iPos]->getOffset() + iWidth ) {
+				getBitFieldAtId(iPos)->setValue(bitFields[iPos]->getMask());
+			} else {
+				getBitFieldAtId(iPos)->setValue( pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1 );
+			}
+			iBit += iWidth; --iPos;
+		}
+
+		// cout << 5 << flush;
+		// print();
+
 	}
 
 // We now set terminator below a resolution not a levelName. The resolution can be at any appropriate bit position.
