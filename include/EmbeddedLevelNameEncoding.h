@@ -18,6 +18,8 @@ public:
 	EmbeddedLevelNameEncoding();
 	virtual ~EmbeddedLevelNameEncoding();
 
+
+	/// ?id is htmID?
 	EmbeddedLevelNameEncoding(uint64 id) {setId(id);}
 	EmbeddedLevelNameEncoding(const char *name){setName(name);}
 

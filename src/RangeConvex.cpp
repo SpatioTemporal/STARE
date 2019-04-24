@@ -79,7 +79,8 @@ RangeConvex::RangeConvex(const SpatialVector * v1,
   float64 s2 = a2 * (*v2);
   float64 s3 = a3 * (*v3);
 
-  if(s1 * s2 * s3) {                // this is nonzero if not on one line
+  //+ mlr 2019-0129 +//
+  if(s1 * s2 * s3 == 0) {                // this is nonzero if not on one line
     if(s1 < 0.0L) a1 = (-1) * a1 ;  // change sign if necessary
     if(s2 < 0.0L) a2 = (-1) * a2 ;
     if(s3 < 0.0L) a3 = (-1) * a3 ;
@@ -220,6 +221,9 @@ RangeConvex::simplify0() {
   typedef std::vector<size_t> ValueVectorSzt;
   ValueVectorSzt cornerConstr1, cornerConstr2, removeConstr;
   ValueVectorSpvec corner;
+  size_t c, currentCorner;
+
+
   if (constraints_.size() == 1) { // for one constraint, it is itself the BC
     boundingCircle_ = constraints_[0];
     return;
@@ -331,7 +335,25 @@ RangeConvex::simplify0() {
   //
   // is >0 if yes, <0 if no...
   //
-  size_t c,currentCorner;
+
+  // size_t c, currentCorner;
+
+  /*
+   now append the corners that match the index c until we got corner 0 again
+   currentCorner holds the current corners index
+   c holds the index of the constraint that has just been intersected with
+   So:
+   x We are on a constraint now (i or j from before), the second corner
+     is the one intersecting with constraint c.
+   x Find other corner for constraint c.
+   x Save that corner, and set c to the constraint that intersects with c
+     at that corner. Set currentcorner to that corners index.
+   x Loop until 0th corner reached.
+*/
+
+  c = 0;
+  currentCorner = 0;
+
   if( ((vi1 - corner[0]) ^ constraints_[i].a_) * corner[0] > 0 ) {
 	corners_.push_back(vi1);
     c = c1;
@@ -341,33 +363,25 @@ RangeConvex::simplify0() {
     c = c2;
     currentCorner = k2;
   }
-  // now append the corners that match the index c until we got corner 0 again
-  // currentCorner holds the current corners index
-  // c holds the index of the constraint that has just been intersected with
-  // So:
-  // x We are on a constraint now (i or j from before), the second corner
-  //   is the one intersecting with constraint c.
-  // x Find other corner for constraint c.
-  // x Save that corner, and set c to the constraint that intersects with c
-  //   at that corner. Set currentcorner to that corners index.
-  // x Loop until 0th corner reached.
+
   while( currentCorner ) {
-    for (k = 0; k < cornerConstr1.size(); k++) {
-      if(k == currentCorner)continue;
-      if(cornerConstr1[k] == c) {
-		if( (currentCorner = k) == 0) break;
-		corners_.push_back(corner[k]);
-		c = cornerConstr2[k];
-		break;
-      }
-      if(cornerConstr2[k] == c) {
-		if( (currentCorner = k) == 0) break;
-		corners_.push_back(corner[k]);
-		c = cornerConstr1[k];
-		break;
-      }
-    }
+	  for (k = 0; k < cornerConstr1.size(); k++) {
+		  if ( k == currentCorner ) continue;
+		  if ( c == cornerConstr1[k] ) {
+			  if( (currentCorner = k) == 0) break;
+			  corners_.push_back(corner[k]);
+			  c = cornerConstr2[k];
+			  break;
+		  }
+		  if ( c == cornerConstr2[k] ) {
+			  if ( (currentCorner = k) == 0) break;
+			  corners_.push_back(corner[k]);
+			  c = cornerConstr1[k];
+			  break;
+		  }
+	  }
   }
+
   // Remove all redundant constraints
   for ( i = 0; i < removeConstr.size(); i++)
 		 constraints_.erase(constraints_.end()-removeConstr[i]-1);
@@ -1195,7 +1209,7 @@ RangeConvex::eSolve(const SpatialVector & v1,
 
   float64 q      = -0.5L * ( b + ( SGN(b) * sqrt(D) ) );
 
-  float64 root1, root2;
+  float64 root1 = -1, root2 = -1;
   int i = 0;
 
   if ( a > gEpsilon || a < -gEpsilon ) { root1 = q / a; i++; }

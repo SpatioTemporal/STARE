@@ -24,10 +24,11 @@ EmbeddedLevelNameEncoding::~EmbeddedLevelNameEncoding() {}
 char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 	if(id == 0) {
 		// Throw an exception?
-		throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
+		std::cout << "EmbeddedLevelNameEncoding::nameById WARNING ID == 0 -> 'S0'...";
+		// throw SpatialFailure("EmbeddedLevelNameEncoding::nameById-INVALID_ID_0");
 	}
 
-	int nameSize = levelById(id)+3; ///< levelById is local to the encoding
+	uint nameSize = levelById(id)+3; ///< levelById is local to the encoding
 	char *returnedName = new char[nameSize];
 	if(id & NorthSouthBit) {
 		returnedName[0] = 'N';
@@ -258,14 +259,14 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
  * @param level
  */
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool keepAllBits ) {
-	int oldLevel = this->getLevel();
+	uint oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
 	keepBits++; // Position 62
 	uint64 newId;
 	if(level < oldLevel) {
 		for(int i=62;i>5;i-=2){
-			int levelAtI = (62-i)/2;
+			uint levelAtI = (62-i)/2;
 			keepBits = keepBits << 2;
 			if((level < levelAtI) && (levelAtI < oldLevel)) {
 				if(keepAllBits) { keepBits += 3; }
@@ -285,14 +286,14 @@ EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::atLevel(uint64 level, bool 
 }
 
 EmbeddedLevelNameEncoding EmbeddedLevelNameEncoding::clearDeeperThanLevel(uint64 level) {
-	int oldLevel = this->getLevel();
+	// uint64 oldLevel = this->getLevel();
 	uint64 id_NoLevel = this->maskOffLevel();
 	uint64 keepBits = one << 1; // Position 63
 	keepBits++; // Position 62
 	uint64 newId;
 
 	for(int i=62;i>5;i-=2){
-	  int levelAtI = (62-i)/2;
+	  uint64 levelAtI = (62-i)/2;
 	  keepBits = keepBits << 2;
 	  if(level >= levelAtI){
 	    keepBits += 3;
@@ -399,7 +400,9 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 //#undef hexOut
 //	cout << endl;
 
-	if( successor < (( lowerBound & stripMask ) + level) ) {
+	// if( successor < (( lowerBound & stripMask ) + level) ) {
+	// if( (successor & ~levelMask) < (( lowerBound & ~levelMask )) ) {
+	if( (successor & stripMask) < ( lowerBound & stripMask ) ) {
 		return 0; // It's invalid! Wrap around!
 	}
 
@@ -429,19 +432,28 @@ uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int
 	successor -= n*one_at_level;
 
 	if( successor == 0 ) {
-		return 0; // It's invald!
+		return 0; // It's invalid!
 	}
 
 	successor += level;
 
-//	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
-//	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+	/*
+	cout << setw(20);
+	cout << "lowerBound:   "<< hex << lowerBound << dec << endl << flush;
+	cout << "one_at_level: "<< hex << one_at_level << dec << endl << flush;
+	cout << "one_mask_to_: "<< hex << one_mask_to_level << dec << endl << flush;
+	cout << "successor':   "<< hex << successor << dec << endl << flush;
+	cout << "threshold:    "<< hex << (lowerBound & ~levelMask)+level << dec << endl << flush;
+	*/
+
+	// cout << "threshold:    "<< hex << (lowerBound & stripMask)+level << dec << endl << flush;
 
 	// Check for overflow.
 	// if( successor == TopBit ) {
 
 	// Check for underflow
-	if( successor > (lowerBound & stripMask)+level) {
+	if( (successor & stripMask) > (lowerBound & stripMask)) {
+	// if( successor > (lowerBound & ~levelMask)+level) {
 		return 0; // It's invalid! Wrap around!
 	}
 	return successor;

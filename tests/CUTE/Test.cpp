@@ -1,43 +1,12 @@
 
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
+#include "Test.h"
 
-#include "cute.h"
-#include "ide_listener.h"
-#include "xml_listener.h"
-#include "cute_runner.h"
-
-#include "HstmIndex.h"
-
-// TODO #include the headers for the code you want to test
-//#include "SpatialGeneral.h"
-#include "SpatialException.h"
-#include "SpatialIndex.h"
-#include "TemporalIndex.h"
-#include "SpatialVector.h"
-#include "SpatialInterface.h"
-
-#include "SpatiallyAdaptiveDataCover.h"
-
-#include "HtmRangeIterator.h"
-#include "BitShiftNameEncoding.h"
-#include "EmbeddedLevelNameEncoding.h"
-
-#include "HtmRangeMultiLevel.h"
-#include "HtmRangeMultiLevelIterator.h"
-
-#include "HstmRange.h"
-
-// TODO Add your test functions
-
+// Convenience functions for the tests.
 double square(SpatialVector x){	return x*x; }
 double norm(SpatialVector x){ return sqrt(square(x)); }
-#define ASSERT_EQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,norm(a-b),tol);
-#define ASSERT_NOTEQUALDM(msg,a,b,tol) ASSERT_LESSM(msg,tol,norm(a-b));
 
-#define componentCheck(xxx) 	{cout << setprecision(17); cout << "  xxx: " << xxx << endl << flush; cout << "v.xxx: " << v_.xxx() << endl << flush; cout << "delta: " << xxx - v_.xxx() << endl << flush;}
+// TODO Add your test functions
+// ...
 
 void precisionTest(){
 	// Check that we understand the precision of the variables.
@@ -94,7 +63,8 @@ void lookupOnTwoSaveLevels() {
 
 }
 
-#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_0(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
 #define INDEX_(name){htm[levelOfName(name)]->index();}
 #define PRINT_ID(msg,htm,name) {	SpatialIndex index = htm[levelOfName(name)]->index(); cout << msg << " indexLevel: " << index.getMaxlevel() << " id: " << flush; cout << index.idByName(name) << " name: " << name << " nameLevel: " << levelOfName(name); SpatialVector v; index.pointById(v,index.idByName(name)); cout << " v: " << v << endl << flush;}
 
@@ -115,7 +85,7 @@ void lookupOnMultipleLevels() {
 	char name0[1024], name1[1024];
 
 	int level          = 3;
-	int saveLevel      = 2;
+	// int saveLevel      = 2;
 
 	index0_ = htm[level]->index();
 	id0 =     htm[level]->lookupID(x,y,z);
@@ -123,7 +93,7 @@ void lookupOnMultipleLevels() {
 	ASSERT_EQUALM("S3333: id0==767: ",767,id0);
 
 	level          = 4;
-	saveLevel      = 5;
+	// saveLevel      = 5;
 	index1_ = htm[level]->index();
 	id1 =     htm[level]->lookupID(x,y,z);
 
@@ -261,9 +231,14 @@ void idByPoint1() {
 	int level          = 8;
 	int saveLevel      = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
-	float64 x = 0.50350942389316267;
+	/* Original point, a little off triangle center at level 8.
+	float64 x =  0.50350942389316267;
 	float64 y = -0.61093299962057024;
 	float64 z = -0.61093299962057024;
+	*/
+	float64 x =  0.50350998334076424;
+	float64 y = -0.61093276908191108;
+	float64 z = -0.61093276908191108;
 	int id_ = htm_->lookupID(x,y,z);
 
 	//	cout << "id_ " << id_ << endl << flush;
@@ -276,6 +251,20 @@ void idByPoint1() {
 	//	cout << "idT " << idTest << endl << flush;
 
 	ASSERT_EQUALM("idByPoint1",id_,idTest);
+
+	SpatialVector u;
+	index.pointByHtmId(u, idTest);
+	/*
+	cout << setprecision(17);
+	cout << "v     = " << v << endl << flush;
+	cout << "u     = " << u << endl << flush;
+	cout << "|v-u| = " << (v-u).length() << endl << flush;
+	*/
+	ASSERT_EQUALDM("Inverse check.",v,u,1.0e-16);
+
+	// The following is incorrect and may segfault!
+	// index.pointById(u, idTest);
+
 }
 
 /**
@@ -393,11 +382,12 @@ void checkBitShiftNameEncoding0() {
 	ASSERT_EQUALM("12683 == N012023?",12683,bitShiftName.idByName("N012023"));
 	ASSERT_EQUALM("level(N012023)",5,bitShiftName.levelById(htmId));
 
-	uint64 testId = 0;
+	// uint64 testId = 0;
 	string failureMessage = "'";
 	try {
-		testId = bitShiftName.idByName("N012024");
-	} catch (SpatialFailure failure) {
+		// testId = bitShiftName.idByName("N012024");
+		bitShiftName.idByName("N012024");
+	} catch (SpatialFailure& failure) {
 		failureMessage += failure.what();
 	}
 	failureMessage += "'";
@@ -414,7 +404,7 @@ void checkBitShiftNameEncoding0() {
 	ASSERT_EQUALM("Construct using name.",12683,htm->getId());
 	try {
 		htm = new BitShiftNameEncoding("N012823");
-	} catch (SpatialFailure failure) {
+	} catch (SpatialFailure& failure) {
 		ASSERT_EQUALM("Bad construction","BitShiftName:idByName-InvalidDigit",failure.what());
 	}
 	htm->setName("N012022");
@@ -538,7 +528,7 @@ void testLatLonDegrees() {
 	float64 l0 = -1, l1 = -1;
 	try {
 		u.getLatLonDegrees(l0,l1);
-	} catch(SpatialException e) {
+	} catch(const SpatialException& e) {
 		ASSERT_EQUALM("LatLon from non-unit vector.",
 				"SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.",
 				e.what());
@@ -818,14 +808,16 @@ void testEmbeddedLevelNameEncoding() {
 	{
 		string failureMessage = "'";
 		string foundName ="'";
+		/* Left justified can now handle an id value of 0, equaling S0.
 		try {
 			foundName += name->nameById(0);
-		} catch (SpatialFailure failure) {
+		} catch (const SpatialFailure& failure) {
 			failureMessage += failure.what();
 		}
 		foundName += "'";
 		failureMessage += "'";
 		ASSERT_EQUALM("INVALID ID 0","'EmbeddedLevelNameEncoding::nameById-INVALID_ID_0'",failureMessage);
+		*/
 
 		foundName ="'";
 		foundName += name->nameById(name->idByName("N3"));
@@ -1051,18 +1043,17 @@ void testRotation() {
 	stringstream msgStream;
 	float64 tolerance = 1.0e-15;
 	//	SpatialVector origin(0.0,0.0,0.0);
-	const SpatialVector zHat(0.0,0.0,1.0), xHat(1.0,0.0,0.0), yHat(0.0,1.0,0.0);
 
 	float64 theta;
 	SpatialVector start, axis, rot, expected;
 
 	theta = gPi;
-	start = xHat;
-	axis  = zHat;
-	expected = -1.0*xHat;
+	start = xhat;
+	axis  = zhat;
+	expected = -1.0*xhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Reverse xHat: <";
+	msgStream << "Reverse xhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -1073,12 +1064,12 @@ void testRotation() {
 	msgStream.str(string()); msgStream.clear();
 
 	theta = gPi*0.5;
-	start = xHat;
-	axis  = zHat;
-	expected = yHat;
+	start = xhat;
+	axis  = zhat;
+	expected = yhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Rotate xHat to yHat: <";
+	msgStream << "Rotate xhat to yhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -1089,12 +1080,28 @@ void testRotation() {
 	msgStream.str(string()); msgStream.clear();
 
 	theta = -gPi*0.5;
-	start = zHat;
-	axis  = xHat;
-	expected = yHat;
+	start = zhat;
+	axis  = xhat;
+	expected = yhat;
 	rot = start.rotatedAbout(axis,theta);
 	tolerance = 1.0e-15;
-	msgStream << "Rotate zHat to yHat: <";
+	msgStream << "Rotate zhat to yhat: <";
+	msgStream << "start: " << start << ", ";
+	msgStream << "axis: " << axis << ", ";
+	msgStream << "th: " << theta << ", ";
+	msgStream << "r: " << rot << ", ";
+	msgStream << "tol: " << tolerance;
+	msgStream << ">";
+	ASSERT_EQUALDM(msgStream.str().c_str(),expected,rot,tolerance);
+	msgStream.str(string()); msgStream.clear();
+
+	theta = gPi;
+	start = zhat;
+	axis  = xhat;
+	expected = -1.0*zhat;
+	rot = start.rotatedAbout(axis,theta);
+	tolerance = 1.0e-15;
+	msgStream << "Rotate zhat to yhat: <";
 	msgStream << "start: " << start << ", ";
 	msgStream << "axis: " << axis << ", ";
 	msgStream << "th: " << theta << ", ";
@@ -1120,12 +1127,13 @@ void testNeighbors() {
 	ASSERT_EQUALM("level(N012023) == 5",5,levelOfName(htmName));
 	ASSERT_EQUALM("level(12683)   == 5",5,levelOfId(htmID));
 
+	SpatialVector workspace_ev[18];
 	uint64 neighbors[3];
 	uint64 htmId;
 	htmId = htmID;
 
 	htmId = 12683;
-	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId);
+	index.NeighborsAcrossEdgesFromHtmId( neighbors, htmId, workspace_ev);
 
 	//	cout
 	//	<< "Neighbors of " << (htmId) << " are "
@@ -1189,7 +1197,7 @@ void testNeighbors() {
 
 	htmId = 12683;
 	uint64 neighborsV[9];
-	index.NeighborsAcrossVerticesFromHtmId( neighborsV, htmId);
+	index.NeighborsAcrossVerticesFromEdges( neighborsV, neighbors, htmId, workspace_ev );
 
 	if(false) {
 		cout << "Neighbors Across Vertices of " << (htmId) << " are ";
@@ -3142,7 +3150,7 @@ void testHstmEqualp() {
 }
 
 void testIndexBug() {
-	int level       = 4;
+	uint level       = 4;
 	int idLevel     = 23;
 	int maxLevel    = 5; // aka buildLevel
 
@@ -3891,6 +3899,89 @@ void testTesselationBug(){
     }    
 }
 
+void LeftJustifiedDecrementBug() {
+	EmbeddedLevelNameEncoding lj;
+	lj.setName("S00000");
+	uint64 lj0 = lj.getId();
+	lj.setName("N33333");
+	uint64 lj1 = lj.getId();
+
+	ASSERT_EQUALM("Min left justified set by name",0x8000000000000004,lj0);
+	ASSERT_EQUALM("Max left justified set by name",0xfff0000000000004,lj1);
+
+	// cout << "lj0,lj1: " << hex << lj0 << "," << lj1 << dec << endl << flush;
+	// cout << "--" << endl;
+
+	uint64 ljx = lj1;
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left dec",0xffe0000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left dec2",0xffd0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc dec2",0xffe0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc2 dec2",0xfff0000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Max left inc3 dec2",0,ljx);
+
+	// cout << "--" << endl;
+
+	ljx = lj0;
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left inc",0x8010000000000004,ljx);
+
+	ljx = lj.increment(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	cout << hex;
+	ASSERT_EQUALM("Min left inc2",0x8020000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec inc2",0x8010000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec2 inc2",0x8000000000000004,ljx);
+
+	ljx = lj.decrement(ljx,4);
+	// cout << "ljx: " << hex << ljx << dec << endl << flush;
+	ASSERT_EQUALM("Min left dec3 inc2",0,ljx);
+
+	// FAIL();
+}
+
+void HstmRangeAddZeroBug() {
+
+	HtmRangeMultiLevel range_ml;
+	// range_ml.addRange(0x8000000000000000,0x8000000000000000);
+	range_ml.addRange(0x0,0xfffffffffffffff);
+	ASSERT_EQUALM("Pushed S0 to underlying HtmRangeMultiLevel",1,range_ml.nranges());
+
+	HstmRange range;
+	range.addRange(0x8000000000000000,0x8000000000000000);
+	ASSERT_EQUALM("Pushed S0 to HstmRange",1,range.range->nranges());
+
+	EmbeddedLevelNameEncoding lj;
+	// cout << "lj.nameById(0) = " << lj.nameById(0) << endl << flush;
+	char tmp_buf[256];
+	strcpy(tmp_buf,lj.nameById(0));
+	ASSERT_EQUALM("Extending left justified to handle S0 == 0","S0",tmp_buf);
+}
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -3932,6 +4023,15 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(testTesselationBug));
 
 	s.push_back(CUTE(testNodeVertexAtLevelZero));
+
+	s.push_back(CUTE(SpatialRotation_test));
+	s.push_back(CUTE(SpatialVector_test));
+	s.push_back(CUTE(SpatialIndex_test));
+	s.push_back(CUTE(SpatialFailure_test));
+
+	s.push_back(CUTE(STARE_test));
+	s.push_back(CUTE(LeftJustifiedDecrementBug));
+	s.push_back(CUTE(HstmRangeAddZeroBug));
 
 	//	s.push_back(CUTE(testRange));
 

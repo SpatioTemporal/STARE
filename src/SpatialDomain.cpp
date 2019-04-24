@@ -76,7 +76,7 @@ bool
 SpatialDomain::intersect(const SpatialIndex * idx, HtmRange *htmrange, bool varlen, HtmRange *hrInterior, HtmRange *hrBoundary)
 {
   index = idx;
-  size_t i;
+  // size_t i;
 
   return intersect(htmrange,varlen,hrInterior,hrBoundary);
 //  for(i = 0; i < convexes_.size(); i++)  // intersect every convex

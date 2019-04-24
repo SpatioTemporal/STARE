@@ -17,6 +17,12 @@
 #include "SpatialVector.h"
 #include "SpatialException.h"
 
+// TODO Figure hout how to make the hats constant.
+SpatialVector
+	xhat(1.0,0.0,0.0),
+	yhat(0.0,1.0,0.0),
+	zhat(0.0,0.0,1.0);
+
 //==============================================================
 //
 // This 3D vector lives on the surface of the sphere.
@@ -30,12 +36,17 @@ SpatialVector::SpatialVector() :
   x_(1), y_(0), z_(0), ra_(0), dec_(0), okRaDec_(true) {
 }
 
-
+/////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Maybe we should create a Coordinate class to handle R3, RA-DEC, LatLon, etc.
 SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
-  x_(x), y_(y), z_(z), okRaDec_(false) {
+  x_(x), y_(y), z_(z), ra_(0), dec_(0), okRaDec_(false) {
 }
 
+/////////////CONSTRUCTOR//////////////////////////////////
+/// TODO Strengthen the following input type.
+SpatialVector::SpatialVector(float64 *x) :
+	x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
+}
 /////////////CONSTRUCTOR//////////////////////////////////
 //
 SpatialVector::SpatialVector(float64 ra, float64 dec) :
@@ -112,34 +123,49 @@ SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
 bool
 SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
   
-  if (latlon_) {
-    lat = latDegrees_;
-    lon = lonDegrees_;
-  } else {
-    float64 X,Y,Z;
-    X = x_; Y = y_; Z = z_;
-    if(length()!=1) { // TODO: Repent disrespecting machine precision
-      // TODO A logger would be useful here.
-      // throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
+	if (latlon_) {
+		lat = latDegrees_;
+		lon = lonDegrees_;
+	} else {
+		float64 X,Y,Z;
+		X = x_; Y = y_; Z = z_;
+		if(length()!=1) { // TODO: Repent disrespecting machine precision
+			// TODO A logger would be useful here.
+			// throw SpatialFailure("SpatialVector::getLatLonDegrees::ERROR Calculating lat-lon-degrees from a non-unit vector.");
 
-      // Deal with it.
-      float64 L = sqrt( X*X + Y*Y + Z*Z );
-      X /= L; Y /= L; Z /= L;
-    } 
-    lat = asin(Z)/gPr; // easy.
-    float64 cd = cos(lat*gPr);
-    if(cd>gEpsilon || cd<-gEpsilon)
-      if(Y>gEpsilon || Y<-gEpsilon)
-	if (Y < 0.0)
-	  lon = 360 - acos(X/cd)/gPr;
-	else
-	  lon = acos(X/cd)/gPr;
-      else
-	lon = (X < 0.0 ? 180.0 : 0.0);
-    else
-      lon=0.0;
-  }
-  return latlon_;
+			// Deal with it.
+			float64 L = sqrt( X*X + Y*Y + Z*Z );
+			X /= L; Y /= L; Z /= L;
+		}
+
+		lat = asin(Z); // easy.
+		float64 cd = cos(lat);
+		lat /= gPr;
+
+		if(cd>gEpsilon || cd<-gEpsilon) {
+			if(Y>gEpsilon || Y<-gEpsilon) {
+//				if(abs(X) < 1.0e-7) {
+//					std::cout << 1000 << " x_,X,cd,X/cd: " << x_ << "," << X  << "," << cd << "," << X/cd << std::endl << std::flush;
+//				}
+				float64 mu = X/cd; // Note, we normalized above so this should be within [-1,1] to within machine error.
+				if( abs(mu) > 1 ) {
+					lon = (X < 0.0 ? 180.0 : 0.0);
+				} else {
+					if (Y < 0.0) {
+						lon = 360 - acos(mu)/gPr;
+					} else {
+						lon = acos(mu)/gPr;
+					}
+				}
+			} else {
+				lon = (X < 0.0 ? 180.0 : 0.0);
+			}
+		} else {
+			lon=0.0;
+		}
+	}
+
+	return latlon_;
 }
 
 /////////////GET//////////////////////////////////////////
@@ -181,12 +207,13 @@ float64 SpatialVector::dec() {
   return dec_;
 }
 
-
 SpatialVector SpatialVector::rotatedAbout(const SpatialVector axis, const float64 theta) const {
 	// Use Rodrigues's formula
 	// Inefficient in that we're calling the transcendental functions each time.
 	const float64 mu     = cos(theta);
-	const float64 muComp = mu - 1.0;
+	// muComp = mu - 1.0; // error? Wikipedia says -- sign error.
+	// const float64 muComp = mu - 1.0;
+	const float64 muComp = 1.0 - mu;
 	const float64 lambda = sin(theta);
 
 	SpatialVector vRot;
@@ -215,6 +242,13 @@ float64 sum, scale;
    x_ *= scale;
    y_ *= scale;
    z_ *= scale;
+}
+
+/////////////REVERSE//////////////////////////////////////
+//
+SpatialVector
+SpatialVector::reverse(){
+	return -1.0*(*this);
 }
 
 /////////////LENGTH///////////////////////////////////////
@@ -373,8 +407,20 @@ const char*
 SpatialVector::toString()
 {
 	char *buffer = new char[40];
-	int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
+	// int n = sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
+	sprintf(buffer,"%4.2e\n%4.2e\n%4.2e\n",x_,y_,z_);
 	return buffer;
+}
+
+float64*
+SpatialVector::toArray()
+{
+	float64 *buffer = new float64[3];
+	buffer[0] = x_;
+	buffer[1] = y_;
+	buffer[2] = z_;
+	return buffer;
+
 }
 
 /////////////READ/////////////////////////////////////////
@@ -397,4 +443,7 @@ SpatialVector::write(std::ostream &out) const
 {
   out << x_ << ' ' << y_ << ' ' << z_ ;
 }
+
+
+
 

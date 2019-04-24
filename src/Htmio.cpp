@@ -7,23 +7,27 @@
 //
 void
 Htmio::read(istream &in, RangeConvex &rc) {
-  size_t nconstr;
-  SpatialConstraint constr;
+	size_t nconstr;
+	SpatialConstraint constr;
 
-  in.setf(ios::skipws);
-  while(in.peek() == COMMENT)  // ignore comments
-      in.ignore(10000,'\n');
-  in >> nconstr ; in.ignore(); // ignore endl
-  if(!in.good())
-    throw SpatialFailure("Htmio:read: Could not read constraint");
-  for(size_t i = 0; i < nconstr; i++) {
-    if(in.eof())
-      throw SpatialFailure("Htmio:read: Premature end-of-file");
-    in >> constr;
-  if(!in.good())
-    throw SpatialFailure("Htmio:read: Could not read constraint");
-    rc.add(constr);
-  }
+	in.setf(ios::skipws);
+	while(in.peek() == COMMENT) {  // ignore comments
+		in.ignore(10000,'\n');
+	}
+	in >> nconstr ; in.ignore(); // ignore endl
+	if(!in.good()) {
+		throw SpatialFailure("Htmio:read: Could not read constraint");
+	}
+	for(size_t i = 0; i < nconstr; i++) {
+		if(in.eof()) {
+			throw SpatialFailure("Htmio:read: Premature end-of-file");
+		}
+		in >> constr;
+		if(!in.good()) {
+			throw SpatialFailure("Htmio:read: Could not read constraint");
+		}
+		rc.add(constr);
+	}
 }
 
 /////////////READ/////////////////////////////////////////

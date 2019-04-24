@@ -386,7 +386,7 @@ htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps ) {
 	polyCorners_.clear();
 //	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
 //	cout << endl;
-	if (steps == -1) {
+	if (steps == (uint64) -1) {
 		steps = latlon.size();
 	} else {
 		steps = min(steps,latlon.size());

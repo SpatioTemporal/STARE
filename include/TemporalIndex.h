@@ -693,13 +693,15 @@ public:
 
 //		cout << "200" << endl << flush;
 
-//#define EXTRACT(field,max_val) cout << #field << " " << flush; \
-//	field = milliseconds_total % max_val; \
-//	cout << "-1-" << flush; \
-//	milliseconds_total -= field ; \
-//	cout << "-2-" << flush; \
-//	milliseconds_total /= max_val; \
-//	cout << "-3-" << endl << flush;
+		/*
+#define EXTRACT(field,max_val) cout << #field << " " << flush; \
+	field = milliseconds_total % max_val; \
+	cout << "-1-" << flush; \
+	milliseconds_total -= field ; \
+	cout << "-2-" << flush; \
+	milliseconds_total /= max_val; \
+	cout << "-3-" << endl << flush;
+	*/
 #define EXTRACT(field,max_val) \
 	field = milliseconds_total % max_val; \
 	milliseconds_total -= field ; \
@@ -838,9 +840,11 @@ public:
 #define PARSE_INT(field,width) \
 	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); \
 	  pos += width;
-	  // cout << endl \
-	  // << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) *continuation*
-	  // << ", '" << nativeString.substr(pos,width) << "'" << endl; *continuation*
+	  /*
+	   cout << endl \
+	   << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) *continuation*
+	   << ", '" << nativeString.substr(pos,width) << "'" << endl; *continuation*
+	   */
 
 	  PARSE_INT(Ma,3); ++pos;
 	  PARSE_INT(ka,3);
