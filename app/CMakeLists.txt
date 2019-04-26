@@ -23,5 +23,3 @@ target_include_directories  ( lookupInteractive PUBLIC )
 add_executable              ( tesselateTrapezoid tesselateTrapezoid.cpp )
 target_link_libraries       ( tesselateTrapezoid STARE)
 target_include_directories  ( tesselateTrapezoid PUBLIC )
-
-

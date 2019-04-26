@@ -1467,7 +1467,7 @@ int levelOfId(uint64 htmId) {
 uint64 SpatialIndex::nodeIndexFromId(uint64 id) const {
 	// This nodeIndex is only valid if depth == maxlevel+1
 	// We could fix this to go to the non-leaf parts of the nodes_ array/index.
-	int depth = depthOfId(id);
+	uint depth = depthOfId(id);
 	if (depth != maxlevel_+1) {
 		cout << "si:nifi: id=" << hex << id << dec << " maxlevel_=" << maxlevel_ << " depth=" << depth << endl << flush;
 		return 0;  // TODO Make this throw an exception?
