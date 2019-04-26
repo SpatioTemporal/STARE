@@ -270,13 +270,13 @@ void partitionTriangle(
  * @param v2
  * @return
  */
-uint64 subTriangleIndexByPoint(
+int subTriangleIndexByPoint(
 		SpatialVector &v,
 		SpatialVector &v0,
 		SpatialVector &v1,
 		SpatialVector &v2
 		) {
-	uint64 subTriangleIndex = -1;
+	int subTriangleIndex = -1;
 
 	SpatialVector w0 = v1 + v2; w0.normalize();
 	SpatialVector w1 = v0 + v2; w1.normalize();
@@ -1379,7 +1379,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	if(level>0) {
 		int level0 = buildlevel_;
 		while(level--) {
-			uint64 subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
+			int subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
 			// cout << "idbp: 350 level = " << level << ", level0 = " << level0++ << ", subTriangleIndex = " << subTriangleIndex << ", name = " << name;
 			name[len++] = '0'+char(subTriangleIndex);
 			// cout << ", name'= " << name << endl << flush;

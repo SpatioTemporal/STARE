@@ -55,7 +55,7 @@ public:
 	bn::ndarray testD() {
 		std::vector<double> v;
 		v.push_back(1); v.push_back(2); v.push_back(3);
-		Py_intptr_t shape[1] = { v.size() };
+		Py_intptr_t shape[1] = { (long int) v.size() };
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<double>());
 		std::copy(v.begin(), v.end(), reinterpret_cast<double*>(result.get_data()));
 		return result;
@@ -64,7 +64,7 @@ public:
 	bn::ndarray testF64() {
 		std::vector<float64> v;
 		v.push_back(1); v.push_back(2); v.push_back(3);
-		Py_intptr_t shape[1] = { v.size() };
+		Py_intptr_t shape[1] = { (long int) v.size() };
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
 		std::copy(v.begin(), v.end(), reinterpret_cast<float64*>(result.get_data()));
 		return result;
@@ -73,7 +73,7 @@ public:
 	bn::ndarray testUI64() {
 		std::vector<STARE_ArrayIndexSpatialValue> v;
 		v.push_back(1); v.push_back(2); v.push_back(3);
-		Py_intptr_t shape[1] = { v.size() };
+		Py_intptr_t shape[1] = { (long int) v.size() };
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
 		std::copy(v.begin(), v.end(), reinterpret_cast<STARE_ArrayIndexSpatialValue*>(result.get_data()));
 		return result;
@@ -103,7 +103,7 @@ public:
 		const Py_intptr_t *shape = {lat.get_shape()}; // TODO Fix assumption shape is 1d and stride is 1.
 		// TODO Check shape & type of lat & lon and throw exception if bad.
 		Py_intptr_t const * strides = lat.get_strides();
-		std::cout << "vfldnp: strides: " << strides[0] << std::endl << std::flush;
+		// std::cout << "vfldnp: strides: " << strides[0] << std::endl << std::flush;
 
 		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexSpatialValue>());
 		bn::dtype lat_dtype = lat.get_dtype();
@@ -142,9 +142,9 @@ public:
 		bn::ndarray result_lon = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
 		for(int i=0; i<shape[0]; ++i) {
 			STARE_ArrayIndexSpatialValue idx = *reinterpret_cast<STARE_ArrayIndexSpatialValue*>(values.get_data() + i*strides[0]);
-			std::cout << "idx: " << idx << std::endl << std::flush;
+			// std::cout << "idx: " << idx << " " << std::hex << idx << std::dec << std::endl << std::flush;
 			LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(idx);
-			std::cout << "ll1: " << latlon1.lat << ", " << latlon1.lon << std::endl << std::flush;
+			// std::cout << "ll1: " << latlon1.lat << ", " << latlon1.lon << std::endl << std::flush;
 			result_lat[i] = latlon1.lat;
 			result_lon[i] = latlon1.lon;
 		}

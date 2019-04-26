@@ -1,4 +1,4 @@
-//#     Filename:       lookup.cpp
+//#     Filename:       lowlevel-lookup-tool.cpp
 //#
 //#     specify a point on the sphere, return its ID/Name to a certain depth
 //#
@@ -11,6 +11,8 @@
 //#
 //# Copyright (C) 2000  Peter Z. Kunszt, Alex S. Szalay, Aniruddha R. Thakar
 //#                     The Johns Hopkins University
+//#
+//#     Heavily revised by Michael Rilee, mike@rilee.net, for DERECHOs and STARE, 2015-2019.
 //#
 //# This program is free software; you can redistribute it and/or
 //# modify it under the terms of the GNU General Public License
@@ -35,6 +37,7 @@
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
 #include "EmbeddedLevelNameEncoding.h"
+#include "STARE.h"
 
 /*******************************************************
 
@@ -45,11 +48,11 @@
 
   It can be invoked by
 
-  	lookup level x y z
+  	lowlevel-lookup-tool level x y z
 
 	or
 
-	lookup level ra dec
+	lowlevel-lookup-tool level ra dec
 
   where
 
@@ -62,7 +65,7 @@
 
 Example 1: level 5, ra,dec = 10,25
 
-%lookup 5 10 25
+% lowlevel-lookup-tool 5 10 25
 
 	(x,y,z) = 0.892539 0.157379 0.422618
 	(ra,dec) = 10,25
@@ -70,7 +73,7 @@ Example 1: level 5, ra,dec = 10,25
 
 Example 2: level 14, x,y,z = -1,2,-23  (output is normed version)
 
-% lookup 14 -1 2 -23
+% lowlevel-lookup-tool 14 -1 2 -23
 
 	(x,y,z) = -0.0432742 0.0865485 -0.995307
 	(ra,dec) = 116.565,-84.4471
@@ -82,7 +85,10 @@ void
 usage(char *name) {
 
 	cout << "usage: " << endl
-			<< name << " [--hex] [--symbol] [--numeric] [--area] [--corner] [--verbose] [--quiet] [--n n] [--text] [--latlon] depth ( x y z | ra dec | lat lon )" << endl;
+			<< name << " [--hex] [--symbol] [--numeric] [--area] [--corner] [--verbose] [--quiet] [--n n] [--text] [--latlon] depth ( x y z | ra dec | lat lon )" << endl
+			<< " e.g. lowlevel-lookup-tool --latlon 5 45.0 45.0" << endl
+			<< " e.g. lowlevel-lookup-tool --quiet --hex --STARE --latlon 5 45.0 45.0" << endl
+			;
 	cout <<    " [--hex]      : print node id in hexadecimal" << endl
 			<< " [--dec]      : print node id as a decimal" << endl
 			<< " [--symbol]   : print node id as a string symbol" << endl
@@ -97,13 +103,15 @@ usage(char *name) {
 			<< " [--levelEmbedded] : print htm id in embedded level format (full)" << endl
 			<< " [--levelEmbeddedIdWithTopBit] : print htm id in embedded level format (level stripped)" << endl
 			<< " [--levelEmbeddedIdOnly] : print htm id in embedded level format (level and top bit stripped)" << endl
+			<< " [--STARE]   : print STARE spatial id" << endl
+			<< " [--HTM]     : print HTM id" << endl
 			<< " depth       : level of index to return" << endl
 			<< " x y z       : cartesian coordinate of point to look up" << endl
 			<< " ra dec      : J2000 coordinate of point to look up" << endl
 			<< " lat lon     : latitude longitude of point to look up" << endl
 			<< endl
 			<< " The command line arguments toggle printing the IDs in order as follows." << endl
-			<< " ID 0xID symbol IDEmbedded IDEmbeddedWithTopBit IDEmbeddedIdOnly 0xIDEmbedded 0xIDEmbeddedWithTopBit 0xIDEmbeddedIdOnly" << endl;
+			<< " ID 0xID symbol IDEmbedded IDEmbeddedWithTopBit IDEmbeddedIdOnly 0xIDEmbedded 0xIDEmbeddedWithTopBit 0xIDEmbeddedIdOnly STARE" << endl;
 	exit(0);
 }
 
@@ -128,10 +136,13 @@ main(int argc, char *argv[]) {
 	bool corner=false;		// print corners
 	bool text = false;		// text flag
 	bool quiet = false;		// debug flag
-	bool bitShifted = true; // flag original id
+	// bool bitShifted = true; // flag original id
+	bool bitShifted = false; // flag original id
 	bool levelEmbedded = false;
 	bool levelEmbeddedIdWithTopBit = false;
 	bool levelEmbeddedIdOnly = false;
+	bool STARE_flag = false;
+	bool ok = false;
 
 	int args = 1;			// counter
 	int arg = 3;			// number of required arguments
@@ -140,21 +151,28 @@ main(int argc, char *argv[]) {
 	float64 ra, dec, x, y, z;
 	VarStr varg;
 	htmInterface *htm;
+	STARE stareIndex;
 	argc--;
 
 	while(argc > 0) {
 		if      (strcmp(argv[args],"--hex")==0) hex=true;
 		else if (strcmp(argv[args],"--dec")==0) decimal=true;
 		else if (strcmp(argv[args],"--symbol")==0) symbol=true;
-		else if (strcmp(argv[args],"--noBitShift")==0) bitShifted=false;
+		else if (strcmp(argv[args],"--noBitShift")==0) {
+			bitShifted=false; ok = true;
+		}
 		else if(strcmp(argv[args],"--latlon")==0) {
 			radec=false; latlon=true;
 		} else if(strcmp(argv[args],"--levelEmbedded")==0) {
-			levelEmbedded = true;
+			levelEmbedded = true; ok = true;
 		} else if(strcmp(argv[args],"--levelEmbeddedIdWithTopBit")==0) {
-			levelEmbeddedIdWithTopBit = true;
+			levelEmbeddedIdWithTopBit = true; ok = true;
 		} else if(strcmp(argv[args],"--levelEmbeddedIdOnly")==0) {
-			levelEmbeddedIdOnly = true;
+			levelEmbeddedIdOnly = true; ok = true;
+		} else if(strcmp(argv[args],"--STARE")==0) {
+			STARE_flag = true; ok = true;
+		} else if(strcmp(argv[args],"--HTM")==0) {
+			bitShifted = true; ok = true; // cf --noBitShift
 		} else if(strcmp(argv[args],"--area")==0)
 			area = true;
 		else if(strcmp(argv[args],"--text")==0)
@@ -173,7 +191,7 @@ main(int argc, char *argv[]) {
 			n = atoi(varg.data());
 			argc--;
 		} else {
-//			if( strcmp(argv[args],"--") ) usage(argv[0]); ???
+			//			if( strcmp(argv[args],"--") ) usage(argv[0]); ???
 			switch(arg) {
 			case 3:
 				// build the index to level 'depth'
@@ -214,7 +232,11 @@ main(int argc, char *argv[]) {
 		args++;
 		argc--;
 	}
-	if(arg > 0)usage(argv[0]);
+	if( arg > 0 || !ok ) {
+		usage(argv[0]);
+	} else {
+		if( !decimal ) { hex = true; }
+	}
 
 	try {
 		if(!quiet)
@@ -247,7 +269,7 @@ main(int argc, char *argv[]) {
 		}
 
 		if (!quiet && !idlookup) {
-//			cout << "radec: " << radec << endl << flush;
+			//			cout << "radec: " << radec << endl << flush;
 			printf("(x,y,z)  = %20.16f, %20.16f, %20.16f\n",x,y,z);
 			if(latlon) {
 				printf("(lat,lon) = %20.16f, %20.16f\n",ra,dec);
@@ -305,33 +327,51 @@ main(int argc, char *argv[]) {
 		//
 		// ******************************************************
 
-//		cout << "100" << endl << flush;
+		//		cout << "100" << endl << flush;
 
 		if(symbol||decimal||hex||bitShifted){
 			if (!quiet)	printf("ID/Name  = ");
-			if(bitShifted) PRINTID(id);
-			if(hex&&bitShifted) {
-				cout << " 0x";
-				PRINTID_HEX(id);
+			if(bitShifted) {
+				if(!quiet)  cout << " HTM-bitShifted ";
+				if(decimal) {
+					PRINTID(id); // Original right justified format
+				}
+				if(hex) {
+					cout << " 0x";
+					PRINTID_HEX(id);
+				}
+				if(symbol)  printf(" %s",htm->lookupName(id));
 			}
-			if(symbol)  printf(" %s",htm->lookupName(id));
 
-			if(levelEmbedded||levelEmbeddedIdOnly||levelEmbeddedIdWithTopBit) {
+			if(STARE_flag) {
+				if(!decimal && !hex) {
+					decimal = true;
+				}
+			}
+
+			if(levelEmbedded||levelEmbeddedIdOnly||levelEmbeddedIdWithTopBit||STARE_flag) {
 				EmbeddedLevelNameEncoding *encoding
 				= new EmbeddedLevelNameEncoding(htm->lookupName(id));
 
 				ios::fmtflags coutFlags(cout.flags());
-				if(levelEmbedded) {
-					if(!quiet)  cout << " embeddedLevel-id: ";
-					if(decimal) cout << " " << encoding->getId();
-				}
-				if(levelEmbeddedIdWithTopBit){
-					if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
-					if(decimal) cout << " " << encoding->getId_NoEmbeddedLevel();
-				}
-				if(levelEmbeddedIdOnly){
-					if(!quiet)  cout << " embeddedLevel-idOnly: ";
-					if(decimal) cout << " " << encoding->bareId_NoShift_NoEmbeddedLevel();
+				if(decimal) {
+					if(levelEmbedded) {
+						if(!quiet)  cout << " embeddedLevel-id: ";
+						if(decimal) cout << " " << encoding->getId();
+					}
+					if(levelEmbeddedIdWithTopBit){
+						if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
+						if(decimal) cout << " " << encoding->getId_NoEmbeddedLevel();
+					}
+					if(levelEmbeddedIdOnly){
+						if(!quiet)  cout << " embeddedLevel-idOnly: ";
+						if(decimal) cout << " " << encoding->bareId_NoShift_NoEmbeddedLevel();
+					}
+					if(STARE_flag) {
+						STARE stareIndex;
+						if(!quiet)  cout << " STARE: ";
+						if(decimal) cout << " " << stareIndex.ValueFromLatLonDegrees(ra, dec, depth);
+					}
 				}
 				if(hex) {
 					cout
@@ -339,32 +379,41 @@ main(int argc, char *argv[]) {
 					<< std::showbase
 					<< std::internal
 					<< std::setfill('0');
+
+					if(levelEmbedded) {
+						if(!quiet)  cout << " embeddedLevel-id: ";
+						if(hex)     cout << " " << std::setw(18) << encoding->getId();
+					}
+					if(levelEmbeddedIdWithTopBit){
+						if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
+						if(hex) cout << " " << std::setw(18) << encoding->getId_NoEmbeddedLevel();
+					}
+					if(levelEmbeddedIdOnly) {
+						if(!quiet)  cout << " embeddedLevel-idOnly: ";
+						if(hex)     cout << " " << std::setw(18) << encoding->bareId_NoShift_NoEmbeddedLevel();
+					}
+					if(STARE_flag) {
+						if(!quiet) cout << " STARE: ";
+						uint64 id1 = stareIndex.ValueFromLatLonDegrees(ra, dec, depth);
+						if(hex)    cout << std::setw(18) << id1;
+						uint64 htmId1 = stareIndex.htmIDFromValue(id1);
+						char idname1[128]; stareIndex.getIndex(depth).nameById(htmId1, idname1);
+						if(symbol) cout << " "  << idname1;
+					}
+					cout << std::dec;
 				}
-				if(levelEmbedded) {
-					if(!quiet)  cout << " embeddedLevel-id: ";
-					if(hex)     cout << " " << std::setw(18) << encoding->getId();
-				}
-				if(levelEmbeddedIdWithTopBit){
-					if(!quiet)  cout << " embeddedLevel-idWithTopBit: ";
-					if(hex) cout << " " << std::setw(18) << encoding->getId_NoEmbeddedLevel();
-				}
-				if(levelEmbeddedIdOnly) {
-					if(!quiet)  cout << " embeddedLevel-idOnly: ";
-					if(hex)     cout << " " << std::setw(18) << encoding->bareId_NoShift_NoEmbeddedLevel();
-				}
-				if(hex) cout << std::dec;
 				cout.flags(coutFlags);
 			}
-//			if(!(!bitShifted&&decimal))
+			//			if(!(!bitShifted&&decimal))
 			cout << endl << flush;
 		}
 
-//		cout << "200" << endl << flush;
+		//		cout << "200" << endl << flush;
 
 		if(corner) {
 			SpatialVector v1,v2,v3;
 
-//			htm->index().nodeVertex(id,v1,v2,v3);  // Bug in the original code.
+			//			htm->index().nodeVertex(id,v1,v2,v3);  // Bug in the original code.
 			htm->index().nodeVertex(htm->index().nodeIndexFromId(id),v1,v2,v3);
 
 			cout.precision(18);
@@ -373,10 +422,10 @@ main(int argc, char *argv[]) {
 					<< v2 << endl
 					<< v3 << endl;
 			if(radec) {
-			cout << "Corners (ra/dec):"
-					<< endl << v1.ra() << " " << v1.dec() << endl
-					<< v2.ra() << " " << v2.dec() << endl
-					<< v3.ra() << " " << v3.dec() << endl;
+				cout << "Corners (ra/dec):"
+						<< endl << v1.ra() << " " << v1.dec() << endl
+						<< v2.ra() << " " << v2.dec() << endl
+						<< v3.ra() << " " << v3.dec() << endl;
 			} else if(latlon) {
 				float64 lat1, lon1, lat2, lon2, lat3, lon3;
 				bool ok = false;
@@ -395,19 +444,19 @@ main(int argc, char *argv[]) {
 					<< v3.x() - v2.x() << " " << v3.y() - v2.y() << " " << v3.z() - v2.z() << endl;
 		}
 
-//		cout << "300" << endl << flush;
+		//		cout << "300" << endl << flush;
 
 		if(area) {
-//			cout << "AREA = " << htm->index().area(id) << endl; // broken
+			//			cout << "AREA = " << htm->index().area(id) << endl; // broken
 			cout << "AREA = " << htm->index().area(htm->index().nodeIndexFromId(id)) << endl; // broken
-//			   leafArea = index.area(index.idByLeafNumber(p)); // From htmTest.cpp
-//			cout
-//			<< "nodeIndex vs. idByLeafNumber: " << htm->index().nodeIndexFromId(id)
-//			<< " vs. " << htm->index().idByLeafNumber(id)
-//			<< endl << flush;
+			//			   leafArea = index.area(index.idByLeafNumber(p)); // From htmTest.cpp
+			//			cout
+			//			<< "nodeIndex vs. idByLeafNumber: " << htm->index().nodeIndexFromId(id)
+			//			<< " vs. " << htm->index().idByLeafNumber(id)
+			//			<< endl << flush;
 		}
 
-//		cout << "400" << endl << flush;
+		//		cout << "400" << endl << flush;
 
 	} catch (SpatialException x) {
 		printf("%s\n",x.what());

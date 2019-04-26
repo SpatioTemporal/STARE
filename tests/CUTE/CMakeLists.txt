@@ -8,6 +8,7 @@ set (
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
   STARE_test.cpp
+  TemporalIndex_test.cpp
   Test.h 
   )
 
@@ -16,4 +17,13 @@ set (
 add_executable(tests ${TestSrcFiles})
 target_link_libraries(tests STARE)
 target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute)
+
+add_test( STARETests tests )
+
+set_tests_properties( STARETests PROPERTIES
+  PASS_REGULAR_EXPRESSION "#success;#starting"
+  FAIL_REGULAR_EXPRESSION "#failure;#error"
+)
+  
+
 

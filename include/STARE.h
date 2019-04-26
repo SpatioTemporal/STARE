@@ -97,5 +97,6 @@ public:
 };
 
 void STARE_test();
+// void STARE_Temporal_test();
 
 #endif /* INCLUDE_STARE_H_ */

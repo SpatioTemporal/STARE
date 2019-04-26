@@ -112,7 +112,7 @@ public:
   void write(ostream& out);
 
     void invert() {
-    	for(uint i = 0; i < constraints_.size(); i++ ) {
+    	for(uint64 i = 0; i < constraints_.size(); i++ ) {
     		constraints_[i].invert();
     	}
     }
