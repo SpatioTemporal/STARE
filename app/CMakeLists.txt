@@ -6,9 +6,13 @@ add_executable              ( intersect intersect.cpp )
 target_link_libraries       ( intersect STARE)
 target_include_directories  ( intersect PUBLIC )
 
-add_executable              ( lookup lookup.cpp )
-target_link_libraries       ( lookup STARE)
-target_include_directories  ( lookup PUBLIC )
+add_executable              ( lowlevel-lookup-tool lowlevel-lookup-tool.cpp )
+target_link_libraries       ( lowlevel-lookup-tool STARE)
+target_include_directories  ( lowlevel-lookup-tool PUBLIC )
+
+# add_executable              ( lookup lookup.cpp )
+# target_link_libraries       ( lookup STARE)
+# target_include_directories  ( lookup PUBLIC )
 
 # Broken
 add_executable              ( lookupInteractive lookupInteractive.cpp )
@@ -19,9 +23,5 @@ target_include_directories  ( lookupInteractive PUBLIC )
 add_executable              ( tesselateTrapezoid tesselateTrapezoid.cpp )
 target_link_libraries       ( tesselateTrapezoid STARE)
 target_include_directories  ( tesselateTrapezoid PUBLIC )
-
-add_executable              ( opendapTester opendapTester.cpp )
-target_link_libraries       ( opendapTester STARE)
-target_include_directories  ( opendapTester PUBLIC )
 
 

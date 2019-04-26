@@ -19,17 +19,32 @@ else
 	BOOST_LIBS  ?= -L/opt/local/lib
 endif
 
-CXX_FLAGS += -I${CUTEDIR}/cute ${BOOST_FLAGS}
+CXX_FLAGS += -I${CUTEDIR}/cute ${BOOST_FLAGS} -I.
 CLX_FLAGS += ${BOOST_LIBS} -L../../unix -lSTARE
 
 CuteTests: test
 	./test
 
-test: test.o libs
-	$(CXX) -o test test.o $(CLX_FLAGS)
+OBJS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
-test.o: Test.cpp
-	$(CXX) $(CXX_FLAGS) -o test.o Test.cpp
+test: $(OBJS)
+	$(CXX) -o test $(OBJS) $(CLX_FLAGS)
+
+#test.o: Test.cpp
+#	$(CXX) $(CXX_FLAGS) -o test.o Test.cpp
+
+%.o : %.cpp
+	$(CXX) -c $(CXX_FLAGS) $< -o $@
 
 clean-test:
 	-rm -f *.o test
+
+local_version:
+	make --version
+	
+local_echo:
+	@echo OBJS: ${OBJS}	
+	@echo CXX_FLAGS: $(CXX_FLAGS)
+	@echo CLX_FLAGS: $(CLX_FLAGS)
+
+#	echo CXX_FLAGS2: ${CXX_FLAGS}

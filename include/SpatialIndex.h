@@ -23,6 +23,7 @@
 #include <time.h>
 #include <SpatialGeneral.h>
 #include <SpatialVector.h>
+#include <SpatialRotation.h>
 #include <SpatialEdge.h>
 #include <SpatialException.h>
   // begin add dcd
@@ -78,9 +79,9 @@ public:
       , that many levels are generated on the fly each time the index
       is called. */
   SpatialIndex() {};
-  SpatialIndex(size_t maxlevel, size_t buildlevel = 5);
-  SpatialIndex(const char* htmIdName, int buildlevel = 5) :
-	  SpatialIndex(levelOfName(htmIdName),buildlevel) {};
+  SpatialIndex(size_t maxlevel, size_t buildlevel = 5, SpatialRotation rot = rot_identity);
+  SpatialIndex(const char* htmIdName, int buildlevel = 5, SpatialRotation rot = rot_identity) :
+	  SpatialIndex(levelOfName(htmIdName),buildlevel,rot) {};
 
   size_t getMaxlevel() const { return maxlevel_; }
   size_t getLeafLevel() const { return maxlevel_; }
@@ -98,7 +99,7 @@ public:
   ///Print the node information in nodes_ at nodeIndex.
 void printNode(int nodeIndex) const;
 
-  /// NodeName conversion to integer ID
+  /// NodeName conversion to integer ID (but which one?)
   static uint64 idByName(const char *);
 
   /// Legacy code
@@ -132,20 +133,47 @@ void printNode(int nodeIndex) const;
       */
   char * nameByLeafNumber(uint64 n, char * name = 0) const;
 
-  /** find the vector to the centroid of a triangle represented by 
-	  the ID */
-  void pointByHtmId(SpatialVector & vector, uint64 ID) const;
-  void pointById(SpatialVector & vector, uint64 ID) const;
+  /** Find the vector to the centroid of a triangle represented by the htmID
+   *
+   * Note this is the inverse of idByPoint.
+   *
+   * */
+  void pointByHtmId(SpatialVector & vector, uint64 htmID) const;
+
+  /** Return the vertices associated with the triangle of htmID
+   *
+   */
+  void nodeVertexByHtmId(SpatialVector &v1, SpatialVector &v2, SpatialVector &v3, uint64 htmId) const;
+
+  /** Return the area associated with an htmId.
+   *
+   */
+  float64 areaByHtmId(uint64 htmId) const;
+
+  /**
+   * Return a leafID, i.e. a NodeID64 from an HtmId.
+   */
+  uint64 NodeID64FromHtmId(uint64 htmId) const;
+
+
+  /** Find the vector to the centroid of a triangle represented by the nodeID64.
+   *
+   * */
+  void pointById(SpatialVector & vector, uint64 nodeID64) const;
 
   /** Find the neighbors across the edges of the triangles htmId */
   void
-  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const;
+  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId, SpatialVector workspace[18]) const;
 
   void
-  NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const;
+  NeighborsAcrossVerticesFromEdges(uint64 neighbors[9], uint64 neighbors_edge[3], uint64 htmId, SpatialVector workspace[18]) const;
+  // NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId, SpatialVector workspace[15]) const;
 
-  /** find a node by giving a vector. 
-      The ID of the node is returned.
+  /** find a node by giving a vector.
+   *
+      The htmID of the node is returned.
+
+      // TODO rename idByPoint by htmIdPoint. Everywhere.
 
       Find the leaf triangle containing the vector.
       */
@@ -249,8 +277,16 @@ private:
 
   // Test whether a vector v is inside a triangle v0,v1,v2. Input
   // triangle has to be sorted in a counter-clockwise direction.
-  bool isInside(const SpatialVector & v, const SpatialVector & v0,
-		const SpatialVector & v1, const SpatialVector & v2) const;
+  bool isInside(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2
+		  ) const;
+
+  bool isInsideBarycentric(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2,
+		  bool verbose
+		  ) const;
 
   // VARIABLES
 
@@ -280,4 +316,7 @@ private:
 
 
 #include "SpatialIndex.hxx"
+
+void SpatialIndex_test();
+
 #endif

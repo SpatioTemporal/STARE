@@ -40,6 +40,7 @@ public:
   SpatialVector(float64 x,
 		float64 y,
 		float64 z);
+  SpatialVector(float64 *x);
 
   /// Constructor from ra/dec, this is always normed to 1
   SpatialVector(float64 ra,
@@ -100,6 +101,9 @@ public:
   /// Normalize vector length to r
   void normalize(float64 r);
 
+  // Return the reverse of the spatial vector.
+  SpatialVector reverse();
+
   /// Printf it to stdout
   void show() const;
 
@@ -110,6 +114,8 @@ public:
   void write(std::ostream &) const;
 
   const char* toString();
+
+  float64* toArray();
 
   /// Comparison
   int operator ==(const SpatialVector & ) const;
@@ -156,6 +162,16 @@ private:
   friend class SpatialDomain;
   friend class sxSpatialDomain;
 };
+
+void SpatialVector_test();
+
+extern SpatialVector xhat, yhat, zhat;
+
+/// A collection of vertices
+typedef std::vector<SpatialVector> Vertices;
+/// A Triangle struct for convenience & typing. Note vertices must have the appropriate ordering.
+// TODO Consider a full-fledged Triangle class to refactor some geometry out of index, etc.
+struct Triangle {SpatialVector centroid;  Vertices vertices;};
 
 #include "SpatialVector.hxx"
 

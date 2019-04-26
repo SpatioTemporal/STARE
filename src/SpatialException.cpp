@@ -21,10 +21,13 @@
 #include <string.h>
 #include <SpatialException.h>
 
+#include <iostream>
+#include <sstream>
+
 /* --- SpatialException methods ------------------------------------------------- */
-char *
+const char *
 SpatialException::defaultstr[] = {
-  "SDSS Science Archive",
+  "STARE Library",
   "generic exception",				// These specialized exceptions are
   "unimplemented functionality",	// currently implemented. If no string
   "failed operation",				// is given, this is the standard
@@ -154,39 +157,70 @@ SpatialFailure::SpatialFailure( const char *context, const char *because ) throw
 }
 
 SpatialFailure::SpatialFailure( const char *context, const char *operation
-		      , const char *resource, const char *because ) throw()
-{
-   try {
-      delete[] str_;
-      if ( !operation && !resource && !because ) {
-		if ( !context ) context = defaultstr[CONTEXT];
-		because = "failed operation";
-      }
-      str_ = new char[ slen(context) + slen(operation) + slen(resource)
-		      + slen(because) + 50];
-      *str_ = '\0';
-      if ( !context )
-		context = defaultstr[CONTEXT];
-		sprintf(str_,"%s: ",context);
-      if ( operation ) {
-		sprintf(str_,"%s %s failed ",str_, operation);
-      }
-      if ( resource ) {
-		if(operation)
-			sprintf(str_,"%s on \"%s\"",str_,resource);
-		else
-			sprintf(str_,"%s trouble with \"%s\"",str_,resource);
-      }
-      if ( because ) {
-		if ( operation || resource )
-			sprintf(str_,"%s because %s",str_,because);
-		else
-			sprintf(str_,"%s %s",str_,because);
-      }
-   }
-   catch (...) {
-     delete[] str_;
-   }
+		, const char *resource, const char *because ) throw() {
+	try {
+		std::stringstream ss;
+		delete[] str_;
+
+		// int std_cout=100; std::cout << std_cout++ << std::endl << std::flush;
+
+		if ( !operation && !resource && !because ) {
+			if ( !context ) context = defaultstr[CONTEXT];
+			because = "failed operation";
+		}
+		str_ = new char[ slen(context) + slen(operation) + slen(resource)
+						 + slen(because) + 50];
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+		*str_ = '\0';
+		if ( !context ) {
+			context = defaultstr[CONTEXT];
+		}
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+		ss << context << ": ";
+		// sprintf(str_,"%s: ",context);
+		if ( operation ) {
+			ss << operation << " failed ";
+			// sprintf(str_,"%s %s failed ",str_, operation);
+		}
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+		if ( resource ) {
+			if(operation) {
+				ss << "on " << resource;
+				// sprintf(str_,"%s on \"%s\"",str_,resource);
+			} else {
+				ss << " trouble with " << resource;
+				// sprintf(str_,"%s trouble with \"%s\"",str_,resource);
+			}
+		}
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+		if ( because ) {
+			if ( operation || resource ) {
+				ss << " because " << because;
+				// sprintf(str_,"%s because %s",str_,because);
+			} else {
+				ss << " " << because;
+				// sprintf(str_,"%s %s",str_,because);
+			}
+		}
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+		// delete [] str_;
+		strcpy( str_, ss.str().c_str() );
+
+		// std::cout << std_cout++ << std::endl << std::flush;
+
+	} catch (...) {
+		delete[] str_;
+	}
 }
 
 SpatialFailure::SpatialFailure( const SpatialFailure& oldX ) throw()
@@ -205,19 +239,25 @@ SpatialBoundsError::SpatialBoundsError( const char *context, const char *array
 			      , int32 limit, int32 index ) throw()
   : SpatialException(context,array,BOUNDS)
 {
+	std::stringstream ss;
    try {
      if ( limit != -1 ) {
-		if ( array )
-			sprintf(str_,"%s[%d]",str_,index);
-		else
-			sprintf(str_, "%s array index %d ",str_, index );
+		if ( array ) {
+			ss << "[" << index << "]";
+			// sprintf(str_,"%s[%d]",str_,index);
+		} else {
+			ss << " array index " << index;
+			// sprintf(str_, "%s array index %d ",str_, index );
+		}
 	 if ( index > limit ) {
-		sprintf( str_, "%s over upper bound by %d",str_, index - limit );
-	 }
-	 else {
-		sprintf( str_, "%s under lower bound by %d",str_, limit - index );
+		// sprintf( str_, "%s over upper bound by %d",str_, index - limit );
+		ss << " over upper bound by " << index - limit;
+	 } else {
+		// sprintf( str_, "%s under lower bound by %d",str_, limit - index );
+		ss << " under lower bound by " << limit - index;
 		}
      }
+     strcpy( str_, ss.str().c_str() );
    }
    catch (...) {
      delete[] str_;
@@ -243,33 +283,41 @@ SpatialInterfaceError::SpatialInterfaceError( const char *context, const char *b
 }
 
 SpatialInterfaceError::SpatialInterfaceError( const char *context, const char *argument
-				 , const char *because ) throw()
-{
-   try {
-      delete[] str_;
-      str_ = new char[slen(context) + slen(argument) + slen(because) + 128];
-      *str_ = '\0';
-      if ( !context )
-		context = defaultstr[CONTEXT];
-		sprintf(str_,"%s: ",context);
-      if ( argument && because ) {
-		sprintf(str_,"%s argument \"%s\" is invalid because %s ",str_,
-		 argument, because);
-      }
-      else if ( argument && !because ) {
-		sprintf(str_,"%s invalid argument \"%s\" ",str_,
-		 argument);
-      }
-      else if ( !argument )
-		if(because)
-			sprintf(str_,"%s %s",str_,because);
-		else
-			sprintf(str_,"%s interface violation",str_);
-   }
-   catch (...) {
-     delete[] str_;
-   }
-}
+		, const char *because ) throw()
+		{
+	std::stringstream ss;
+	try {
+		delete[] str_;
+		str_ = new char[slen(context) + slen(argument) + slen(because) + 128];
+		*str_ = '\0';
+		if ( !context )
+			context = defaultstr[CONTEXT];
+		ss << context << ": ";
+		// sprintf(str_,"%s: ",context);
+		if ( argument && because ) {
+			ss << "argument " << argument << " is invalid because " << because;
+			// sprintf(str_,"%s argument \"%s\" is invalid because %s ",str_,
+					// argument, because);
+		}
+		else if ( argument && !because ) {
+			ss << "invalid argument " << argument;
+			// sprintf(str_,"%s invalid argument \"%s\" ",str_,
+				//	argument);
+		}
+		else if ( !argument ) {
+			if(because)
+				ss << " " << because;
+				// sprintf(str_,"%s %s",str_,because);
+			else
+				ss << " interface violation";
+				// sprintf(str_,"%s interface violation",str_);
+		}
+		strcpy( str_, ss.str().c_str() );
+	}
+	catch (...) {
+		delete[] str_;
+	}
+		}
 
 SpatialInterfaceError::SpatialInterfaceError( const SpatialInterfaceError& oldX ) throw()
   : SpatialException(oldX)

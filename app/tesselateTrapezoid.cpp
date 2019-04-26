@@ -46,37 +46,53 @@ int main(int argc, char *argv[]) {
             cnrs[c]->setLatLonDegrees(lat, lon);         
         }           
     }
+
+    cout << 20 << endl << flush;
               
     SpatialIndex* si; 
     RangeConvex* conv;
     HtmRange htmRange;    
     char* symbol;
     
-    
+    cout << 30 << endl << flush;
+
     // create htm interface
     htmInterface htm(level,savelevel);
+
+    cout << 40 << endl << flush;
   
     // Create spatial index at according level
     //si = new SpatialIndex(level,savelevel);    
     const SpatialIndex &index = htm.index();
     
+    cout << 50 << endl << flush;
+
     // create spatial domain
     SpatialDomain domain(&index);   // initialize empty domain
+
+    cout << 60 << endl << flush;
   
     // Create convex to represent the geometry
-    conv = new RangeConvex(cnrs[0],cnrs[1],cnrs[2],cnrs[3]);  
+    conv = new RangeConvex(cnrs[0],cnrs[1],cnrs[2],cnrs[3]);
+
+    cout << 70 << endl << flush;
     
     // Add convex to domain
     domain.add(*conv);
+
+    cout << 80 << endl << flush;
         
     // Purge HTMRange
     htmRange.purge();
+
+    cout << 90 << endl << flush;
         
-    // Do the intersect. The boolean is for varlenght ids or not
+    // Do the intersect. The boolean is for varlength ids or not
     //conv->intersect(si,htmRange,false);
     domain.intersect(&index, &htmRange, false);	  // intersect with range
-    
   
+    cout << 100 << endl << flush;
+
     // Iterate through the indeces
     HtmRangeIterator iter(&htmRange);        
     char buffer[80];

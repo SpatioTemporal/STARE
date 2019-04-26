@@ -50,7 +50,9 @@ public:
 	}
 
 protected:
+	/// The fundamental id that is encoded.
 	uint64 id;
+	/// The symbolic name associated with the id, e.g. N01230123.
 	const char*  name;
 
 };

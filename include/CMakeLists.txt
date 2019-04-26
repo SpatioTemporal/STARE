@@ -1,6 +1,7 @@
 
 set (
-  HSTMSrcFiles
+  STARE_SrcFiles
+  ${CMAKE_CURRENT_SOURCE_DIR}/BitField.h
   ${CMAKE_CURRENT_SOURCE_DIR}/BitShiftNameEncoding.h
   ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
   ${CMAKE_CURRENT_SOURCE_DIR}/Convexio.h
@@ -19,7 +20,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConvex.hxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h
+  #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h		Is this file no longer needed here?
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.bak_h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.hxx
@@ -33,6 +34,10 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialSign.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialVector.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialVector.hxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialRotation.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/STARE.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/TemporalIndex.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/TemporalWordFormat1.h	
   ${CMAKE_CURRENT_SOURCE_DIR}/VarCmp.h
   ${CMAKE_CURRENT_SOURCE_DIR}/VarStr.h
   ${CMAKE_CURRENT_SOURCE_DIR}/VarStr.hpp
@@ -46,3 +51,45 @@ set (
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 #
 
+install(FILES STARE.h
+  BitField.h
+  BitShiftNameEncoding.h
+  CMakeLists.txt
+  Convexio.h
+  EmbeddedLevelNameEncoding.h
+  HtmRange.h
+  HtmRangeIterator.h
+  HtmRangeMultiLevel.h
+  HtmRangeMultiLevelIterator.h
+  Htmio.h
+  HstmRange.h
+  KeyPair.h
+  NameEncoding.h
+  RangeConvex.h
+  RangeConvex.hxx
+  SkipList.h
+  SkipListElement.h
+  SpatialConstraint.h
+  SpatialConstraint.hxx
+  SpatialConvex.hxx
+  SpatialDomain.bak_h
+  SpatialDomain.h
+  SpatialDomain.hxx
+  SpatialEdge.h
+  SpatialException.h
+  SpatialGeneral.h
+  SpatialIndex.h
+  SpatialIndex.hxx
+  SpatialInterface.h
+  SpatialInterface.hxx
+  SpatialSign.h
+  SpatialVector.h
+  SpatialVector.hxx
+  SpatialRotation.h
+  STARE.h
+  TemporalIndex.h
+  TemporalWordFormat1.h	
+  VarCmp.h
+  VarStr.h
+  VarStr.hpp
+  VarStr.hxx DESTINATION include)

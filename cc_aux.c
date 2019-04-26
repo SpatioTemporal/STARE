@@ -170,7 +170,7 @@ double cc_sqrt3    = 1.7320508075688772935;
 uint64 cc_vector2ID(double x, double y, double z, int depth)
 {
   uint64 rstat = 0;
-  int startID;
+  // uint64 startID;
   char name[80];
   int len = 0;
 
@@ -187,7 +187,8 @@ uint64 cc_vector2ID(double x, double y, double z, int depth)
   // Get the ID of the level0 triangle, and its starting vertices
   //
 
-  startID = cc_startpane(v0, v1, v2, x, y, z, name);
+  // startID = cc_startpane(v0, v1, v2, x, y, z, name);
+  cc_startpane(v0, v1, v2, x, y, z, name);
   len = 2;
   //
   // Start searching for the children
@@ -267,7 +268,7 @@ uint64 cc_vector2ID(double x, double y, double z, int depth)
 uint64 cc_radec2ID(double ra, double dec, int depth)
 {
   uint64 rstat = 0;
-  int startID;
+  // uint64 startID;
   double x, y , z;
   char name[80];
   int len = 0;
@@ -286,7 +287,8 @@ uint64 cc_radec2ID(double ra, double dec, int depth)
   // Get the ID of the level0 triangle, and its starting vertices
   //
 
-  startID = cc_startpane(v0, v1, v2, x, y, z, name);
+  // startID = cc_startpane(v0, v1, v2, x, y, z, name);
+  cc_startpane(v0, v1, v2, x, y, z, name);
   len = 2;
   //
   // Start searching for the children

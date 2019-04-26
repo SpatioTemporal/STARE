@@ -35,7 +35,7 @@
 #endif
 
 typedef int64 Key;            // key type TODO Why not uint64?
-//typedef uint64 Key;            // key type TODO Why not uint64?
+// typedef uint64 Key;            // key type TODO Why not uint64?
 typedef int Value;          // value type
 
 // class ostream;

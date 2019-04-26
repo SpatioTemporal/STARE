@@ -185,26 +185,34 @@ int HtmRange::isIn(Key a, Key b)
 
 	// If both lo and hi are inside some range, and the range numbers agree...
 	//
-	Key GH_a, GL_a, SH_a, SL_a;
-	Key GH_b, GL_b, SH_b, SL_b;
-	Key param[8];
-	int i;
-	int rstat = 0;
-	i = 0;
-	param[i++] = GL_a = my_los->findMAX(a);
-	param[i++] = GH_a = my_his->findMAX(a);
+	// Key GH_a, GL_a, SH_a, SL_a;
+	// Key GH_b, GL_b, SH_b, SL_b;
 
-	param[i++] = SL_a = my_los->findMIN(a);
-	param[i++] = SH_a = my_his->findMIN(a);
-
-
-	param[i++] = GL_b = my_los->findMAX(b);
-	param[i++] = GH_b = my_his->findMAX(b);
-
-	param[i++] = SL_b = my_los->findMIN(b);
-	param[i++] = SH_b = my_his->findMIN(b);
+	Key
+	GL_a = my_los->findMAX(a),
+	GH_a = my_his->findMAX(a),
+	SL_a = my_los->findMIN(a),
+	SH_a = my_his->findMIN(a),
+	GL_b = my_los->findMAX(b),
+	GH_b = my_his->findMAX(b);
 
 	/*
+	Key
+	SL_b = my_los->findMIN(b),
+	SH_b = my_his->findMIN(b);
+	*/
+
+	/*
+	Key param[8]; int i = 0;
+	param[i++] = GL_a;
+	param[i++] = GH_a;
+	param[i++] = SL_a;
+	param[i++] = SH_a;
+	param[i++] = GL_b;
+	param[i++] = GH_b;
+	param[i++] = SL_b;
+	param[i++] = SH_b;
+
 //	bool dbg = a==150;
 	bool dbg = a==50;
 	dbg = (a == 60 && b == 80) || (a==50);
@@ -227,6 +235,7 @@ int HtmRange::isIn(Key a, Key b)
 	}
 	*/
 
+	int rstat = 0;
 	if(GH_a < GL_a && GL_b < GH_b){ // a is in, b is not. TODO What about +/- MAX?
 		rstat = 0;
 //		if(dbg) cout << " <<<<< X (0), GH_a < GL_a && GL_b < GH_b" << endl;
@@ -724,7 +733,8 @@ void HtmRange::reset()
 int HtmRange::nranges()
 {
 //	cout << "z000" << endl << flush;
-	Key lo, hi;
+	Key lo;
+	// Key hi;
 	int n_ranges;
 	n_ranges = 0;
 	my_los->reset();
@@ -734,7 +744,7 @@ int HtmRange::nranges()
 	while((lo = my_los->getkey()) > 0){
 		n_ranges++;
 //		cout << "z020 " << n_ranges << flush;
-		hi = my_his->getkey();
+		// hi = my_his->getkey();
 //		cout << " : " << lo << ", " << hi << " " << flush << endl;
 		my_los->step();
 		my_his->step();
@@ -752,7 +762,7 @@ int HtmRange::nranges()
 Key HtmRange::bestgap(Key desiredSize)
 {
 	SkipList sortedgaps(SKIP_PROB);
-	Key gapsize;
+	Key gapsize = -1;
 	Key key;
 	Value val;
 
@@ -958,7 +968,7 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
 
 HtmRange HtmRange::getSpan() {
 	HtmRange ret;
-	Key lo, hi, first, last;
+	Key lo, hi = -1, first, last;
 	my_los->reset();
 	my_his->reset();
 	lo = my_los->getkey();
@@ -978,8 +988,9 @@ HtmRange HtmRange::getSpan() {
 }
 
 void HtmRange::parse(std::string rangeString) {
-	char tmp_buf[256];
-	std::string::size_type pos, lastPos = 0;
+	// char tmp_buf[256];
+	std::string::size_type pos;
+	// std::string::size_type lastPos = 0;
 
 //	cout << "x000:" << rangeString << endl;
 
@@ -994,7 +1005,7 @@ void HtmRange::parse(std::string rangeString) {
 		throw SpatialFailure("HtmRange::parse::NoOpenRepresentationString");
 	}
 
-	int iSpace = rangeString.find_first_of(' ');
+	// int iSpace = rangeString.find_first_of(' ');
 	// cout << "x120: " << iSpace << endl;
 
 	int posSym = rangeString.find(SymbolicRepresentationString);
@@ -1067,7 +1078,8 @@ void HtmRange::parse(std::string rangeString) {
 				// throw(SpatialFailure("HtmRange::parse::hex::NoData"));
 			}
 			int posComma = rangeString.find(",");
-			std:string endSymbol;
+			// std:string endSymbol;
+			string endSymbol;
 			if(posComma<0) {
 				endSymbol = ")";
 			} else {
