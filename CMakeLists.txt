@@ -11,7 +11,7 @@ endif()
 
 # If an environment variable was not set, then guess.
 if(CUTE_INCLUDE_DIR MATCHES "ON")
-    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/cute )
+    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE )
 endif()
 
 message("\n------------ Running cmake for project STARE ------------\n")
@@ -23,7 +23,7 @@ if(EXISTS "${CUTE_INCLUDE_DIR}")
     message( " CUTE Testing Enabled\n" )
 else()
      # message( FATAL_ERROR " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\n ")
-     message( WARNING " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\nContinuing without configuring tests...\n")
+     message( WARNING " CUTE_INCLUDE_DIR not set, using ${CUTE_INCLUDE_DIR}\nContinuing without configuring tests...\n")
 endif()
 
 # Set CC and CXX before calling cmake...

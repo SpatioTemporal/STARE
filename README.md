@@ -1,30 +1,30 @@
 
-###########################################################################
-# STARE SpatioTemporal Adaptive Resolution Encoding
+STARE (SpatioTemporal Adaptive Resolution Encoding)
+=================================================
 
 An encoding for high-performance search and subsetting of geospatial data.
 
 Development supported by NASA/ACCESS-17.
 
-*** THIS CODE IS UNDER HEAVY DEVELOPMENT.
-*** IT'S API AND NUMERICAL RESULTS ARE BOUND TO CHANGE.
+### --THIS CODE IS UNDER HEAVY DEVELOPMENT--
+### --IT'S API AND NUMERICAL RESULTS ARE BOUND TO CHANGE--
 
 Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net
 
 
-###########################################################################
-#
-INSTALL
+## INSTALL
+``` 
   Please see the INSTALL file for more information. CMake is the preferred build method.
-  
-PySTARE
+```
+## PySTARE
+```
   A fledgling Python 3 interface is available. See INSTALL and src/PySTARE.cpp for more information.
+```
 
-
-###########################################################################
-## OBSOLETE ##
+OBSOLETE
+========
 # hstm Hierarchical Spherical Triangular Mesh
 
 A fork of version 2 of the Hierarchical Triangular Mesh developed for the Sloan Digital Sky Survey.

@@ -29,13 +29,15 @@ set (
   TemporalWordFormat1.cpp
   VarStr.C )
   
-# TODO Trouble with VarStr.hpp# TODO Trouble with VarStr.hpp
+# TODO Trouble with VarStr.hpp
 # Var.Str.C is a kluge because I don't know how to get CMake to handle the hpp files correctly.
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
-find_package(Boost)
+# FIXME jhth 5/1/19 Fails for me. find_package(Boost)
+set ( Boost_FOUND  OFF )
+
 if(Boost_FOUND)
   include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.7m"  )
   set(Boost_USE_STATIC_LIBS OFF)
