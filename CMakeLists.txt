@@ -15,7 +15,6 @@ if(CUTE_INCLUDE_DIR MATCHES "ON")
 endif()
 
 message("\n------------ Running cmake for project STARE ------------\n")
-message("\n Cute Dir: ${CUTE_INCLUDE_DIR} \n Source Dir: ${PROJECT_SOURCE_DIR}")
 
 # Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
 if(EXISTS "${CUTE_INCLUDE_DIR}")
@@ -24,7 +23,7 @@ if(EXISTS "${CUTE_INCLUDE_DIR}")
     message( " CUTE Testing Enabled\n" )
 else()
      # message( FATAL_ERROR " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\n ")
-     message( WARNING " CUTE_INCLUDE_DIR not found! ${CUTE_INCLUDE_DIR}\nContinuing without configuring tests...\n")
+     message( WARNING " CUTE_INCLUDE_DIR not set, using ${CUTE_INCLUDE_DIR}\nContinuing without configuring tests...\n")
 endif()
 
 # Set CC and CXX before calling cmake...
