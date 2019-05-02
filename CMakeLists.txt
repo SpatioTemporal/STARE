@@ -11,10 +11,11 @@ endif()
 
 # If an environment variable was not set, then guess.
 if(CUTE_INCLUDE_DIR MATCHES "ON")
-    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/cute )
+    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE )
 endif()
 
 message("\n------------ Running cmake for project STARE ------------\n")
+message("\n Cute Dir: ${CUTE_INCLUDE_DIR} \n Source Dir: ${PROJECT_SOURCE_DIR}")
 
 # Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
 if(EXISTS "${CUTE_INCLUDE_DIR}")

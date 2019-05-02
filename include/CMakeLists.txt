@@ -20,7 +20,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConvex.hxx
-  #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h		Is this file no longer needed here?
+  #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h		Is this file no longer needed here? -kln 4/25/19
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.bak_h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.hxx

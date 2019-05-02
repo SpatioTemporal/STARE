@@ -4,8 +4,7 @@
 Notes on installation.
 
 The environment variable TOPDIR is set to the top level of the
-distribution. CUTE-based unit testing is the default, set CUTEDIR to
-CUTE's location.
+distribution. CUTE-based unit testing is the default.
 
 There are now two methods for compiling STARE. The currently preferred
 method is based on CMake and the second (deprecated) uses an old ad hoc
@@ -25,8 +24,18 @@ Dependencies:
 #   tests will be in build/default/tests
 #   ./STARE/include contains the headers
 #
+# The default location for CMAKE_INSTALL_PREFIX is /usr/local (UNIX)
+#	or c:/Program Files (Windows). Running the below cmake command will
+#	set it to $prefix/deps. If you wish to install it elsewhere, simply
+#	set the environment variable to your preferred location.
+# The environment variable "CUTE_INCLUDE_DIR" has a default value of:
+#	'${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE'
+#	If you want to use a different location for the CUTE headers you
+#	must provide it with the cmake command using
+#	'-DCUTE_INCLUDE_DIR=<CUTE location>'
+
 $ mkdir build; cd build
-$ cmake ../STARE
+$ cmake .. -DCMAKE_INSTALL_PREFIX=$prefix/deps
 $ make
 
 
