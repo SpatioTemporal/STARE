@@ -42,7 +42,7 @@ endif()
 
 #add_subdirectory is used when the subdirectory has its own CMakeLists.txt
 # Otherwise, include_directories is used to access files in the directory
-include_directories(${PROJECT_SOURCE_DIR}/include )
+include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
 if(BUILD_TESTING)
   message( "Adding tests...\n" )
   add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)

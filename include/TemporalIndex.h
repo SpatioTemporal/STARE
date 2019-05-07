@@ -20,6 +20,8 @@
 #include "BitField.h"
 #include "TemporalWordFormat1.h"
 
+#include "erfa.h"
+
 namespace std {
 
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
@@ -167,6 +169,7 @@ public:
 
 		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
 		setFieldMaxId(fieldId-1);
+		setValue("type",2); //
 
 		/*
 		bitFields.push_back(
@@ -185,8 +188,8 @@ public:
 	virtual ~TemporalWordFormat();
 };
 
-static const TemporalWordFormat temporalWordFormat;
-static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
+// static const TemporalWordFormat temporalWordFormat;
+// static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
 
 //int scidbTemporalIndexCommonLevel(int64_t i0, int64_t i1) {
 //	int commonLevel = -3; // error
@@ -214,7 +217,8 @@ public:
 	// TODO Make better use of temporalWordFormat...
 
 	TemporalIndex() {
-		data = temporalWordFormat; // Copy the format
+		// data = temporalWordFormat; // Copy the format
+		TemporalWordFormat data;
 		// data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
 		data.setValue("resolution",63);
 	};
@@ -267,9 +271,12 @@ public:
 	};
 
 // #define SHIFT_AND_MASK(field) field = mask_##field & (idx_ >> offset_##field ) ;
-#define SHIFT_AND_MASK(field) data.setValue(#field,data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset()));
-#define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
+#define SHIFT_AND_MASK(field) data.setValue(#field,\
+		data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset()));
 
+#define REVERT(field) data.setValue(#field, data.get(#field)->getMaxValue()-data.getValue(#field) );
+
+#define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
 
 	int leapYearDay(int64_t _year) {
 		// From wikipedia
@@ -294,8 +301,11 @@ public:
 
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
 		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
+		int64_t babit = 1;
 		if(idx_<0) {
+			babit = 0;
 			idx_ = - idx_;
+			// idx_ = idx_ | (1ll << 63);
 		}
 		SHIFT_AND_MASK(year)
 		SHIFT_AND_MASK(month)
@@ -307,6 +317,18 @@ public:
 		SHIFT_AND_MASK(millisecond)
 		SHIFT_AND_MASK(resolution)
 		SHIFT_AND_MASK(type)
+
+		// if(false) {
+		if(babit == 0) {
+			// REVERT(year);
+			REVERT(month);
+			REVERT(week);
+			REVERT(day);
+			REVERT(hour);
+			REVERT(minute);
+			REVERT(second);
+			REVERT(millisecond);
+		}
 
 		// Note: data.getValue("resolution") == 63 for a terminator.
 
@@ -335,9 +357,9 @@ public:
 			SET_MAX(minute); // ok
 			SET_MAX(second); // ok
 			SET_MAX(millisecond); // ok
-
 		}
 	};
+#undef REVERT
 #undef SET_MAX
 #undef SHIFT_AND_MASK
 
@@ -361,36 +383,64 @@ public:
 
 	// TODO Check for errors/integrity of data value.
 // #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
-#define MASK_AND_SHIFT(field) (( data.get(#field)->getMask() & data.getValue(#field) ) \
+
+ #define MASK_AND_SHIFT_REVERSE(babit,field) (( data.get(#field)->getMask() \
+		& ( babit*data.getValue(#field)   + (1-babit)*(data.get(#field)->getMaxValue()-data.getValue(#field)))  ) \
 		<< data.get(#field)->getOffset() )
+
+#define MASK_AND_SHIFT(babit,field) (( data.get(#field)->getMask() \
+		& data.getValue(#field) ) \
+		<< data.get(#field)->getOffset() )
+
+// #define CHECK_MASK_AND_SHIFT(babit,field) cout << "CMAS "<< #field << " " << data.getValue(#field) \
+// 	<< " " << (data.get(#field)->getMaxValue()-data.getValue(#field)) << endl << flush;
+
 // #define MASK_AND_SHIFT_RESOLUTION(field) (( data.get(#field)->getMask() & (data.resolutionLevelConstraint-data.getValue(#field)) ) \
 //		<< data.get(#field)->getOffset() )
+
 	int64_t scidbTemporalIndex() {
+
+		int64_t babit = data.getValue("BeforeAfterStartBit");
+
 		int64_t idx_;
 //		cout << "100 ms: " << millisecond << " " << (0x3ffll  & millisecond) << endl << flush;
 //		cout << "100 Ma: " << Ma << " " << (0x7fll  & Ma) << endl << flush;
 //		cout << "100 rL: " << coResolutionLevel << endl << flush;
 		idx_ =
-				MASK_AND_SHIFT(year) |
-				MASK_AND_SHIFT(month) |
-				MASK_AND_SHIFT(week) |
-				MASK_AND_SHIFT(day) |
-				MASK_AND_SHIFT(hour) |
-				MASK_AND_SHIFT(minute) |
-				MASK_AND_SHIFT(second) |
-				MASK_AND_SHIFT(millisecond) |
-				MASK_AND_SHIFT(resolution) |
-				MASK_AND_SHIFT(type)
+				MASK_AND_SHIFT(babit,year) |
+				MASK_AND_SHIFT_REVERSE(babit,month) |
+				MASK_AND_SHIFT_REVERSE(babit,week) |
+				MASK_AND_SHIFT_REVERSE(babit,day) |
+				MASK_AND_SHIFT_REVERSE(babit,hour) |
+				MASK_AND_SHIFT_REVERSE(babit,minute) |
+				MASK_AND_SHIFT_REVERSE(babit,second) |
+				MASK_AND_SHIFT_REVERSE(babit,millisecond) |
+				MASK_AND_SHIFT(1,resolution) |
+				MASK_AND_SHIFT(1,type)
 				;
+
+/*
+		CHECK_MASK_AND_SHIFT(babit,year)
+		CHECK_MASK_AND_SHIFT(babit,month);
+		CHECK_MASK_AND_SHIFT(babit,week);
+		CHECK_MASK_AND_SHIFT(babit,day);
+		CHECK_MASK_AND_SHIFT(babit,hour);
+		CHECK_MASK_AND_SHIFT(babit,minute);
+		CHECK_MASK_AND_SHIFT(babit,second);
+		CHECK_MASK_AND_SHIFT(babit,millisecond);
+		CHECK_MASK_AND_SHIFT(1,resolution);
+		CHECK_MASK_AND_SHIFT(1,type);
+*/
 		if(0x1 && data.getValue("BeforeAfterStartBit") == 0) {
 			// past
 			idx_ = -idx_;
+			// idx_ = idx_ | (1ll << 63);
 		} // else future...
 		// old idx_ = idx_ | MASK_AND_SHIFT_RESOLUTION(coResolutionLevel);
 		return idx_;
 	};
 #undef MASK_AND_SHIFT
-#undef MASK_AND_SHIFT_RESOLUTION
+// #undef MASK_AND_SHIFT_RESOLUTION
 
 /*
  * Keep the level
@@ -491,26 +541,27 @@ public:
 #undef OUTPUT
 
 	void hackSetTraditionalDate(
-				    int64_t _year, // > 0
-			int64_t _month, // 0..11
-			int64_t _day_of_month, // 1..31
-			int64_t _hour, // 0..23
-			int64_t _minute, // 0..59
-			int64_t _second, // 0..59
-			int64_t _millisecond // 0..999
+			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// > 0
+			int64_t _month, 		// 1..12 not 0..11
+			int64_t _day_of_month, 	// 1..31
+			int64_t _hour, 			// 0..23
+			int64_t _minute, 		// 0..59
+			int64_t _second, 		// 0..59
+			int64_t _millisecond 	// 0..999
 	) {
 
-	  if(_year < 0) 
-	    { stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 0" << endl;
-	      ss << "TODO: Correct hackSetTraditionalDate to handle negative years." << endl;
+	  if(_year < 1)
+	    { stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 1" << endl;
 	      throw SpatialFailure(ss.str().c_str()); }
-	  
+
 #define CHECK_BOUND(lo,val,hi) \
 	if ((val < lo) || (hi < val)) \
 	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
 		throw SpatialFailure(ss.str().c_str()); }
-	CHECK_BOUND(0,_year,15999999);
-	CHECK_BOUND(0,_month,11);
+	CHECK_BOUND(1,_year,15999999);
+    // CHECK_BOUND(1,_year,4700);
+	CHECK_BOUND(1,_month,12);
 	CHECK_BOUND(1,_day_of_month,31);
 	CHECK_BOUND(0,_hour,23);
 	CHECK_BOUND(0,_minute,59);
@@ -523,11 +574,14 @@ public:
 				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 		};
 
-		days_in_month[1] += leapYearDay(_year);
+		// days_in_month[1] += leapYearDay(_year);
+		int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
+		days_in_month[1] += lyd;
 
 		int64_t days_in_months = 0;
 
-		for(int imo=0; imo < _month; ++imo) {
+		// _month 1..12
+		for(int imo=0; imo < _month-1; ++imo) {
 			days_in_months += days_in_month[imo];
 		}
 
@@ -537,14 +591,17 @@ public:
 						60ll * (_minute +
 								60ll * (_hour +
 										24ll * ( _day_of_month - 1ll +
-												days_in_months +
-												365ll * _year )))); // TODO HACK HACK HACK ?Use 365.25?
+												days_in_months))));
+
+		// 365ll * _year ))));
+		// TODO HACK HACK HACK ?Use 365.25?
+
+		data.setValue("year",_year);
 
 #define SCALE(field) data.setValue(#field, \
 	(milliseconds_total / data.get(#field)->getScale()) \
 	% (data.get(#field)->getMaxValue() + 1) ); \
 	milliseconds_total -= data.get(#field)->getScale()*data.getValue(#field);
-		SCALE(year);
 		SCALE(month);
 		SCALE(week);
 		SCALE(day);
@@ -552,15 +609,20 @@ public:
 		SCALE(minute);
 		SCALE(second);
 #undef SCALE
-		// data.incrementAtName("ka",   0);
-		data.incrementAtName("year", 0);
+
+		// There is no year zero.
+		if( CE <= 0 ) {
+			data.decrementAtName("year");
+		}
+		// data.incrementAtName("year", 0);
 		data.setValue("millisecond",_millisecond);
-		data.setValue("BeforeAfterStartBit",1);
+		data.setValue("BeforeAfterStartBit",CE);
 	}
 
 	void hackGetTraditionalDate(
+			int64_t &_BeforeAfterStartBit,
 			int64_t &_year,
-			int64_t &_month, // 0..11
+			int64_t &_month, // 1..12 not 0..11
 			int64_t &_day_of_month, // 1..31
 			int64_t &_hour, // 0..23
 			int64_t &_minute, // 0..59
@@ -570,12 +632,22 @@ public:
 
 		int64_t milliseconds_total = 0;
 
+		_BeforeAfterStartBit = data.getValue("BeforeAfterStartBit");
+
 //		cout << "100" << endl << flush;
+
+		int64_t CE = data.getValue("BeforeAfterStartBit");
+		_year = data.getValue("year");
+		// There is no year zero. Alias it to 1 BCE.
+		if( CE == 0 ) {
+			++_year;
+		}
+		int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
 
 #define SCALE(field) milliseconds_total += \
 		  data.getValue(#field) * data.get(#field)->getScale() \
 		  ;
-		SCALE(year);
+		// SCALE(year);
 		SCALE(month);
 		SCALE(week);
 		SCALE(day);
@@ -584,6 +656,25 @@ public:
 		SCALE(second);
 		SCALE(millisecond);
 #undef SCALE
+		/*
+		(* 3600 24)
+		86400
+
+		86400000
+
+		(* 365 (* 3600 24))
+		31536000
+
+		(* 365.25 (* 3600 24))
+		31557600.0
+		 */
+
+		int64_t days_per_year = 365ll+lyd;
+
+		int64_t msec_per_year = days_per_year*24ll*3600ll*1000ll;
+		// 365.25 int64_t msec_per_year = 31557600000;
+
+		milliseconds_total += msec_per_year;
 
 		int64_t _day_of_year = 0;
 
@@ -602,13 +693,33 @@ public:
 	field = milliseconds_total % max_val; \
 	milliseconds_total -= field ; \
 	milliseconds_total /= max_val;
+
+//#define EXTRACTF(field,max_val) \
+//	field = (int64_t) fmod( milliseconds_total, max_val ); \
+//	milliseconds_total -= field ; \
+//	milliseconds_total /= max_val;
+
 		EXTRACT(_millisecond,1000ll);
 		EXTRACT(_second,     60ll);
 		EXTRACT(_minute,     60ll);
 		EXTRACT(_hour,       24ll);
-		EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
-		_year = milliseconds_total;
+		EXTRACT(_day_of_year,days_per_year);  // TODO HACK HACK HACK ?Use 365.25?
+		// EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
+		//		EXTRACTF(_day_of_year,365.25);  // TODO HACK HACK HACK ?Use 365.25?
+		// _year = milliseconds_total;
+
 #undef EXTRACT
+
+		// Already handled above.
+		// There is no year zero. Alias it to 1 BCE.
+//		if( CE == 0 ) {
+//			++_year;
+//		}
+//		} else {
+//			--_year;
+//		}
+
+		// int64_t milliseconds_per_year = 1000ll * 60ll * 60ll * 24ll * 365ll; // Note this is not 365.25...
 
 //		cout << "300" << endl << flush;
 
@@ -618,6 +729,7 @@ public:
 				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 		};
 
+		/*
 		// From wikipedia
 		int leapyear_day = 0;
 		if( (_year % 4) != 0 ) {
@@ -628,6 +740,9 @@ public:
 			leapyear_day = 0;
 		} else { leapyear_day = 1; }
 		days_in_month[1] += leapyear_day;
+		*/
+
+		days_in_month[1] += lyd;
 
 //		cout << "400" << endl << flush;
 
@@ -639,7 +754,7 @@ public:
 				throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");
 			}
 		}
-		_month = imo;
+		_month = imo+1;
 		_day_of_month = _day_of_year + 1;
 
 //		cout << "500" << endl << flush;
@@ -649,6 +764,7 @@ public:
 	string hackStringInTraditionalDate() {
 	  
 	  int64_t
+	    BeforeAfterStartBit = 0,
 	    year = 0,
 	    month = 0,
 	    day_of_month = 0,
@@ -660,7 +776,8 @@ public:
 
 	  // Traditional format
 	  hackGetTraditionalDate
-	    ( year,
+	    ( BeforeAfterStartBit,
+	      year,
 	      month,
 	      day_of_month,
 	      hour,
@@ -672,6 +789,12 @@ public:
 	  stringstream ss;
 	  // ss << tIndex;
 	  // << setw(4) << setfill('0') << year << "-"
+	  if( BeforeAfterStartBit> 0 ) {
+		  ss << setw(2) << "1 ";
+	  } else {
+		  ss << setw(2) << "0 ";
+	  }
+
 	  ss
 	    << setw(9) << setfill('0') << year << "-"
 	    << setw(2) << setfill('0') << month << "-"
@@ -693,6 +816,7 @@ public:
 	  int pos = 0;
 #define PARSE_INT(field,width) \
 	  int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
+	  PARSE_INT(CE,2);
 	  PARSE_INT(year,traditionalString.find("-"));
 	  PARSE_INT(month,2);
 	  PARSE_INT(day_of_month,2);
@@ -703,21 +827,28 @@ public:
 	  ++pos;
 	  PARSE_INT(level,2);
 #undef PARSE_INT
-	  hackSetTraditionalDate
-	    ( year,
-	      month,
-	      day_of_month,
-	      hour,
-	      minute,
-	      second,
-	      millisecond
-	      );
+
+	  hackSetTraditionalDate (
+			  CE,
+			  year,
+			  month,
+			  day_of_month,
+			  hour,
+			  minute,
+			  second,
+			  millisecond
+	  );
 	  data.setValue("resolutionLevel",level);
 	}
 
 	string stringInNativeDate() {
 
 	  stringstream ss;
+	  if(data.getValue("BeforeAfterStartBit") == 0 ) {
+		  ss << setw(1) << "-";
+	  } else {
+		  ss << setw(1) << "+";
+	  }
 	  ss
 	    << setw(9) << setfill('0') << data.getValue("year") << "-"
 	    << setw(2) << setfill('0') << data.getValue("month") << "-"
@@ -758,6 +889,33 @@ public:
 #undef PARSE_INT
 	  data.setValue("BeforeAfterStartBit",1);
 	}
+
+	int eraTest() {
+		int iy, im, id, ihour, imin, j, iymdf[4];
+		double d1, d2, sec, d, fd;
+		/* Date and time. */
+		iy = 2008; im = 2; id = 29;ihour = 23; imin = 59; sec = 59.9;
+		iy = -4700; im = 2; id = 1;ihour = 23; imin = 59; sec = 59.9;
+
+		// iy = -4800; im = 2; id = 28;ihour = 23; imin = 59; sec = 59.9;
+
+		printf ( "0: %4d/%2.2d/%2.2d%3d:%2.2d:%4.1f\n",iy, im, id, ihour, imin, sec );
+		/* Express as 2-part JD. */
+		j = eraCal2jd ( iy, im, id, &d1, &d2 );if ( j ) return 1;
+		j = eraTf2d ( '+', ihour, imin, sec, &d );if ( j ) return 1;
+		d2 += d;
+		printf ( "1: %9.1f +%13.6f =%15.6f\n", d1, d2, d1 + d2 );
+		/* Express as calendar date and fraction of a day. */
+		j = eraJd2cal ( d1, d2, &iy, &im, &id, &fd );if ( j ) return 1;
+		d = ( (double) id ) + fd;
+		printf ( "2: %4d/%2.2d/%9.6f\n", iy, im, d );
+		/* Round to 0.001 day. */
+		j = eraJdcalf ( 3, d1, d2, iymdf );if ( j ) return 1;
+		printf ( "3: %4d/%2.2d/%2.2d.%3.3d\n",iymdf[0], iymdf[1], iymdf[2], iymdf[3] );
+
+		return 0;
+	}
+
 };
 
 } /* namespace std */

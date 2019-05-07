@@ -14,9 +14,11 @@ set (
 
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -I${PROJECT_SOURCE_DIR}/include" )
 
+find_library( ERFA_LIB erfa )
+
 add_executable(tests ${TestSrcFiles})
-target_link_libraries(tests STARE)
-target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute)
+target_link_libraries(tests STARE "${ERFA_LIB}")
+target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute /usr/include)
 
 add_test( STARETests tests )
 
@@ -24,6 +26,3 @@ set_tests_properties( STARETests PROPERTIES
   PASS_REGULAR_EXPRESSION "#success;#starting"
   FAIL_REGULAR_EXPRESSION "#failure;#error"
 )
-  
-
-
