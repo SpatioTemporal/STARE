@@ -162,9 +162,42 @@ void TemporalIndex_test() {
 
 	tIndex.hackSetTraditionalDate(1, 4*1024, 1, 1, 0, 0, 0, 1); INDEX_OUT(8,tIndex);
 
+	cout << endl << flush;
+	tIndex.hackSetTraditionalDate(0, 256*1024, 1, 1, 0, 0, 0, 1); INDEX_OUT(8,tIndex);
+	tIndex.hackSetTraditionalDate(1, 256*1024, 1, 1, 0, 0, 0, 1); INDEX_OUT(8,tIndex);
+
 	TAG(300)
+
+	cout << endl << flush;
+	tIndex.hackSetTraditionalDate(1, 2007, 12, 31, 0, 0, 0, 0); INDEX_OUT(9,tIndex);
+	tIndex.hackSetTraditionalDate(1, 2008, 12, 31, 0, 0, 0, 0); INDEX_OUT(9,tIndex);
+	tIndex.hackSetTraditionalDate(1, 2009,  1,  1, 0, 0, 0, 0); INDEX_OUT(9,tIndex);
+	cout << endl << flush;
+
+	TemporalIndex tIndex0;
+
+	string failureMessage = "'";
+	try {
+		tIndex0.hackFromTraditionalString(tIndex.hackStringInTraditionalDate());
+	} catch (SpatialFailure& failure) {
+		failureMessage += failure.what();
+		cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+	}
+
+	TAG(301)
+
+	cout << dec;
+
+	INDEX_OUT(10,tIndex);
+	INDEX_OUT(10,tIndex0);
+
+	cout << endl << flush;
+
+	TAG(302)
 	// tIndex.data.print();
 	// TAG(400)
+	tIndex.set_zero();
+	tIndex.set_year(5);
 	ASSERT_EQUAL( 0, tIndex.get_millisecond());
 	ASSERT_EQUAL( 0, tIndex.get_day());
 	ASSERT_EQUAL( 0, tIndex.get_BeforeAfterStartBit());
@@ -275,7 +308,7 @@ void TemporalIndex_test() {
 	}
 
 	TemporalIndex tIndex2;
-	tIndex2.hackSetTraditionalDate(1, 0, 11, 31, 23, 59, 59, 999);
+	tIndex2.hackSetTraditionalDate(1, 1, 11, 31, 23, 59, 59, 999);
 	cout << "            :   0x" << hex << setw(16) << setfill('0') << tIndex2.scidbTemporalIndex() << flush
 	<< ", " << tIndex2.scidbTerminatorp() << flush
 	<< ", " << tIndex2.stringInNativeDate() << flush
@@ -284,6 +317,8 @@ void TemporalIndex_test() {
 
 	int not_ok = tIndex2.eraTest();
 	cout << flush;
+
+	// TAG(800)
 
 	TemporalIndex tIndex3;
 	tIndex3.set_year(0);
@@ -300,6 +335,7 @@ void TemporalIndex_test() {
 	tIndex3.set_BeforeAfterStartBit(1);
 	cout << "5 tI3: " << tIndex3.stringInNativeDate()  << ", " << tIndex3.hackStringInTraditionalDate() << endl << flush;
 
+	// TAG(900)
 	TemporalIndex tIndex4;
 
 	tIndex3.data.setZero();

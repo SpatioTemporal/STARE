@@ -22,6 +22,12 @@
 
 #include "erfa.h"
 
+
+
+#define TAG(X) cout << dec << X << hex << endl << flush;
+
+
+
 namespace std {
 
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
@@ -812,12 +818,16 @@ public:
 
 	void hackFromTraditionalString(string traditionalString) {
 
+		cout << endl << endl << "hfts1 " << traditionalString << endl << flush;
+
 	  // TODO repent the sin of hardcoding
 	  int pos = 0;
 #define PARSE_INT(field,width) \
-	  int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
-	  PARSE_INT(CE,2);
-	  PARSE_INT(year,traditionalString.find("-"));
+		cout << endl << "pi: " << traditionalString.substr(pos,width).c_str() << endl; \
+		int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
+	  TAG(1000)
+	  PARSE_INT(CE,1);
+	  PARSE_INT(year,traditionalString.find("-")-2);
 	  PARSE_INT(month,2);
 	  PARSE_INT(day_of_month,2);
 	  PARSE_INT(hour,2);
@@ -825,9 +835,24 @@ public:
 	  PARSE_INT(second,2);
 	  PARSE_INT(millisecond,3);
 	  ++pos;
-	  PARSE_INT(level,2);
+	  PARSE_INT(resolution,2);
+	  ++pos; ++pos;
+	  PARSE_INT(type,1);
 #undef PARSE_INT
-
+	  TAG(2000)
+#define CHECK(var) cout << #var << " 0x" << hex << var << dec << " " << var << endl << flush;
+	  CHECK(CE)
+	  CHECK(year)
+	  CHECK(month)
+	  CHECK(day_of_month)
+	  CHECK(hour)
+	  CHECK(minute)
+	  CHECK(second)
+	  CHECK(millisecond)
+	  CHECK(resolution)
+	  CHECK(type)
+#undef CHECK
+	  TAG(2100)
 	  hackSetTraditionalDate (
 			  CE,
 			  year,
@@ -838,7 +863,9 @@ public:
 			  second,
 			  millisecond
 	  );
-	  data.setValue("resolutionLevel",level);
+	  TAG(2200)
+	  data.setValue("resolution",resolution);
+	  data.setValue("type",type);
 	}
 
 	string stringInNativeDate() {
