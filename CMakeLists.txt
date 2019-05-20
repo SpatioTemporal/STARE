@@ -54,15 +54,15 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
 
-# These commands replicate automake's 'make dist'. jhrg 5/20/19
+# These commands replicate automake's 'make dist'.
+# https://agateau.com/2009/cmake-and-make-dist/. jhrg 5/20/19
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "1")
 set(CPACK_PACKAGE_VERSION_PATCH "2")
 set(CPACK_SOURCE_GENERATOR "TBZ2")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-set(CPACK_SOURCE_IGNORE_FILES
-  "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 include(CPack)
 
 # By default, CPack names the target 'package_source'. This makes
