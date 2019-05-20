@@ -174,6 +174,13 @@ const float64 gEpsilon = 5.0E-19;
 
 #endif  /* _WIN32 */
 
+// Added this to cover the case where the code is built
+// without a specific OS being defined since that's now
+// often the case. jhrg 5/20/19
+#ifndef LINKAGE
+    #define LINKAGE
+#endif
+
 #ifndef SpatialWinNT
 #   define IDHIGHBIT  0x8000000000000000LL
 #   define IDHIGHBIT2 0x4000000000000000LL
