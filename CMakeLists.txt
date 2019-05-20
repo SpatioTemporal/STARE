@@ -11,7 +11,7 @@ endif()
 
 # If an environment variable was not set, then guess.
 if(CUTE_INCLUDE_DIR MATCHES "ON")
-    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE )
+    set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/cute )
 endif()
 
 message("\n------------ Running cmake for project STARE ------------\n")
@@ -54,5 +54,19 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
 
+# These commands replicate automake's 'make dist'.
+# https://agateau.com/2009/cmake-and-make-dist/. jhrg 5/20/19
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_PATCH "2")
+set(CPACK_SOURCE_GENERATOR "TBZ2")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+include(CPack)
 
+# By default, CPack names the target 'package_source'. This makes
+# a second target named 'dist' to match the behavior of automake.
+# jhrg 5/20/19
+add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
