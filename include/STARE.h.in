@@ -19,7 +19,7 @@
 #include <map>
 #include <vector>
 
-#define STARE_VERSION "0.1.3"
+#define STARE_VERSION "@VERSION@"
 
 // #include "TemporalIndex.h"
 

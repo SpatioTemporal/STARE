@@ -35,7 +35,7 @@ set (
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
-# FIXME jhth 5/1/19 Fails for me. find_package(Boost)
+# FIXME jhrg 5/1/19 Fails for me. find_package(Boost)
 set ( Boost_FOUND  OFF )
 
 if(Boost_FOUND)
