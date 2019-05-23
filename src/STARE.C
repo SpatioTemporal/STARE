@@ -18,8 +18,8 @@
  * @brief Version function with C linkage to aid in finding the library with autoconf
  * @return The library's version. Points to static storage.
  */
-extern "C" char *STARE_version() {
-    return STARE_VERSION;
+extern "C" const char *STARE_version() {
+    return (const char *)STARE_VERSION;
 }
     
 /**

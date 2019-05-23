@@ -101,7 +101,7 @@ public:
 void STARE_test();
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19
-extern "C" char *STARE_version();
+extern "C" const char *STARE_version();
 
 // void STARE_Temporal_test();
 
