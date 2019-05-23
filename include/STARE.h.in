@@ -19,6 +19,8 @@
 #include <map>
 #include <vector>
 
+#define STARE_VERSION "@VERSION@"
+
 // #include "TemporalIndex.h"
 
 // TODO Consider index vs. array index vs. collections of the same & set logic.
@@ -97,6 +99,10 @@ public:
 };
 
 void STARE_test();
+
+// I added this to simplify finding the library with autoconf. jhrg 5/22/19
+extern "C" char *STARE_version();
+
 // void STARE_Temporal_test();
 
 #endif /* INCLUDE_STARE_H_ */

@@ -1,12 +1,12 @@
 
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 2.8)
 
 project(STARE)
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
 
 if(DEFINED ENV{CUTE_INCLUDE_DIR})
-	set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
+    set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
 endif()
 
 # If an environment variable was not set, then guess.
@@ -27,12 +27,12 @@ else()
 endif()
 
 # Set CC and CXX before calling cmake...
-# set(CMAKE_C_COMPILER gcc)
-# set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
  
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-     set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -D__macosx -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
-     set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -D__macosx -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
+     set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
+     set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
 elseif(UNIX)
      set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -D__unix -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
      set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -D__unix -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
@@ -54,14 +54,28 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
 
+# Read the version number from a file.
+file (STRINGS "version.txt" VERSION)
+
+# Generate the header in the source include dir. Not really the
+# best plan since it should be in the build dir, but I cannot get
+# that working and this is a version number and thus not platform
+# specific. jhrg 5/22/19
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/STARE.h.in
+	${CMAKE_CURRENT_SOURCE_DIR}/include/STARE.h @ONLY)
+
+# This will put the generated header in the directory where cmake is
+# run. That would be great, but I have no idea how to get cmake to
+# tell the compiler to look there for headers.
+# configure_file(include/STARE.h.in STARE.h @ONLY)
+# This command does not work. jhrg 5/23/19
+# target_include_directories(STARE ${CMAKE_CURRENT_BINARY_DIR}/include)
+
 # These commands replicate automake's 'make dist'.
 # https://agateau.com/2009/cmake-and-make-dist/. jhrg 5/20/19
-set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "1")
-set(CPACK_PACKAGE_VERSION_PATCH "2")
 set(CPACK_SOURCE_GENERATOR "TBZ2")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${VERSION}")
+
 set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 include(CPack)
 
@@ -70,3 +84,13 @@ include(CPack)
 # jhrg 5/20/19
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()

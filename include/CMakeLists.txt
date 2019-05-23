@@ -86,7 +86,6 @@ install(FILES STARE.h
   SpatialVector.h
   SpatialVector.hxx
   SpatialRotation.h
-  STARE.h
   TemporalIndex.h
   TemporalWordFormat1.h	
   VarCmp.h
