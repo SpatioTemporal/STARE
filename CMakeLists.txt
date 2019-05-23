@@ -6,7 +6,7 @@ project(STARE)
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
 
 if(DEFINED ENV{CUTE_INCLUDE_DIR})
-	set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
+    set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
 endif()
 
 # If an environment variable was not set, then guess.
@@ -27,12 +27,12 @@ else()
 endif()
 
 # Set CC and CXX before calling cmake...
-# set(CMAKE_C_COMPILER gcc)
-# set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
  
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-     set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -D__macosx -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
-     set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -D__macosx -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
+     set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
+     set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
 elseif(UNIX)
      set(CMAKE_C_FLAGS "-g -Wall -D_BOOL_EXISTS -D__unix -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
      set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -D_BOOL_EXISTS -D__unix -UDIAGNOSE -fPIC ${CMAKE_CXX_FLAGS}")
@@ -64,7 +64,11 @@ file (STRINGS "version.txt" VERSION)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/STARE.h.in
 	${CMAKE_CURRENT_SOURCE_DIR}/include/STARE.h @ONLY)
 
-# This command does not work
+# This will put the generated header in the directory where cmake is
+# run. That would be great, but I have no idea how to get cmake to
+# tell the compiler to look there for headers.
+# configure_file(include/STARE.h.in STARE.h @ONLY)
+# This command does not work. jhrg 5/23/19
 # target_include_directories(STARE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # These commands replicate automake's 'make dist'.
@@ -80,3 +84,13 @@ include(CPack)
 # jhrg 5/20/19
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
