@@ -26,12 +26,14 @@
 
 #define TAG(X) cout << dec << X << hex << endl << flush;
 
-
-
 namespace std {
 
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
 public:
+
+	/**
+	 * Define the fields making up the encoding.
+	 */
 	TemporalWordFormat() {
 		// resolutionLevelConstraint =  7; // Counts the number of levels, including
 		nonDataLevels             =  3;
@@ -49,6 +51,7 @@ public:
 		///
 		/// TODO Put more thought into the "calendar" below...
 
+		// TODO DANGER This bit is not really set. It's used to set the sign of the index.
 		bitFields.push_back(
 				new BitField("BeforeAfterStartBit",
 						1, // maxValue
@@ -88,7 +91,7 @@ public:
 						3, // maxValue
 						2, // width
 						offset_base,
-						7*24*3600*1000,
+						7ll*24*3600*1000,
 						fieldId++
 				)
 		);
@@ -152,6 +155,7 @@ public:
 
 		bitFields.push_back(
 				new BitField("resolution",
+						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
 						pow(2,6)-1, // maxValue
 						6, // width
 						offset_base,
@@ -217,6 +221,18 @@ public:
 //}
 
 // TODO Question: Am I working myself towards an n-adic template?
+/**
+ * TemporalIndex defines a particular temporal index, in this case type=2.
+ * The constructor and the set_* methods are low level methods and do not
+ * check bounds. Other methods can be defined that provide a higher level
+ * API that includes such checks. We need at least one set of low-level
+ * methods.
+ *
+ * TemporalWordFormat1, the base class for TemporalWordFormat, provides some
+ * checks, e.g. resolutionInBounds.
+ *
+ *
+ */
 class TemporalIndex {
 public:
 	TemporalWordFormat data;
@@ -255,10 +271,19 @@ public:
 //				coResolutionLevel(coResolutionLevel)
 	{
 
+		/*
 	  if( BeforeAfterStartBit != 1 )
 	    { stringstream ss; ss << "TemporalIndex::NOT_IMPLEMENTED_ERROR in TemporalIndex(...) BeforeAfterStartBit = 0 (past)" << endl;
 	      ss << "TODO: Correct index scheme for the past. E.g. years go negative, but not months, weeks, etc." << endl;
 	      throw SpatialFailure(ss.str().c_str()); }
+	      */
+
+// TODO Figure out redundancy of +/- 0 redundancy.
+//
+//	 There is no year zero. Should be aliased to 1 BCE, but this is a low-level constructor, so let's throw an error.
+//		if( BeforeAfterStartBit == 1 && year == 0) {
+//
+//		}
 	  
 #define SET_VALUE(field) data.setValue(#field,field);
 		SET_VALUE( BeforeAfterStartBit );
@@ -280,11 +305,13 @@ public:
 #define SHIFT_AND_MASK(field) data.setValue(#field,\
 		data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset()));
 
+		// cout << endl << #field << " " << dec << (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) << endl << flush;
+
 #define REVERT(field) data.setValue(#field, data.get(#field)->getMaxValue()-data.getValue(#field) );
 
 #define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
 
-	int leapYearDay(int64_t _year) {
+	int leapYearDay(int64_t _year) const {
 		// From wikipedia
 		int leapyear_day = 0;
 		if( (_year % 4) != 0 ) {
@@ -302,6 +329,12 @@ public:
 //				data.resolutionLevelConstraint \
 //				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
 
+	/**
+	 * Set the TemporalIndex according to a scidb temporal index.
+	 *
+	 * This is a low-level constructor, with no or minimal value checking.
+	 *
+	 */
 	TemporalIndex(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
@@ -341,7 +374,9 @@ public:
 		// TODO Come up with a better leap year handler
 		// TODO Think through temporal design re: translation to & from dates.
 
+		/*
 		if( data.getValue("resolution") == 63 ) {
+
 //			// Fix things up if this is a terminator
 			if(data.getValue("year") > 0) {
 				data.setValue("month",13);
@@ -364,10 +399,32 @@ public:
 			SET_MAX(second); // ok
 			SET_MAX(millisecond); // ok
 		}
+		*/
+
+		// TODO Construct an index validity checker...
+		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
+			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+		}
 	};
 #undef REVERT
 #undef SET_MAX
 #undef SHIFT_AND_MASK
+
+	TemporalIndex(const TemporalIndex& orig) {
+#define SET(field) data.setValue(#field,orig.data.getValue(#field));
+		SET(BeforeAfterStartBit)
+		SET(year)
+		SET(month)
+		SET(week)
+		SET(day)
+		SET(hour)
+		SET(minute)
+		SET(second)
+		SET(millisecond)
+		SET(resolution)
+		SET(type)
+#undef SET
+	}
 
 // #undef SHIFT_AND_MASK_RESOLUTION
 
@@ -387,97 +444,44 @@ public:
 		return data.getFieldId(levelName);
 	}
 
-	// TODO Check for errors/integrity of data value.
-// #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
-
- #define MASK_AND_SHIFT_REVERSE(babit,field) (( data.get(#field)->getMask() \
-		& ( babit*data.getValue(#field)   + (1-babit)*(data.get(#field)->getMaxValue()-data.getValue(#field)))  ) \
-		<< data.get(#field)->getOffset() )
-
-#define MASK_AND_SHIFT(babit,field) (( data.get(#field)->getMask() \
-		& data.getValue(#field) ) \
-		<< data.get(#field)->getOffset() )
-
-// #define CHECK_MASK_AND_SHIFT(babit,field) cout << "CMAS "<< #field << " " << data.getValue(#field) \
-// 	<< " " << (data.get(#field)->getMaxValue()-data.getValue(#field)) << endl << flush;
-
-// #define MASK_AND_SHIFT_RESOLUTION(field) (( data.get(#field)->getMask() & (data.resolutionLevelConstraint-data.getValue(#field)) ) \
-//		<< data.get(#field)->getOffset() )
-
-	int64_t scidbTemporalIndex() {
-
-		int64_t babit = data.getValue("BeforeAfterStartBit");
-
-		int64_t idx_;
-//		cout << "100 ms: " << millisecond << " " << (0x3ffll  & millisecond) << endl << flush;
-//		cout << "100 Ma: " << Ma << " " << (0x7fll  & Ma) << endl << flush;
-//		cout << "100 rL: " << coResolutionLevel << endl << flush;
-		idx_ =
-				MASK_AND_SHIFT(babit,year) |
-				MASK_AND_SHIFT_REVERSE(babit,month) |
-				MASK_AND_SHIFT_REVERSE(babit,week) |
-				MASK_AND_SHIFT_REVERSE(babit,day) |
-				MASK_AND_SHIFT_REVERSE(babit,hour) |
-				MASK_AND_SHIFT_REVERSE(babit,minute) |
-				MASK_AND_SHIFT_REVERSE(babit,second) |
-				MASK_AND_SHIFT_REVERSE(babit,millisecond) |
-				MASK_AND_SHIFT(1,resolution) |
-				MASK_AND_SHIFT(1,type)
-				;
-
-/*
-		CHECK_MASK_AND_SHIFT(babit,year)
-		CHECK_MASK_AND_SHIFT(babit,month);
-		CHECK_MASK_AND_SHIFT(babit,week);
-		CHECK_MASK_AND_SHIFT(babit,day);
-		CHECK_MASK_AND_SHIFT(babit,hour);
-		CHECK_MASK_AND_SHIFT(babit,minute);
-		CHECK_MASK_AND_SHIFT(babit,second);
-		CHECK_MASK_AND_SHIFT(babit,millisecond);
-		CHECK_MASK_AND_SHIFT(1,resolution);
-		CHECK_MASK_AND_SHIFT(1,type);
-*/
-		if(0x1 && data.getValue("BeforeAfterStartBit") == 0) {
-			// past
-			idx_ = -idx_;
-			// idx_ = idx_ | (1ll << 63);
-		} // else future...
-		// old idx_ = idx_ | MASK_AND_SHIFT_RESOLUTION(coResolutionLevel);
-		return idx_;
-	};
-#undef MASK_AND_SHIFT
-// #undef MASK_AND_SHIFT_RESOLUTION
-
-/*
- * Keep the level
- * Use resolution full (all bits set) to flag terminator.
- */
-	int64_t scidbTerminator() {
-//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
-		// cout << "a";
-		TemporalIndex tmpIndex(this->scidbTemporalIndex());
-		// cout << "b";
-		// tmpIndex.data.setTerminatorBelowLevel(get_coResolutionLevel());
-		tmpIndex.data.setTerminatorBelowResolution(get_resolution());
-		// cout << "c";
-		int64_t idx_ = tmpIndex.scidbTemporalIndex();
-		// cout << "d";
-		idx_ = idx_
-				| (tmpIndex.data.get("resolution")->getMask() <<  tmpIndex.data.get("resolution")->getOffset())
-				| ( (tmpIndex.data.get("type")->getValue() <<  tmpIndex.data.get("type")->getOffset()) )
-				;
-		return idx_;
-	};
-
-	bool scidbTerminatorp() {
-		int64_t resolution = this->data.getValue("resolution");
-		return resolution == 63;
+	int64_t getIdOfCoarsestNonZeroField() {
+		int64_t iPos = data.pos_CoarsestResolutionLevel;
+		int64_t iCoarsestNonZero = -1;
+		do {
+			if ( data.getValueAtId(iPos) > 0 ) {
+				iCoarsestNonZero = iPos;
+			}
+			--iPos;
+		} while ( (iPos > data.pos_FinestResolutionLevel) && (iCoarsestNonZero < 0) );
+		return iCoarsestNonZero;
 	}
 
-	TemporalIndex &set_zero() {
-		data.setZero();
-		return *this;
-	}
+	int64_t bitOffsetFinest();
+	int64_t bitOffsetCoarsest();
+	int64_t bitOffsetResolution(int64_t resolution);
+	int64_t bitfieldIdFromResolution(int64_t resolution);
+
+	int64_t scidbTemporalIndex();
+	int64_t scidbTerminator();
+	int64_t scidbTerminatorJulian();
+	bool    scidbTerminatorp();
+	TemporalIndex& set_zero();
+	TemporalIndex& setZero();
+	TemporalIndex& setEOY(int64_t year,int64_t babit);
+	void toJulianDoubleDay(double& d1, double& d2) const;
+	TemporalIndex& fromJulianDoubleDay( double d1, double d2);
+
+	/**
+	 * Convert the fields to milliseconds to aid conversions and support intervals.
+	 *
+	 * No corrections for "leap years" with this low-level calculation.
+	 *
+	 * TODO Augment with a Julian millisecond calculation?
+	 */
+	int64_t toInt64Milliseconds() const;
+	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
+	int64_t millisecondsAtResolution(int64_t resolution);
+	double julianDoubleDayAtResolution(int64_t resolution);
 
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
@@ -502,7 +506,7 @@ public:
 //		return *this;
 //	}
 
-#define GET(field) int64_t get_##field() { return data.getValue(#field); }
+#define GET(field) int64_t get_##field() const { return data.getValue(#field); }
 	GET(BeforeAfterStartBit)
 	GET(year)
 	GET(month)
@@ -518,34 +522,7 @@ public:
 #undef GET
 	// int64_t get_resolutionLevel() { return data.resolutionLevelConstraint - get_coResolutionLevel(); }
 
-
-// #define OUTPUT(field) cout << name_##field << " " << field << " " << bitWidth_##field << " " << mask_##field << endl << flush;
-#define OUTPUT(field) cout \
-		<< setw(20) << data.get(#field)->getName() \
-		<< setw(6) << data.getValue(#field) \
-		<< setw(3) << data.get(#field)->getWidth() \
-		<< setw(5) << data.get(#field)->getMask() \
-		<< setw(4) << data.get(#field)->getOffset() \
-		<< setw(4) << dec << data.get(#field)->getCoFieldId() << hex \
-		<< endl << flush;
-	void checkBitFormat() {
-		cout << hex;
-		OUTPUT(BeforeAfterStartBit);
-		OUTPUT(year);
-		OUTPUT(month);
-		OUTPUT(week);
-		OUTPUT(day);
-		OUTPUT(hour);
-		OUTPUT(minute);
-		OUTPUT(second);
-		OUTPUT(millisecond);
-		OUTPUT(resolution);
-		OUTPUT(type);
-		// OUTPUT(coResolutionLevel);
-		cout << dec;
-	}
-#undef OUTPUT
-
+	void checkBitFormat();
 	void hackSetTraditionalDate(
 			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
 			int64_t _year, 			// > 0
@@ -555,76 +532,7 @@ public:
 			int64_t _minute, 		// 0..59
 			int64_t _second, 		// 0..59
 			int64_t _millisecond 	// 0..999
-	) {
-
-	  if(_year < 1)
-	    { stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 1" << endl;
-	      throw SpatialFailure(ss.str().c_str()); }
-
-#define CHECK_BOUND(lo,val,hi) \
-	if ((val < lo) || (hi < val)) \
-	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
-		throw SpatialFailure(ss.str().c_str()); }
-	CHECK_BOUND(1,_year,15999999);
-    // CHECK_BOUND(1,_year,4700);
-	CHECK_BOUND(1,_month,12);
-	CHECK_BOUND(1,_day_of_month,31);
-	CHECK_BOUND(0,_hour,23);
-	CHECK_BOUND(0,_minute,59);
-	CHECK_BOUND(0,_second,59);
-	CHECK_BOUND(0,_millisecond,999);
-#undef  CHECK_BOUND
-		// Be a little silly.
-		// TODO Fix for correct work
-		int days_in_month[] = {
-				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-		};
-
-		// days_in_month[1] += leapYearDay(_year);
-		int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
-		days_in_month[1] += lyd;
-
-		int64_t days_in_months = 0;
-
-		// _month 1..12
-		for(int imo=0; imo < _month-1; ++imo) {
-			days_in_months += days_in_month[imo];
-		}
-
-		int64_t milliseconds_total =
-				_millisecond +
-				1000ll * (_second +
-						60ll * (_minute +
-								60ll * (_hour +
-										24ll * ( _day_of_month - 1ll +
-												days_in_months))));
-
-		// 365ll * _year ))));
-		// TODO HACK HACK HACK ?Use 365.25?
-
-		data.setValue("year",_year);
-
-#define SCALE(field) data.setValue(#field, \
-	(milliseconds_total / data.get(#field)->getScale()) \
-	% (data.get(#field)->getMaxValue() + 1) ); \
-	milliseconds_total -= data.get(#field)->getScale()*data.getValue(#field);
-		SCALE(month);
-		SCALE(week);
-		SCALE(day);
-		SCALE(hour);
-		SCALE(minute);
-		SCALE(second);
-#undef SCALE
-
-		// There is no year zero.
-		if( CE <= 0 ) {
-			data.decrementAtName("year");
-		}
-		// data.incrementAtName("year", 0);
-		data.setValue("millisecond",_millisecond);
-		data.setValue("BeforeAfterStartBit",CE);
-	}
-
+	);
 	void hackGetTraditionalDate(
 			int64_t &_BeforeAfterStartBit,
 			int64_t &_year,
@@ -634,316 +542,72 @@ public:
 			int64_t &_minute, // 0..59
 			int64_t &_second, // 0..59
 			int64_t &_millisecond // 0..999
-	) {
-
-		int64_t milliseconds_total = 0;
-
-		_BeforeAfterStartBit = data.getValue("BeforeAfterStartBit");
-
-//		cout << "100" << endl << flush;
-
-		int64_t CE = data.getValue("BeforeAfterStartBit");
-		_year = data.getValue("year");
-		// There is no year zero. Alias it to 1 BCE.
-		if( CE == 0 ) {
-			++_year;
-		}
-		int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
-
-#define SCALE(field) milliseconds_total += \
-		  data.getValue(#field) * data.get(#field)->getScale() \
-		  ;
-		// SCALE(year);
-		SCALE(month);
-		SCALE(week);
-		SCALE(day);
-		SCALE(hour);
-		SCALE(minute);
-		SCALE(second);
-		SCALE(millisecond);
-#undef SCALE
-		/*
-		(* 3600 24)
-		86400
-
-		86400000
-
-		(* 365 (* 3600 24))
-		31536000
-
-		(* 365.25 (* 3600 24))
-		31557600.0
-		 */
-
-		int64_t days_per_year = 365ll+lyd;
-
-		int64_t msec_per_year = days_per_year*24ll*3600ll*1000ll;
-		// 365.25 int64_t msec_per_year = 31557600000;
-
-		milliseconds_total += msec_per_year;
-
-		int64_t _day_of_year = 0;
-
-//		cout << "200" << endl << flush;
-
-		/*
-#define EXTRACT(field,max_val) cout << #field << " " << flush; \
-	field = milliseconds_total % max_val; \
-	cout << "-1-" << flush; \
-	milliseconds_total -= field ; \
-	cout << "-2-" << flush; \
-	milliseconds_total /= max_val; \
-	cout << "-3-" << endl << flush;
-	*/
-#define EXTRACT(field,max_val) \
-	field = milliseconds_total % max_val; \
-	milliseconds_total -= field ; \
-	milliseconds_total /= max_val;
-
-//#define EXTRACTF(field,max_val) \
-//	field = (int64_t) fmod( milliseconds_total, max_val ); \
-//	milliseconds_total -= field ; \
-//	milliseconds_total /= max_val;
-
-		EXTRACT(_millisecond,1000ll);
-		EXTRACT(_second,     60ll);
-		EXTRACT(_minute,     60ll);
-		EXTRACT(_hour,       24ll);
-		EXTRACT(_day_of_year,days_per_year);  // TODO HACK HACK HACK ?Use 365.25?
-		// EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
-		//		EXTRACTF(_day_of_year,365.25);  // TODO HACK HACK HACK ?Use 365.25?
-		// _year = milliseconds_total;
-
-#undef EXTRACT
-
-		// Already handled above.
-		// There is no year zero. Alias it to 1 BCE.
-//		if( CE == 0 ) {
-//			++_year;
-//		}
-//		} else {
-//			--_year;
-//		}
-
-		// int64_t milliseconds_per_year = 1000ll * 60ll * 60ll * 24ll * 365ll; // Note this is not 365.25...
-
-//		cout << "300" << endl << flush;
-
-		// Be a little silly.
-		// TODO Fix for correct work
-		int days_in_month[] = {
-				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-		};
-
-		/*
-		// From wikipedia
-		int leapyear_day = 0;
-		if( (_year % 4) != 0 ) {
-			leapyear_day = 0;
-		} else if( (_year % 100) != 0 ) {
-			leapyear_day = 1;
-		} else if( (_year % 400) != 0 ) {
-			leapyear_day = 0;
-		} else { leapyear_day = 1; }
-		days_in_month[1] += leapyear_day;
-		*/
-
-		days_in_month[1] += lyd;
-
-//		cout << "400" << endl << flush;
-
-		int imo = 0;
-		while( _day_of_year >= days_in_month[imo] ) { // bug mlr 2017-0602 was >
-			// cout << "401 " << _day_of_year << " " << imo << endl;
-			_day_of_year -= days_in_month[ imo++ ];
-			if( imo > 11 ) {
-				throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");
-			}
-		}
-		_month = imo+1;
-		_day_of_month = _day_of_year + 1;
-
-//		cout << "500" << endl << flush;
-
-	}
-
-	string hackStringInTraditionalDate() {
-	  
-	  int64_t
-	    BeforeAfterStartBit = 0,
-	    year = 0,
-	    month = 0,
-	    day_of_month = 0,
-	    hour = 0,
-	    minute = 0,
-	    second = 0,
-	    millisecond = 0
-	    ;
-
-	  // Traditional format
-	  hackGetTraditionalDate
-	    ( BeforeAfterStartBit,
-	      year,
-	      month,
-	      day_of_month,
-	      hour,
-	      minute,
-	      second,
-	      millisecond
-	      );
-
-	  stringstream ss;
-	  // ss << tIndex;
-	  // << setw(4) << setfill('0') << year << "-"
-	  if( BeforeAfterStartBit> 0 ) {
-		  ss << setw(2) << "1 ";
-	  } else {
-		  ss << setw(2) << "0 ";
-	  }
-
-	  ss
-	    << setw(9) << setfill('0') << year << "-"
-	    << setw(2) << setfill('0') << month << "-"
-	    << setw(2) << setfill('0') << day_of_month << " "
-	    << setw(2) << hour << ":"
-	    << setw(2) << minute << ":"
-	    << setw(2) << second << "."
-	    << setw(3) << millisecond
-		<< " (" << setw(2) << data.getValue("resolution") << ")"
-		<< " (" << setw(1) << data.getValue("type") << ")"
-		;
-
-	  return ss.str(); // Traditional date
-	}
-
-	void hackFromTraditionalString(string traditionalString) {
-
-		cout << endl << endl << "hfts1 " << traditionalString << endl << flush;
-
-	  // TODO repent the sin of hardcoding
-	  int pos = 0;
-#define PARSE_INT(field,width) \
-		cout << endl << "pi: " << traditionalString.substr(pos,width).c_str() << endl; \
-		int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
-	  TAG(1000)
-	  PARSE_INT(CE,1);
-	  PARSE_INT(year,traditionalString.find("-")-2);
-	  PARSE_INT(month,2);
-	  PARSE_INT(day_of_month,2);
-	  PARSE_INT(hour,2);
-	  PARSE_INT(minute,2);
-	  PARSE_INT(second,2);
-	  PARSE_INT(millisecond,3);
-	  ++pos;
-	  PARSE_INT(resolution,2);
-	  ++pos; ++pos;
-	  PARSE_INT(type,1);
-#undef PARSE_INT
-	  TAG(2000)
-#define CHECK(var) cout << #var << " 0x" << hex << var << dec << " " << var << endl << flush;
-	  CHECK(CE)
-	  CHECK(year)
-	  CHECK(month)
-	  CHECK(day_of_month)
-	  CHECK(hour)
-	  CHECK(minute)
-	  CHECK(second)
-	  CHECK(millisecond)
-	  CHECK(resolution)
-	  CHECK(type)
-#undef CHECK
-	  TAG(2100)
-	  hackSetTraditionalDate (
-			  CE,
-			  year,
-			  month,
-			  day_of_month,
-			  hour,
-			  minute,
-			  second,
-			  millisecond
-	  );
-	  TAG(2200)
-	  data.setValue("resolution",resolution);
-	  data.setValue("type",type);
-	}
-
-	string stringInNativeDate() {
-
-	  stringstream ss;
-	  if(data.getValue("BeforeAfterStartBit") == 0 ) {
-		  ss << setw(1) << "-";
-	  } else {
-		  ss << setw(1) << "+";
-	  }
-	  ss
-	    << setw(9) << setfill('0') << data.getValue("year") << "-"
-	    << setw(2) << setfill('0') << data.getValue("month") << "-"
-	    << setw(1) << setfill('0') << data.getValue("week") << "-"
-	    << setw(1) << setfill('0') << data.getValue("day") << " "
-		<< setw(2) << setfill('0') << data.getValue("hour") << ":"
-		<< setw(2) << setfill('0') << data.getValue("minute") << ":"
-	    << setw(2) << setfill('0') << data.getValue("second") << "."
-	    << setw(3) << setfill('0') << data.getValue("millisecond")
-	    << " (" << setw(2) << data.getValue("resolution") << ")"
-	    << " (" << setw(1) << data.getValue("type") << ")"
-		;
-
-	  return ss.str();
-	}
-
-	void fromNativeString(string nativeString) {
-	  // TODO repent the sin of hardcoding
-	  int pos = 0;
-#define PARSE_INT(field,width) \
-	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); \
-	  pos += width;
-	  /*
-	   cout << endl \
-	   << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) *continuation*
-	   << ", '" << nativeString.substr(pos,width) << "'" << endl; *continuation*
-	   */
-	  // PARSE_INT(year,nativeString.find("-")); ++pos;
-	  PARSE_INT(year,9); ++pos;
-	  PARSE_INT(month,2); ++pos;
-	  PARSE_INT(week,1); ++pos;
-	  PARSE_INT(day,1); ++pos;
-	  PARSE_INT(hour,2); ++pos;
-	  PARSE_INT(minute,2); ++pos;
-	  PARSE_INT(second,2); ++pos;
-	  PARSE_INT(millisecond,3); pos += 2;
-	  PARSE_INT(resolutionLevel,2);
-#undef PARSE_INT
-	  data.setValue("BeforeAfterStartBit",1);
-	}
-
-	int eraTest() {
-		int iy, im, id, ihour, imin, j, iymdf[4];
-		double d1, d2, sec, d, fd;
-		/* Date and time. */
-		iy = 2008; im = 2; id = 29;ihour = 23; imin = 59; sec = 59.9;
-		iy = -4700; im = 2; id = 1;ihour = 23; imin = 59; sec = 59.9;
-
-		// iy = -4800; im = 2; id = 28;ihour = 23; imin = 59; sec = 59.9;
-
-		printf ( "0: %4d/%2.2d/%2.2d%3d:%2.2d:%4.1f\n",iy, im, id, ihour, imin, sec );
-		/* Express as 2-part JD. */
-		j = eraCal2jd ( iy, im, id, &d1, &d2 );if ( j ) return 1;
-		j = eraTf2d ( '+', ihour, imin, sec, &d );if ( j ) return 1;
-		d2 += d;
-		printf ( "1: %9.1f +%13.6f =%15.6f\n", d1, d2, d1 + d2 );
-		/* Express as calendar date and fraction of a day. */
-		j = eraJd2cal ( d1, d2, &iy, &im, &id, &fd );if ( j ) return 1;
-		d = ( (double) id ) + fd;
-		printf ( "2: %4d/%2.2d/%9.6f\n", iy, im, d );
-		/* Round to 0.001 day. */
-		j = eraJdcalf ( 3, d1, d2, iymdf );if ( j ) return 1;
-		printf ( "3: %4d/%2.2d/%2.2d.%3.3d\n",iymdf[0], iymdf[1], iymdf[2], iymdf[3] );
-
-		return 0;
-	}
-
+	) const;
+	string hackStringInTraditionalDate();
+	void hackFromTraditionalString(string traditionalString);
+	string stringInNativeDate();
+	void fromNativeString(string nativeString);
+	int eraTest();
 };
+
+inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
+	}
+	bool done = false; int iField = 0;
+	int ret = 0;
+	int     CE_factor = 1;
+	int64_t thisCE  = a.get_BeforeAfterStartBit();
+	int64_t otherCE = b.get_BeforeAfterStartBit();
+	if( thisCE == otherCE ) {
+		// We need to reorder the inequalities if we're in BCE territory.
+		if( thisCE < 1 ) {
+			CE_factor = -1;
+		}
+	}
+
+	do {
+		int64_t lhs = a.data.getValueAtId(iField);
+		int64_t rhs = b.data.getValueAtId(iField);
+//		int64_t lhs = a.data.getBitFieldAtId(iField)->getValue();
+//		int64_t rhs = b.data.getBitFieldAtId(iField)->getValue();
+		if( lhs < rhs ) {
+			ret = -1*CE_factor; done = true;
+		} else if ( lhs > rhs ) {
+			ret =  1*CE_factor; done = true;
+		}
+		++iField;
+		 if( iField >= a.data.getFieldId("resolution") ){
+			 done = true;
+		 }
+	} while (!done);
+	return ret;
+}
+
+inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+
+	int64_t	ab = a.toInt64Milliseconds() + b.toInt64Milliseconds();
+
+	TemporalIndex* c = new TemporalIndex;
+
+	c->fromInt64Milliseconds(ab);
+	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
+
+	return *c;
+}
+
+inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) == 0; }
+inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) != 0; }
+inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <  0; }
+inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) >  0; }
+inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <= 0; }
+inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) >= 0; }
+inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
 
 } /* namespace std */
 

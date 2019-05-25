@@ -31,6 +31,14 @@ public:
 	TemporalWordFormat1(); // Overload this
 	virtual ~TemporalWordFormat1();
 
+	int64_t maxResolutionLevel() {
+		int64_t offsetTop =
+				bitFields[pos_CoarsestResolutionLevel]->getOffset() +
+				bitFields[pos_CoarsestResolutionLevel]->getWidth()-1;
+		int64_t offsetBottom = bitFields[pos_FinestResolutionLevel]->getOffset();
+		return offsetTop - offsetBottom;
+	}
+
 	void print() const {
 
 		bool first = true;
@@ -63,7 +71,7 @@ public:
 		bitFieldMap.at(name)->setValue(value);
 		return *this;
 	}
-	int64_t getValue(string name) {
+	int64_t getValue(string name) const {
 		return bitFieldMap.at(name)->getValue();
 	}
 
@@ -80,12 +88,16 @@ public:
 	int64_t getCoFieldId(string levelName) {
 		return bitFieldMap.at(levelName)->getCoFieldId();
 	}
-	int64_t getFieldId(string levelName) {
+	int64_t getFieldId(string levelName) const {
 		return bitFieldMap.at(levelName)->getFieldId();
 	}
 
-	BitField* getBitFieldAtId(int64_t id) {
+	BitField* getBitFieldAtId(int64_t id) const {
 		return bitFieldMap.at(bitFields[id]->getName());
+	}
+
+	int64_t getValueAtId(int64_t id) const {
+		return bitFieldMap.at(bitFields[id]->getName())->getValue();
 	}
 
 	void incrementAtId(int64_t id,int64_t delta) {
@@ -121,6 +133,10 @@ public:
 		incrementAtId(getFieldId(name),delta);
 	}
 
+/**
+ * Low-level decrement of a particular field. It doesn't know any details of the calendar,
+ * i.e. CE/BCE, and throws an exception if you decrement below zero.
+ */
 	void decrementAtId(int64_t id, int64_t delta) {
 //		if(level >= maxCoResolutionLevelValue) {
 //			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:MaxLevelExceeded");
@@ -146,68 +162,81 @@ public:
 		decrementAtId(getFieldId(name), delta);
 	}
 
-	// TODO Shift from level to bit position.
-	// TODO 2019-0419 MLR FIX
-	void setTerminatorBelowResolution(int64_t resolution){
-		int64_t bitPosition;
-
-		// cout << 1 << flush;
+	bool resolutionNotInBounds(int64_t resolution) {
 		int64_t offsetTop =
 				bitFields[pos_CoarsestResolutionLevel]->getOffset() +
 				bitFields[pos_CoarsestResolutionLevel]->getWidth()-1;
 		int64_t offsetResolution = offsetTop - resolution;
 		int64_t offsetBottom = bitFields[pos_FinestResolutionLevel]->getOffset();
+		return ( offsetResolution > offsetTop || offsetBottom > offsetResolution );
+	}
 
-		// cout << 2 << flush;
+	// void fieldIdAndResolutionScaleFromResolution(int64_t &fieldId, int64_t &scale, int64_t &resolution) {
+	// }
 
-		if( offsetResolution > offsetTop
-				|| offsetBottom > offsetResolution ) {
-			throw SpatialFailure("TemporalWordFormat:setTerminatorBelowResolution:ResolutionOutOfBounds");
-		}
-
-		// cout << 3 << flush;
-
-//		int64_t termMask = 0;
-//		for( int i = offsetResolution; i >= 0; --i ){
-//			termMask = termMask << 1;
-//			if( i > offsetBottom ) {
-//				++termMask;
+	//
+	// The following mucks up on BCE/CE encodings.
+	//
+	//
+//	// TODO Shift from level to bit position.
+//	// TODO 2019-0419 MLR FIX
+//	void setTerminatorBelowResolution(int64_t resolution){
+//		int64_t bitPosition;
+//		// cout << 1 << flush;
+//		int64_t offsetTop =
+//				bitFields[pos_CoarsestResolutionLevel]->getOffset() +
+//				bitFields[pos_CoarsestResolutionLevel]->getWidth()-1;
+//		int64_t offsetResolution = offsetTop - resolution;
+//		int64_t offsetBottom = bitFields[pos_FinestResolutionLevel]->getOffset();
+//		// cout << 2 << flush;
+//		if( resolutionNotInBounds(resolution) ) {
+//			if ( resolution != 63 ) {
+//				throw SpatialFailure("TemporalWordFormat:setTerminatorBelowResolution:ResolutionOutOfBounds");
+//			} else {
+//				// The index is already a terminator.
+//				offsetResolution = max((int64_t) 0,offsetResolution);
 //			}
 //		}
-
-		// cout << 4 << endl << flush;
-
-		int iBit = offsetBottom;
-		int iPos = pos_FinestResolutionLevel;
-
-//		cout << endl << flush;
-//		cout << "offsetTop:        " << dec << offsetTop        << hex << endl << flush;
-//		cout << "offsetResolution: " << dec << offsetResolution << hex << endl << flush;
-//		cout << "offsetBottom:     " << dec << offsetBottom     << hex << endl << flush;
-
-		while( iBit <= offsetResolution ) {
-			int64_t iWidth = bitFields[iPos]->getWidth();
-
-//			cout << dec << "iBit,iPos: "
-//					<< iBit << "," << iPos << hex
-//					<< " mask0: " << bitFields[iPos]->getMask()
-//					<< ", mask1: "	<< (long long int) pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1
-//					<< ", oR,chk: "
-//					<< dec << offsetResolution << "," << bitFields[iPos]->getOffset() + iWidth
-//					<< hex << endl << flush;
-
-			if( offsetResolution >= bitFields[iPos]->getOffset() + iWidth ) {
-				getBitFieldAtId(iPos)->setValue(bitFields[iPos]->getMask());
-			} else {
-				getBitFieldAtId(iPos)->setValue( pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1 );
-			}
-			iBit += iWidth; --iPos;
-		}
-
-		// cout << 5 << flush;
-		// print();
-
-	}
+//		// cout << 3 << flush;
+////		int64_t termMask = 0;
+////		for( int i = offsetResolution; i >= 0; --i ){
+////			termMask = termMask << 1;
+////			if( i > offsetBottom ) {
+////				++termMask;
+////			}
+////		}
+//		// cout << 4 << endl << flush;
+//		int iBit = offsetBottom;
+//		int iPos = pos_FinestResolutionLevel;
+////		cout << endl << flush;
+////		cout << "offsetTop:        " << dec << offsetTop        << hex << endl << flush;
+////		cout << "offsetResolution: " << dec << offsetResolution << hex << endl << flush;
+////		cout << "offsetBottom:     " << dec << offsetBottom     << hex << endl << flush;
+//		while( iBit <= offsetResolution ) {
+//			int64_t iWidth = bitFields[iPos]->getWidth();
+////			cout << dec << "iBit,iPos: "
+////					<< iBit << "," << iPos << hex
+////					<< " mask0: " << bitFields[iPos]->getMask()
+////					<< ", mask1: "	<< (long long int) pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1
+////					<< ", oR,chk: "
+////					<< dec << offsetResolution << "," << bitFields[iPos]->getOffset() + iWidth
+////					<< hex << endl << flush;
+//			if( offsetResolution >= bitFields[iPos]->getOffset() + iWidth ) {
+//				// The last item of each field.
+//				getBitFieldAtId(iPos)->setValue(bitFields[iPos]->getMaxValue());
+//			} else {
+////				int64_t tmp = getBitFieldAtId(iPos)->getValue();
+//				// Add the resolution scale to the value...
+//				incrementAtId(iPos,
+//						pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1 );
+////				 getBitFieldAtId(iPos)->setValue(
+////						pow(2ll,offsetResolution - bitFields[iPos]->getOffset()+1) - 1 );
+//			}
+//			iBit += iWidth; --iPos;
+//		}
+//		// cout << 5 << flush;
+//		// print();
+//	}
 
 // We now set terminator below a resolution not a levelName. The resolution can be at any appropriate bit position.
 //	void setTerminatorBelowLevel(string levelName) {
