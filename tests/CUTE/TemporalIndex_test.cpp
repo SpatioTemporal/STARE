@@ -10,6 +10,7 @@
 #include "Test.h"
 
 #define TAG(X) cout << dec << X << hex << endl << flush;
+#define TAGNC(X) cout << dec << X << hex << flush;
 // #define TAG(x) {}
 
 void TemporalIndex_test() {
@@ -818,22 +819,52 @@ void TemporalIndex_test() {
 	tIndex.setZero().set_millisecond(i3+i4).set_resolution(level);
 	ASSERT_EQUAL(tIndex,tIndex5);
 
+	cout << endl << flush;
 	// SciDB checks
 	int64_t max_coordinate = (1ULL << 62) - 1;
 	int64_t min_coordinate = - max_coordinate;
+	cout << "min,max coordinate: " << dec << min_coordinate << ", " << max_coordinate << endl << flush;
 
+	cout << endl << flush;
 	tag_id = 9999;
-	tIndex = TemporalIndex(max_coordinate);
-	INDEX_OUT(++tag_id,tIndex);
-	tIndex.setZero().set_BeforeAfterStartBit(1).set_year(262143);
+	cout << "Max SciDB coord" << endl << flush;
+	// Note: max_coordinate actually has the type bits set to 3, which is invalid for this TemporalIndex,
+	// which is of type=2.
+	tIndex = TemporalIndex(max_coordinate); INDEX_OUT(++tag_id,tIndex);
+	// .set_year(262143)
+	cout << "Native maximum (scidb)" << endl << flush;
+	tIndex.setZero().setEOY(262143,1);INDEX_OUT(++tag_id,tIndex);
+	TemporalIndex tIndex1 = TemporalIndex(tIndex.scidbTerminator()); INDEX_OUT(++tag_id,tIndex1);
+	cout << "-" << endl << flush;
+	tIndex.setZero()
+			.set_BeforeAfterStartBit(1)
+			.set_year(262144)
+		; INDEX_OUT(++tag_id,tIndex);
+	cout << "-" << endl << flush;
 
-	tIndex = TemporalIndex(min_coordinate);
-	INDEX_OUT(++tag_id,tIndex);
-	tIndex.setZero().set_year(262143);
-	INDEX_OUT(++tag_id,tIndex);
+
+
+
+
+	cout << endl << flush;
+	cout << "Min SciDB coord" << endl << flush;
+	// Note min_coordinate is not a valid stare temporal index value.
+	tIndex = TemporalIndex(min_coordinate);	INDEX_OUT(++tag_id,tIndex);
+
+	cout << endl << flush;
+	cout << "Native minimum (scidb)" << endl << flush;
+	tIndex.setZero().set_year(262143);   	INDEX_OUT(++tag_id,tIndex);
+	cout << "nat-min0 " << scidbMinimumIndex() << endl << flush;
+	cout << "nat-min > sci-min: " << (tIndex.scidbTemporalIndex() > min_coordinate) << endl << flush;
+	tIndex = TemporalIndex(scidbMinimumIndex()); INDEX_OUT(++tag_id,tIndex);
+	cout << endl << flush;
+
+	cout << "nat-max " << scidbMaximumIndex() << endl << flush;
+	cout << endl << flush;
 
 	tIndex.setZero().setEOY(1024,1);
 	INDEX_OUT(++tag_id,tIndex);
+	cout << endl << flush;
 
 	tIndex.hackSetTraditionalDate(1, 2000, 12, 31, 23, 59, 59, 999);
 	INDEX_OUTNC(++tag_id,tIndex);
@@ -860,22 +891,50 @@ void TemporalIndex_test() {
 	tIndex.setZero().fromJulianDoubleDay(d1, d2);
 	INDEX_OUTNC(++tag_id,tIndex); cout << " d1,d2: " << d1 << ", " << d2 << endl << flush;
 	cout << endl << flush;
+	//
 
-	// << setprecision(17) << setw(20) << scientific
+#define FMT_JD(d1,d2) cout << " d1,d2: " << setprecision(17) << setw(20) << scientific << d1 << ", " << d2; cout.copyfmt(ios(NULL));
 
+	tag_id = 11000;
+	try {
+	tag_id = 11500;
 	// tIndex.setZero().hackSetTraditionalDate(1, 2000, 12, 31, 23, 59, 45, 459);
-	tIndex.setZero().hackSetTraditionalDate(1, 2000, 12, 31, 23, 59, 59, 999);
-	INDEX_OUT(++tag_id,tIndex);
+	tIndex.setZero().hackSetTraditionalDate(1, 2000, 12, 31, 23, 59, 59, 999);	INDEX_OUT(++tag_id,tIndex);
+
 	tIndex.toJulianDoubleDay(d1, d2);
-	tIndex.setZero().fromJulianDoubleDay(d1, d2);
-	INDEX_OUTNC(++tag_id,tIndex); cout << " d1,d2: " << d1 << ", " << d2 << endl << flush;
+	tIndex.setZero().fromJulianDoubleDay(d1, d2);  INDEX_OUTNC(++tag_id,tIndex); FMT_JD(d1,d2); cout << endl << flush;
+
 	tIndex.toJulianDoubleDay(d1, d2);
-	tIndex.setZero().fromJulianDoubleDay(d1, d2);
-	INDEX_OUTNC(++tag_id,tIndex); cout << " d1,d2: " << d1 << ", " << d2 << endl << flush;
+	tIndex.setZero().fromJulianDoubleDay(d1, d2);  INDEX_OUTNC(++tag_id,tIndex); FMT_JD(d1,d2); cout << endl << flush;
+
 	tIndex.toJulianDoubleDay(d1, d2);
-	tIndex.setZero().fromJulianDoubleDay(d1, d2);
-	INDEX_OUTNC(++tag_id,tIndex); cout << " d1,d2: " << d1 << ", " << d2 << endl << flush;
+	tIndex.setZero().fromJulianDoubleDay(d1, d2);  INDEX_OUTNC(++tag_id,tIndex); FMT_JD(d1,d2); cout << endl << flush;
 	cout << endl << flush;
+
+	tag_id = 11600;
+	tIndex1.set_type(2); tIndex2.set_type(2); // 2 is the type for this index type
+	tIndex1.setZero().hackSetTraditionalDate(1, 4,  1,  1,  0,  0,  0,   0);	INDEX_OUT(++tag_id,tIndex1);
+	// tIndex1.setZero();	INDEX_OUT(++tag_id,tIndex1);
+	tIndex2.setZero().hackSetTraditionalDate(1, 2,  1,  1,  0,  0,  0,   0);	INDEX_OUT(++tag_id,tIndex2);
+	// tIndex2.setZero().fromJulianDoubleDay(0, 1); INDEX_OUT(++tag_id,tIndex2);
+	tIndex4 = tIndex1 + tIndex2; INDEX_OUT(++tag_id,tIndex4);
+	tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
+
+	cout << endl << flush;
+
+	tag_id = 11700;
+	tIndex1.set_type(2); tIndex2.set_type(2); // 2 is the type for this index type
+	tIndex1.setZero().hackSetTraditionalDate(1, 4,  1,  1,  0,  0,  0,   0);	INDEX_OUT(++tag_id,tIndex1);
+	tIndex2.setZero().fromJulianDoubleDay(0, 1); TAG("."); INDEX_OUT(++tag_id,tIndex2);
+	tIndex4 = tIndex1 + tIndex2; INDEX_OUT(++tag_id,tIndex4);
+	tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
+
+	cout << endl << flush;
+	} catch (SpatialFailure& failure) {
+		failureMessage = "'";
+		failureMessage += failure.what();
+		cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+	};
 
 	FAIL();
 }

@@ -70,7 +70,7 @@ void TemporalIndex::hackSetTraditionalDate(
 		if ((val < lo) || (hi < val)) \
 		{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
 		throw SpatialFailure(ss.str().c_str()); }
-	CHECK_BOUND(1,_year,15999999);
+	CHECK_BOUND(1,_year,15999999);  // TODO check this bound...
 	// CHECK_BOUND(1,_year,4700);
 	CHECK_BOUND(1,_month,12);
 	CHECK_BOUND(1,_day_of_month,31);
@@ -617,7 +617,7 @@ int64_t TemporalIndex::scidbTerminatorJulian() {
 	double d1, d2;
 	tmpIndex.toJulianDoubleDay(d1,d2);
 	tmpIndex.fromJulianDoubleDay(d1,d2+delta);
-	int64_t idx_ = tmpIndex.scidbTemporalIndex();
+	idx_ = tmpIndex.scidbTemporalIndex();
 	return idx_;
 }
 
@@ -689,6 +689,39 @@ void TemporalIndex::toJulianDoubleDay(double& d1, double& d2) const {
 	// double dtot = d1 + d2 + d;
 	// dtot += dtot*1000.0*86400.0 + _millisecond;
 	// return (int64_t)dtot;
+	if(not_ok != 0) {
+		// string msgs[4] = {"OK","bad year (JD not computed)","bad month (JD not computed)","bad day (JD computed)"};
+		string msgs[10] = {
+				"dubious year and time is after end of day", // 0
+				"time is after end of day",
+				"dubious year",
+				"ok",
+				"bad year",
+				"bad month",
+				"bad day",
+				"bad hour",
+				"bad minute",
+				"bad second (<0)" // 9
+		};
+		stringstream ss;
+		ss << "TemporalIndex:toJulianDoubleDay:eraDtf2d-failure " << msgs[3-not_ok];
+		ss << endl;
+#define FMT1(x) ss << #x << " : " << dec << x << endl << flush;
+		FMT1(_year)
+		FMT1(_month)
+		FMT1(_day_of_month)
+		FMT1(_hour)
+		FMT1(_minute)
+		FMT1(_second)
+		FMT1(_millisecond)
+		FMT1(d1)
+		FMT1(d2)
+#undef FMT1
+		// TODO add some way to tune sensitivity to poorly formed dates & times
+		if (not_ok < 0) {
+			throw SpatialFailure(ss.str().c_str());
+		}
+	}
 };
 TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 	int not_ok;
@@ -700,6 +733,7 @@ TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 	// j = iauD2dtf ( "UTC", 3, u1, u2, &iy, &im, &id, ihmsf );
 	int ihmsf[4];
 	not_ok = eraD2dtf ( "UTC", 3, d1, d2, &iy, &im, &id, ihmsf );
+	// TAG(10)
 	// int iymdf[4];
 	// not_ok = eraJdcalf ( 8, d1, d2, iymdf );
 	// not_ok = eraJdcalf ( 3, d1, d2, iymdf );
@@ -711,16 +745,53 @@ TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 	_minute = ihmsf[1];
 	_second = ihmsf[2];
 	_millisecond = ihmsf[3];
+	if(not_ok != 0) {
+		// string msgs[4] = {"OK","bad year (JD not computed)","bad month (JD not computed)","bad day (JD computed)"};
+		string msgs[10] = {
+				"dubious year", // 0
+				"ok",
+				"unacceptable date" // 2
+		};
+		stringstream ss;
+		ss << "TemporalIndex:fromJulianDoubleDay:eraD2dtf-failure " << msgs[1-not_ok];
+		ss << endl;
+#define FMT1(x) ss << #x << " : " << dec << x << endl << flush;
+		FMT1(d1)
+		FMT1(d2)
+		FMT1(iy)
+		FMT1(im)
+		FMT1(id)
+		FMT1(_hour)
+		FMT1(_minute)
+		FMT1(_second)
+		FMT1(_millisecond)
+#undef FMT1
+		// TODO add some way to tune sensitivity to poorly formed dates & times
+		if( not_ok < 0 ) {
+			throw SpatialFailure(ss.str().c_str());
+		}
+	}
+
 	if( iy < 1) {
 		CE = 0;
-		--iy;
+		// --iy;
+		iy = -iy + 1;
 	}
 	// not_ok = eraJdcalf ( 3, d1, d2, iymdf );
 	// 1/86400e3 = 1.16e-8. Keep day-fraction to 1.0e-8
 	// fractionalDayToHMSM(fd,_hour, _minute, _second, _millisecond);
+//#define FMT1(x) cout << #x << " : " << dec << x << endl << flush;
+//	FMT1(iy)
+//	FMT1(im)
+//	FMT1(id)
+//	FMT1(_hour)
+//	FMT1(_minute)
+//	FMT1(_second)
+//	FMT1(_millisecond)
+//#undef FMT1
 	this->hackSetTraditionalDate(CE, (int64_t)iy, (int64_t)im, (int64_t)id, (int64_t)_hour, (int64_t)_minute, (int64_t)_second, (int64_t)_millisecond);
+//	TAG(20)
 	return *this;
-
 };
 
 /// Note: for indexing, not astronomy. Support a kind of "addition".
@@ -811,8 +882,23 @@ int64_t TemporalIndex::millisecondsAtResolution(int64_t resolution) {
 	return sum;
 }
 
+/**
+ * Return a number of days associated with a resolution level.
+ */
 double TemporalIndex::julianDoubleDayAtResolution(int64_t resolution) {
-	return millisecondsAtResolutions(resolution) / 86400.0e3;
+	return millisecondsAtResolution(resolution) / 86400.0e3;
+}
+
+int64_t scidbMinimumIndex() {
+	TemporalIndex tIndex;
+	tIndex.setZero().set_year(262143).set_type(2);
+	return tIndex.scidbTemporalIndex();
+}
+
+int64_t scidbMaximumIndex() {
+	TemporalIndex tIndex;
+	tIndex.setZero().setEOY(262143,1).set_type(2);
+	return tIndex.scidbTemporalIndex();
 }
 
 } /* namespace std */

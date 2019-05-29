@@ -465,6 +465,9 @@ public:
 	int64_t scidbTerminator();
 	int64_t scidbTerminatorJulian();
 	bool    scidbTerminatorp();
+
+
+
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t year,int64_t babit);
@@ -601,6 +604,27 @@ inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 	return *c;
 }
 
+inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+	double ad1, ad2, bd1, bd2, cd1, cd2;
+	a.toJulianDoubleDay(ad1, ad2);
+	b.toJulianDoubleDay(bd1, bd2);
+	cd1 = ad1+bd1; cd2 = ad2+bd2;
+//#define FMT1(x,y) cout << #x << "," << #y << " " << x << "," << y << endl << flush;
+//	FMT1(ad1,ad2);
+//	FMT1(bd1,bd2);
+//	FMT1(cd1,cd2);
+//#undef FMT1
+	TemporalIndex* c = new TemporalIndex;
+	c->fromJulianDoubleDay(cd1, cd2);
+	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return *c;
+}
+
 inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) == 0; }
 inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) != 0; }
 inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <  0; }
@@ -608,6 +632,16 @@ inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { ret
 inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <= 0; }
 inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) >= 0; }
 inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
+inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+
+/**
+ * Returns the lowest temporal index valid in SciDB. SciDB has symmetrical coordinate (index) dimensions, i.e. +/- (2**62 -1).
+ */
+int64_t scidbMinimumIndex();
+/**
+ * Returns the greatest non-terminator temporal index valid in SciDB. For a poor-man's terminator here, set the 6 resolution bits to 1, i.e. 63.
+ */
+int64_t scidbMaximumIndex();
 
 } /* namespace std */
 
