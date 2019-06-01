@@ -22,8 +22,6 @@
 
 #include "erfa.h"
 
-
-
 #define TAG(X) cout << dec << X << hex << endl << flush;
 
 namespace std {
@@ -198,6 +196,8 @@ public:
 	virtual ~TemporalWordFormat();
 };
 
+static const char* TimeStandard = "TAI"; // Not "UTC"
+
 // static const TemporalWordFormat temporalWordFormat;
 // static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
 
@@ -238,6 +238,8 @@ public:
 	TemporalWordFormat data;
 	// TODO Make better use of temporalWordFormat...
 
+
+
 	TemporalIndex() {
 		// data = temporalWordFormat; // Copy the format
 		TemporalWordFormat data;
@@ -245,6 +247,9 @@ public:
 		data.setValue("resolution",63);
 	};
 	virtual ~TemporalIndex();
+	/**
+	 * Native calendar format puts all leap time at the end of the year.
+	 */
 	TemporalIndex(
 			int64_t BeforeAfterStartBit,
 			int64_t year,
@@ -323,6 +328,11 @@ public:
 		} else { leapyear_day = 1; }
 		return leapyear_day;
 	}
+
+//	int64_t milliseconds_per_year(int64_t _year) {
+//		int64_t ms;
+//		return ms;
+//	}
 
 //#define SHIFT_AND_MASK_RESOLUTION(field) \
 //		data.setValue(#field, \
@@ -470,9 +480,22 @@ public:
 
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
-	TemporalIndex& setEOY(int64_t year,int64_t babit);
+	TemporalIndex& setEOY(int64_t CE, int64_t year);
 	void toJulianDoubleDay(double& d1, double& d2) const;
 	TemporalIndex& fromJulianDoubleDay( double d1, double d2);
+	TemporalIndex& setJulianFromTraditionalDate(
+			int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// > 0
+			int64_t _month, 		// 1..12 not 0..11
+			int64_t _day_of_month, 	// 1..31
+			int64_t _hour, 			// 0..23
+			int64_t _minute, 		// 0..59
+			int64_t _second, 		// 0..59
+			int64_t _millisecond 	// 0..999
+	);
+
+	string toStringJ();
+	TemporalIndex& fromStringJ(string inputString);
 
 	/**
 	 * Convert the fields to milliseconds to aid conversions and support intervals.
@@ -481,8 +504,11 @@ public:
 	 *
 	 * TODO Augment with a Julian millisecond calculation?
 	 */
+	int64_t toInt64MillisecondsFractionOfYearJ() const;
+	int64_t toInt64MillisecondsFractionOfYear() const;
 	int64_t toInt64Milliseconds() const;
 	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
+
 	int64_t millisecondsAtResolution(int64_t resolution);
 	double julianDoubleDayAtResolution(int64_t resolution);
 
@@ -526,6 +552,13 @@ public:
 	// int64_t get_resolutionLevel() { return data.resolutionLevelConstraint - get_coResolutionLevel(); }
 
 	void checkBitFormat();
+
+	TemporalIndex& setDateFromYearAndMilliseconds(
+			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// > 0
+			int64_t _milliseconds
+			);
+
 	void hackSetTraditionalDate(
 			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
 			int64_t _year, 			// > 0
@@ -552,6 +585,9 @@ public:
 	void fromNativeString(string nativeString);
 	int eraTest();
 };
+
+void fractionalDayToHMSM   (double  fd, int& hour, int& minute, int& second, int& ms);
+void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int  ms);
 
 inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
@@ -604,6 +640,26 @@ inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 	return *c;
 }
 
+inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
+	}
+
+	double ad1, ad2, bd1, bd2;
+	double ad, bd;
+	a.toJulianDoubleDay(ad1, ad2);
+	b.toJulianDoubleDay(bd1, bd2);
+	ad = ad1 + ad2; bd = bd1 + bd2;
+
+	int ret = 0; // if equal
+	if ( ad < bd ) {
+		ret = -1;
+	} else if ( ad > bd ) {
+		ret = 1;
+	}
+	return ret;
+}
+
 inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
@@ -642,6 +698,8 @@ int64_t scidbMinimumIndex();
  * Returns the greatest non-terminator temporal index valid in SciDB. For a poor-man's terminator here, set the 6 resolution bits to 1, i.e. 63.
  */
 int64_t scidbMaximumIndex();
+
+int64_t millisecondsInYear(int64_t CE, int64_t year);
 
 } /* namespace std */
 
