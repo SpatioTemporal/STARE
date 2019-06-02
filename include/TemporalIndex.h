@@ -483,6 +483,9 @@ public:
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
 	void toJulianDoubleDay(double& d1, double& d2) const;
 	TemporalIndex& fromJulianDoubleDay( double d1, double d2);
+	/**
+	 * Set using a TAI date.
+	 */
 	TemporalIndex& setJulianFromTraditionalDate(
 			int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
 			int64_t _year, 			// > 0
@@ -493,6 +496,24 @@ public:
 			int64_t _second, 		// 0..59
 			int64_t _millisecond 	// 0..999
 	);
+	void toUTC(
+			int& _year,
+			int& _month, 		// 1..12 not 0..11
+			int& _day_of_month, // 1..31
+			int& _hour, 		// 0..23
+			int& _minute, 		// 0..59
+			int& _second, 		// 0..59
+			int& _millisecond 	// 0..999
+			);
+	TemporalIndex& fromUTC(
+			int _year,
+			int _month, 		// 1..12 not 0..11
+			int _day_of_month, 	// 1..31
+			int _hour, 			// 0..23
+			int _minute, 		// 0..59
+			int _second, 		// 0..59
+			int _millisecond 	// 0..999
+			);
 
 	string toStringJ();
 	TemporalIndex& fromStringJ(string inputString);

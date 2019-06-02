@@ -107,7 +107,6 @@ TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
 #define PARSE_INT(field,width) \
 		int64_t field = atoi(inputString.substr(pos,width).c_str()); pos += width + 1;
 	// cout << endl << "pi: " << inputString.substr(pos,width).c_str() << endl;
-	// TAG(1000)
 	PARSE_INT(CE,1);
 	PARSE_INT(year,inputString.find("-")-2);
 	PARSE_INT(month,2);
@@ -121,23 +120,52 @@ TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
 	++pos; ++pos;
 	PARSE_INT(type,1);
 #undef PARSE_INT
-
-	// TAG(1010)
-
-//	if( _CE < 1 ) {
-//		// If we're in BCE, correct the _year ( 1 BCE goes to year 0) and reverse.
-//		--_year; _year *= -1;
-//	}
-//	double d1,d2;
-//	int not_ok = eraDtf2d( "UTC", year, month, day_of_month, hour, minute, second+(millisecond*0.001), &d1, &d2 );
-//	this->fromJulianDoubleDay(d1, d2);
-
 	this->setJulianFromTraditionalDate(CE, year, month, day_of_month, hour, minute, second, millisecond);
-	// TAG(1020)
 	data.setValue("resolution",resolution);
-	// TAG(1030)
 	data.setValue("type",type);
-	// TAG(1040)
+	return *this;
+}
+
+void TemporalIndex::toUTC(
+		int& _year,
+		int& _month, 		// 1..12 not 0..11
+		int& _day_of_month, 	// 1..31
+		int& _hour, 			// 0..23
+		int& _minute, 		// 0..59
+		int& _second, 		// 0..59
+		int& _millisecond 	// 0..999
+) {
+	int not_ok;
+	double d1,d2; this->toJulianDoubleDay(d1,d2); // Get the TAI encoded time.
+
+	// Convert TAI to UTC.
+	double utc1, utc2; not_ok = eraTaiutc(d1, d2, &utc1, &utc2);
+
+	int ihmsf[4];
+	// The following takes as input the date and then formats it...
+	not_ok      = eraD2dtf ( "UTC", 3, utc1, utc2, &_year, &_month, &_day_of_month, ihmsf );
+	_hour        = ihmsf[0];
+	_minute      = ihmsf[1];
+	_second      = ihmsf[2];
+	_millisecond = ihmsf[3];
+}
+
+TemporalIndex& TemporalIndex::fromUTC(
+		int _year,
+		int _month, 		// 1..12 not 0..11
+		int _day_of_month, 	// 1..31
+		int _hour, 			// 0..23
+		int _minute, 		// 0..59
+		int _second, 		// 0..59
+		int _millisecond 	// 0..999
+		) {
+
+	double utc1, utc2;
+	int not_ok = eraDtf2d( "UTC", _year, _month, _day_of_month, _hour, _minute, _second+(_millisecond*0.001), &utc1, &utc2 );
+
+	double d1,d2; not_ok = eraUtctai(utc1,utc2,&d1,&d2);
+
+	this->fromJulianDoubleDay(d1, d2);
 
 	return *this;
 }

@@ -1211,5 +1211,52 @@ void TemporalIndex_test() {
 					<< ", msp: " << millisecondsInYear(tIndex.get_BeforeAfterStartBit(),tIndex.get_year())
 					<< endl << flush;
 	cout << "---" << endl << flush;
+
+	{
+		int _year, _month, _day_of_month, _hour, _minute, _second, _millisecond;
+		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+
+		cout
+		<< setw(9) << setfill(' ') << _year << "-"
+		<< setw(2) << setfill('0') << _month << "-"
+		<< setw(2) << setfill('0') << _day_of_month << " "
+		<< setw(2) << _hour << ":"
+		<< setw(2) << _minute << ":"
+		<< setw(2) << _second << "."
+		<< setw(3) << _millisecond
+		<< endl << flush;
+
+		_year         = 1972;
+		_month        =   12;
+		_day_of_month =   31;
+		_hour         =   23;
+		_minute       =   59;
+		_second       =   60;
+		_millisecond  =  999;
+
+		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
+
+		_year         = 0;
+		_month        = 0;
+		_day_of_month = 0;
+		_hour         = 0;
+		_minute       = 0;
+		_second       = 0;
+		_millisecond  = 0;
+		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+
+		cout
+		<< setw(9) << setfill(' ') << _year << "-"
+		<< setw(2) << setfill('0') << _month << "-"
+		<< setw(2) << setfill('0') << _day_of_month << " "
+		<< setw(2) << _hour << ":"
+		<< setw(2) << _minute << ":"
+		<< setw(2) << _second << "."
+		<< setw(3) << _millisecond
+		<< endl << flush;
+
+	}
+
+
 	FAIL();
 }
