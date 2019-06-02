@@ -558,29 +558,6 @@ public:
 			int64_t _year, 			// > 0
 			int64_t _milliseconds
 			);
-
-	void hackSetTraditionalDate(
-			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
-			int64_t _year, 			// > 0
-			int64_t _month, 		// 1..12 not 0..11
-			int64_t _day_of_month, 	// 1..31
-			int64_t _hour, 			// 0..23
-			int64_t _minute, 		// 0..59
-			int64_t _second, 		// 0..59
-			int64_t _millisecond 	// 0..999
-	);
-	void hackGetTraditionalDate(
-			int64_t &_BeforeAfterStartBit,
-			int64_t &_year,
-			int64_t &_month, // 1..12 not 0..11
-			int64_t &_day_of_month, // 1..31
-			int64_t &_hour, // 0..23
-			int64_t &_minute, // 0..59
-			int64_t &_second, // 0..59
-			int64_t &_millisecond // 0..999
-	) const;
-	string hackStringInTraditionalDate();
-	void hackFromTraditionalString(string traditionalString);
 	string stringInNativeDate();
 	void fromNativeString(string nativeString);
 	int eraTest();

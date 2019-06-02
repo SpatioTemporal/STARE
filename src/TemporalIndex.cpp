@@ -70,190 +70,6 @@ TemporalIndex& TemporalIndex::setDateFromYearAndMilliseconds(
 	return *this;
 }
 
-void TemporalIndex::hackSetTraditionalDate(
-		int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
-		int64_t _year, 			// > 0
-		int64_t _month, 		// 1..12 not 0..11
-		int64_t _day_of_month, 	// 1..31
-		int64_t _hour, 			// 0..23
-		int64_t _minute, 		// 0..59
-		int64_t _second, 		// 0..59
-		int64_t _millisecond 	// 0..999
-) {
-
-	if(_year < 1)
-	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 1" << endl;
-	throw SpatialFailure(ss.str().c_str()); }
-
-	if( CE == 1 && _year == 0 ){
-		throw SpatialFailure("TemporalIndex:hackSetTraditionalDate:InvalidYearZeroCE");
-	}
-
-#define CHECK_BOUND(lo,val,hi) \
-		if ((val < lo) || (hi < val)) \
-		{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
-		throw SpatialFailure(ss.str().c_str()); }
-	CHECK_BOUND(1,_year,15999999);  // TODO check this bound...
-	// CHECK_BOUND(1,_year,4700);
-	CHECK_BOUND(1,_month,12);
-	CHECK_BOUND(1,_day_of_month,31);
-	CHECK_BOUND(0,_hour,23);
-	CHECK_BOUND(0,_minute,59);
-	// CHECK_BOUND(0,_second,59);
-	if( _month == 6 || _month == 12 ) {
-		CHECK_BOUND(0,_second,59+1); // Sometimes there's a leap second on June or December. TODO improve this check.
-	} else {
-		CHECK_BOUND(0,_second,59); // Sometimes there's a leap second on June or December. TODO improve this check.
-	}
-	CHECK_BOUND(0,_millisecond,999);
-#undef  CHECK_BOUND
-	// Be a little silly.
-	// TODO Fix for correct work
-	int days_in_month[] = {
-			31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-	};
-
-	// days_in_month[1] += leapYearDay(_year);
-	int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
-	days_in_month[1] += lyd;
-
-	int64_t days_in_months = 0;
-
-	// _month 1..12
-	for(int imo=0; imo < _month-1; ++imo) {
-		days_in_months += days_in_month[imo];
-	}
-
-	int64_t milliseconds_total =
-			_millisecond +
-			1000ll * (_second +
-					60ll * (_minute +
-							60ll * (_hour +
-									24ll * ( _day_of_month - 1ll +
-											days_in_months))));
-
-	// 365ll * _year ))));
-	// TODO HACK HACK HACK ?Use 365.25?
-
-	data.setValue("year",_year);
-
-#define SCALE(field) data.setValue(#field, \
-		(milliseconds_total / data.get(#field)->getScale()) \
-		% (data.get(#field)->getMaxValue() + 1) ); \
-		milliseconds_total -= data.get(#field)->getScale()*data.getValue(#field);
-	SCALE(month);
-	SCALE(week);
-	SCALE(day);
-	SCALE(hour);
-	SCALE(minute);
-	SCALE(second);
-#undef SCALE
-
-	// There is no year zero.
-	if( CE <= 0 ) {
-		data.decrementAtName("year");
-	}
-	// data.incrementAtName("year", 0);
-	data.setValue("millisecond",_millisecond);
-	data.setValue("BeforeAfterStartBit",CE);
-}
-
-void TemporalIndex::hackGetTraditionalDate(
-		int64_t &_BeforeAfterStartBit,
-		int64_t &_year,
-		int64_t &_month, // 1..12 not 0..11
-		int64_t &_day_of_month, // 1..31
-		int64_t &_hour, // 0..23
-		int64_t &_minute, // 0..59
-		int64_t &_second, // 0..59 // or 60 if a leap second(s)...
-		int64_t &_millisecond // 0..999
-) const {
-	// int64_t milliseconds_total = 0;
-	_BeforeAfterStartBit = data.getValue("BeforeAfterStartBit");
-	int64_t CE = data.getValue("BeforeAfterStartBit");
-	_year = data.getValue("year");
-	// There is no year zero.
-	if( CE == 0 ) {
-		++_year;
-	} else if ( _year == 0 ){
-		throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:InvalidYearZeroCE");
-	}
-	int lyd = leapYearDay(_year-1+CE); // TODO CHECK LYD
-
-//#define SCALE(field) milliseconds_total += \
-//		data.getValue(#field) * data.get(#field)->getScale() \
-//		;
-//	// SCALE(year);
-//	SCALE(month);
-//	SCALE(week);
-//	SCALE(day);
-//	SCALE(hour);
-//	SCALE(minute);
-//	SCALE(second);
-//	SCALE(millisecond);
-//#undef SCALE
-
-	int64_t milliseconds_total = this->toInt64MillisecondsFractionOfYear();
-
-	/*
-	(* 3600 24) = 86400
-	(* 365 (* 3600 24)) = 	31536000
-	(* 365.25 (* 3600 24)) = 	31557600.0
-	 */
-	int64_t days_per_year = 365ll+lyd;
-	int64_t msec_per_year = days_per_year*24ll*3600ll*1000ll;
-	// 365.25 int64_t msec_per_year = 31557600000;
-	milliseconds_total += msec_per_year;
-	int64_t _day_of_year = 0;
-	/*
-#define EXTRACT(field,max_val) cout << #field << " " << flush; \
-field = milliseconds_total % max_val; \
-cout << "-1-" << flush; \
-milliseconds_total -= field ; \
-cout << "-2-" << flush; \
-milliseconds_total /= max_val; \
-cout << "-3-" << endl << flush;
-	 */
-#define EXTRACT(field,max_val) \
-		field = milliseconds_total % max_val; \
-		milliseconds_total -= field ; \
-		milliseconds_total /= max_val;
-
-	//#define EXTRACTF(field,max_val) \
-	//	field = (int64_t) fmod( milliseconds_total, max_val ); \
-	//	milliseconds_total -= field ; \
-	//	milliseconds_total /= max_val;
-
-	EXTRACT(_millisecond,1000ll);
-	EXTRACT(_second,     60ll);
-	EXTRACT(_minute,     60ll);
-	EXTRACT(_hour,       24ll);
-	EXTRACT(_day_of_year,days_per_year);  // TODO HACK HACK HACK ?Use 365.25?
-	// EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
-	//		EXTRACTF(_day_of_year,365.25);  // TODO HACK HACK HACK ?Use 365.25?
-	// _year = milliseconds_total;
-#undef EXTRACT
-
-	// int64_t milliseconds_per_year = 1000ll * 60ll * 60ll * 24ll * 365ll; // Note this is not 365.25...
-
-	// Be a little silly.
-	// TODO Fix for correct work
-	int days_in_month[] = {
-			31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-	};
-	days_in_month[1] += lyd;
-	int imo = 0;
-	while( _day_of_year >= days_in_month[imo] ) { // bug mlr 2017-0602 was >
-		// cout << "401 " << _day_of_year << " " << imo << endl;
-		_day_of_year -= days_in_month[ imo++ ];
-		if( imo > 11 ) {
-			throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");
-		}
-	}
-	_month = imo+1;
-	_day_of_month = _day_of_year + 1;
-}
-
 string TemporalIndex::toStringJ() {
 	double d1,d2; this->toJulianDoubleDay(d1, d2);
 	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
@@ -324,122 +140,6 @@ TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
 	// TAG(1040)
 
 	return *this;
-}
-
-//void TemporalIndex::getCalendarDateJ (
-//		int64_t &_BeforeAfterStartBit,
-//		int64_t &_year,
-//		int64_t &_month, // 1..12 not 0..11
-//		int64_t &_day_of_month, // 1..31
-//		int64_t &_hour, // 0..23
-//		int64_t &_minute, // 0..59
-//		int64_t &_second, // 0..59 // or 60 if a leap second(s)...
-//		int64_t &_millisecond // 0..999
-//) const {}
-
-string TemporalIndex::hackStringInTraditionalDate() {
-
-	int64_t
-	BeforeAfterStartBit = 0,
-	year = 0,
-	month = 0,
-	day_of_month = 0,
-	hour = 0,
-	minute = 0,
-	second = 0,
-	millisecond = 0
-	;
-
-	// Traditional format
-	hackGetTraditionalDate
-	( BeforeAfterStartBit,
-			year,
-			month,
-			day_of_month,
-			hour,
-			minute,
-			second,
-			millisecond
-	);
-
-	stringstream ss;
-	// ss << tIndex;
-	// << setw(4) << setfill('0') << year << "-"
-	if( BeforeAfterStartBit> 0 ) {
-		ss << setw(2) << "1 ";
-	} else {
-		ss << setw(2) << "0 ";
-	}
-
-	ss
-	<< setw(9) << setfill('0') << year << "-"
-	<< setw(2) << setfill('0') << month << "-"
-	<< setw(2) << setfill('0') << day_of_month << " "
-	<< setw(2) << hour << ":"
-	<< setw(2) << minute << ":"
-	<< setw(2) << second << "."
-	<< setw(3) << millisecond
-	<< " (" << setw(2) << data.getValue("resolution") << ")"
-	<< " (" << setw(1) << data.getValue("type") << ")"
-	;
-
-	return ss.str(); // Traditional date
-}
-
-void TemporalIndex::hackFromTraditionalString(string traditionalString) {
-
-	// cout << endl << endl << "hfts1 " << traditionalString << endl << flush;
-	// TODO repent the sin of hardcoding
-
-	int pos = 0;
-#define PARSE_INT(field,width) \
-		int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
-
-	//	  cout << endl << "pi: " << traditionalString.substr(pos,width).c_str() << endl;
-
-	// TAG(1000)
-	PARSE_INT(CE,1);
-	PARSE_INT(year,traditionalString.find("-")-2);
-	PARSE_INT(month,2);
-	PARSE_INT(day_of_month,2);
-	PARSE_INT(hour,2);
-	PARSE_INT(minute,2);
-	PARSE_INT(second,2);
-	PARSE_INT(millisecond,3);
-	++pos;
-	PARSE_INT(resolution,2);
-	++pos; ++pos;
-	PARSE_INT(type,1);
-#undef PARSE_INT
-	// TAG(2000)
-	/*
-#define CHECK(var) cout << #var << " 0x" << hex << var << dec << " " << var << endl << flush;
-  CHECK(CE)
-  CHECK(year)
-  CHECK(month)
-  CHECK(day_of_month)
-  CHECK(hour)
-  CHECK(minute)
-  CHECK(second)
-  CHECK(millisecond)
-  CHECK(resolution)
-  CHECK(type)
-#undef CHECK
-	 */
-	// TAG(2100)
-	hackSetTraditionalDate (
-			CE,
-			year,
-			month,
-			day_of_month,
-			hour,
-			minute,
-			second,
-			millisecond
-	);
-	// TAG(2200)
-	data.setValue("resolution",resolution);
-	data.setValue("type",type);
 }
 
 string TemporalIndex::stringInNativeDate() {
@@ -708,7 +408,8 @@ int64_t millisecondsInYear(int64_t CE, int64_t year) {
 	int not_ok_2 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d1_boy, &d2_boy);
 
 	double delta = (d1_eoy+d2_eoy) - (d1_boy+d2_boy);
-	return (int64_t)(delta*86400000.0);
+	// return (int64_t)(delta*86400000.0);
+	return rint(delta*86400000.0);
 }
 
 TemporalIndex& TemporalIndex::setEOY( int64_t CE, int64_t year ) {
@@ -755,10 +456,8 @@ TemporalIndex& TemporalIndex::setJulianFromTraditionalDate(
 		int64_t _second, 		// 0..59
 		int64_t _millisecond 	// 0..999
 ){
-	if( _CE < 1 ) {
-		// If we're in BCE, correct the _year ( 1 BCE goes to year 0) and reverse.
-		--_year; _year *= -1;
-	}
+	// If we're in BCE, correct the _year ( 1 BCE goes to year 0) and reverse.
+	if( _CE < 1 ) { _year = 1 - _year; }
 	double d1,d2;
 	int not_ok = eraDtf2d( TimeStandard, _year, _month, _day_of_month, _hour, _minute, _second+(_millisecond*0.001), &d1, &d2 );
 
@@ -795,6 +494,18 @@ TemporalIndex& TemporalIndex::setJulianFromTraditionalDate(
 			throw SpatialFailure(ss.str().c_str());
 		}
 	}
+//#define FMT1(x) cout << "z100 " << #x << " : " << dec << x << endl << flush;
+//		cout << endl << flush;
+//		FMT1(_year)
+//		FMT1(_month)
+//		FMT1(_day_of_month)
+//		FMT1(_hour)
+//		FMT1(_minute)
+//		FMT1(_second)
+//		FMT1(_millisecond)
+//		FMT1(d1)
+//		FMT1(d2)
+//#undef FMT1
 	return fromJulianDoubleDay(d1,d2);
 }
 
@@ -802,7 +513,7 @@ void TemporalIndex::toJulianDoubleDay(double& d1, double& d2) const {
 	int64_t _babit, _year;
 	_babit = this->get_BeforeAfterStartBit();
 	_year  = this->get_year();
-	if( _babit < 1 ) { _year = 1 - _year; } // If we're in BCE, correct the _year ( 1 BCE goes to year 0) and reverse.
+	if( _babit < 1 ) { _year = - _year; } // Note, for ERFA (IAU SOFA) Year 0 is valid.
 	double d0_1, d0_2;
 	int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
@@ -814,6 +525,8 @@ TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 	int not_ok, iy, im, id,_hour, _minute, _second, _millisecond, ihmsf[4];
 	int64_t CE = 1;
 	not_ok = eraD2dtf ( TimeStandard, 3, d1, d2, &iy, &im, &id, ihmsf );
+	// only using iy below...
+	// not_ok = eraD2dtf ( TimeStandard, 4, d1, d2, &iy, &im, &id, ihmsf );
 	_hour   = ihmsf[0];	_minute = ihmsf[1];	_second = ihmsf[2];	_millisecond = ihmsf[3];
 	if(not_ok != 0) {
 		// string msgs[4] = {"OK","bad year (JD not computed)","bad month (JD not computed)","bad day (JD computed)"};
@@ -841,12 +554,29 @@ TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 			throw SpatialFailure(ss.str().c_str());
 		}
 	}
+
+//#define FMT1(x) cout << "a100 " << #x << " : " << dec << x << endl << flush;
+//	cout << endl << flush;
+//	FMT1(d1)
+//	FMT1(d2)
+//	FMT1(iy)
+//	FMT1(im)
+//	FMT1(id)
+//	FMT1(_hour)
+//	FMT1(_minute)
+//	FMT1(_second)
+//	FMT1(_millisecond)
+//#undef FMT1
+
 	// Find the number of milliseconds in the fractional year.
 	double d0_1, d0_2;
 	int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	double delta = ((d1-d0_1)+(d2-d0_2))*86400000.0;
-	int64_t milliseconds = (int64_t) delta;
-	if( iy < 1) { CE = 0; iy = -iy + 1;	}
+//	cout << "a200 " << setw(24) << setprecision(20) << delta << flush;
+	// int64_t milliseconds = (int64_t) delta;
+	int64_t milliseconds = rint(delta);
+//	cout << ", " << milliseconds << endl << flush;
+	if( iy < 1) { CE = 0; iy = -iy;	}
 	this->setDateFromYearAndMilliseconds(CE, (int64_t)iy, milliseconds);
 	return *this;
 };
@@ -881,7 +611,8 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 	double d1, d2;
 	this->toJulianDoubleDay(d1, d2);
 	double delta = (d1+d2) - (d0_1+d0_2); // Find difference d-d0
-	return (int64_t) (delta * 86400000.0); // Convert to milliseconds
+	// return (int64_t) (delta * 86400000.0); // Convert to milliseconds
+	return rint(delta * 86400000.0); // Convert to milliseconds
 }
 /// Note: for indexing, not astronomy. Support a kind of "addition".
 int64_t TemporalIndex::toInt64Milliseconds() const {
