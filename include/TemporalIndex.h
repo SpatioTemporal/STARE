@@ -679,14 +679,19 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return *c;
 }
 
-inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) == 0; }
-inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) != 0; }
-inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <  0; }
-inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) >  0; }
-inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) <= 0; }
-inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmp(lhs,rhs) >= 0; }
-inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
-inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) == 0; }
+inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) != 0; }
+inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <  0; }
+inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >  0; }
+inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <= 0; }
+inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >= 0; }
+inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
+
+inline ostream& operator<<(ostream& os, TemporalIndex tIndex) {
+	os << tIndex.toStringJ();
+	return os;
+}
 
 /**
  * Returns the lowest temporal index valid in SciDB. SciDB has symmetrical coordinate (index) dimensions, i.e. +/- (2**62 -1).

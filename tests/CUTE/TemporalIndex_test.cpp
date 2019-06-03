@@ -815,7 +815,7 @@ void TemporalIndex_test() {
 	int64_t i3 = 3, i4 = 8;
 	tIndex3.setZero().fromInt64Milliseconds(i3).set_resolution(--level); INDEX_OUT(++tag_id,tIndex3);
 	tIndex4.setZero().fromInt64Milliseconds(i4).set_resolution(--level); INDEX_OUT(++tag_id,tIndex4);
-	tIndex5 = tIndex3 + tIndex4; INDEX_OUT(++tag_id,tIndex5);
+	tIndex5 = tIndex3 | tIndex4; INDEX_OUT(++tag_id,tIndex5);
 	tIndex.setZero().set_millisecond(i3+i4).set_resolution(level);
 	ASSERT_EQUAL(tIndex,tIndex5);
 
@@ -935,7 +935,7 @@ void TemporalIndex_test() {
 	tIndex2.setZero().setJulianFromTraditionalDate(1, 2,  1,  1,  0,  0,  0,   0);	INDEX_OUT(++tag_id,tIndex2);
 	// tIndex2.setZero().fromJulianDoubleDay(0, 1); INDEX_OUT(++tag_id,tIndex2);
 	tIndex4 = tIndex1 + tIndex2; INDEX_OUT(++tag_id,tIndex4);
-	tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
+	// tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
 
 	cout << endl << flush;
 
@@ -944,7 +944,7 @@ void TemporalIndex_test() {
 	tIndex1.setZero().setJulianFromTraditionalDate(1, 4,  1,  1,  0,  0,  0,   0);	INDEX_OUT(++tag_id,tIndex1);
 	tIndex2.setZero().fromJulianDoubleDay(0, 1); INDEX_OUT(++tag_id,tIndex2);
 	tIndex4 = tIndex1 + tIndex2; INDEX_OUT(++tag_id,tIndex4);
-	tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
+	// tIndex3 = tIndex1 | tIndex2; INDEX_OUT(++tag_id,tIndex3);
 
 	cout << endl << flush;
 	} catch (SpatialFailure& failure) {
@@ -1213,18 +1213,24 @@ void TemporalIndex_test() {
 	cout << "---" << endl << flush;
 
 	{
+
+#define FMT_DT1(lbl) \
+		cout \
+		<< lbl \
+		<< setw(9) << setfill(' ') << _year << "-" \
+		<< setw(2) << setfill('0') << _month << "-" \
+		<< setw(2) << setfill('0') << _day_of_month << " " \
+		<< setw(2) << _hour << ":" \
+		<< setw(2) << _minute << ":" \
+		<< setw(2) << _second << "." \
+		<< setw(3) << _millisecond \
+		<< endl << flush;
+
 		int _year, _month, _day_of_month, _hour, _minute, _second, _millisecond;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+		FMT_DT1("")
 
-		cout
-		<< setw(9) << setfill(' ') << _year << "-"
-		<< setw(2) << setfill('0') << _month << "-"
-		<< setw(2) << setfill('0') << _day_of_month << " "
-		<< setw(2) << _hour << ":"
-		<< setw(2) << _minute << ":"
-		<< setw(2) << _second << "."
-		<< setw(3) << _millisecond
-		<< endl << flush;
+		cout << "---" << endl << flush;
 
 		_year         = 1972;
 		_month        =   12;
@@ -1233,7 +1239,7 @@ void TemporalIndex_test() {
 		_minute       =   59;
 		_second       =   60;
 		_millisecond  =  999;
-
+		FMT_DT1("1972 eoy leap second ")
 		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
 
 		_year         = 0;
@@ -1244,18 +1250,84 @@ void TemporalIndex_test() {
 		_second       = 0;
 		_millisecond  = 0;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+		FMT_DT1("")
 
-		cout
-		<< setw(9) << setfill(' ') << _year << "-"
-		<< setw(2) << setfill('0') << _month << "-"
-		<< setw(2) << setfill('0') << _day_of_month << " "
-		<< setw(2) << _hour << ":"
-		<< setw(2) << _minute << ":"
-		<< setw(2) << _second << "."
-		<< setw(3) << _millisecond
-		<< endl << flush;
+		cout << "---" << endl << flush;
+
+		_year         = 1972;
+		_month        =    6;
+		_day_of_month =   30;
+		_hour         =   23;
+		_minute       =   59;
+		_second       =   60;
+		_millisecond  =  999;
+		FMT_DT1("1972 6/30 leap second ")
+		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
+
+		_year         = 0;
+		_month        = 0;
+		_day_of_month = 0;
+		_hour         = 0;
+		_minute       = 0;
+		_second       = 0;
+		_millisecond  = 0;
+		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+		FMT_DT1("")
+
+		cout << "---" << endl << flush;
+
+		_year         = 1972;
+		_month        =    6;
+		_day_of_month =   30;
+		_hour         =   23;
+		_minute       =   59;
+		_second       =   61;
+		_millisecond  =  999;
+		FMT_DT1("1972 6/30 leap second + 1")
+		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
+
+		_year         = 0;
+		_month        = 0;
+		_day_of_month = 0;
+		_hour         = 0;
+		_minute       = 0;
+		_second       = 0;
+		_millisecond  = 0;
+		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+		FMT_DT1("")
+
+		cout << "---" << endl << flush;
+
+		_year         = 1986;
+		_month        =   12;
+		_day_of_month =   31;
+		_hour         =   23;
+		_minute       =   59;
+		_second       =   60;
+		_millisecond  =  501;
+		FMT_DT1("1986 eoy fake leap second")
+		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
+
+		_year         = 0;
+		_month        = 0;
+		_day_of_month = 0;
+		_hour         = 0;
+		_minute       = 0;
+		_second       = 0;
+		_millisecond  = 0;
+		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
+		FMT_DT1("")
+
+		cout << "---" << endl << flush;
+
+
+
+#undef FMT_DT1
 
 	}
+
+
+
 
 
 	FAIL();
