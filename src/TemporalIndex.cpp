@@ -52,12 +52,28 @@ void TemporalIndex::checkBitFormat() {
  *
  * If the number of milliseconds is larger than the usual, then the extra are simply
  * added at the end of the native format year.
+ *
+ * This is a low-level routine. It sets the native format as directed, *except* for avoiding ambiguity
+ * at year = 0. CE=0, _year=0 is allowed, CE=1, _year=0 is not.
+ *
+ * TODO Consider possibility of a latent overflow, i.e. _year or _milliseconds might be too large for the algorithm.
  */
 TemporalIndex& TemporalIndex::setDateFromYearAndMilliseconds(
 		int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
 		int64_t _year, 			// > 0
-		int64_t _milliseconds
+		int64_t _milliseconds   // >= 0, < (* 365.0 86400.0 1000.0) 31536000000.0
 		) {
+	// TODO Check for consistency?
+	if( CE != 0 && CE != 1 ) {
+		throw SpatialFailure("TemporalIndex::setDateFromYearAndMilliseconds: CE != 0 or 1.");
+	}
+	if( _year < 1 && CE != 0 ) {
+		throw SpatialFailure("TemporalIndex::setDateFromYearAndMilliseconds: _year < 1 and CE != 0. Out of bounds. Use CE convention.");
+	}
+	if( _milliseconds < 0 ) {
+		throw SpatialFailure("TemporalIndex::setDateFromYearAndMilliseconds: _milliseconds < 0.");
+	}
+
 	this->set_BeforeAfterStartBit(CE); this->set_year(_year);
 	int64_t total_left = _milliseconds;
 	for( int i = data.pos_CoarsestResolutionLevel+1; i <= data.pos_FinestResolutionLevel; ++i ) {
@@ -69,9 +85,64 @@ TemporalIndex& TemporalIndex::setDateFromYearAndMilliseconds(
 	}
 	return *this;
 }
+/**
+ * Return CE, year, and fraction of year in milliseconds.
+ *
+ * A canonical year should be 365*86400*1000 in milliseconds here.
+ */
+void TemporalIndex::toYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds) {
+	_CE   = this->get_BeforeAfterStartBit();
+	_year = this->get_year();
+	_milliseconds = this->toInt64MillisecondsFractionOfYear();
+}
+
+/**
+ * Ignore any leap modifications and assume each year is YearNativeCanonicalInMS_d long.
+ *
+ * For use when astronomical accuracy is not required, and when beyond the domain of
+ * the ERFA (IAU SOFA) algorithms (about +/- 4800). Year zero exists.
+ *
+ * This *will* alias native dates that map beyond YearNativeCanonicalInMS_d to the
+ * succeeding year.
+ *
+ * TODO Consider a hybrid scheme wherein ERFA is used in it's domain and *NativeYear routines used elsewhere.
+ *
+ */
+double TemporalIndex::toNativeYear() {
+	int64_t
+	_CE   = this->get_BeforeAfterStartBit(),
+	_milliseconds = this->toInt64MillisecondsFractionOfYear();
+	double _year = (double)this->get_year();
+	double delta_ms = ((double)_milliseconds/YearNativeCanonicalInMS_d);
+	if( _CE < 1 ) {
+		_year = - _year - 1 + delta_ms;
+	} else {
+		_year = _year + delta_ms;
+	}
+	return _year;
+}
+
+/**
+ * Ignore any leap modifications and assume each year is YearNativeCanonicalInMS_d long.
+ *
+ * For use when astronomical accuracy is not required, and when beyond the domain of
+ * the ERFA (IAU SOFA) algorithms (about +/- 4800). Year zero exists.
+ */
+TemporalIndex& TemporalIndex::fromNativeYear(double year) {
+	int64_t _year = (int64_t)year;
+	double fractionOfYear = year - _year;
+	int64_t _CE = 1;
+	if( _year < 1 ) {
+		_CE = 0;
+		fractionOfYear = 1.0+fractionOfYear;
+		_year = - _year;
+	}
+	this->setDateFromYearAndMilliseconds(_CE, _year, rint(fractionOfYear*YearNativeCanonicalInMS_d));
+	return *this;
+}
 
 string TemporalIndex::toStringJ() {
-	double d1,d2; this->toJulianDoubleDay(d1, d2);
+	double d1,d2; this->toJulianTAIDouble2(d1, d2);
 	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
 	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
 	hour        = ihmsf[0];
@@ -120,7 +191,11 @@ TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
 	++pos; ++pos;
 	PARSE_INT(type,1);
 #undef PARSE_INT
-	this->setJulianFromTraditionalDate(CE, year, month, day_of_month, hour, minute, second, millisecond);
+	if( CE < 1 ) {
+		year = 1 - year;
+	}
+	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
+	this->setJulianFromFormattedTAI(year, month, day_of_month, hour, minute, second, millisecond);
 	data.setValue("resolution",resolution);
 	data.setValue("type",type);
 	return *this;
@@ -136,7 +211,7 @@ void TemporalIndex::toUTC(
 		int& _millisecond 	// 0..999
 ) {
 	int not_ok;
-	double d1,d2; this->toJulianDoubleDay(d1,d2); // Get the TAI encoded time.
+	double d1,d2; this->toJulianTAIDouble2(d1,d2); // Get the TAI encoded time.
 
 	// Convert TAI to UTC.
 	double utc1, utc2; not_ok = eraTaiutc(d1, d2, &utc1, &utc2);
@@ -165,7 +240,7 @@ TemporalIndex& TemporalIndex::fromUTC(
 
 	double d1,d2; not_ok = eraUtctai(utc1,utc2,&d1,&d2);
 
-	this->fromJulianDoubleDay(d1, d2);
+	this->fromJulianTAIDouble2(d1, d2);
 
 	return *this;
 }
@@ -245,7 +320,6 @@ int TemporalIndex::eraTest() {
 	return 0;
 }
 
-
 int firstBitDifferenceFromLeft(int64_t i0, int64_t i1) {
 	int base = 64; int address = base;
 	int64_t i01 = (i0 & i1 ) | ( ~i0 & ~i1 );
@@ -259,8 +333,6 @@ int firstBitDifferenceFromLeft(int64_t i0, int64_t i1) {
 }
 
 int64_t makeMask(int width) { return pow(2ll,width) -1; }
-
-
 
 // TODO Check for errors/integrity of data value.
 // #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
@@ -401,8 +473,8 @@ int64_t TemporalIndex::scidbTerminatorJulian() {
 	// Let's add an amount corresponding to the resolution.
 	double delta = tmpIndex.julianDoubleDayAtResolution(resolution);
 	double d1, d2;
-	tmpIndex.toJulianDoubleDay(d1,d2);
-	tmpIndex.fromJulianDoubleDay(d1,d2+delta);
+	tmpIndex.toJulianTAIDouble2(d1,d2);
+	tmpIndex.fromJulianTAIDouble2(d1,d2+delta);
 	idx_ = tmpIndex.scidbTemporalIndex();
 	return idx_;
 }
@@ -448,7 +520,7 @@ TemporalIndex& TemporalIndex::setEOY( int64_t CE, int64_t year ) {
 	int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	// Go back a millisecond.
 	--d0_1;	++d0_2;	d0_2 -= 1.0 / 86400000.0;
-	this->fromJulianDoubleDay(d0_1, d0_2);
+	this->fromJulianTAIDouble2(d0_1, d0_2);
 	return *this;
 }
 
@@ -474,8 +546,8 @@ void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int
 	fd /= 24.0;
 }
 
-TemporalIndex& TemporalIndex::setJulianFromTraditionalDate(
-		int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
+TemporalIndex& TemporalIndex::setJulianFromFormattedTAI(
+		//old int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
 		int64_t _year, 			// > 0
 		int64_t _month, 		// 1..12 not 0..11
 		int64_t _day_of_month, 	// 1..31
@@ -485,7 +557,7 @@ TemporalIndex& TemporalIndex::setJulianFromTraditionalDate(
 		int64_t _millisecond 	// 0..999
 ){
 	// If we're in BCE, correct the _year ( 1 BCE goes to year 0) and reverse.
-	if( _CE < 1 ) { _year = 1 - _year; }
+	//old if( _CE < 1 ) { _year = 1 - _year; }
 	double d1,d2;
 	int not_ok = eraDtf2d( TimeStandard, _year, _month, _day_of_month, _hour, _minute, _second+(_millisecond*0.001), &d1, &d2 );
 
@@ -534,10 +606,10 @@ TemporalIndex& TemporalIndex::setJulianFromTraditionalDate(
 //		FMT1(d1)
 //		FMT1(d2)
 //#undef FMT1
-	return fromJulianDoubleDay(d1,d2);
+	return fromJulianTAIDouble2(d1,d2);
 }
 
-void TemporalIndex::toJulianDoubleDay(double& d1, double& d2) const {
+void TemporalIndex::toJulianTAIDouble2(double& d1, double& d2) const {
 	int64_t _babit, _year;
 	_babit = this->get_BeforeAfterStartBit();
 	_year  = this->get_year();
@@ -549,7 +621,7 @@ void TemporalIndex::toJulianDoubleDay(double& d1, double& d2) const {
 	d1 = d0_1; d2 = d0_2 + days;
 };
 
-TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
+TemporalIndex& TemporalIndex::fromJulianTAIDouble2( double d1, double d2) {
 	int not_ok, iy, im, id,_hour, _minute, _second, _millisecond, ihmsf[4];
 	int64_t CE = 1;
 	not_ok = eraD2dtf ( TimeStandard, 3, d1, d2, &iy, &im, &id, ihmsf );
@@ -582,20 +654,6 @@ TemporalIndex& TemporalIndex::fromJulianDoubleDay( double d1, double d2) {
 			throw SpatialFailure(ss.str().c_str());
 		}
 	}
-
-//#define FMT1(x) cout << "a100 " << #x << " : " << dec << x << endl << flush;
-//	cout << endl << flush;
-//	FMT1(d1)
-//	FMT1(d2)
-//	FMT1(iy)
-//	FMT1(im)
-//	FMT1(id)
-//	FMT1(_hour)
-//	FMT1(_minute)
-//	FMT1(_second)
-//	FMT1(_millisecond)
-//#undef FMT1
-
 	// Find the number of milliseconds in the fractional year.
 	double d0_1, d0_2;
 	int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
@@ -637,7 +695,7 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 //	// Get the current date
 //	int64_t milliseconds = toInt64MillisecondsFractionOfYear();
 	double d1, d2;
-	this->toJulianDoubleDay(d1, d2);
+	this->toJulianTAIDouble2(d1, d2);
 	double delta = (d1+d2) - (d0_1+d0_2); // Find difference d-d0
 	// return (int64_t) (delta * 86400000.0); // Convert to milliseconds
 	return rint(delta * 86400000.0); // Convert to milliseconds

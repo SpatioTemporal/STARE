@@ -197,6 +197,8 @@ public:
 };
 
 static const char* TimeStandard = "TAI"; // Not "UTC"
+static const double  YearNativeCanonicalInMS_d   = 365.0*86400.0*1000.0;
+static const int64_t YearNativeCanonicalInMS_i64 = 365  *86400  *1000;
 
 // static const TemporalWordFormat temporalWordFormat;
 // static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
@@ -476,19 +478,18 @@ public:
 	int64_t scidbTerminatorJulian();
 	bool    scidbTerminatorp();
 
-
-
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
-	void toJulianDoubleDay(double& d1, double& d2) const;
-	TemporalIndex& fromJulianDoubleDay( double d1, double d2);
+	void           toJulianTAIDouble2 ( double& d1, double& d2) const;
+	TemporalIndex& fromJulianTAIDouble2( double  d1, double  d2);
+
 	/**
 	 * Set using a TAI date.
 	 */
-	TemporalIndex& setJulianFromTraditionalDate(
-			int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
-			int64_t _year, 			// > 0
+	TemporalIndex& setJulianFromFormattedTAI(
+			//old int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// Match the TAI format. 1 BCE is year 0. //old > 0
 			int64_t _month, 		// 1..12 not 0..11
 			int64_t _day_of_month, 	// 1..31
 			int64_t _hour, 			// 0..23
@@ -529,6 +530,9 @@ public:
 	int64_t toInt64MillisecondsFractionOfYear() const;
 	int64_t toInt64Milliseconds() const;
 	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
+
+	double         toNativeYear();
+	TemporalIndex& fromNativeYear(double year);
 
 	int64_t millisecondsAtResolution(int64_t resolution);
 	double julianDoubleDayAtResolution(int64_t resolution);
@@ -579,6 +583,7 @@ public:
 			int64_t _year, 			// > 0
 			int64_t _milliseconds
 			);
+	void toYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds);
 	string stringInNativeDate();
 	void fromNativeString(string nativeString);
 	int eraTest();
@@ -645,8 +650,8 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 
 	double ad1, ad2, bd1, bd2;
 	double ad, bd;
-	a.toJulianDoubleDay(ad1, ad2);
-	b.toJulianDoubleDay(bd1, bd2);
+	a.toJulianTAIDouble2(ad1, ad2);
+	b.toJulianTAIDouble2(bd1, bd2);
 	ad = ad1 + ad2; bd = bd1 + bd2;
 
 	int ret = 0; // if equal
@@ -665,8 +670,8 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	// Note by convention, there is no babit==1, year==0.
 	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
 	double ad1, ad2, bd1, bd2, cd1, cd2;
-	a.toJulianDoubleDay(ad1, ad2);
-	b.toJulianDoubleDay(bd1, bd2);
+	a.toJulianTAIDouble2(ad1, ad2);
+	b.toJulianTAIDouble2(bd1, bd2);
 	cd1 = ad1+bd1; cd2 = ad2+bd2;
 //#define FMT1(x,y) cout << #x << "," << #y << " " << x << "," << y << endl << flush;
 //	FMT1(ad1,ad2);
@@ -674,7 +679,7 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 //	FMT1(cd1,cd2);
 //#undef FMT1
 	TemporalIndex* c = new TemporalIndex;
-	c->fromJulianDoubleDay(cd1, cd2);
+	c->fromJulianTAIDouble2(cd1, cd2);
 	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
 	return *c;
 }
