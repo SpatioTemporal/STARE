@@ -380,4 +380,30 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
 }
 
+std::TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution,int type) {
+	if( type != 2 ) {
+		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+	}
+	// tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms, type);
+	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
+	tIndex.set_resolution(resolution);
+	return tIndex;
+}
+
+std::TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+	if( type != 2 ) {
+		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+	}
+	// tIndex.fromUTC(year, month,day,hour, minute, second, ms, type);
+	tIndex.fromUTC(year, month,day,hour, minute, second, ms);
+	tIndex.set_resolution(resolution);
+	return tIndex;
+}
+
+// TemporalIndex& STARE::getTIndex() { return tIndex; }
+
+STARE_ArrayIndexTemporalValue STARE::getTemporalIndexValue() {
+	return tIndex.scidbTemporalIndex();
+}
+
 

@@ -477,7 +477,12 @@ void STARE_test() {
 				/* --- */
 	}
 
+	// STARE index;
+
 	/* */
+
+	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999);
+	cout << "tI: " << index.tIndex.toStringJ() << endl << flush;
 
 	// FAIL();
 }

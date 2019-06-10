@@ -58,7 +58,7 @@ void TemporalIndex::checkBitFormat() {
  *
  * TODO Consider possibility of a latent overflow, i.e. _year or _milliseconds might be too large for the algorithm.
  */
-TemporalIndex& TemporalIndex::setDateFromYearAndMilliseconds(
+TemporalIndex& TemporalIndex::fromNativeCEYearAndMilliseconds(
 		int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
 		int64_t _year, 			// > 0
 		int64_t _milliseconds   // >= 0, < (* 365.0 86400.0 1000.0) 31536000000.0
@@ -90,7 +90,7 @@ TemporalIndex& TemporalIndex::setDateFromYearAndMilliseconds(
  *
  * A canonical year should be 365*86400*1000 in milliseconds here.
  */
-void TemporalIndex::toYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds) {
+void TemporalIndex::toNativeCEYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds) {
 	_CE   = this->get_BeforeAfterStartBit();
 	_year = this->get_year();
 	_milliseconds = this->toInt64MillisecondsFractionOfYear();
@@ -137,12 +137,12 @@ TemporalIndex& TemporalIndex::fromNativeYear(double year) {
 		fractionOfYear = 1.0+fractionOfYear;
 		_year = - _year;
 	}
-	this->setDateFromYearAndMilliseconds(_CE, _year, rint(fractionOfYear*YearNativeCanonicalInMS_d));
+	this->fromNativeCEYearAndMilliseconds(_CE, _year, rint(fractionOfYear*YearNativeCanonicalInMS_d));
 	return *this;
 }
 
 string TemporalIndex::toStringJ() {
-	double d1,d2; this->toJulianTAIDouble2(d1, d2);
+	double d1,d2; this->toJulianTAI(d1, d2);
 	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
 	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
 	hour        = ihmsf[0];
@@ -195,7 +195,7 @@ TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
 		year = 1 - year;
 	}
 	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
-	this->setJulianFromFormattedTAI(year, month, day_of_month, hour, minute, second, millisecond);
+	this->fromFormattedJulianTAI(year, month, day_of_month, hour, minute, second, millisecond);
 	data.setValue("resolution",resolution);
 	data.setValue("type",type);
 	return *this;
@@ -211,7 +211,7 @@ void TemporalIndex::toUTC(
 		int& _millisecond 	// 0..999
 ) {
 	int not_ok;
-	double d1,d2; this->toJulianTAIDouble2(d1,d2); // Get the TAI encoded time.
+	double d1,d2; this->toJulianTAI(d1,d2); // Get the TAI encoded time.
 
 	// Convert TAI to UTC.
 	double utc1, utc2; not_ok = eraTaiutc(d1, d2, &utc1, &utc2);
@@ -240,7 +240,7 @@ TemporalIndex& TemporalIndex::fromUTC(
 
 	double d1,d2; not_ok = eraUtctai(utc1,utc2,&d1,&d2);
 
-	this->fromJulianTAIDouble2(d1, d2);
+	this->fromJulianTAI(d1, d2);
 
 	return *this;
 }
@@ -440,8 +440,20 @@ int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) {
 }
 
 /*
- * Keep the level
- * Use resolution full (all bits set) to flag terminator.
+ *
+ * Use native milliseconds to set the terminator. A terminator is an upper bound to a temporal interval. It corresponds
+ * to a particular time, but has a special resolution encoding marking it as a terminator.
+ *
+ * To calculate the terminator, determine the time scale associated with the resolution of this TemporalIndex.
+ * Add this time scale to the time encoded to find the terminator, and set the resolution to 63, an otherwise invalid resolution level.
+ *
+ * In other words, use resolution full (all bits set) to flag terminator.
+ *
+ * This calculation is based on the native encoding and is not dependent on the limits of IAU standards.
+ *
+ * Since a terminator is an int64_t, a TemporalIndex can be initialized with it, and one can then print it's
+ * calendar value, etc.
+ *
  */
 int64_t TemporalIndex::scidbTerminator() {
 	//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
@@ -461,7 +473,15 @@ int64_t TemporalIndex::scidbTerminator() {
 	return idx_;
 }
 
-int64_t TemporalIndex::scidbTerminatorJulian() {
+/**
+ * Use IAU TAI to set the terminator. A terminator is an upper bound to a temporal interval. It corresponds
+ * to a particular time, but has a special resolution encoding marking it as a terminator.
+ *
+ * The calculation is similar to that for scidbTerminator(), except using IAU standards (ERFA), instead
+ * of the native encoding.
+ *
+ */
+int64_t TemporalIndex::scidbTerminatorJulianTAI() {
 	int64_t idx_ = 0;
 	TemporalIndex tmpIndex(this->scidbTemporalIndex());
 	int64_t resolution = tmpIndex.get_resolution();
@@ -471,10 +491,10 @@ int64_t TemporalIndex::scidbTerminatorJulian() {
 
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
-	double delta = tmpIndex.julianDoubleDayAtResolution(resolution);
+	double delta = tmpIndex.daysAtResolution(resolution);
 	double d1, d2;
-	tmpIndex.toJulianTAIDouble2(d1,d2);
-	tmpIndex.fromJulianTAIDouble2(d1,d2+delta);
+	tmpIndex.toJulianTAI(d1,d2);
+	tmpIndex.fromJulianTAI(d1,d2+delta);
 	idx_ = tmpIndex.scidbTemporalIndex();
 	return idx_;
 }
@@ -520,7 +540,7 @@ TemporalIndex& TemporalIndex::setEOY( int64_t CE, int64_t year ) {
 	int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	// Go back a millisecond.
 	--d0_1;	++d0_2;	d0_2 -= 1.0 / 86400000.0;
-	this->fromJulianTAIDouble2(d0_1, d0_2);
+	this->fromJulianTAI(d0_1, d0_2);
 	return *this;
 }
 
@@ -546,7 +566,7 @@ void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int
 	fd /= 24.0;
 }
 
-TemporalIndex& TemporalIndex::setJulianFromFormattedTAI(
+TemporalIndex& TemporalIndex::fromFormattedJulianTAI(
 		//old int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
 		int64_t _year, 			// > 0
 		int64_t _month, 		// 1..12 not 0..11
@@ -606,10 +626,10 @@ TemporalIndex& TemporalIndex::setJulianFromFormattedTAI(
 //		FMT1(d1)
 //		FMT1(d2)
 //#undef FMT1
-	return fromJulianTAIDouble2(d1,d2);
+	return fromJulianTAI(d1,d2);
 }
 
-void TemporalIndex::toJulianTAIDouble2(double& d1, double& d2) const {
+void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	int64_t _babit, _year;
 	_babit = this->get_BeforeAfterStartBit();
 	_year  = this->get_year();
@@ -621,7 +641,7 @@ void TemporalIndex::toJulianTAIDouble2(double& d1, double& d2) const {
 	d1 = d0_1; d2 = d0_2 + days;
 };
 
-TemporalIndex& TemporalIndex::fromJulianTAIDouble2( double d1, double d2) {
+TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 	int not_ok, iy, im, id,_hour, _minute, _second, _millisecond, ihmsf[4];
 	int64_t CE = 1;
 	not_ok = eraD2dtf ( TimeStandard, 3, d1, d2, &iy, &im, &id, ihmsf );
@@ -663,7 +683,7 @@ TemporalIndex& TemporalIndex::fromJulianTAIDouble2( double d1, double d2) {
 	int64_t milliseconds = rint(delta);
 //	cout << ", " << milliseconds << endl << flush;
 	if( iy < 1) { CE = 0; iy = -iy;	}
-	this->setDateFromYearAndMilliseconds(CE, (int64_t)iy, milliseconds);
+	this->fromNativeCEYearAndMilliseconds(CE, (int64_t)iy, milliseconds);
 	return *this;
 };
 
@@ -695,7 +715,7 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 //	// Get the current date
 //	int64_t milliseconds = toInt64MillisecondsFractionOfYear();
 	double d1, d2;
-	this->toJulianTAIDouble2(d1, d2);
+	this->toJulianTAI(d1, d2);
 	double delta = (d1+d2) - (d0_1+d0_2); // Find difference d-d0
 	// return (int64_t) (delta * 86400000.0); // Convert to milliseconds
 	return rint(delta * 86400000.0); // Convert to milliseconds
@@ -788,7 +808,7 @@ int64_t TemporalIndex::millisecondsAtResolution(int64_t resolution) {
 /**
  * Return a number of days associated with a resolution level.
  */
-double TemporalIndex::julianDoubleDayAtResolution(int64_t resolution) {
+double TemporalIndex::daysAtResolution(int64_t resolution) {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 

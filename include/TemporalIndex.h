@@ -198,7 +198,7 @@ public:
 
 static const char* TimeStandard = "TAI"; // Not "UTC"
 static const double  YearNativeCanonicalInMS_d   = 365.0*86400.0*1000.0;
-static const int64_t YearNativeCanonicalInMS_i64 = 365  *86400  *1000;
+static const int64_t YearNativeCanonicalInMS_i64 = 31536000000; // 365  *86400  *1000;
 
 // static const TemporalWordFormat temporalWordFormat;
 // static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
@@ -475,19 +475,19 @@ public:
 
 	int64_t scidbTemporalIndex();
 	int64_t scidbTerminator();
-	int64_t scidbTerminatorJulian();
+	int64_t scidbTerminatorJulianTAI();
 	bool    scidbTerminatorp();
 
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
-	void           toJulianTAIDouble2 ( double& d1, double& d2) const;
-	TemporalIndex& fromJulianTAIDouble2( double  d1, double  d2);
+	void           toJulianTAI ( double& d1, double& d2) const;
+	TemporalIndex& fromJulianTAI( double  d1, double  d2);
 
 	/**
 	 * Set using a TAI date.
 	 */
-	TemporalIndex& setJulianFromFormattedTAI(
+	TemporalIndex& fromFormattedJulianTAI(
 			//old int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
 			int64_t _year, 			// Match the TAI format. 1 BCE is year 0. //old > 0
 			int64_t _month, 		// 1..12 not 0..11
@@ -519,23 +519,8 @@ public:
 	string toStringJ();
 	TemporalIndex& fromStringJ(string inputString);
 
-	/**
-	 * Convert the fields to milliseconds to aid conversions and support intervals.
-	 *
-	 * No corrections for "leap years" with this low-level calculation.
-	 *
-	 * TODO Augment with a Julian millisecond calculation?
-	 */
-	int64_t toInt64MillisecondsFractionOfYearJ() const;
-	int64_t toInt64MillisecondsFractionOfYear() const;
-	int64_t toInt64Milliseconds() const;
-	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
-
-	double         toNativeYear();
-	TemporalIndex& fromNativeYear(double year);
-
 	int64_t millisecondsAtResolution(int64_t resolution);
-	double julianDoubleDayAtResolution(int64_t resolution);
+	double daysAtResolution(int64_t resolution);
 
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
@@ -578,14 +563,31 @@ public:
 
 	void checkBitFormat();
 
-	TemporalIndex& setDateFromYearAndMilliseconds(
+	/**
+	 * Convert the fields to milliseconds to aid conversions and support intervals.
+	 *
+	 * No corrections for "leap years" with this low-level calculation.
+	 *
+	 * TODO Augment with a Julian millisecond calculation?
+	 */
+	int64_t toInt64MillisecondsFractionOfYearJ() const;
+	int64_t toInt64MillisecondsFractionOfYear() const;
+	int64_t toInt64Milliseconds() const;
+	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
+
+	double         toNativeYear();
+	TemporalIndex& fromNativeYear(double year);
+
+	TemporalIndex& fromNativeCEYearAndMilliseconds(
 			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
 			int64_t _year, 			// > 0
 			int64_t _milliseconds
 			);
-	void toYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds);
+	void toNativeCEYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds);
+
 	string stringInNativeDate();
 	void fromNativeString(string nativeString);
+
 	int eraTest();
 };
 
@@ -650,8 +652,8 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 
 	double ad1, ad2, bd1, bd2;
 	double ad, bd;
-	a.toJulianTAIDouble2(ad1, ad2);
-	b.toJulianTAIDouble2(bd1, bd2);
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
 	ad = ad1 + ad2; bd = bd1 + bd2;
 
 	int ret = 0; // if equal
@@ -670,8 +672,8 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	// Note by convention, there is no babit==1, year==0.
 	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
 	double ad1, ad2, bd1, bd2, cd1, cd2;
-	a.toJulianTAIDouble2(ad1, ad2);
-	b.toJulianTAIDouble2(bd1, bd2);
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
 	cd1 = ad1+bd1; cd2 = ad2+bd2;
 //#define FMT1(x,y) cout << #x << "," << #y << " " << x << "," << y << endl << flush;
 //	FMT1(ad1,ad2);
@@ -679,7 +681,7 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 //	FMT1(cd1,cd2);
 //#undef FMT1
 	TemporalIndex* c = new TemporalIndex;
-	c->fromJulianTAIDouble2(cd1, cd2);
+	c->fromJulianTAI(cd1, cd2);
 	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
 	return *c;
 }

@@ -19,7 +19,11 @@
 #include <map>
 #include <vector>
 
-// #include "TemporalIndex.h"
+#include "TemporalIndex.h"
+
+typedef int64_t STARE_ArrayIndexTemporalValue;
+typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_TemporalIntervals;
+typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_ArrayIndexTemporalValues;
 
 // TODO Consider index vs. array index vs. collections of the same & set logic.
 
@@ -93,7 +97,17 @@ public:
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
-	// TemporalIndex tIndex;
+	std::TemporalIndex tIndex;
+
+	std::TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+	std::TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+
+	std::TemporalIndex& getTIndex() { return tIndex; }
+
+	STARE_ArrayIndexTemporalValue getTemporalIndexValue();
+
+
+
 };
 
 void STARE_test();
