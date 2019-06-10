@@ -4057,10 +4057,11 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(SpatialIndex_test));
 	s.push_back(CUTE(SpatialFailure_test));
 
-	s.push_back(CUTE(STARE_test));
 	s.push_back(CUTE(LeftJustifiedDecrementBug));
 	s.push_back(CUTE(HstmRangeAddZeroBug));
+
 	s.push_back(CUTE(TemporalIndex_test));
+	s.push_back(CUTE(STARE_test));
 
 	//	s.push_back(CUTE(testRange));
 

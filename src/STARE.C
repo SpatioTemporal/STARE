@@ -380,7 +380,7 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
 }
 
-std::TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution,int type) {
+TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution,int type) {
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
@@ -390,7 +390,7 @@ std::TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, 
 	return tIndex;
 }
 
-std::TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
@@ -402,8 +402,12 @@ std::TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, 
 
 // TemporalIndex& STARE::getTIndex() { return tIndex; }
 
-STARE_ArrayIndexTemporalValue STARE::getTemporalIndexValue() {
+STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
 	return tIndex.scidbTemporalIndex();
+}
+
+TemporalIndex& STARE::setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue) {
+	return tIndex.fromTemporalIndexValue(temporalValue);
 }
 
 

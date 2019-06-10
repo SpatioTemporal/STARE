@@ -481,9 +481,55 @@ void STARE_test() {
 
 	/* */
 
-	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999);
-	cout << "tI: " << index.tIndex.toStringJ() << endl << flush;
+	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(10).set_type(2);
+	cout
+	<< "tI: " << index.tIndex.toStringJulianTAI()
+	<< "  : 0x" << hex << index.getArrayIndexTemporalValue() << dec
+	<< ", " << index.getArrayIndexTemporalValue()
+	<< endl << flush;
 
-	// FAIL();
+	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(20).set_type(2);
+	cout
+	<< "tI: " << index.tIndex.toStringJulianTAI()
+	<< "  : 0x" << hex << index.getArrayIndexTemporalValue() << dec
+	<< ", " << index.getArrayIndexTemporalValue()
+	<< endl << flush;
+
+	index1.tIndex.fromFormattedJulianTAI(2001, 7, 1, 0, 0, 0, 0).set_resolution(20).set_type(2);
+
+	{
+
+		double delta = diff_JulianTAIDays(index.tIndex,index1.tIndex);
+		cout
+		<< "cmp: " << (index.tIndex == index1.tIndex)
+		<< endl << flush
+		<< "delta: " << delta << ", ms: " << delta*86400.0e3 << endl << flush;
+
+		cout << "+++" << endl << flush;
+
+		index.tIndex.fromFormattedJulianTAI(2001, 5, 30, 12, 59, 59, 999).set_resolution(22).set_type(2);
+		index1.setArrayIndexTemporalValue(index.getArrayIndexTemporalValue());
+
+		cout
+		<< "cmp: " << (index.tIndex == index1.tIndex)
+		<< endl << flush;
+		cout
+		<< "tI0: " << index.tIndex.toStringJulianTAI()
+		<< " : 0x" << hex << index.getArrayIndexTemporalValue() << dec
+		<< ", " << index.getArrayIndexTemporalValue()
+		<< endl << flush;
+
+		cout
+		<< "tI1: " << index1.tIndex.toStringJulianTAI()
+		<< " : 0x" << hex << index1.getArrayIndexTemporalValue() << dec
+		<< ", " << index1.getArrayIndexTemporalValue()
+		<< endl << flush;
+
+
+
+	}
+
+
+	FAIL();
 }
 

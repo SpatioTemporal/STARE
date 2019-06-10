@@ -24,7 +24,8 @@
 
 #define TAG(X) cout << dec << X << hex << endl << flush;
 
-namespace std {
+using namespace std;
+// namespace std {
 
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
 public:
@@ -318,18 +319,18 @@ public:
 
 #define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
 
-	int leapYearDay(int64_t _year) const {
-		// From wikipedia
-		int leapyear_day = 0;
-		if( (_year % 4) != 0 ) {
-			leapyear_day = 0;
-		} else if( (_year % 100) != 0 ) {
-			leapyear_day = 1;
-		} else if( (_year % 400) != 0 ) {
-			leapyear_day = 0;
-		} else { leapyear_day = 1; }
-		return leapyear_day;
-	}
+//	int leapYearDay(int64_t _year) const {
+//		// From wikipedia
+//		int leapyear_day = 0;
+//		if( (_year % 4) != 0 ) {
+//			leapyear_day = 0;
+//		} else if( (_year % 100) != 0 ) {
+//			leapyear_day = 1;
+//		} else if( (_year % 400) != 0 ) {
+//			leapyear_day = 0;
+//		} else { leapyear_day = 1; }
+//		return leapyear_day;
+//	}
 
 //	int64_t milliseconds_per_year(int64_t _year) {
 //		int64_t ms;
@@ -348,6 +349,44 @@ public:
 	 *
 	 */
 	TemporalIndex(int64_t scidbTemporalIndex) {
+		int64_t idx_ = scidbTemporalIndex;
+
+		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
+		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
+		int64_t babit = 1;
+		if(idx_<0) {
+			babit = 0;
+			idx_ = - idx_;
+			// idx_ = idx_ | (1ll << 63);
+		}
+		SHIFT_AND_MASK(year)
+		SHIFT_AND_MASK(month)
+		SHIFT_AND_MASK(week)
+		SHIFT_AND_MASK(day)
+		SHIFT_AND_MASK(hour)
+		SHIFT_AND_MASK(minute)
+		SHIFT_AND_MASK(second)
+		SHIFT_AND_MASK(millisecond)
+		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(type)
+
+		// if(false) {
+		if(babit == 0) {
+			// REVERT(year);
+			REVERT(month);
+			REVERT(week);
+			REVERT(day);
+			REVERT(hour);
+			REVERT(minute);
+			REVERT(second);
+			REVERT(millisecond);
+		}
+		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
+			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+		}
+	}
+
+	TemporalIndex& fromTemporalIndexValue(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
@@ -415,8 +454,9 @@ public:
 
 		// TODO Construct an index validity checker...
 		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
-			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE");
 		}
+		return *this;
 	};
 #undef REVERT
 #undef SET_MAX
@@ -516,11 +556,14 @@ public:
 			int _millisecond 	// 0..999
 			);
 
-	string toStringJ();
-	TemporalIndex& fromStringJ(string inputString);
+	string toStringJulianTAI();
+	TemporalIndex& fromStringJulianTAI(string inputString);
 
 	int64_t millisecondsAtResolution(int64_t resolution);
 	double daysAtResolution(int64_t resolution);
+
+	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
+
 
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
@@ -686,6 +729,18 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return *c;
 }
 
+inline double diff_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+	double ad1, ad2, bd1, bd2;
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
+	return (ad1+ad2)-(bd1+bd2);
+}
+
 inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) == 0; }
 inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) != 0; }
 inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <  0; }
@@ -695,8 +750,8 @@ inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { ret
 inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
 inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
 
-inline ostream& operator<<(ostream& os, TemporalIndex tIndex) {
-	os << tIndex.toStringJ();
+inline std::ostream& operator<<(std::ostream& os, TemporalIndex tIndex) {
+	os << tIndex.toStringJulianTAI();
 	return os;
 }
 
@@ -711,7 +766,9 @@ int64_t scidbMaximumIndex();
 
 int64_t millisecondsInYear(int64_t CE, int64_t year);
 
-} /* namespace std */
+// } /* namespace std */
+
+int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
 
 void TemporalIndex_test();
 

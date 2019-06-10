@@ -7,7 +7,8 @@
 
 #include "TemporalIndex.h"
 
-namespace std {
+using namespace std;
+// namespace std {
 
 BitField::BitField() {}
 BitField::~BitField() {}
@@ -141,7 +142,7 @@ TemporalIndex& TemporalIndex::fromNativeYear(double year) {
 	return *this;
 }
 
-string TemporalIndex::toStringJ() {
+string TemporalIndex::toStringJulianTAI() {
 	double d1,d2; this->toJulianTAI(d1, d2);
 	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
 	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
@@ -173,7 +174,7 @@ string TemporalIndex::toStringJ() {
 	return ss.str();
 }
 
-TemporalIndex& TemporalIndex::fromStringJ(string inputString) {
+TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	int pos = 0;
 #define PARSE_INT(field,width) \
 		int64_t field = atoi(inputString.substr(pos,width).c_str()); pos += width + 1;
@@ -514,6 +515,9 @@ TemporalIndex& TemporalIndex::setZero() {
 	return *this;
 }
 
+/**
+ * Find the number of TAI seconds in a particular year.
+ */
 int64_t millisecondsInYear(int64_t CE, int64_t year) {
 	int64_t _year = year;
 	if( CE < 1 ) { _year = 1 - _year; }
@@ -812,6 +816,23 @@ double TemporalIndex::daysAtResolution(int64_t resolution) {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 
+int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseconds) {
+	int64_t resolution = this->data.maxResolutionLevel();
+	bool done = false;
+	while(  resolution >= 0 && !done ) {
+		int64_t ms = millisecondsAtResolution(resolution);
+		done = ms >= milliseconds;
+		if( done ) {
+			if( ms > milliseconds ) {
+				++resolution;
+			}
+		} else {
+			--resolution;
+		}
+	}
+	return resolution;
+}
+
 int64_t scidbMinimumIndex() {
 	TemporalIndex tIndex;
 	tIndex.setZero().set_year(262143).set_type(2);
@@ -824,4 +845,4 @@ int64_t scidbMaximumIndex() {
 	return tIndex.scidbTemporalIndex();
 }
 
-} /* namespace std */
+// } /* namespace std */

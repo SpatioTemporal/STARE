@@ -19,7 +19,8 @@
 #ifndef INCLUDE_BITFIELD_H_
 #define INCLUDE_BITFIELD_H_
 
-namespace std {
+// namespace std {
+using namespace std;
 
 int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
 int64_t makeMask(int width);
@@ -120,6 +121,6 @@ public:
 	int64_t getCoFieldId() const { return maxFieldId - fieldId; }
 };
 
-}
+// }
 
 #endif /* INCLUDE_BITFIELD_H_ */

@@ -97,14 +97,15 @@ public:
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
-	std::TemporalIndex tIndex;
+	TemporalIndex tIndex;
 
-	std::TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
-	std::TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+	TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
 
-	std::TemporalIndex& getTIndex() { return tIndex; }
+	TemporalIndex& getTIndex() { return tIndex; }
 
-	STARE_ArrayIndexTemporalValue getTemporalIndexValue();
+	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
+	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 
 
