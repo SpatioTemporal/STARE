@@ -508,10 +508,10 @@ public:
 		return iCoarsestNonZero;
 	}
 
-	int64_t bitOffsetFinest();
-	int64_t bitOffsetCoarsest();
-	int64_t bitOffsetResolution(int64_t resolution);
-	int64_t bitfieldIdFromResolution(int64_t resolution);
+	int64_t bitOffsetFinest() const;
+	int64_t bitOffsetCoarsest() const;
+	int64_t bitOffsetResolution(int64_t resolution)  const;
+	int64_t bitfieldIdFromResolution(int64_t resolution) const;
 
 	int64_t scidbTemporalIndex();
 	int64_t scidbTerminator();
@@ -559,10 +559,21 @@ public:
 	string toStringJulianTAI();
 	TemporalIndex& fromStringJulianTAI(string inputString);
 
-	int64_t millisecondsAtResolution(int64_t resolution);
-	double daysAtResolution(int64_t resolution);
-
+	int64_t millisecondsAtResolution(int64_t resolution) const;
+	double daysAtResolution(int64_t resolution) const;
 	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
+	double getResolutionTimescaleDays() const {
+		return daysAtResolution(get_resolution());
+	}
+	/**
+	 * Set resolution to the finest level coarser than the resolutionDays input.
+	 */
+	TemporalIndex& setResolutionFromTimescaleDays( double resolutionDays ) {
+		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerThanMilliseconds( resolutionDays*86400.0e3 )-1);
+		set_resolution(resolutionLevel);
+		return *this;
+	}
+
 
 
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
@@ -739,6 +750,20 @@ inline double diff_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b)
 	a.toJulianTAI(ad1, ad2);
 	b.toJulianTAI(bd1, bd2);
 	return (ad1+ad2)-(bd1+bd2);
+}
+
+/**
+ * Are two TemporalIndex values within a "resolution" time scale of each other?
+ *
+ */
+inline bool cmp_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	double delta  = diff_JulianTAIDays(a,b);
+	double timescale = max(a.getResolutionTimescaleDays(),b.getResolutionTimescaleDays());
+	bool neighborsp = abs(delta) < timescale;
+	return neighborsp;
 }
 
 inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) == 0; }

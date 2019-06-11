@@ -107,7 +107,7 @@ public:
 	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
 	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
-
+	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
 
 };
 

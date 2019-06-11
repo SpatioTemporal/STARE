@@ -525,6 +525,10 @@ void STARE_test() {
 		<< ", " << index1.getArrayIndexTemporalValue()
 		<< endl << flush;
 
+		cout << "+++" << endl << flush;
+
+		cout << "cmp " << index.cmpTemporalAtResolution(index1.getArrayIndexTemporalValue()) << endl << flush;
+
 
 
 	}

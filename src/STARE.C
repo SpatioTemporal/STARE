@@ -410,4 +410,9 @@ TemporalIndex& STARE::setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue t
 	return tIndex.fromTemporalIndexValue(temporalValue);
 }
 
+bool STARE::cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue) {
+	TemporalIndex inputTIndex(temporalValue);
+	return cmp_JulianTAIDays(this->tIndex,inputTIndex);
+}
+
 

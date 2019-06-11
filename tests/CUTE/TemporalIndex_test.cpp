@@ -42,6 +42,7 @@ void TemporalIndex_test() {
 
 #define INDEX_OUT0(lbl,var) cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << ", " << var.toStringJulianTAI() << flush << endl;
 #define INDEX_OUTN(lbl,var) cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << endl;
+#define INDEX_OUTN_NC(lbl,var) cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush;
 #define INDEX_OUT(lbl,var)  cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << ", " << var.toStringJulianTAI() << flush << ", 0x" << setw(16) << setfill('0') << hex << var.scidbTemporalIndex() << dec << ", " << setfill(' ') << setw(22) << var.scidbTemporalIndex() << endl << flush;
 #define INDEX_OUTNC(lbl,var)  cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << ", " << var.toStringJulianTAI() << flush << ", 0x" << setw(16) << setfill('0') << hex << var.scidbTemporalIndex() << dec << ", " << setfill(' ') << setw(22) << var.scidbTemporalIndex();
 
@@ -1448,13 +1449,54 @@ void TemporalIndex_test() {
 		cout << "max resolution ms:    " << tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()) << endl << flush;
 		cout << setw(12) << "iDelta" << "  " << setw(4) << "ti" << endl << flush;
 		int64_t iDelta = 1;
-		while( iDelta < 10000000 ) {
+		while( iDelta < 1000000000000000000 ) {
 			cout
-			<< setw(12) << iDelta << "  " << setw(4) << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)
-			<< " " << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))
+			<< setw(18) << iDelta << "  "
+			<< setw(4) << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3
 			<< endl << flush;
 			iDelta *= 10;
 		}
+		cout << "----" << endl << flush;
+		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_resolution(10); INDEX_OUTN_NC(++tag_id,tIndex1);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54); INDEX_OUTN_NC(++tag_id,tIndex2);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+
+		cout << "----" << endl << flush;
+		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_resolution(40); INDEX_OUTN_NC(++tag_id,tIndex1);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54); INDEX_OUTN_NC(++tag_id,tIndex2);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+
+		cout << "----" << endl << flush;
+		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).setResolutionFromTimescaleDays(1000);
+
+		INDEX_OUTN_NC(++tag_id,tIndex1);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54);
+
+		INDEX_OUTN_NC(++tag_id,tIndex2);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+
+		cout << "----" << endl << flush;
+		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).setResolutionFromTimescaleDays(3653);
+
+		INDEX_OUTN_NC(++tag_id,tIndex1);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54);
+
+		INDEX_OUTN_NC(++tag_id,tIndex2);
+		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 
 		}
 #undef FMT_DT1

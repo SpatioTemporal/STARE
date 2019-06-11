@@ -405,23 +405,23 @@ int64_t TemporalIndex::scidbTemporalIndex() {
 // #undef MASK_AND_SHIFT_RESOLUTION
 
 
-int64_t TemporalIndex::bitOffsetFinest() {
+int64_t TemporalIndex::bitOffsetFinest() const {
 	int64_t offsetBottom = data.bitFields[data.pos_FinestResolutionLevel]->getOffset();
 	return offsetBottom;
 }
 
-int64_t TemporalIndex::bitOffsetCoarsest() {
+int64_t TemporalIndex::bitOffsetCoarsest() const {
 	int64_t offsetTop =
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getOffset() +
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getWidth()-1;
 	return offsetTop;
 }
 
-int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) {
+int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) const {
 	return bitOffsetCoarsest() - resolution;
 }
 
-int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) {
+int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
 	int offsetTop = bitOffsetCoarsest();
 	int offsetResolution = bitOffsetResolution(resolution);
 	// int iBit = bitOffsetFinest();
@@ -780,7 +780,7 @@ TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
 /**
  * Return a number of milliseconds based on the resolution (bit position).
  */
-int64_t TemporalIndex::millisecondsAtResolution(int64_t resolution) {
+int64_t TemporalIndex::millisecondsAtResolution(const int64_t resolution) const {
 
 	TemporalIndex tmpIndex;
 	int64_t bitPosition;
@@ -812,7 +812,7 @@ int64_t TemporalIndex::millisecondsAtResolution(int64_t resolution) {
 /**
  * Return a number of days associated with a resolution level.
  */
-double TemporalIndex::daysAtResolution(int64_t resolution) {
+double TemporalIndex::daysAtResolution(const int64_t resolution) const {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 
