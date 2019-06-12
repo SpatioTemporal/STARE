@@ -400,6 +400,17 @@ TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int m
 	return tIndex;
 }
 
+void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+	tIndex.toFormattedJulianTAI(year, month, day, hour, minute, second, ms);
+	resolution = tIndex.get_resolution();
+	type       = tIndex.get_type();
+}
+void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+	tIndex.toUTC(year, month, day, hour, minute, second, ms);
+	resolution = tIndex.get_resolution();
+	type       = tIndex.get_type();
+}
+
 // TemporalIndex& STARE::getTIndex() { return tIndex; }
 
 STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
@@ -415,4 +426,12 @@ bool STARE::cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue)
 	return cmp_JulianTAIDays(this->tIndex,inputTIndex);
 }
 
+bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2) {
+	TemporalIndex a(tv1), b(tv2);
+	return cmp_JulianTAIDays(a,b);
+}
 
+bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days) {
+	TemporalIndex a(tv1), b(tv2);
+	return cmp_JulianTAIDays3(a,b,days);
+}

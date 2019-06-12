@@ -529,8 +529,33 @@ void STARE_test() {
 
 		cout << "cmp " << index.cmpTemporalAtResolution(index1.getArrayIndexTemporalValue()) << endl << flush;
 
+		cout << "+++" << endl << flush;
 
+		cout << index.tIndex.toStringJulianTAI() << endl << flush;
+		double jd0 = index.toJulianDayTAI();
+		int64_t id0 = index.getArrayIndexTemporalValue();
+		cout
+		<< "tI-JD-TAI-0: "
+		<< setprecision(18) << setw(20) << scientific
+		<< jd0 << endl << flush;
 
+		double jd1 = jd0 + 1.0;
+		index.fromJulianDayTAI(jd1);
+		cout << index.tIndex.toStringJulianTAI() << endl << flush;
+
+		jd1 = -1;
+		jd1 = index.toJulianDayTAI();
+		int64_t id1 = index.getArrayIndexTemporalValue();
+		cout
+		<< "tI-JD-TAI-1: "
+		<< setprecision(18) << setw(20) << scientific
+		<< jd0 << endl << flush;
+		cout << index.tIndex.toStringJulianTAI() << endl << flush;
+
+		cout << "cmp-0.5:   " << cmpTemporalAtResolution3(id0,id1,0.5) << endl << flush;
+		cout << "cmp-1.0:   " << cmpTemporalAtResolution3(id0,id1,1.0) << endl << flush;
+		cout << "cmp-1.0+e: " << cmpTemporalAtResolution3(id0,id1,1.001) << endl << flush;
+		cout << "cmp-1.5:   " << cmpTemporalAtResolution3(id0,id1,1.5) << endl << flush;
 	}
 
 

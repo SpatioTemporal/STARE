@@ -102,14 +102,22 @@ public:
 	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
 	TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
 
+	void toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type);
+	void toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type);
+
+	double toJulianDayTAI()                   { double d1,d2; tIndex.toJulianTAI(d1, d2); return d1+d2; }
+	TemporalIndex& fromJulianDayTAI(double d) { tIndex.fromJulianTAI(d, 0.0); return tIndex; }
+
 	TemporalIndex& getTIndex() { return tIndex; }
 
 	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
-	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
+	TemporalIndex&                setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
 
 };
+bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2);
+bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days);
 
 void STARE_test();
 // void STARE_Temporal_test();

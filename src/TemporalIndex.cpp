@@ -174,6 +174,18 @@ string TemporalIndex::toStringJulianTAI() {
 	return ss.str();
 }
 
+void TemporalIndex::toFormattedJulianTAI(
+		int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
+		) {
+	double d1,d2; this->toJulianTAI(d1, d2);
+	int ihmsf[4];
+	int not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day, ihmsf );
+	hour        = ihmsf[0];
+	minute      = ihmsf[1];
+	second      = ihmsf[2];
+	ms          = ihmsf[3];
+}
+
 TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	int pos = 0;
 #define PARSE_INT(field,width) \
@@ -202,6 +214,9 @@ TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	return *this;
 }
 
+/**
+ * Retrieve the UTC version of the stored TAI-based index value.
+ */
 void TemporalIndex::toUTC(
 		int& _year,
 		int& _month, 		// 1..12 not 0..11
@@ -225,7 +240,9 @@ void TemporalIndex::toUTC(
 	_second      = ihmsf[2];
 	_millisecond = ihmsf[3];
 }
-
+/**
+ * Convert and store a UTC coordinate into the native TAI-based value.
+ */
 TemporalIndex& TemporalIndex::fromUTC(
 		int _year,
 		int _month, 		// 1..12 not 0..11
@@ -245,7 +262,9 @@ TemporalIndex& TemporalIndex::fromUTC(
 
 	return *this;
 }
-
+/**
+ * Construct a string representation of the index value as stored.
+ */
 string TemporalIndex::stringInNativeDate() {
 
 	stringstream ss;
@@ -270,6 +289,9 @@ string TemporalIndex::stringInNativeDate() {
 	return ss.str();
 }
 
+/**
+ * Parse and store an index value represented in native format.
+ */
 void TemporalIndex::fromNativeString(string nativeString) {
 	// TODO repent the sin of hardcoding
 	int pos = 0;
@@ -295,6 +317,9 @@ void TemporalIndex::fromNativeString(string nativeString) {
 	data.setValue("BeforeAfterStartBit",1);
 }
 
+/**
+ * Test calling ERFA routines.
+ */
 int TemporalIndex::eraTest() {
 	int iy, im, id, ihour, imin, j, iymdf[4];
 	double d1, d2, sec, d, fd;
@@ -500,9 +525,13 @@ int64_t TemporalIndex::scidbTerminatorJulianTAI() {
 	return idx_;
 }
 
+/**
+ * Determine if the stored index value is a terminator.
+ */
 bool TemporalIndex::scidbTerminatorp() {
 	int64_t resolution = this->data.getValue("resolution");
-	return resolution == 63;
+	// return resolution == 63;
+	return resolution == this->data.get("resolution")->getMask();
 }
 
 TemporalIndex& TemporalIndex::set_zero() {
@@ -816,6 +845,12 @@ double TemporalIndex::daysAtResolution(const int64_t resolution) const {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 
+
+/**
+ * Determine the resolution level immediately finer than the resolution given in milliseconds.
+ *
+ * TODO Consider there might be a faster (formulaic) way to do this based on the bit position.
+ */
 int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseconds) {
 	int64_t resolution = this->data.maxResolutionLevel();
 	bool done = false;
@@ -833,12 +868,18 @@ int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseco
 	return resolution;
 }
 
+/**
+ * The minimum scidb temporal index.
+ */
 int64_t scidbMinimumIndex() {
 	TemporalIndex tIndex;
 	tIndex.setZero().set_year(262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
 }
 
+/**
+ * The maximum scidb temporal index.
+ */
 int64_t scidbMaximumIndex() {
 	TemporalIndex tIndex;
 	tIndex.setZero().setEOY(1,262143).set_type(2);

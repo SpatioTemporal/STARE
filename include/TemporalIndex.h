@@ -524,6 +524,10 @@ public:
 	void           toJulianTAI ( double& d1, double& d2) const;
 	TemporalIndex& fromJulianTAI( double  d1, double  d2);
 
+
+	void toFormattedJulianTAI(
+			int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
+			);
 	/**
 	 * Set using a TAI date.
 	 */
@@ -766,6 +770,18 @@ inline bool cmp_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
 	return neighborsp;
 }
 
+/**
+ * Are two TemporalIndex values within a "resolution" time scale of each other?
+ *
+ */
+inline bool cmp_JulianTAIDays3(const TemporalIndex& a, const TemporalIndex& b, double daysTolerance) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	double delta  = diff_JulianTAIDays(a,b);
+	bool neighborsp = abs(delta) < daysTolerance;
+	return neighborsp;
+}
 inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) == 0; }
 inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) != 0; }
 inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <  0; }
