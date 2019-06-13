@@ -48,9 +48,39 @@ if(Boost_FOUND)
   )
   add_library( PySTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
   set_target_properties( PySTARE PROPERTIES PREFIX "" )
-  target_link_libraries( PySTARE ${Boost_LIBRARIES} )
+  target_link_libraries( PySTARE ${Boost_LIBRARIES} "/usr/lib64/liberfa.so" )
 else()
   message("Boost not found, not creating shared object PySTARE, including the python 3 API. Was BOOST_ROOT set?\nContinuing...\n")  
 endif()
 
+
+if(true)
+
+	# UseSWIG_TARGET_NAME_PREFERENCE
+	cmake_policy( SET CMP0078 NEW )
+	cmake_policy( SET CMP0086 NEW )
+
+    include_directories( "/usr/include/python3.7m"  )
+    add_library(PySTARE1A SHARED PySTARE1.cpp)
+    # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
+    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
+    # target_link_libraries( PySTARE1 "/usr/lib64/liberfa.so" )
+    
+    # SWIG
+    find_package(SWIG REQUIRED)
+    include(${SWIG_USE_FILE})
+    find_package(PythonLibs)
+    include_directories(${PYTHON_INCLUDE_DIRS})
+    
+    # set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
+	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
+	
+	set_property(SOURCE PySTARE1.i PROPERTY CPLUSPLUS ON)
+	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
+
+    swig_add_library( PySTARE1 TYPE SHARED LANGUAGE python SOURCES PySTARE1.i )
+    swig_link_libraries( PySTARE1 STARE )
+    swig_link_libraries( PySTARE1 PySTARE1A )
+    swig_link_libraries( PySTARE1 ${PYTHON_LIBRARIES} )
+endif()
 

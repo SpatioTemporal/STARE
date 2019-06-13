@@ -24,6 +24,10 @@
  * while some is due to a mismatch between the input location and the nearest
  * triangle center. At level 27 and float64, it's hard to tell these apart.
  *
+ * Example temporal usage:
+ *
+   s.JDTAIfromValueNP(s.ValueFromJDTAINP(np.array([2000001.21]),100))
+ *
  *  Created on: Feb 12, 2019
  *      Author: mrilee
  *
@@ -150,6 +154,47 @@ public:
 		}
 		return bp::make_tuple(result_lat,result_lon);
 	}
+
+	bn::ndarray ValueFromJDTAINP( bn::ndarray JDTAI, int resolution_days ) {
+		const Py_intptr_t *shape = {JDTAI.get_shape()}; // TODO Fix assumption shape is 1d and stride is 1.
+		// TODO Check shape & type of lat & lon and throw exception if bad.
+		Py_intptr_t const * strides = JDTAI.get_strides();
+		bn::dtype jdtai_dtype = JDTAI.get_dtype();
+
+		// std::cout << "vfldnp: strides: " << strides[0] << std::endl << std::flush;
+		bn::ndarray result = bn::zeros(1,shape,bn::dtype::get_builtin<STARE_ArrayIndexTemporalValue>());
+		bool ok = true;
+		float64 d;
+		// TODO move logic test out of loop
+		for(int i=0; ok && (i<shape[0]); ++i) {
+			if( bn::dtype::get_builtin<float64>() == jdtai_dtype ) {
+				d = *reinterpret_cast<float64 const *>( JDTAI.get_data() + i*strides[0] );
+			} else if( bn::dtype::get_builtin<int64>() == jdtai_dtype ) {
+				d = *reinterpret_cast<int64 const *>( JDTAI.get_data() + i*strides[0] );
+			} else {
+				ok = false;
+			}
+			if( ok ) {
+				result[i] = index.fromJulianDayTAI(d).scidbTemporalIndex();
+			}
+		}
+		return result;
+	}
+
+	bn::ndarray JDTAIfromValueNP(bn::ndarray values) {
+		const Py_intptr_t *shape = {values.get_shape()};
+		Py_intptr_t const * strides = values.get_strides();
+		bn::ndarray result_jdtai = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
+		for(int i=0; i<shape[0]; ++i) {
+			STARE_ArrayIndexTemporalValue idx = *reinterpret_cast<STARE_ArrayIndexTemporalValue*>(values.get_data() + i*strides[0]);
+			index.setArrayIndexTemporalValue(idx);
+			result_jdtai[i] = index.toJulianDayTAI();
+		}
+		return result_jdtai;
+	}
+
+
+
 };
 
 
@@ -183,6 +228,8 @@ BOOST_PYTHON_MODULE(PySTARE)
 		.def("testUI64_2", &PySTARE::testUI64_2)
 		.def("ValueFromLatLonDegreesNP", &PySTARE::ValueFromLatLonDegreesNP)
 		.def("LatLonDegreesFromValueNP", &PySTARE::LatLonDegreesFromValueNP)
+		.def("ValueFromJDTAINP",&PySTARE::ValueFromJDTAINP)
+		.def("JDTAIfromValueNP",&PySTARE::JDTAIfromValueNP)
 			;
 
 	/*
