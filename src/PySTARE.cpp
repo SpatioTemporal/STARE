@@ -181,7 +181,7 @@ public:
 		return result;
 	}
 
-	bn::ndarray JDTAIfromValueNP(bn::ndarray values) {
+	bn::ndarray JDTAIFromValueNP(bn::ndarray values) {
 		const Py_intptr_t *shape = {values.get_shape()};
 		Py_intptr_t const * strides = values.get_strides();
 		bn::ndarray result_jdtai = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
@@ -229,7 +229,7 @@ BOOST_PYTHON_MODULE(PySTARE)
 		.def("ValueFromLatLonDegreesNP", &PySTARE::ValueFromLatLonDegreesNP)
 		.def("LatLonDegreesFromValueNP", &PySTARE::LatLonDegreesFromValueNP)
 		.def("ValueFromJDTAINP",&PySTARE::ValueFromJDTAINP)
-		.def("JDTAIfromValueNP",&PySTARE::JDTAIfromValueNP)
+		.def("JDTAIfromValueNP",&PySTARE::JDTAIFromValueNP)
 			;
 
 	/*

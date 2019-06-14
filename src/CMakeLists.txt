@@ -64,7 +64,7 @@ if(true)
     add_library(PySTARE1A SHARED PySTARE1.cpp)
     # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
     #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
-    # target_link_libraries( PySTARE1 "/usr/lib64/liberfa.so" )
+    target_link_libraries( PySTARE1A "/usr/lib64/liberfa.so" )
     
     # SWIG
     find_package(SWIG REQUIRED)
