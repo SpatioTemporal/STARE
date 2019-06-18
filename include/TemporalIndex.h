@@ -799,11 +799,11 @@ inline std::ostream& operator<<(std::ostream& os, TemporalIndex tIndex) {
 /**
  * Returns the lowest temporal index valid in SciDB. SciDB has symmetrical coordinate (index) dimensions, i.e. +/- (2**62 -1).
  */
-int64_t scidbMinimumIndex();
+int64_t scidbMinimumTemporalIndex();
 /**
  * Returns the greatest non-terminator temporal index valid in SciDB. For a poor-man's terminator here, set the 6 resolution bits to 1, i.e. 63.
  */
-int64_t scidbMaximumIndex();
+int64_t scidbMaximumTemporalIndex();
 
 int64_t millisecondsInYear(int64_t CE, int64_t year);
 

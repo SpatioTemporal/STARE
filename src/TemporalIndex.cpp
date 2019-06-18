@@ -871,7 +871,7 @@ int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseco
 /**
  * The minimum scidb temporal index.
  */
-int64_t scidbMinimumIndex() {
+int64_t scidbMinimumTemporalIndex() {
 	TemporalIndex tIndex;
 	tIndex.setZero().set_year(262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
@@ -880,7 +880,7 @@ int64_t scidbMinimumIndex() {
 /**
  * The maximum scidb temporal index.
  */
-int64_t scidbMaximumIndex() {
+int64_t scidbMaximumTemporalIndex() {
 	TemporalIndex tIndex;
 	tIndex.setZero().setEOY(1,262143).set_type(2);
 	return tIndex.scidbTemporalIndex();

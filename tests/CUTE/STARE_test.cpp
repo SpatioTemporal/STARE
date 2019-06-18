@@ -674,6 +674,30 @@ void STARE_test() {
 		cout << endl << flush;
 	}
 
+	if(false){
+		/*
+		 * Make some example values for Kodi (OPeNDAP).
+		STARE indices for coordinates such as:  0˚, 0˚
+		                                0˚, 180˚
+		                                -90˚, -180˚ (or 360˚)
+		                                */
+		double lat, lon, level;
+		STARE_ArrayIndexSpatialValue id;
+
+#define LATLONID(lat,lon,id) cout << "lat,lon,id: " \
+		<< setw(4) << setfill(' ') << dec << lat << " " \
+		<< setw(4) << setfill(' ') << dec << lon << " " \
+		<< "0x" << setw(16) << setfill('0') << hex << id << dec \
+		<< endl << flush;
+		lat = 0.0; lon = -90.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+		lat = 0.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+		lat = 0.0; lon = 0.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+		lat = 0.0; lon = 180.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+		lat = -90.0; lon = -180.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+		lat = -90.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); LATLONID(lat,lon,id);
+#undef LATLONID
+	}
+
 //	{
 //		STARE_ArrayIndexSpatialValue spatialStareId = 0;
 //		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);
