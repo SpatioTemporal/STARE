@@ -49,6 +49,12 @@ public:
 
 	void ValueFromJDTAINP( int len, int64_t* indices, double* JDTAI, int resolution_days );
 	void JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices );
+	// void ResolutionDaysLevelFromValueNP();
+
+	void ValueFromLatLonDegreesLevelNP( int len, int64_t* indices, double* lat, double* lon, int resolutionLevel );
+	void LatLonDegreesFromValueNP( int len, double* lat, double* lon, int64_t* indices );
+	// void ResolutionLevelFromValueNP();
+
 };
 
 // PySTARE1* PySTARE() { return new PySTARE1; }

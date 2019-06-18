@@ -15,6 +15,10 @@
 
 void TemporalIndex_test() {
 
+	bool globalPrintFlag = false;
+
+	stringstream ss;
+
 	string failureMessage = "'";
 
 	TemporalIndex tIndex, tIndex1;
@@ -713,34 +717,37 @@ void TemporalIndex_test() {
 	tIndex3.set_BeforeAfterStartBit(0);
 	tIndex4 = TemporalIndex(tIndex3.scidbTerminator());
 
-	cout << endl << flush;
-	cout << "b" << endl << flush;
-	INDEX_OUT(5000,tIndex3);
-	INDEX_OUT(5001,tIndex4);
-	cout << "tI3:  idx:  0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTemporalIndex() << dec << endl << flush;
-	cout << "tI3: term:  0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTerminator() << " " << dec << tIndex3.scidbTerminatorp() << endl << flush;
+	if(globalPrintFlag) {
+		cout << endl << flush;
+		cout << "b" << endl << flush;
+		INDEX_OUT(5000,tIndex3);
+		INDEX_OUT(5001,tIndex4);
+		cout << "tI3:  idx:  0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTemporalIndex() << dec << endl << flush;
+		cout << "tI3: term:  0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTerminator() << " " << dec << tIndex3.scidbTerminatorp() << endl << flush;
 
 
-	cout << "tI4: term:  0x" << setw(16) << setfill('0') << hex << tIndex4.scidbTerminator() << " " << dec << tIndex4.scidbTerminatorp() << endl << flush;
-	cout << "tI3s   tI3t:  " <<  dec << tIndex3.scidbTemporalIndex() << " " <<  tIndex3.scidbTerminator() << endl << flush;
-	cout << "tI3s < tI3t?  " <<  ( tIndex3.scidbTemporalIndex() < tIndex3.scidbTerminator() ) << endl << flush;
-	cout << "tI3  < tI4 ?  " <<  ( tIndex3 < tIndex4 ) << endl << flush;
-	cout << "tI3 <= tI4 ?  " <<  ( tIndex3 <= tIndex4 ) << endl << flush;
-	cout << "tI3  > tI4 ?  " <<  ( tIndex3 > tIndex4 ) << endl << flush;
-	cout << "tI3 >= tI4 ?  " <<  ( tIndex3 >= tIndex4 ) << endl << flush;
-	cout << "tI3 == tI4 ?  " <<  ( tIndex3 == tIndex4 ) << endl << flush;
-	cout << "tI3 == tI3 ?  " <<  ( tIndex3 == tIndex3 ) << endl << flush;
-	cout << "tI3 >= tI3 ?  " <<  ( tIndex3 >= tIndex3 ) << endl << flush;
-	cout << "tI3 <= tI3 ?  " <<  ( tIndex3 <= tIndex3 ) << endl << flush;
-	cout << "tI3 != tI3 ?  " <<  ( tIndex3 != tIndex3 ) << endl << flush;
-	cout << "tI3 != tI4 ?  " <<  ( tIndex3 != tIndex4 ) << endl << flush;
-	cout << "tI4s < tI4t?  " <<  ( tIndex4.scidbTemporalIndex() < tIndex4.scidbTerminator() ) << endl << flush;
-	cout << "tI4s <= tI4t? " <<  ( tIndex4.scidbTemporalIndex() <= tIndex4.scidbTerminator() ) << endl << flush;
-	cout << "tI4s >= tI4t? " <<  ( tIndex4.scidbTemporalIndex() >= tIndex4.scidbTerminator() ) << endl << flush;
-	cout << "tI4s == tI4t? " <<  ( tIndex4.scidbTemporalIndex() == tIndex4.scidbTerminator() ) << endl << flush;
-	// cout << "tI4 " << tIndex4.scidbTerminatorp() << endl << flush;
+		cout << "tI4: term:  0x" << setw(16) << setfill('0') << hex << tIndex4.scidbTerminator() << " " << dec << tIndex4.scidbTerminatorp() << endl << flush;
+		cout << "tI3s   tI3t:  " <<  dec << tIndex3.scidbTemporalIndex() << " " <<  tIndex3.scidbTerminator() << endl << flush;
+		cout << "tI3s < tI3t?  " <<  ( tIndex3.scidbTemporalIndex() < tIndex3.scidbTerminator() ) << endl << flush;
+		cout << "tI3  < tI4 ?  " <<  ( tIndex3 < tIndex4 ) << endl << flush;
+		cout << "tI3 <= tI4 ?  " <<  ( tIndex3 <= tIndex4 ) << endl << flush;
+		cout << "tI3  > tI4 ?  " <<  ( tIndex3 > tIndex4 ) << endl << flush;
+		cout << "tI3 >= tI4 ?  " <<  ( tIndex3 >= tIndex4 ) << endl << flush;
+		cout << "tI3 == tI4 ?  " <<  ( tIndex3 == tIndex4 ) << endl << flush;
+		cout << "tI3 == tI3 ?  " <<  ( tIndex3 == tIndex3 ) << endl << flush;
+		cout << "tI3 >= tI3 ?  " <<  ( tIndex3 >= tIndex3 ) << endl << flush;
+		cout << "tI3 <= tI3 ?  " <<  ( tIndex3 <= tIndex3 ) << endl << flush;
+		cout << "tI3 != tI3 ?  " <<  ( tIndex3 != tIndex3 ) << endl << flush;
+		cout << "tI3 != tI4 ?  " <<  ( tIndex3 != tIndex4 ) << endl << flush;
+		cout << "tI4s < tI4t?  " <<  ( tIndex4.scidbTemporalIndex() < tIndex4.scidbTerminator() ) << endl << flush;
+		cout << "tI4s <= tI4t? " <<  ( tIndex4.scidbTemporalIndex() <= tIndex4.scidbTerminator() ) << endl << flush;
+		cout << "tI4s >= tI4t? " <<  ( tIndex4.scidbTemporalIndex() >= tIndex4.scidbTerminator() ) << endl << flush;
+		cout << "tI4s == tI4t? " <<  ( tIndex4.scidbTemporalIndex() == tIndex4.scidbTerminator() ) << endl << flush;
+		// cout << "tI4 " << tIndex4.scidbTerminatorp() << endl << flush;
 
-	cout << endl << flush;
+		cout << endl << flush;
+	}
+
 #define FMT(lbl,xval) cout << lbl << " 0x" << setw(16) << setfill('0') << hex << xval << dec << " " << xval << flush;
 	FMT("tI4s vs. tI4t ",tIndex4.scidbTemporalIndex()); cout << endl << flush;
 	FMT("              ",tIndex4.scidbTerminator());    cout << endl << flush;
@@ -766,9 +773,11 @@ void TemporalIndex_test() {
 	ASSERT_EQUAL( tIndex4.scidbTemporalIndex(), tIndex4.scidbTerminator() );
 	ASSERT_EQUAL(tIndex4.scidbTerminatorp(),1);
 
-	cout << endl << flush;
-
 	int tag_id = 6000; int level = 30;
+
+	if(globalPrintFlag) {
+		cout << endl << flush;
+
 	cout << tag_id << endl << flush;
 	tIndex3.setZero().set_BeforeAfterStartBit(1).set_year(1).set_resolution(--level); INDEX_OUTNC(++tag_id,tIndex3);
 	itmp4 = tIndex3.scidbTerminator(); tIndex4 = TemporalIndex(itmp4); INDEX_OUT(" ",tIndex4);
@@ -831,12 +840,14 @@ void TemporalIndex_test() {
 	ASSERT_EQUAL(tIndex,tIndex5);
 
 	cout << endl << flush;
+	}
+
 	// SciDB checks
 	int64_t max_coordinate = (1ULL << 62) - 1;
 	int64_t min_coordinate = - max_coordinate;
 	cout << "min,max coordinate: " << dec << min_coordinate << ", " << max_coordinate << endl << flush;
 
-	cout << endl << flush;
+	// cout << endl << flush;
 	tag_id = 9999;
 	cout << "Max SciDB coord" << endl << flush;
 	// Note: max_coordinate actually has the type bits set to 3, which is invalid for this TemporalIndex,
@@ -1039,7 +1050,7 @@ void TemporalIndex_test() {
 		//		cout << "---" << endl << flush;
 	}
 
-	{
+	if(globalPrintFlag) {
 		int not_ok;
 		int
 		_year = 0,
@@ -1073,7 +1084,7 @@ void TemporalIndex_test() {
 		cout << "---" << endl << flush;
 	}
 
-	{
+	if(globalPrintFlag) {
 		int not_ok;
 		int
 		_year = 1973,
@@ -1225,23 +1236,25 @@ void TemporalIndex_test() {
 
 	{
 
-#define FMT_DT1(lbl) \
-		cout \
-		<< lbl \
+#define XOUT cout
+// #define XOUT ss
+#define FMT_DT1_NC(xout) \
+		xout \
 		<< setw(9) << setfill(' ') << _year << "-" \
 		<< setw(2) << setfill('0') << _month << "-" \
 		<< setw(2) << setfill('0') << _day_of_month << " " \
 		<< setw(2) << _hour << ":" \
 		<< setw(2) << _minute << ":" \
 		<< setw(2) << _second << "." \
-		<< setw(3) << _millisecond \
-		<< endl << flush;
+		<< setw(3) << _millisecond;
+
+#define FMT_DT1(xout,lbl) xout << lbl; FMT_DT1_NC(xout); xout << endl << flush;
 
 		int _year, _month, _day_of_month, _hour, _minute, _second, _millisecond;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
-		FMT_DT1("")
-
-		cout << "---" << endl << flush;
+		// FMT_DT1(XOUT,"")
+		ss.str(""); FMT_DT1_NC(ss); ASSERT_EQUAL("     2002-12-31 23:59:27.999",ss.str().c_str());
+		// cout << "---" << endl << flush;
 
 		_year         = 1972;
 		_month        =   12;
@@ -1250,9 +1263,8 @@ void TemporalIndex_test() {
 		_minute       =   59;
 		_second       =   60;
 		_millisecond  =  999;
-		FMT_DT1("1972 eoy leap second ")
+		// FMT_DT1(XOUT,"1972 eoy leap second ")
 		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
-
 		_year         = 0;
 		_month        = 0;
 		_day_of_month = 0;
@@ -1261,9 +1273,9 @@ void TemporalIndex_test() {
 		_second       = 0;
 		_millisecond  = 0;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
-		FMT_DT1("")
-
-		cout << "---" << endl << flush;
+		// FMT_DT1(XOUT,"")
+		ss.str(""); FMT_DT1_NC(ss); ASSERT_EQUAL("     1972-12-31 23:59:60.999",ss.str().c_str());
+		// cout << "---" << endl << flush;
 
 		_year         = 1972;
 		_month        =    6;
@@ -1272,9 +1284,9 @@ void TemporalIndex_test() {
 		_minute       =   59;
 		_second       =   60;
 		_millisecond  =  999;
-		FMT_DT1("1972 6/30 leap second ")
+		// FMT_DT1(XOUT,"1972 6/30 leap second ")
+		// ASSERT_EQUAL("",ss.str.c_str());
 		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
-
 		_year         = 0;
 		_month        = 0;
 		_day_of_month = 0;
@@ -1283,9 +1295,9 @@ void TemporalIndex_test() {
 		_second       = 0;
 		_millisecond  = 0;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
-		FMT_DT1("")
-
-		cout << "---" << endl << flush;
+		// FMT_DT1(XOUT,"")
+		ss.str(""); FMT_DT1_NC(ss); ASSERT_EQUAL("     1972-06-30 23:59:60.999",ss.str().c_str());
+		// cout << "---" << endl << flush;
 
 		_year         = 1972;
 		_month        =    6;
@@ -1294,9 +1306,8 @@ void TemporalIndex_test() {
 		_minute       =   59;
 		_second       =   61;
 		_millisecond  =  999;
-		FMT_DT1("1972 6/30 leap second + 1")
+		// FMT_DT1(XOUT,"1972 6/30 leap second + 1")
 		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
-
 		_year         = 0;
 		_month        = 0;
 		_day_of_month = 0;
@@ -1305,9 +1316,9 @@ void TemporalIndex_test() {
 		_second       = 0;
 		_millisecond  = 0;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
-		FMT_DT1("")
-
-		cout << "---" << endl << flush;
+		// FMT_DT1(XOUT,"")
+		ss.str(""); FMT_DT1_NC(ss); ASSERT_EQUAL("     1972-07-01 00:00:00.999",ss.str().c_str());
+		// cout << "---" << endl << flush;
 
 		_year         = 1986;
 		_month        =   12;
@@ -1316,9 +1327,8 @@ void TemporalIndex_test() {
 		_minute       =   59;
 		_second       =   60;
 		_millisecond  =  501;
-		FMT_DT1("1986 eoy fake leap second")
+		// FMT_DT1(XOUT,"1986 eoy fake leap second")
 		tIndex.setZero().fromUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond); INDEX_OUT(++tag_id,tIndex);
-
 		_year         = 0;
 		_month        = 0;
 		_day_of_month = 0;
@@ -1327,126 +1337,163 @@ void TemporalIndex_test() {
 		_second       = 0;
 		_millisecond  = 0;
 		tIndex.toUTC(_year, _month, _day_of_month, _hour, _minute, _second, _millisecond);
-		FMT_DT1("")
+		// FMT_DT1(XOUT,"")
+		ss.str(""); FMT_DT1_NC(ss); ASSERT_EQUAL("     1987-01-01 00:00:00.501",ss.str().c_str());
 
-		cout << "---" << endl << flush;
+
+		// cout << "---" << endl << flush;
 
 		tIndex.setZero().fromJulianTAI(0, 0); INDEX_OUT(++tag_id,tIndex);
 
-		cout << "---" << endl << flush;
+		// cout << "---" << endl << flush;
 		tag_id = 23000;
 		failureMessage = "'";
 		try {
-			tIndex.setZero().fromJulianTAI(-1.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-10.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-100.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-1000.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-10000.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-20000.0, 0); INDEX_OUT(++tag_id,tIndex);
-			tIndex.setZero().fromJulianTAI(-40000.0, 0); INDEX_OUT(++tag_id,tIndex);
+			if(globalPrintFlag) {
+				tIndex.setZero().fromJulianTAI(-1.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-10.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-100.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-1000.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-10000.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-20000.0, 0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.setZero().fromJulianTAI(-40000.0, 0); INDEX_OUT(++tag_id,tIndex);
+			}
+			tIndex.setZero().fromJulianTAI(-40000.0, 0);
 			// tIndex.setZero().fromJulianTAIDouble2(-80000.0, 0); INDEX_OUT(++tag_id,tIndex);
 		} catch (SpatialFailure& failure) {
 			failureMessage += failure.what();
-			cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+			failureMessage += "'";
+			// cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+			ASSERT_EQUAL("'TemporalIndex::setDateFromYearAndMilliseconds: _milliseconds < 0.'",failureMessage);
 		};
 
-		cout << "---" << endl << flush;
+		// cout << "---" << endl << flush;
 
 		{
 			int64_t CE, year, milliseconds;
 
 			tag_id = 24000;
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(0,0,0); INDEX_OUT(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
 
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(0,0,365*86400000.0-1.0); INDEX_OUT(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+			if(globalPrintFlag) {
+				tIndex.setZero().fromNativeCEYearAndMilliseconds(0,0,0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+				cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+						<< " : " << tIndex.toNativeYear()
+						<< " : " << tIndex.scidbTemporalIndex()
+						<< endl << flush;
+
+				tIndex.setZero().fromNativeCEYearAndMilliseconds(0,0,365*86400000.0-1.0); INDEX_OUT(++tag_id,tIndex);
+				tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+				cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+						<< " : " << tIndex.toNativeYear()
+						<< " : " << tIndex.scidbTemporalIndex()
+						<< endl << flush;
+			}
 
 		failureMessage = "'";
 		try {
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(1,0,0); INDEX_OUT(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(1,0,0); INDEX_OUT(++tag_id,tIndex);
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			//		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+			//				<< " : " << tIndex.toNativeYear()
+			//				<< " : " << tIndex.scidbTemporalIndex()
+			//				<< endl << flush;
 		} catch (SpatialFailure& failure) {
 			failureMessage += failure.what();
-			cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+			failureMessage += "'";
+			// cout << "failureMessage: " << failureMessage << "'" << endl << flush;
+			ASSERT_EQUAL("'TemporalIndex::setDateFromYearAndMilliseconds: _year < 1 and CE != 0. Out of bounds. Use CE convention.'",failureMessage);
+			// ASSERT_EQUAL("'TemporalIndex::setDateFromYearAndMilliseconds: _milliseconds < 0.'",failureMessage);
 		};
+		if(globalPrintFlag) {
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,10000,0); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< endl << flush;
 
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(0,10000,0); INDEX_OUTN(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,100000,120000); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< endl << flush;
 
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(0,100000,120000); INDEX_OUTN(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
-
-		tIndex.setZero().fromNativeCEYearAndMilliseconds(1,100000,120000); INDEX_OUTN(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(1,100000,120000); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< endl << flush;
+		}
 
 		double year_ms = 31536000000.0; double year_ti;
-
-		cout << "----ti----" << endl << flush;
-
+		if(globalPrintFlag) {
+			cout << "----ti----" << endl << flush;
+			cout << setprecision(17);
+		}
 		tIndex.setZero().fromNativeCEYearAndMilliseconds(0,0,0.25*year_ms); INDEX_OUTN(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+		ASSERT_EQUAL(-0.75,tIndex.toNativeYear());
+		if(globalPrintFlag) {
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< endl << flush;
 
-		year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
-		cout << "year_ti: " << year_ti << endl << flush;
-		cout << "----" << endl << flush;
+			year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
+			cout << "year_ti: " << year_ti << endl << flush;
+			cout << "----" << endl << flush;
+		}
 
 		tIndex.setZero().fromNativeCEYearAndMilliseconds(1,1,0.25*year_ms); INDEX_OUTN(++tag_id,tIndex);
-		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< endl << flush;
+		ASSERT_EQUAL(1.25,tIndex.toNativeYear());
+		if(globalPrintFlag) {
+			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< endl << flush;
+			year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
+			cout << "year_ti: " << year_ti << endl << flush;
+			cout << "----" << endl << flush;
+			// tIndex.setZero().setDateFromYearAndMilliseconds(1,1,0.25*year_ms); INDEX_OUTN(++tag_id,tIndex);
+			cout << "Note that in the current configuration, the leap-year day is not captured in toNativeYear. Use toJulianTAI instead." << endl << flush;
+		}
 
-		year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
-		cout << "year_ti: " << year_ti << endl << flush;
-		cout << "----" << endl << flush;
-
-		// tIndex.setZero().setDateFromYearAndMilliseconds(1,1,0.25*year_ms); INDEX_OUTN(++tag_id,tIndex);
-		cout << "Note that in the current configuration, the leap-year day is not captured in toNativeYear. Use toJulianTAI instead." << endl << flush;
 		tIndex.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999); INDEX_OUTN(++tag_id,tIndex);
 		tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
-		cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
-				<< " : " << tIndex.toNativeYear()
-				<< " : " << tIndex.scidbTemporalIndex()
-				<< " , " << tIndex.scidbTerminator()
-				<< " , " << tIndex.scidbTerminatorJulianTAI()
-				<< endl << flush;
+
+		if(globalPrintFlag) {
+		// if(true) {
+			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
+					<< " : " << setprecision(17) << tIndex.toNativeYear()
+					<< " : " << tIndex.scidbTemporalIndex()
+					<< " , " << tIndex.scidbTerminator()
+					<< " , " << tIndex.scidbTerminatorJulianTAI()
+					<< endl << flush;
+		}
+		ASSERT_EQUAL(1,CE);
+		ASSERT_EQUAL(2000,year);
+		ASSERT_EQUAL(31622399999,milliseconds);
+		ASSERT_EQUAL(35198725801371394,tIndex.scidbTemporalIndex());
+		ASSERT_EQUAL(4646888008403904510,tIndex.scidbTerminator());
+		ASSERT_EQUAL(4643822982302525438,tIndex.scidbTerminatorJulianTAI());
+		ASSERT_EQUAL(2001.0027397259958,tIndex.toNativeYear());
 
 		year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
-		cout << "year_ti: " << year_ti << endl << flush;
-		cout << "----" << endl << flush;
 
-		cout << "max resolution level: " << tIndex.data.maxResolutionLevel() << endl << flush;
-		cout << "max resolution ms:    " << tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()) << endl << flush;
+		if(globalPrintFlag) {
+			cout << "year_ti: " << year_ti << endl << flush;
+			cout << "----" << endl << flush;
+			cout << "max resolution level: " << tIndex.data.maxResolutionLevel() << endl << flush;
+			cout << "max resolution ms:    " << tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()) << endl << flush;
+		}
+		ASSERT_EQUAL(54,tIndex.data.maxResolutionLevel());
+		ASSERT_EQUAL(1,tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()));
+
+		if(globalPrintFlag){
 		cout << setw(12) << "iDelta" << "  " << setw(4) << "ti" << endl << flush;
 		int64_t iDelta = 1;
 		while( iDelta < 1000000000000000000 ) {
@@ -1458,45 +1505,76 @@ void TemporalIndex_test() {
 			<< endl << flush;
 			iDelta *= 10;
 		}
+		}
+		if(globalPrintFlag){
 		cout << "----" << endl << flush;
+		}
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_resolution(10); INDEX_OUTN_NC(++tag_id,tIndex1);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		}
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54); INDEX_OUTN_NC(++tag_id,tIndex2);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
-
 		cout << "----" << endl << flush;
+		}
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_resolution(40); INDEX_OUTN_NC(++tag_id,tIndex1);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		}
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54); INDEX_OUTN_NC(++tag_id,tIndex2);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
-
+		}
+		ASSERT_EQUAL(0.000185185185185185,tIndex1.getResolutionTimescaleDays());
+		//ASSERT_EQUAL(0.0,0.000185185-tIndex1.getResolutionTimescaleDays());
+		ASSERT_EQUAL(3653,diff_JulianTAIDays(tIndex1,tIndex2));
+		ASSERT(!cmp_JulianTAIDays(tIndex1,tIndex2));
+		if(globalPrintFlag){
 		cout << "----" << endl << flush;
+		}
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).setResolutionFromTimescaleDays(1000);
 
 		INDEX_OUTN_NC(++tag_id,tIndex1);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		}
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54);
 
 		INDEX_OUTN_NC(++tag_id,tIndex2);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
-
+		}
+		ASSERT_EQUAL(1460,tIndex1.getResolutionTimescaleDays());
+		ASSERT_EQUAL(3653,diff_JulianTAIDays(tIndex1,tIndex2));
+		ASSERT(!cmp_JulianTAIDays(tIndex1,tIndex2));
 		cout << "----" << endl << flush;
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).setResolutionFromTimescaleDays(3653);
 
 		INDEX_OUTN_NC(++tag_id,tIndex1);
+		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		}
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_resolution(54);
+		ASSERT_EQUAL(5840,tIndex1.getResolutionTimescaleDays());
+		ASSERT_EQUAL(3653,diff_JulianTAIDays(tIndex1,tIndex2));
+		ASSERT(cmp_JulianTAIDays(tIndex1,tIndex2));
 
 		INDEX_OUTN_NC(++tag_id,tIndex2);
-		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
-		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
-		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		if(globalPrintFlag){
+			cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+			cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+			cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		}
+		ASSERT_EQUAL(5840,tIndex1.getResolutionTimescaleDays());
+		ASSERT_EQUAL(3653,diff_JulianTAIDays(tIndex1,tIndex2));
+		ASSERT(cmp_JulianTAIDays(tIndex1,tIndex2));
 
 		}
 #undef FMT_DT1

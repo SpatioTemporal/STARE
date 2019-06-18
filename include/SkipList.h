@@ -19,6 +19,9 @@
 class SkipListElement;
 // class ostream;
 
+/**
+ * Note: Keys are presumed positive in this formulation.
+ */
 class LINKAGE SkipList{
 public:
 

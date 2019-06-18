@@ -95,9 +95,7 @@ void ValueFromJDTAINP( PySTARE1* p, int len1, int64_t* indices, int len2, double
          len1, len2);
         return;
 	}
-	for(int i=0; i< len1; ++i) {
-	   p->ValueFromJDTAINP(len1, indices, JDTAI, resolution_days );
-	}
+	p->ValueFromJDTAINP(len1, indices, JDTAI, resolution_days );
 }
 %}
 %clear (int len1, int64_t* indices);
@@ -121,12 +119,64 @@ void my_JDTAIFromValueNP( PySTARE1* p, int len1, double* JDTAI, int len2, int64_
          len1, len2);
         return;
 	}
-	for(int i=0; i< len1; ++i) {
-	   p->JDTAIFromValueNP(len1,  JDTAI, indices );
-	}
+	p->JDTAIFromValueNP(len1,  JDTAI, indices );
 }
 %}
 %clear (int len1, double* JDTAI);
 %clear (int len2, int64_t* indices);
 
+
+/* void ValueFromLatLonDegreesLevelNP( int len, int64_t* indices, double* lat, double* lon, int resolutionLevel ); */
+%apply ( int DIM1, int64_t* INPLACE_ARRAY1 ) {(int len1, int64_t* indices)}
+%apply ( int DIM1, double* IN_ARRAY1 ) {(int len2, double* lat),(int len3, double* lon)}
+
+%rename (ValueFromLatLonDegreesLevelNP) my_ValueFromLatLonDegreesLevelNP;
+%exception  my_ValueFromLatLonDegreesLevelNP{
+	$action
+	if (PyErr_Occurred()) SWIG_fail;
+}
+
+%inline %{
+void my_ValueFromLatLonDegreesLevelNP( PySTARE1* p, int len1, int64_t *indices, int len2, double* lat, int len3, double* lon, int resolutionLevel) {
+
+	if ( len1 != len2 || len1 != len3 ) {
+		PyErr_Format(PyExc_ValueError,
+         "Arrays of lengths (%d,%d,%d) given",
+         len1, len2, len3);
+        return;
+	}
+	p->ValueFromLatLonDegreesLevelNP(len1, indices, lat, lon, resolutionLevel);
+}
+%}
+
+%clear (int len1, int64_t* indices);
+%clear (int len2, double* lat);
+%clear (int len3, double* lon);
+
+
+
+/* void LatLonDegreesFromValueNP( int len, double* lat, double* lon, int64_t* indices ); */
+%apply ( int DIM1, double* INPLACE_ARRAY1 ) {(int len1, double* lat),(int len2, double* lon)}
+%apply ( int DIM1, int64_t* IN_ARRAY1 ) {(int len3, int64_t* indices)}
+
+%rename (LatLonDegreesFromValueNP) my_LatLonDegreesFromValueNP;
+%exception my_LatLonDegreesFromValueNP {
+	$action
+	if (PyErr_Occurred()) SWIG_fail;
+}
+
+%inline %{
+void my_LatLonDegreesFromValueNP( PySTARE1* p, int len1, double* lat, int len2, double* lon, int len3, int64_t* indices ) {
+	if ( len1 != len2 || len1 != len3 ) {
+		PyErr_Format(PyExc_ValueError,
+         "Arrays of lengths (%d,%d,%d) given",
+         len1, len2, len3);
+        return;
+	}
+	p->LatLonDegreesFromValueNP( len1, lat, lon, indices );
+}
+%}
+%clear (int len1, double* lat);
+%clear (int len2, double* lon);
+%clear (int len3, int64_t* indices);
 
