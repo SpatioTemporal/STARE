@@ -7,9 +7,11 @@ Dependencies:
 
 1. STARE library
   C++ (std11)
+  ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
+  CUTE (included) - https://cute-test.com/
 
 2. PySTARE1: Python interface using SWIG
-  Python3
+  Python3, SWIG
 
 3. PySTARE: Python interface using Boost (deprecated)
   Python3, Boost, Boost::Python
