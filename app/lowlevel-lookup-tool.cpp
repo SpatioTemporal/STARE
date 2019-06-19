@@ -43,10 +43,21 @@
 
   DESCRIPTION
 
-  This example code demonstrates the lookup functionality of
-  the SpatialIndex.
+  This example code demonstrates the lookup functionality of the SpatialIndex.
 
-  It can be invoked by
+  NOTE: This is a low level function meant for analyzing library code, it should
+        be replaced by an easier-to-use lookup or other functional code for
+        regular use.
+
+  It can be invoked (for STARE) by
+
+    lowlevel-lookup-tool --quiet --STARE --latlon level lat lon
+
+  where
+    level is the resolution level (0..27)
+    lat,lon are the latitude and longitude in degrees, defining a point on the sphere
+
+  For LEGACY uses, it can be invoked by
 
   	lowlevel-lookup-tool level x y z
 
