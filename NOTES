@@ -1,0 +1,32 @@
+
+* 2019-06-19
+
+** TODOs
+
+- Add ERFA and CUTE to the root directory of the distribution.
+- Update the CMakeLists.txt to reflect those changes and reduce hardcoding.
+
+- The Boost-based Python API is deprecated and will be deleted soon.
+-- The current PySTARE has tuple and list support.
+-- The future PySTARE1 has a slightly different usage and no tuple/list support
+   currently depending on Numpy. (See contrib/python examples.)
+
+- A number of classes & files have a "1" at the end of their names This
+  generally indicates a need to refactor as the "1" is either a
+  derived class or an evolution meant to replace older code.
+
+- The TemporalIndex hierarchy of classes needs more thought. Currently
+  the default type is #2 and different implementations for the other
+  types is left for the future.
+
+- ERFA provides datum mappings for precise positioning in time. We should
+  take advantage of this when we need to associate longitude and time.
+
+** ODDITIES
+
+- The HTM spatial libraries, in particular the SkipList code used for
+  spatial ranges and covers expects negative index values to indicate 
+  invalid indices. Therefore the STARE spatial index must be positive
+  and the most significant bit is not used.
+  
+

@@ -5,6 +5,9 @@ contrib/
 
 Odds and ends in various stages of completion contributed by anyone.
 
+contrib/python
+
+Examples on how to use the python interface.
 
 contrib/scidb-hstm-cli-tools/
 

@@ -3,20 +3,22 @@
 
 Notes on installation.
 
-The environment variable TOPDIR is set to the top level of the
-distribution. CUTE-based unit testing is the default, set CUTEDIR to
-CUTE's location.
-
-There are now two methods for compiling STARE. The currently preferred
-method is based on CMake and the second (deprecated) uses an old ad hoc
-shell script.
-
 Dependencies:
-  Python3, Boost::Python: for PySTARE
+
+1. STARE library
+  C++ (std11)
+  ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
+  CUTE (included) - https://cute-test.com/
+
+2. PySTARE1: Python interface using SWIG
+  Python3, Numpy, SWIG
+
+3. PySTARE: Python interface using Boost (deprecated)
+  Python3, Numpy, Boost, Boost::Python
 
 ########################################################################### 
 #
-# METHOD 1 CMake (Preferred)
+# CMake build 
 #
 # Out-of-source build. Assume ./STARE is the TOPDIR.
 # 
@@ -25,23 +27,11 @@ Dependencies:
 #   tests will be in build/default/tests
 #   ./STARE/include contains the headers
 #
-$ mkdir build; cd build
-$ cmake ../STARE
-$ make
 
+mkdir build; cd build
+cmake ../STARE
+make
 
-########################################################################### 
-#
-# METHOD 2 Configure + Make (Deprecated)
-#
-# In TOPDIR, construct the makefile. The configure script uses uname
-# to try to determine which platform we're on.
-$ ./configure
-$ make
-
-The object files and library archive (libSTARE.a) are in the 'unix' directory.
-
-To use the library, include the files in 'include' and link to 'libSTARE.a'.
 
 ###########################################################################
 #

@@ -17,88 +17,31 @@
 
 #include <ctime>
 
-namespace std {
+#include "BitField.h"
+#include "TemporalWordFormat1.h"
 
-int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
-int64_t makeMask(int width);
+#include "erfa.h"
 
-// TODO Switch to templates for these different fields.
-// TODO Use vectors for the following.
-// TODO How to make a macro that does the following?
+#define TAG(X) cout << dec << X << hex << endl << flush;
 
-class BitField {
-	string  name;
-	int64_t value = 0;
-	int64_t maxValue;
-	int64_t width;
-	int64_t mask;
-	int64_t offset;
-	int64_t scale;
-	int64_t headroom;
-	int64_t coResolutionLevel;
+using namespace std;
+// namespace std {
+
+class TemporalWordFormat : virtual public TemporalWordFormat1 {
 public:
-	BitField();
-	BitField(
-			string  name,
-			int64_t maxValue,
-			int64_t width,
-			int64_t &offset,
-			int64_t scale,
-			int64_t coResolutionLevel
-			) :
-	name(name),
-	maxValue(maxValue),
-	width(width),
-	offset(offset-width),
-	scale(scale),
-	coResolutionLevel(coResolutionLevel)
-	{
-		mask = pow(2ll,width) -1;
-		headroom = mask - maxValue;
-		offset -= width;
 
-	};
-	virtual ~BitField();
-
-	string toString() const {
-		stringstream ss;
-		ss
-			<< setw(20) << name
-			<< setw(5)  << maxValue
-			<< setw(5)  << headroom
-			<< setw(5)  << width
-			<< setw(5)  << offset
-			<< setw(20) << scale
-			<< setw(5)  << coResolutionLevel;
-
-		return ss.str();
-	}
-
-	string   getName()   const { return name; }
-	int64_t  getMask()   const { return mask; }
-	int64_t  getOffset() const { return offset; }
-	int64_t  getMaxValue() const { return maxValue; }
-	int64_t  getWidth()  const { return width; }
-	int64_t  getScale()  const { return scale; }
-
-	int64_t  getValue()  const { return value; }
-	void     setValue(int64_t value) {
-		this->value = value;
-	}
-	int64_t getCoResolutionLevel() const { return coResolutionLevel; }
-};
-
-class TemporalWordFormat {
-	vector<BitField>     bitFields;   // Construct order... Verify object identity?
-	map<string,BitField> bitFieldMap; // Holds the data, can we have the same obj as previous?
-public:
-	int64_t maxCoResolutionLevelValue =  9;  // Would be const in a perfect universe.
-	int64_t minCoResolutionLevelValue = -1; // Corresponds to "Ma"
-	int64_t resolutionLevelConstraint =  7;
+	/**
+	 * Define the fields making up the encoding.
+	 */
 	TemporalWordFormat() {
+		// resolutionLevelConstraint =  7; // Counts the number of levels, including
+		nonDataLevels             =  3;
+
 		// maxCoResolutionLevelValue = 9; // Is actually more than we count in resLevel.
 		int64_t offset_base = 64;
-		int64_t coResolutionLevel = maxCoResolutionLevelValue;
+//		int64_t coResolutionLevel = maxCoResolutionLevelValue;
+//		int64_t coFieldId = maxCoResolutionLevelValue;
+		int64_t fieldId = 0;
 		// int64_t resolutionLevel = -2;  // TODO Fix hackery
 		// resolutionLevelConstraint = coResolutionLevel + resolutionLevel;
 		/// coResolutionLevel + resolutionLevel = maxCoResolutionLevelValue - 2
@@ -107,253 +50,159 @@ public:
 		///
 		/// TODO Put more thought into the "calendar" below...
 
+		// TODO DANGER This bit is not really set. It's used to set the sign of the index.
 		bitFields.push_back(
-				BitField("BeforeAfterStartBit",
+				new BitField("BeforeAfterStartBit",
 						1, // maxValue
 						1, // width
 						offset_base, // address/offset // in: 64; set to: 63 out: 63
 						-2,   // scale -- really need N/A here
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
+		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
-				BitField("Ma",
-						15,
-						4,
-						offset_base, // in: 63; set to: 59; out: 59
-						1000ll*1000*365*24*3600*1000,
-						coResolutionLevel--
-				)
-		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
-
-		bitFields.push_back(
-				BitField("ka",
-						999, // maxValue
-						10, // width
-						offset_base, // in: 59; set to: 49; out: 49
-						1000ll*365*24*3600*1000,
-						coResolutionLevel-- // the real start at rL = 7.
-				)
-		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
-
-		bitFields.push_back(
-				BitField("year",
-						999, // maxValue
-						10, // width
+				new BitField("year",
+						pow(2,19)-1, // maxValue
+						19, // width
 						offset_base,
 						(13ll*28+1)*24*3600*1000,
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				BitField("month",
+				new BitField("month",
 						13, //maxValue // TODO Repent: 13 months with 4 weeks each, and a 14th with one day... Or maybe you just use 12...
 						4, // width
 						offset_base,
 						28ll*24*3600*1000,
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				BitField("week",
+				new BitField("week",
 						3, // maxValue
 						2, // width
 						offset_base,
-						7*24*3600*1000,
-						coResolutionLevel--
+						7ll*24*3600*1000,
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				BitField("day",
+				new BitField("day",
 						6, // maxValue
 						3, // width
 						offset_base,
 						24*3600*1000,
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				BitField("hour",
+				new BitField("hour",
 						23, // maxValue
 						5, // width
 						offset_base,
 						3600*1000,
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				BitField("second",
-						3599, // maxValue
-						12, // width
+				new BitField("minute",
+						59, // maxValue
+						6, // width
+						offset_base,
+						60*1000,
+						fieldId++
+				)
+		);
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+
+		bitFields.push_back(
+				new BitField("second",
+						59, // maxValue
+						6, // width
 						offset_base,
 						1000,
-						coResolutionLevel--
+						fieldId++
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
+		pos_FinestResolutionLevel = fieldId;
 		bitFields.push_back(
-				BitField("millisecond",
+				new BitField("millisecond",
 						999, // maxValue
 						10, // width
 						offset_base,
-						1,
-						coResolutionLevel-- // the actual low, should equal zero
+						1, // time unit
+						fieldId++ // the actual low, should equal zero
 				)
 		);
-		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
+				new BitField("resolution",
+						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
+						pow(2,6)-1, // maxValue
+						6, // width
+						offset_base,
+						-1, // time unit, not applicable
+						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
+				)
+		);
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+
+		bitFields.push_back(
+				new BitField("type",
+						3, // maxValue
+						2, // width
+						offset_base,
+						-1, // time unit, not applicable
+						fieldId++ // N/A
+				)
+		);
+		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+
+
+		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
+		setFieldMaxId(fieldId-1);
+		setValue("type",2); //
+
+		/*
+		bitFields.push_back(
 				BitField("coResolutionLevel",
-						7, // maxValue
-						3, // width
+						-1, // maxValue
+						-1, // width
 						offset_base,
 						-1, // Not applicable
-						coResolutionLevel-- // -1, i.e. N/A
+						-1 // coResolutionLevel-- // -1, i.e. N/A
 				)
 		);
 		bitFieldMap.insert(pair<string,BitField>(bitFields.back().getName(),bitFields.back()));
+		*/
 
 	}
 	virtual ~TemporalWordFormat();
-
-	void print() const {
-		int i = 10;
-		for(vector<BitField>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
-			cout
-			<< setw(2)
-			<< --i << " "
-			<< (*it).toString() << endl << flush;
-		}
-
-	}
-	BitField get(string name) const {
-		return bitFieldMap.at(name);
-	}
-	TemporalWordFormat& setValue(string name, int64_t value) {
-		if(name != "resolutionLevel") {
-			bitFieldMap.at(name).setValue(value);
-		} else {
-			bitFieldMap.at("coResolutionLevel").setValue(resolutionLevelConstraint-value);
-		}
-		return *this;
-	}
-	int64_t getValue(string name) {
-	  if(name != "resolutionLevel") {
-		return bitFieldMap.at(name).getValue();
-	  } else {
-	    return
-	      resolutionLevelConstraint - bitFieldMap.at("coResolutionLevel").getValue();
-	  }
-	}
-
-	void setZero() {
-		int64_t coResolutionLevel = bitFieldMap.at("coResolutionLevel").getValue();
-		for(map<string,BitField>::iterator it = bitFieldMap.begin(); it != bitFieldMap.end(); ++it) {
-			(*it).second.setValue(0);
-		}
-		bitFieldMap.at("coResolutionLevel").setValue(coResolutionLevel);
-	}
-
-	// TODO throw excpetion if levelName is not a resolution level, i.e. a non-level field
-	int64_t getCoResolutionLevel(string levelName) {
-		return bitFieldMap.at(levelName).getCoResolutionLevel();
-	}
-
-	BitField &getBitFieldAtLevel(int64_t coResolutionLevel) {
-		// TODO Repent hard coding here
-		// int idx_coResolutionLevel = 9;
-		int idx_coResolutionLevel = bitFields.size(); // rL should be the last one.
-		int idx = idx_coResolutionLevel-2-coResolutionLevel; // Assume levels consecutive
-		return bitFieldMap.at(bitFields[idx].getName());
-	}
-
-	void incrementAtLevel(int64_t level,int64_t delta) {
-		if( (level < minCoResolutionLevelValue)
-			|| (maxCoResolutionLevelValue < level) )
-		{
-			throw SpatialFailure("TemporalWordFormat:incrementAtLevel:LevelOutOfBounds");
-		}
-//		cout << "10000: " << level << endl;
-		int64_t oldValue = getBitFieldAtLevel(level).getValue();
-//		cout << "10010: " << oldValue << endl;
-		int64_t newValue = oldValue + delta;
-
-		// TODO Check for overflow & underflow? Carry?
-		if(newValue>getBitFieldAtLevel(level).getMaxValue()) {
-			// Carry!
-			// TODO 8 is the "top" level here, even though we have a 3-bit level field here.
-			// TODO fix hardcode
-			if(level >= maxCoResolutionLevelValue) { // == 9 //
-				throw SpatialFailure("TemporalWordFormat:OverflowError");
-			}
-//			cout << "10100: " << newValue << endl;
-			incrementAtLevel(level+1,1); // level = 0 => highest resolution, greatest depth
-			newValue-=getBitFieldAtLevel(level).getMaxValue()+1;
-//			cout << "10110: " << newValue << endl;
-		}
-//		cout << "19000: " << newValue << endl;
-		getBitFieldAtLevel(level).setValue(newValue);
-//		cout << "19001: " << getBitFieldAtLevel(level).getValue() << endl;
-	}
-	void incrementAtLevel(string levelName, int64_t delta=1) {
-		incrementAtLevel(getCoResolutionLevel(levelName),delta);
-	}
-
-	void decrementAtLevel(int64_t level, int64_t delta) {
-		if(level >= maxCoResolutionLevelValue) {
-			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:MaxLevelExceeded");
-		}
-		if( (level < minCoResolutionLevelValue)
-			|| (maxCoResolutionLevelValue < level) )
-		{
-			throw SpatialFailure("TemporalWordFormat:decrementAtLevel:LevelOutOfBounds");
-		}
-		int64_t oldValue = getBitFieldAtLevel(level).getValue();
-		int64_t newValue = oldValue - delta;
-		// TODO Check for overflow & underflow? Carry?
-		if(newValue<0){
-			if(level==0) {
-				throw SpatialFailure("TemporalWordFormat:UnderflowError");
-			}
-			decrementAtLevel(level+1,1); // level = 0 => highest resolution, greatest depth
-			newValue+=getBitFieldAtLevel(level).getMaxValue()+1;
-		}
-		getBitFieldAtLevel(level).setValue(newValue);
-	}
-	void decrementAtLevel(string levelName, int64_t delta = 1) {
-		decrementAtLevel(getCoResolutionLevel(levelName), delta);
-	}
-
-	void setTerminatorBelowLevel(int64_t level){
-		// TODO Biggest abs-value possible in the field?
-		while( level-- > 0) {
-			int64_t newValue = getBitFieldAtLevel(level).getMask(); // negation handled elsewhere
-			// int64_t newValue = getBitFieldAtLevel(level).getMaxValue();
-			getBitFieldAtLevel(level).setValue(newValue);
-		}
-	}
-	void setTerminatorBelowLevel(string levelName) {
-		setTerminatorBelowLevel(getCoResolutionLevel(levelName));
-	}
-
 };
-static const TemporalWordFormat temporalWordFormat;
-static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
+
+static const char* TimeStandard = "TAI"; // Not "UTC"
+static const double  YearNativeCanonicalInMS_d   = 365.0*86400.0*1000.0;
+static const int64_t YearNativeCanonicalInMS_i64 = 31536000000; // 365  *86400  *1000;
+
+// static const TemporalWordFormat temporalWordFormat;
+// static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
 
 //int scidbTemporalIndexCommonLevel(int64_t i0, int64_t i1) {
 //	int commonLevel = -3; // error
@@ -375,39 +224,48 @@ static const int64_t maxValue_coResolutionLevel =  7 ; // = 7
 //}
 
 // TODO Question: Am I working myself towards an n-adic template?
+/**
+ * TemporalIndex defines a particular temporal index, in this case type=2.
+ * The constructor and the set_* methods are low level methods and do not
+ * check bounds. Other methods can be defined that provide a higher level
+ * API that includes such checks. We need at least one set of low-level
+ * methods.
+ *
+ * TemporalWordFormat1, the base class for TemporalWordFormat, provides some
+ * checks, e.g. resolutionInBounds.
+ *
+ *
+ */
 class TemporalIndex {
 public:
 	TemporalWordFormat data;
 	// TODO Make better use of temporalWordFormat...
-//	int64_t BeforeAfterStartBit = 0;
-//	int64_t Ma            = 0;
-//	int64_t ka            = 0;
-//	int64_t year          = 0;
-//	int64_t month         = 0;
-//	int64_t week          = 0;
-//	int64_t day           = 0;
-//	int64_t hour          = 0;
-//	int64_t second        = 0;
-//	int64_t millisecond   = 0;
-//	int64_t coResolutionLevel = maxValue_coResolutionLevel; // full (millisecond) resolution; = 0 => ka resolution
+
+
 
 	TemporalIndex() {
-		data = temporalWordFormat; // Copy the format
-		data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
+		// data = temporalWordFormat; // Copy the format
+		TemporalWordFormat data;
+		// data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
+		data.setValue("resolution",63);
 	};
 	virtual ~TemporalIndex();
+	/**
+	 * Native calendar format puts all leap time at the end of the year.
+	 */
 	TemporalIndex(
 			int64_t BeforeAfterStartBit,
-			int64_t Ma,
-			int64_t ka,
 			int64_t year,
 			int64_t month,
 			int64_t week,
 			int64_t day,
 			int64_t hour,
+			int64_t minute,
 			int64_t second,
 			int64_t millisecond,
-			int64_t coResolutionLevel )
+			int64_t resolution,
+			int64_t type
+			)
 //	:
 //				BeforeAfterStartBit(BeforeAfterStartBit),
 //				Ma(Ma),
@@ -421,448 +279,538 @@ public:
 //				coResolutionLevel(coResolutionLevel)
 	{
 
+		/*
 	  if( BeforeAfterStartBit != 1 )
 	    { stringstream ss; ss << "TemporalIndex::NOT_IMPLEMENTED_ERROR in TemporalIndex(...) BeforeAfterStartBit = 0 (past)" << endl;
 	      ss << "TODO: Correct index scheme for the past. E.g. years go negative, but not months, weeks, etc." << endl;
 	      throw SpatialFailure(ss.str().c_str()); }
+	      */
+
+// TODO Figure out redundancy of +/- 0 redundancy.
+//
+//	 There is no year zero. Should be aliased to 1 BCE, but this is a low-level constructor, so let's throw an error.
+//		if( BeforeAfterStartBit == 1 && year == 0) {
+//
+//		}
 	  
 #define SET_VALUE(field) data.setValue(#field,field);
 		SET_VALUE( BeforeAfterStartBit );
-		SET_VALUE( Ma );
-		SET_VALUE( ka );
 		SET_VALUE( year );
 		SET_VALUE( month );
 		SET_VALUE( week );
 		SET_VALUE( day );
 		SET_VALUE( hour );
+		SET_VALUE( minute );
 		SET_VALUE( second );
 		SET_VALUE( millisecond );
-		SET_VALUE( coResolutionLevel );
+		SET_VALUE( resolution );
+		SET_VALUE( type );
+		// SET_VALUE( coResolutionLevel );
 #undef SET_VALUE
 	};
 
 // #define SHIFT_AND_MASK(field) field = mask_##field & (idx_ >> offset_##field ) ;
-#define SHIFT_AND_MASK(field) data.setValue(#field,data.get(#field).getMask() & (idx_ >> data.get(#field).getOffset()));
-#define SHIFT_AND_MASK_RESOLUTION(field) \
-		data.setValue(#field, \
-				data.resolutionLevelConstraint \
-				- (data.get(#field).getMask() & (idx_ >> data.get(#field).getOffset())) );
+#define SHIFT_AND_MASK(field) data.setValue(#field,\
+		data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset()));
 
+		// cout << endl << #field << " " << dec << (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) << endl << flush;
+
+#define REVERT(field) data.setValue(#field, data.get(#field)->getMaxValue()-data.getValue(#field) );
+
+#define SET_MAX(field) data.setValue(#field,min(data.getValue(#field),data.get(#field)->getMaxValue()));
+
+//	int leapYearDay(int64_t _year) const {
+//		// From wikipedia
+//		int leapyear_day = 0;
+//		if( (_year % 4) != 0 ) {
+//			leapyear_day = 0;
+//		} else if( (_year % 100) != 0 ) {
+//			leapyear_day = 1;
+//		} else if( (_year % 400) != 0 ) {
+//			leapyear_day = 0;
+//		} else { leapyear_day = 1; }
+//		return leapyear_day;
+//	}
+
+//	int64_t milliseconds_per_year(int64_t _year) {
+//		int64_t ms;
+//		return ms;
+//	}
+
+//#define SHIFT_AND_MASK_RESOLUTION(field) \
+//		data.setValue(#field, \
+//				data.resolutionLevelConstraint \
+//				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
+
+	/**
+	 * Set the TemporalIndex according to a scidb temporal index.
+	 *
+	 * This is a low-level constructor, with no or minimal value checking.
+	 *
+	 */
 	TemporalIndex(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
-		SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
+		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
+		int64_t babit = 1;
 		if(idx_<0) {
+			babit = 0;
 			idx_ = - idx_;
+			// idx_ = idx_ | (1ll << 63);
 		}
-		SHIFT_AND_MASK(Ma)
-		SHIFT_AND_MASK(ka)
 		SHIFT_AND_MASK(year)
 		SHIFT_AND_MASK(month)
 		SHIFT_AND_MASK(week)
 		SHIFT_AND_MASK(day)
 		SHIFT_AND_MASK(hour)
+		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
-	};
-#undef SHIFT_AND_MASK
-#undef SHIFT_AND_MASK_RESOLUTION
+		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(type)
 
+		// if(false) {
+		if(babit == 0) {
+			// REVERT(year);
+			REVERT(month);
+			REVERT(week);
+			REVERT(day);
+			REVERT(hour);
+			REVERT(minute);
+			REVERT(second);
+			REVERT(millisecond);
+		}
+		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
+			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+		}
+	}
+
+	TemporalIndex& fromTemporalIndexValue(int64_t scidbTemporalIndex) {
+		int64_t idx_ = scidbTemporalIndex;
+
+		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
+		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
+		int64_t babit = 1;
+		if(idx_<0) {
+			babit = 0;
+			idx_ = - idx_;
+			// idx_ = idx_ | (1ll << 63);
+		}
+		SHIFT_AND_MASK(year)
+		SHIFT_AND_MASK(month)
+		SHIFT_AND_MASK(week)
+		SHIFT_AND_MASK(day)
+		SHIFT_AND_MASK(hour)
+		SHIFT_AND_MASK(minute)
+		SHIFT_AND_MASK(second)
+		SHIFT_AND_MASK(millisecond)
+		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(type)
+
+		// if(false) {
+		if(babit == 0) {
+			// REVERT(year);
+			REVERT(month);
+			REVERT(week);
+			REVERT(day);
+			REVERT(hour);
+			REVERT(minute);
+			REVERT(second);
+			REVERT(millisecond);
+		}
+
+		// Note: data.getValue("resolution") == 63 for a terminator.
+
+		// TODO Come up with a better leap year handler
+		// TODO Think through temporal design re: translation to & from dates.
+
+		/*
+		if( data.getValue("resolution") == 63 ) {
+
+//			// Fix things up if this is a terminator
+			if(data.getValue("year") > 0) {
+				data.setValue("month",13);
+				data.setValue("week",0);
+				data.setValue("day",0);
+				// data.setValue("day",leapYearDay(data.getValue("year")));
+			}
+			SET_MAX(year);
+			if(data.getValue("month") > 12) {
+				data.setValue("month",13);
+				data.setValue("week",0);
+				data.setValue("day",0);
+				// data.setValue("day",leapYearDay(data.getValue("year")));
+			}
+			SET_MAX(month);
+			SET_MAX(week);   // ok
+			SET_MAX(day);    // ok
+			SET_MAX(hour);   // ok
+			SET_MAX(minute); // ok
+			SET_MAX(second); // ok
+			SET_MAX(millisecond); // ok
+		}
+		*/
+
+		// TODO Construct an index validity checker...
+		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
+			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE");
+		}
+		return *this;
+	};
+#undef REVERT
+#undef SET_MAX
+#undef SHIFT_AND_MASK
+
+	TemporalIndex(const TemporalIndex& orig) {
+#define SET(field) data.setValue(#field,orig.data.getValue(#field));
+		SET(BeforeAfterStartBit)
+		SET(year)
+		SET(month)
+		SET(week)
+		SET(day)
+		SET(hour)
+		SET(minute)
+		SET(second)
+		SET(millisecond)
+		SET(resolution)
+		SET(type)
+#undef SET
+	}
+
+// #undef SHIFT_AND_MASK_RESOLUTION
+
+	/*
 	int64_t getCoResolutionLevel(string levelName) {
 		return data.getCoResolutionLevel(levelName);
 	}
-
 	int64_t getResolutionLevel(string levelName) {
 		return data.resolutionLevelConstraint - data.getCoResolutionLevel(levelName);
 	}
+	*/
 
-	// TODO Check for errors/integrity of data value.
-// #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
-#define MASK_AND_SHIFT(field) (( data.get(#field).getMask() & data.getValue(#field) ) \
-		<< data.get(#field).getOffset() )
-#define MASK_AND_SHIFT_RESOLUTION(field) (( data.get(#field).getMask() & (data.resolutionLevelConstraint-data.getValue(#field)) ) \
-		<< data.get(#field).getOffset() )
-	int64_t scidbTemporalIndex() {
-		int64_t idx_;
-//		cout << "100 ms: " << millisecond << " " << (0x3ffll  & millisecond) << endl << flush;
-//		cout << "100 Ma: " << Ma << " " << (0x7fll  & Ma) << endl << flush;
-//		cout << "100 rL: " << coResolutionLevel << endl << flush;
-		idx_ =
-				MASK_AND_SHIFT(Ma) |
-				MASK_AND_SHIFT(ka) |
-				MASK_AND_SHIFT(year) |
-				MASK_AND_SHIFT(month) |
-				MASK_AND_SHIFT(week) |
-				MASK_AND_SHIFT(day) |
-				MASK_AND_SHIFT(hour) |
-				MASK_AND_SHIFT(second) |
-				MASK_AND_SHIFT(millisecond)
-				;
-		if(0x1 && data.getValue("BeforeAfterStartBit") == 0) {
-			// past
-			idx_ = -idx_;
-		} // else future...
-		idx_ = idx_ | MASK_AND_SHIFT_RESOLUTION(coResolutionLevel);
-		return idx_;
-	};
-#undef MASK_AND_SHIFT
-#undef MASK_AND_SHIFT_RESOLUTION
+	int64_t getCoFieldId(string levelName) {
+		return data.getCoFieldId(levelName);
+	}
+	int64_t getFieldId(string levelName) {
+		return data.getFieldId(levelName);
+	}
 
-	int64_t scidbTerminator() {
-//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
-		TemporalIndex tmpIndex(this->scidbTemporalIndex());
-		tmpIndex.data.setTerminatorBelowLevel(get_coResolutionLevel());
-		int64_t idx_ = tmpIndex.scidbTemporalIndex();
-		idx_ = idx_ | tmpIndex.data.get("coResolutionLevel").getMask();
-		return idx_;
-	};
+	int64_t getIdOfCoarsestNonZeroField() {
+		int64_t iPos = data.pos_CoarsestResolutionLevel;
+		int64_t iCoarsestNonZero = -1;
+		do {
+			if ( data.getValueAtId(iPos) > 0 ) {
+				iCoarsestNonZero = iPos;
+			}
+			--iPos;
+		} while ( (iPos > data.pos_FinestResolutionLevel) && (iCoarsestNonZero < 0) );
+		return iCoarsestNonZero;
+	}
 
-	TemporalIndex &set_zero() {
-		data.setZero();
+	int64_t bitOffsetFinest() const;
+	int64_t bitOffsetCoarsest() const;
+	int64_t bitOffsetResolution(int64_t resolution)  const;
+	int64_t bitfieldIdFromResolution(int64_t resolution) const;
+
+	int64_t scidbTemporalIndex();
+	int64_t scidbTerminator();
+	int64_t scidbTerminatorJulianTAI();
+	bool    scidbTerminatorp();
+
+	TemporalIndex& set_zero();
+	TemporalIndex& setZero();
+	TemporalIndex& setEOY(int64_t CE, int64_t year);
+	void           toJulianTAI ( double& d1, double& d2) const;
+	TemporalIndex& fromJulianTAI( double  d1, double  d2);
+
+
+	void toFormattedJulianTAI(
+			int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
+			);
+	/**
+	 * Set using a TAI date.
+	 */
+	TemporalIndex& fromFormattedJulianTAI(
+			//old int64_t _CE,            // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// Match the TAI format. 1 BCE is year 0. //old > 0
+			int64_t _month, 		// 1..12 not 0..11
+			int64_t _day_of_month, 	// 1..31
+			int64_t _hour, 			// 0..23
+			int64_t _minute, 		// 0..59
+			int64_t _second, 		// 0..59
+			int64_t _millisecond 	// 0..999
+	);
+	void toUTC(
+			int& _year,
+			int& _month, 		// 1..12 not 0..11
+			int& _day_of_month, // 1..31
+			int& _hour, 		// 0..23
+			int& _minute, 		// 0..59
+			int& _second, 		// 0..59
+			int& _millisecond 	// 0..999
+			);
+	TemporalIndex& fromUTC(
+			int _year,
+			int _month, 		// 1..12 not 0..11
+			int _day_of_month, 	// 1..31
+			int _hour, 			// 0..23
+			int _minute, 		// 0..59
+			int _second, 		// 0..59
+			int _millisecond 	// 0..999
+			);
+
+	string toStringJulianTAI();
+	TemporalIndex& fromStringJulianTAI(string inputString);
+
+	int64_t millisecondsAtResolution(int64_t resolution) const;
+	double daysAtResolution(int64_t resolution) const;
+	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
+	double getResolutionTimescaleDays() const {
+		return daysAtResolution(get_resolution());
+	}
+	/**
+	 * Set resolution to the finest level coarser than the resolutionDays input.
+	 */
+	TemporalIndex& setResolutionFromTimescaleDays( double resolutionDays ) {
+		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerThanMilliseconds( resolutionDays*86400.0e3 )-1);
+		set_resolution(resolutionLevel);
 		return *this;
 	}
 
+
+
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
-	if( (x < 0) || (x > data.get(#field).getMaxValue()))\
-	throw SpatialFailure("TemporalIndex:DomainFailure in ",data.get(#field).getName().c_str()); return *this;}
+	if( (x < 0) || (x > data.get(#field)->getMaxValue()))\
+	throw SpatialFailure("TemporalIndex:DomainFailure in ",data.get(#field)->getName().c_str()); return *this;}
 	SET(BeforeAfterStartBit)
-	SET(Ma)
-	SET(ka)
 	SET(year)
 	SET(month)
 	SET(week)
 	SET(day)
 	SET(hour)
+	SET(minute)
 	SET(second)
 	SET(millisecond)
-	SET(coResolutionLevel)
+	SET(resolution)
+	SET(type)
+	// SET(coResolutionLevel)
 #undef  SET
-	TemporalIndex &set_resolutionLevel(int64_t level) {
-		data.setValue("coResolutionLevel",data.resolutionLevelConstraint - level); // TODO refactor
-		return *this;
-	}
+	// below is obsolete and wrong
+//	TemporalIndex &set_resolutionLevel(int64_t level) {
+//		data.setValue("coResolutionLevel",data.resolutionLevelConstraint - level); // TODO refactor
+//		return *this;
+//	}
 
-#define GET(field) int64_t get_##field() { return data.getValue(#field); }
+#define GET(field) int64_t get_##field() const { return data.getValue(#field); }
 	GET(BeforeAfterStartBit)
-	GET(Ma)
-	GET(ka)
 	GET(year)
 	GET(month)
 	GET(week)
 	GET(day)
 	GET(hour)
+	GET(minute)
 	GET(second)
 	GET(millisecond)
-	GET(coResolutionLevel)
+	GET(resolution)
+	GET(type)
+	// GET(coResolutionLevel)
 #undef GET
-	int64_t get_resolutionLevel() { return data.resolutionLevelConstraint - get_coResolutionLevel(); }
+	// int64_t get_resolutionLevel() { return data.resolutionLevelConstraint - get_coResolutionLevel(); }
 
-// #define OUTPUT(field) cout << name_##field << " " << field << " " << bitWidth_##field << " " << mask_##field << endl << flush;
-#define OUTPUT(field) cout \
-		<< setw(20) << data.get(#field).getName() \
-		<< setw(6) << data.getValue(#field) \
-		<< setw(3) << data.get(#field).getWidth() \
-		<< setw(5) << data.get(#field).getMask() \
-		<< endl << flush;
-	void checkBitFormat() {
-		cout << hex;
-		OUTPUT(BeforeAfterStartBit);
-		OUTPUT(Ma);
-		OUTPUT(ka);
-		OUTPUT(year);
-		OUTPUT(month);
-		OUTPUT(week);
-		OUTPUT(day);
-		OUTPUT(hour);
-		OUTPUT(second);
-		OUTPUT(millisecond);
-		OUTPUT(coResolutionLevel);
-		cout << dec;
-	}
-#undef OUTPUT
+	void checkBitFormat();
 
-	void hackSetTraditionalDate(
-				    int64_t _year, // > 0
-			int64_t _month, // 0..11
-			int64_t _day_of_month, // 1..31
-			int64_t _hour, // 0..23
-			int64_t _minute, // 0..59
-			int64_t _second, // 0..59
-			int64_t _millisecond // 0..999
-	) {
+	/**
+	 * Convert the fields to milliseconds to aid conversions and support intervals.
+	 *
+	 * No corrections for "leap years" with this low-level calculation.
+	 *
+	 * TODO Augment with a Julian millisecond calculation?
+	 */
+	int64_t toInt64MillisecondsFractionOfYearJ() const;
+	int64_t toInt64MillisecondsFractionOfYear() const;
+	int64_t toInt64Milliseconds() const;
+	TemporalIndex& fromInt64Milliseconds(int64_t milliseconds);
 
-	  if(_year < 0) 
-	    { stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR _year < 0" << endl;
-	      ss << "TODO: Correct hackSetTraditionalDate to handle negative years." << endl;
-	      throw SpatialFailure(ss.str().c_str()); }
-	  
-#define CHECK_BOUND(lo,val,hi) \
-	if ((val < lo) || (hi < val)) \
-	{ stringstream ss; ss << "TemporalIndex::hackSetTraditionalDate:CHECK_BOUND:ERROR in " << #val; \
-		throw SpatialFailure(ss.str().c_str()); }
-	CHECK_BOUND(0,_year,15999999);
-	CHECK_BOUND(0,_month,11);
-	CHECK_BOUND(1,_day_of_month,31);
-	CHECK_BOUND(0,_hour,23);
-	CHECK_BOUND(0,_minute,59);
-	CHECK_BOUND(0,_second,59);
-	CHECK_BOUND(0,_millisecond,999);
-#undef  CHECK_BOUND
-		// Be a little silly.
-		// TODO Fix for correct work
-		int days_in_month[] = {
-				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-		};
-		// From wikipedia
-		int leapyear_day = 0;
-		if( (_year % 4) != 0 ) {
-			leapyear_day = 0;
-		} else if( (_year % 100) != 0 ) {
-			leapyear_day = 1;
-		} else if( (_year % 400) != 0 ) {
-			leapyear_day = 0;
-		} else { leapyear_day = 1; }
+	double         toNativeYear();
+	TemporalIndex& fromNativeYear(double year);
 
-		days_in_month[1] += leapyear_day;
+	TemporalIndex& fromNativeCEYearAndMilliseconds(
+			int64_t CE,             // 0 or 1: 0 = BCE, 1 = CE
+			int64_t _year, 			// > 0
+			int64_t _milliseconds
+			);
+	void toNativeCEYearAndMilliseconds(int64_t& _CE, int64_t& _year, int64_t& _milliseconds);
 
-		int64_t days_in_months = 0;
+	string stringInNativeDate();
+	void fromNativeString(string nativeString);
 
-		for(int imo=0; imo < _month; ++imo) {
-			days_in_months += days_in_month[imo];
-		}
-
-		int64_t milliseconds_total =
-				_millisecond +
-				1000ll * (_second +
-						60ll * (_minute +
-								60ll * (_hour +
-										24ll * ( _day_of_month - 1ll +
-												days_in_months +
-												365ll * _year )))); // TODO HACK HACK HACK ?Use 365.25?
-
-#define SCALE(field) data.setValue(#field, \
-	(milliseconds_total / data.get(#field).getScale()) \
-	% (data.get(#field).getMaxValue() + 1) ); \
-	milliseconds_total -= data.get(#field).getScale()*data.getValue(#field);
-		SCALE(Ma);
-		SCALE(ka);
-		SCALE(year);
-		SCALE(month);
-		SCALE(week);
-		SCALE(day);
-		SCALE(hour);
-		SCALE(second);
-#undef SCALE
-		data.incrementAtLevel("ka",   0);
-		data.incrementAtLevel("year", 0);
-		data.setValue("millisecond",_millisecond);
-		data.setValue("BeforeAfterStartBit",1);
-	}
-
-	void hackGetTraditionalDate(
-			int64_t &_year,
-			int64_t &_month, // 0..11
-			int64_t &_day_of_month, // 1..31
-			int64_t &_hour, // 0..23
-			int64_t &_minute, // 0..59
-			int64_t &_second, // 0..59
-			int64_t &_millisecond // 0..999
-	) {
-
-		int64_t milliseconds_total = 0;
-
-//		cout << "100" << endl << flush;
-
-#define SCALE(field) milliseconds_total += \
-		  data.getValue(#field) * data.get(#field).getScale() \
-		  ;
-		SCALE(Ma);
-		SCALE(ka);
-		SCALE(year);
-		SCALE(month);
-		SCALE(week);
-		SCALE(day);
-		SCALE(hour);
-		SCALE(second);
-		SCALE(millisecond);
-#undef SCALE
-
-		int64_t _day_of_year = 0;
-
-//		cout << "200" << endl << flush;
-
-		/*
-#define EXTRACT(field,max_val) cout << #field << " " << flush; \
-	field = milliseconds_total % max_val; \
-	cout << "-1-" << flush; \
-	milliseconds_total -= field ; \
-	cout << "-2-" << flush; \
-	milliseconds_total /= max_val; \
-	cout << "-3-" << endl << flush;
-	*/
-#define EXTRACT(field,max_val) \
-	field = milliseconds_total % max_val; \
-	milliseconds_total -= field ; \
-	milliseconds_total /= max_val;
-		EXTRACT(_millisecond,1000ll);
-		EXTRACT(_second,     60ll);
-		EXTRACT(_minute,     60ll);
-		EXTRACT(_hour,       24ll);
-		EXTRACT(_day_of_year,365ll);  // TODO HACK HACK HACK ?Use 365.25?
-		_year = milliseconds_total;
-#undef EXTRACT
-
-//		cout << "300" << endl << flush;
-
-		// Be a little silly.
-		// TODO Fix for correct work
-		int days_in_month[] = {
-				31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-		};
-
-		// From wikipedia
-		int leapyear_day = 0;
-		if( (_year % 4) != 0 ) {
-			leapyear_day = 0;
-		} else if( (_year % 100) != 0 ) {
-			leapyear_day = 1;
-		} else if( (_year % 400) != 0 ) {
-			leapyear_day = 0;
-		} else { leapyear_day = 1; }
-		days_in_month[1] += leapyear_day;
-
-//		cout << "400" << endl << flush;
-
-		int imo = 0;
-		while( _day_of_year >= days_in_month[imo] ) { // bug mlr 2017-0602 was >
-			// cout << "401 " << _day_of_year << " " << imo << endl;
-			_day_of_year -= days_in_month[ imo++ ];
-			if( imo > 11 ) {
-				throw SpatialFailure("TemporalIndex:hackGetTraditionalDate:MonthArrayOverflow");
-			}
-		}
-		_month = imo;
-		_day_of_month = _day_of_year + 1;
-
-//		cout << "500" << endl << flush;
-
-	}
-
-	string hackStringInTraditionalDate() {
-	  
-	  int64_t
-	    year = 0,
-	    month = 0,
-	    day_of_month = 0,
-	    hour = 0,
-	    minute = 0,
-	    second = 0,
-	    millisecond = 0
-	    ;
-
-	  // Traditional format
-	  hackGetTraditionalDate
-	    ( year,
-	      month,
-	      day_of_month,
-	      hour,
-	      minute,
-	      second,
-	      millisecond
-	      );
-
-	  stringstream ss;
-	  // ss << tIndex;
-	  ss
-	    << setw(4) << setfill('0') << year << "-"
-	    << setw(2) << setfill('0') << month << "-"
-	    << setw(2) << setfill('0') << day_of_month << " "
-	    << setw(2) << hour << ":"
-	    << setw(2) << minute << ":"
-	    << setw(2) << second << "."
-	    << setw(3) << millisecond
-	    << " (" << setw(2) << data.getValue("resolutionLevel") << ")";
-
-	  return ss.str();
-	}
-
-	void hackFromTraditionalString(string traditionalString) {
-
-	  // TODO repent the sin of hardcoding
-	  int pos = 0;
-#define PARSE_INT(field,width) \
-	  int64_t field = atoi(traditionalString.substr(pos,width).c_str()); pos += width + 1;
-	  PARSE_INT(year,4);
-	  PARSE_INT(month,2);
-	  PARSE_INT(day_of_month,2);
-	  PARSE_INT(hour,2);
-	  PARSE_INT(minute,2);
-	  PARSE_INT(second,2);
-	  PARSE_INT(millisecond,3);
-	  ++pos;
-	  PARSE_INT(level,2);
-#undef PARSE_INT
-	  hackSetTraditionalDate
-	    ( year,
-	      month,
-	      day_of_month,
-	      hour,
-	      minute,
-	      second,
-	      millisecond
-	      );
-	  data.setValue("resolutionLevel",level);
-	}
-
-	string stringInNativeDate() {
-
-	  stringstream ss;
-	  ss
-	    << setw(3) << setfill('0') << data.getValue("Ma") << "-"
-	    << setw(3) << setfill('0') << data.getValue("ka")
-	    << setw(3) << setfill('0') << data.getValue("year") << "-"
-	    << setw(2) << setfill('0') << data.getValue("month") << "-"
-	    << setw(1) << setfill('0') << data.getValue("week") << "-"
-	    << setw(1) << setfill('0') << data.getValue("day") << " "
-	    << setw(2) << setfill('0') << data.getValue("hour") << ":"
-	    << setw(4) << setfill('0') << data.getValue("second") << "."
-	    << setw(3) << setfill('0') << data.getValue("millisecond")
-	    << " (" << setw(2) << data.getValue("resolutionLevel") << ")";
-
-	  return ss.str();
-	}
-
-	void fromNativeString(string nativeString) {
-	  // TODO repent the sin of hardcoding
-	  int pos = 0;
-#define PARSE_INT(field,width) \
-	  data.setValue(#field,atoi(nativeString.substr(pos,width).c_str())); \
-	  pos += width;
-	  /*
-	   cout << endl \
-	   << #field << ": " << atoi(nativeString.substr(pos,width).c_str()) *continuation*
-	   << ", '" << nativeString.substr(pos,width) << "'" << endl; *continuation*
-	   */
-
-	  PARSE_INT(Ma,3); ++pos;
-	  PARSE_INT(ka,3);
-	  PARSE_INT(year,3); ++pos;
-	  PARSE_INT(month,2); ++pos;
-	  PARSE_INT(week,1); ++pos;
-	  PARSE_INT(day,1); ++pos;
-	  PARSE_INT(hour,2); ++pos;
-	  PARSE_INT(second,4); ++pos;
-	  PARSE_INT(millisecond,3); pos += 2;
-	  PARSE_INT(resolutionLevel,2);
-#undef PARSE_INT
-	  data.setValue("BeforeAfterStartBit",1);
-	}
-
-
+	int eraTest();
 };
 
-} /* namespace std */
+void fractionalDayToHMSM   (double  fd, int& hour, int& minute, int& second, int& ms);
+void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int  ms);
+
+inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
+	}
+	bool done = false; int iField = 0;
+	int ret = 0;
+	int     CE_factor = 1;
+	int64_t thisCE  = a.get_BeforeAfterStartBit();
+	int64_t otherCE = b.get_BeforeAfterStartBit();
+	if( thisCE == otherCE ) {
+		// We need to reorder the inequalities if we're in BCE territory.
+		if( thisCE < 1 ) {
+			CE_factor = -1;
+		}
+	}
+
+	do {
+		int64_t lhs = a.data.getValueAtId(iField);
+		int64_t rhs = b.data.getValueAtId(iField);
+//		int64_t lhs = a.data.getBitFieldAtId(iField)->getValue();
+//		int64_t rhs = b.data.getBitFieldAtId(iField)->getValue();
+		if( lhs < rhs ) {
+			ret = -1*CE_factor; done = true;
+		} else if ( lhs > rhs ) {
+			ret =  1*CE_factor; done = true;
+		}
+		++iField;
+		 if( iField >= a.data.getFieldId("resolution") ){
+			 done = true;
+		 }
+	} while (!done);
+	return ret;
+}
+
+inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+
+	int64_t	ab = a.toInt64Milliseconds() + b.toInt64Milliseconds();
+
+	TemporalIndex* c = new TemporalIndex;
+
+	c->fromInt64Milliseconds(ab);
+	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
+
+	return *c;
+}
+
+inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
+	}
+
+	double ad1, ad2, bd1, bd2;
+	double ad, bd;
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
+	ad = ad1 + ad2; bd = bd1 + bd2;
+
+	int ret = 0; // if equal
+	if ( ad < bd ) {
+		ret = -1;
+	} else if ( ad > bd ) {
+		ret = 1;
+	}
+	return ret;
+}
+
+inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+	double ad1, ad2, bd1, bd2, cd1, cd2;
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
+	cd1 = ad1+bd1; cd2 = ad2+bd2;
+//#define FMT1(x,y) cout << #x << "," << #y << " " << x << "," << y << endl << flush;
+//	FMT1(ad1,ad2);
+//	FMT1(bd1,bd2);
+//	FMT1(cd1,cd2);
+//#undef FMT1
+	TemporalIndex* c = new TemporalIndex;
+	c->fromJulianTAI(cd1, cd2);
+	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return *c;
+}
+
+inline double diff_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	// Note by convention, there is no babit==1, year==0.
+	// Now, use TemporalIndex as a scratchpad and fix semantics at end.
+	double ad1, ad2, bd1, bd2;
+	a.toJulianTAI(ad1, ad2);
+	b.toJulianTAI(bd1, bd2);
+	return (ad1+ad2)-(bd1+bd2);
+}
+
+/**
+ * Are two TemporalIndex values within a "resolution" time scale of each other?
+ *
+ */
+inline bool cmp_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	double delta  = diff_JulianTAIDays(a,b);
+	double timescale = max(a.getResolutionTimescaleDays(),b.getResolutionTimescaleDays());
+	bool neighborsp = abs(delta) < timescale;
+	return neighborsp;
+}
+
+/**
+ * Are two TemporalIndex values within a "resolution" time scale of each other?
+ *
+ */
+inline bool cmp_JulianTAIDays3(const TemporalIndex& a, const TemporalIndex& b, double daysTolerance) {
+	if( a.get_type() != b.get_type() ) {
+		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
+	}
+	double delta  = diff_JulianTAIDays(a,b);
+	bool neighborsp = abs(delta) < daysTolerance;
+	return neighborsp;
+}
+inline bool operator==(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) == 0; }
+inline bool operator!=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) != 0; }
+inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <  0; }
+inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >  0; }
+inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <= 0; }
+inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >= 0; }
+inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
+
+inline std::ostream& operator<<(std::ostream& os, TemporalIndex tIndex) {
+	os << tIndex.toStringJulianTAI();
+	return os;
+}
+
+/**
+ * Returns the lowest temporal index valid in SciDB. SciDB has symmetrical coordinate (index) dimensions, i.e. +/- (2**62 -1).
+ */
+int64_t scidbMinimumTemporalIndex();
+/**
+ * Returns the greatest non-terminator temporal index valid in SciDB. For a poor-man's terminator here, set the 6 resolution bits to 1, i.e. 63.
+ */
+int64_t scidbMaximumTemporalIndex();
+
+int64_t millisecondsInYear(int64_t CE, int64_t year);
+
+// } /* namespace std */
+
+int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
+
+void TemporalIndex_test();
 
 #endif /* SRC_TEMPORALINDEX_H_ */
