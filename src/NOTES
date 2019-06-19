@@ -8,7 +8,7 @@ testNode takes SpatialVectors and returns reject, full, partial or dontknow
 it would make more sense to have a testnode(id) and macros have no implicit reference to id
 
 OPTIMIZE:
-	The expresiion index->nodes_[id] gets evaluated three times, instead of once.
+	The expression index->nodes_[id] gets evaluated three times, instead of once.
 
 
 testNode(

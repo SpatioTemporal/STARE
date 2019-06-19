@@ -3,6 +3,10 @@
 #
 # Example script for comparing the legacy lowlevel-lookup-tool with PySTARE.
 #
+# Usage: python example.py
+#
+# Note the hardwired reference to the lowlevel-lookup-tool. The PySTARE1 module must be available in the PYTHONPATH.
+#
 # Michael Rilee, mike@rilee.net, 2019 April 15
 #
 

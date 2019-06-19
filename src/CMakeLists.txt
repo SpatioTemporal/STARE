@@ -35,6 +35,7 @@ set (
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
+# Boost is deprecated
 find_package(Boost)
 if(Boost_FOUND)
   include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.7m"  )
@@ -53,9 +54,8 @@ else()
   message("Boost not found, not creating shared object PySTARE, including the python 3 API. Was BOOST_ROOT set?\nContinuing...\n")  
 endif()
 
-
+# SWIG integration of PySTARE1
 if(true)
-
 	# UseSWIG_TARGET_NAME_PREFERENCE
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )

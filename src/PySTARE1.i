@@ -22,13 +22,13 @@ import_array();
 
 /* double doublefun(double b); */
 
-/* https://scipy.github.io/old-wiki/pages/Cookbook/SWIG_NumPy_examples */
+/* https://scipy.github.io/old-wiki/pages/Cookbook/SWIG_NumPy_examples
 %apply (int* ARGOUT_ARRAY1, int DIM1) {(int* rangevec, int n)}
 void range(int *rangevec, int n);
 %clear (int* rangevec, int n);
+ */
 
-
-/* double dot(int n, double *a, double *b); */
+/* double dot(int n, double *a, double *b); 
 %apply (int DIM1, double* IN_ARRAY1) {(int len1, double* vec1),
                                       (int len2, double* vec2)}
 %rename (dot) my_dot;
@@ -47,8 +47,9 @@ double my_dot(int len1, double* vec1, int len2, double* vec2) {
     return dot(len1, vec1, vec2);
 }
 %}
+*/
 
-/* void xdot(int n, double* a, double* b, double* ret); */
+/* void xdot(int n, double* a, double* b, double* ret);
 %apply ( int DIM1, double* INPLACE_ARRAY1 ) {(int len3, double* ret)} 
 %rename (xdot) my_xdot;
 %exception my_xdot {
@@ -66,10 +67,11 @@ void my_xdot(int len1, double* vec1, int len2, double* vec2, int len3, double* r
 	xdot(len1,vec1,vec2,ret);
 }
 %}
-
+ 
 %clear (int len1, double* vec1);
 %clear (int len2, double* vec2);
 %clear (int len3, double* ret);
+*/
 
 %inline %{
 
