@@ -1,8 +1,6 @@
 
 ### Provisos
 
-
-
 This release is being made in the hopes it may be useful for early users wishing to experiment with STARE functions.
 
 ###########################################################################
@@ -29,6 +27,9 @@ INSTALL
 PySTARE and PySTARE1
   A fledgling Python 3 interface is available. See INSTALL for more information.
   See also contrib/python for examples of how to use the Python interface and the low-level-lookup-tool in the app directory.
+  
+GITHUB
+  STARE is made available at https://github.com/michaelleerilee/STARE
 
 ###########################################################################
 
@@ -36,9 +37,9 @@ HISTORY
 
 2018-2019 Development supported by NASA/ACCESS-17.
 
-The spatial indexing is a fork of version 2 of the Hierarchical Triangular Mesh developed for the Sloan Digital Sky Survey.
+The spatial indexing is a fork of version 2 of the Hierarchical Triangular Mesh (HTM) developed for the Sloan Digital Sky Survey.
 
-Version 2 is the legacy version: http://www.skyserver.org/HTM/Old_default.aspx
+HTM Version 2 is the legacy version: http://www.skyserver.org/HTM/Old_default.aspx
 
 Seminal work on the HTM for indexing the sphere was done by P.Z. Kunszt, A.S. Szalay, I. Csabai, A.R. Thakar, with extended development by J. Gray and G. Fekete (http://www.skyserver.org/HTM/doc/).  See also Kondor et al., 2014, "http://arxiv.org/pdf/1410.0709.pdf".
 

@@ -1,0 +1,12 @@
+
+* 2019-06-19
+
+** TODOs
+
+- Add ERFA and CUTE to the root directory of the distribution.
+- Update the CMakeLists.txt to reflect those changes and reduce hardcoding.
+
+- The Boost-based Python API is deprecated and will be deleted soon.
+-- The current PySTARE has tuple and list support.
+-- The future PySTARE1 has a slightly different usage and no tuple/list support currently depending on Numpy. (See contrib/python examples.)
+
