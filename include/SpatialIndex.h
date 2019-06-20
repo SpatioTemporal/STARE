@@ -99,7 +99,7 @@ public:
   ///Print the node information in nodes_ at nodeIndex.
 void printNode(int nodeIndex) const;
 
-  /// NodeName conversion to integer ID
+  /// NodeName conversion to integer ID (but which one?)
   static uint64 idByName(const char *);
 
   /// Legacy code
@@ -163,10 +163,11 @@ void printNode(int nodeIndex) const;
 
   /** Find the neighbors across the edges of the triangles htmId */
   void
-  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId) const;
+  NeighborsAcrossEdgesFromHtmId(uint64 neighbors[3], uint64 htmId, SpatialVector workspace[18]) const;
 
   void
-  NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId) const;
+  NeighborsAcrossVerticesFromEdges(uint64 neighbors[9], uint64 neighbors_edge[3], uint64 htmId, SpatialVector workspace[18]) const;
+  // NeighborsAcrossVerticesFromHtmId(uint64 neighbors[9], uint64 htmId, SpatialVector workspace[15]) const;
 
   /** find a node by giving a vector.
    *
@@ -276,8 +277,16 @@ private:
 
   // Test whether a vector v is inside a triangle v0,v1,v2. Input
   // triangle has to be sorted in a counter-clockwise direction.
-  bool isInside(const SpatialVector & v, const SpatialVector & v0,
-		const SpatialVector & v1, const SpatialVector & v2) const;
+  bool isInside(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2
+		  ) const;
+
+  bool isInsideBarycentric(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2,
+		  bool verbose
+		  ) const;
 
   // VARIABLES
 

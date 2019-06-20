@@ -3,20 +3,22 @@
 
 Notes on installation.
 
-The environment variable TOPDIR is set to the top level of the
-distribution. CUTE-based unit testing is the default, set CUTEDIR to
-CUTE's location.
-
-There are now two methods for compiling STARE. The currently preferred
-method is based on CMake and the second (deprecated) uses an old ad hoc
-shell script.
-
 Dependencies:
-  Python3, Boost::Python: for PySTARE
+
+1. STARE library
+  C++ (std11)
+  ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
+  CUTE (included) - https://cute-test.com/
+
+2. PySTARE1: Python interface using SWIG
+  Python3, Numpy, SWIG
+
+3. PySTARE: Python interface using Boost (deprecated)
+  Python3, Numpy, Boost, Boost::Python
 
 ########################################################################### 
 #
-# METHOD 1 CMake (Preferred)
+# CMake build 
 #
 # Out-of-source build. Assume ./STARE is the TOPDIR.
 # 
@@ -25,23 +27,59 @@ Dependencies:
 #   tests will be in build/default/tests
 #   ./STARE/include contains the headers
 #
-$ mkdir build; cd build
-$ cmake ../STARE
-$ make
 
+# The default location for CMAKE_INSTALL_PREFIX is /usr/local (UNIX)
+#	or c:/Program Files (Windows). Running the below cmake command will
+#	set it to $prefix/deps. If you wish to install it elsewhere, simply
+#	set the environment variable to your preferred location.
+# The environment variable "CUTE_INCLUDE_DIR" has a default value of:
+#	'${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE'
+#	If you want to use a different location for the CUTE headers you
+#	must provide it with the cmake command using
+#	'-DCUTE_INCLUDE_DIR=<CUTE location>'
 
-########################################################################### 
+mkdir build; cd build
+cmake ../STARE
+make
+
+###########################################################################
 #
-# METHOD 2 Configure + Make (Deprecated)
+# CUTE additional comments
+
+wget https://github.com/PeterSommerlad/CUTE/archive/master.zip
+unzip master.zip 
+
+# option 1)
+export CUTE_INCLUDE_DIR="/path/to/cute/"
+
+# option 2)
+mkdir STARE/cute/
+cp -r CUTE/cute STARE/cute/
+
+###########################################################################
 #
-# In TOPDIR, construct the makefile. The configure script uses uname
-# to try to determine which platform we're on.
-$ ./configure
-$ make
+# Ubuntu 18.04 additional comments
 
-The object files and library archive (libSTARE.a) are in the 'unix' directory.
+sudo apt install cmake
+sudo apt install g++
+sudo apt install libboost-python-dev
+sudo apt install libboost-numpy-dev
 
-To use the library, include the files in 'include' and link to 'libSTARE.a'.
+###########################################################################
+#
+# CentOS 7 additional comments
+
+sudo yum install epel-release
+sudo yum install cmake3
+sudo yum install gcc-c++
+sudo yum install python36-devel.x86_64
+
+# The meta package "boost-python3-devel.x86_64" points to version 1.53, which does not contain boost-numpy
+# therefore, install boost169-python3-devel
+
+sudo yum install boost169-python3-devel.x86_64
+sudo ln -s /usr/lib64/libboost_python34.so.1.69.0 /usr/lib64/libboost_python3.so
+sudo ln -s /usr/lib64/libboost_numpy34.so.1.69.0 /usr/lib64/libboost_numpy3.so
 
 ###########################################################################
 #
@@ -55,4 +93,3 @@ Copyrights and licenses as asserted in individual files. Legacy HTM distributed 
 
 Copyright (c) 2019 Michael Lee Rilee, RSTLLC, mike@rilee.net
 
-###########################################################################

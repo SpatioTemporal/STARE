@@ -19,10 +19,13 @@
 class SkipListElement;
 // class ostream;
 
+/**
+ * Note: Keys are presumed positive in this formulation.
+ */
 class LINKAGE SkipList{
 public:
 
-	/* ITERATOR SUPPRT */
+	/* ITERATOR SUPPORT */
 	/**
 	 * Reset the iterator iter to the header's zeroth element.
 	 */
@@ -32,11 +35,12 @@ public:
 	/// Set iter to the next element, returning True if it exists.
 	int step() {
 		iter = iter->getElement(0); return (iter != NIL);}
+	/// TODO redo the getkey to something like bool getkey(Key &key)...
 	Key getkey() {
 		if (iter != NIL)
 			return iter->getKey();
 		else
-			return (Key) -1;
+			return (Key) -1; // TODO Rethink using a Key as a symbol -- only positive Keys? There are KEY_MAX and KEY_MIN and KEY_MIN < 0.
 	}
 	Value getvalue() {
 		if (iter != NIL)

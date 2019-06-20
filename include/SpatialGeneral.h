@@ -115,7 +115,12 @@ const float64 gPi   = 3.1415926535897932385E0 ;
 const float64 gPio2 = 3.1415926535897932385E0/2.0 ;
 const float64 gPr = gPi/180.0; 
 const float64 piDiv180 = gPr;
-const float64 gEpsilon = 1.0E-15;
+// const float64 gEpsilon = 1.0E-15;
+// const float64 gEpsilon = 1.0E-16;
+// const float64 gEpsilon = 1.0E-17;
+// const float64 gEpsilon = 5.0E-18;
+// const float64 gEpsilon = 1.0E-18;
+const float64 gEpsilon = 5.0E-19;
 // CVSversion = "$Name:  $";
 
 //
@@ -168,6 +173,13 @@ const float64 gEpsilon = 1.0E-15;
 #   endif
 
 #endif  /* _WIN32 */
+
+// Added this to cover the case where the code is built
+// without a specific OS being defined since that's now
+// often the case. jhrg 5/20/19
+#ifndef LINKAGE
+    #define LINKAGE
+#endif
 
 #ifndef SpatialWinNT
 #   define IDHIGHBIT  0x8000000000000000LL

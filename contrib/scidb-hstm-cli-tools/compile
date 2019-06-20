@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo OBSOLETE EXAMPLE FOR HOW TO COMPILE THESE CLI FILES
+echo Exiting...
+exit
+
+# The legacy build process put object and lib files in ${STARE_HOME}/unix.
+
 # STARE_HOME=/Users/mrilee/git/stare
 STARE_HOME=~/stare
 

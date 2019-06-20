@@ -14,16 +14,41 @@
 #include "SpatialDomain.h"
 #include <iostream>
 
+/**
+ * @brief Version function with C linkage to aid in finding the library with autoconf
+ * @return The library's version. Points to static storage.
+ */
+extern "C" const char *STARE_version() {
+    return (const char *)STARE_VERSION;
+}
+    
+/**
+ *
+ * Major change: The default octahedral rotation is now theta    = 0.25*gPi - 12.0e-9.
+ * The 7.6 cm shift puts the north pole in the center of a trixel.
+ *
+ */
 STARE::STARE() {
-	// TODO Fix the hardwired rotation -- want to bump it over a 26-level triangle.
+
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
-	float64       theta    = 0.25*gPi;
+	float64       theta    = 0.25*gPi - 12.0e-9; // bump it over a 27-level triangle
 	rotate_root_octahedron = SpatialRotation(axis,theta);
 	sIndex                 = SpatialIndex(search_level, build_level, rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(search_level,sIndex));
 	/*if( sIndexes.find(search_level) ) {
 		// The level was found...
 	}*/
+}
+
+STARE::STARE(
+		int search_level, int build_level, SpatialRotation rotate_root_octahedron ) {
+
+	this->search_level = search_level;
+	this->build_level  = build_level;
+	this->rotate_root_octahedron = rotate_root_octahedron;
+
+	sIndex                 = SpatialIndex(search_level, build_level, this->rotate_root_octahedron);
+	sIndexes.insert(std::make_pair(search_level,sIndex));
 }
 
 STARE::~STARE() {
@@ -193,10 +218,10 @@ bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
  * @param force_resolution_level - the smallest triangles to use in the covering
  *
  */
-STARE_Intervals STARE::CoverBoundingBoxFromLatLonDegrees(
+STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
 	int resolution_level; // for the match
-	STARE_Intervals intervals;
+	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
 		return intervals;
@@ -257,7 +282,7 @@ STARE_Intervals STARE::CoverBoundingBoxFromLatLonDegrees(
  *
  * TODO Requires testing & presentation
  */
-STARE_Intervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level) {
+STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level) {
 
 	SpatialIndex index;
 	if( force_resolution_level > -1 ) {
@@ -279,7 +304,7 @@ STARE_Intervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, fl
 	bool overlap = d.intersect(&index,&r,&varlen_false);
 	r.reset();
 
-	STARE_Intervals intervals;
+	STARE_SpatialIntervals intervals;
 	Key lo=-999, hi=-999;
 	uint64 id0, id1;
 	int indexp = r.getNext(lo,hi);
@@ -308,7 +333,7 @@ SpatialIndex STARE::getIndex(int resolutionLevel) {
 }
 
 /**
- * Return the htmID value from the spatialStareId.
+ * Return the legacy htmID value from the spatialStareId.
  *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
  * This is important when calling into the legacy htm foundation and why it's kept private.
@@ -326,4 +351,95 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	BitShiftNameEncoding rightJustified(leftJustifiedPositionOnly.rightJustifiedId());
 	uint64 htmID = rightJustified.getId();
 	return htmID;
+}
+/**
+ * Return the spatialStareId from the legacy htmID.
+ *
+ * This is the inverse of htmIDFromValue and should not be so useful.
+ */
+STARE_ArrayIndexSpatialValue STARE::ValueFromHtmID(uint64 htmID) {
+	return EmbeddedLevelNameEncoding(BitShiftNameEncoding(htmID).leftJustifiedId()).getSciDBLeftJustifiedFormat();
+}
+
+/**
+ * Return a vector of spatial STARE index values containing all 12 neighboring triangles.
+ *
+ * Uses htmID legacy encoding under the hood.
+ */
+STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
+	STARE_ArrayIndexSpatialValue spatialStareId) {
+	// TODO make htmID it's own type so we can lean a bit on the compiler.
+	int level = ResolutionLevelFromValue(spatialStareId);
+	uint64 htmID = htmIDFromValue          (spatialStareId,level); // TODO verify this line is correct. We've got to watch out for the extra precision bits during the conversion.
+	SpatialIndex index = getIndex(ResolutionLevelFromValue(spatialStareId));
+	uint64 neighbors[3+9];
+	SpatialVector workspace[18];
+
+	// index.NeighborsAcrossEdgesFromHtmId(&neighbors[9], htmID, workspace);
+	// index.NeighborsAcrossVerticesFromEdges(neighbors, &neighbors[9], htmID, workspace);
+
+	index.NeighborsAcrossEdgesFromHtmId(neighbors, htmID, workspace);
+	index.NeighborsAcrossVerticesFromEdges(&neighbors[3], neighbors, htmID, workspace);
+
+	for(int i=0; i < 3+9; ++i ) {
+		// cout << i << " s::nov: " << hex << "0x" << neighbors[i] << dec << endl << flush;
+		neighbors[i] = ValueFromHtmID(neighbors[i]);
+	}
+	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
+}
+
+TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution,int type) {
+	if( type != 2 ) {
+		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+	}
+	// tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms, type);
+	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
+	tIndex.set_resolution(resolution);
+	return tIndex;
+}
+
+TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+	if( type != 2 ) {
+		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+	}
+	// tIndex.fromUTC(year, month,day,hour, minute, second, ms, type);
+	tIndex.fromUTC(year, month,day,hour, minute, second, ms);
+	tIndex.set_resolution(resolution);
+	return tIndex;
+}
+
+void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+	tIndex.toFormattedJulianTAI(year, month, day, hour, minute, second, ms);
+	resolution = tIndex.get_resolution();
+	type       = tIndex.get_type();
+}
+void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+	tIndex.toUTC(year, month, day, hour, minute, second, ms);
+	resolution = tIndex.get_resolution();
+	type       = tIndex.get_type();
+}
+
+// TemporalIndex& STARE::getTIndex() { return tIndex; }
+
+STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
+	return tIndex.scidbTemporalIndex();
+}
+
+TemporalIndex& STARE::setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue) {
+	return tIndex.fromTemporalIndexValue(temporalValue);
+}
+
+bool STARE::cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue) {
+	TemporalIndex inputTIndex(temporalValue);
+	return cmp_JulianTAIDays(this->tIndex,inputTIndex);
+}
+
+bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2) {
+	TemporalIndex a(tv1), b(tv2);
+	return cmp_JulianTAIDays(a,b);
+}
+
+bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days) {
+	TemporalIndex a(tv1), b(tv2);
+	return cmp_JulianTAIDays3(a,b,days);
 }

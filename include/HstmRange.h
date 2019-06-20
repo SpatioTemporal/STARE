@@ -32,6 +32,7 @@ public:
 	HstmRange();
 	virtual ~HstmRange();
 
+	// TODO Note the int in the following is a return code, not an index.
 	int  getNext(KeyPair &kp) {
 		int istat = range->getNext(kp);
 //		cout << "<istat=" << istat << ">" << flush;
