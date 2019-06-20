@@ -39,12 +39,12 @@ GITHUB
 The spatial encoding encodes the traversal through a recursive partitioning
 (quadfurcation) of spherical triangles to find points located on the unit sphere. 
 
- BITS    USAGE
----------------
-63 - 62  Not used
-59 - 61  Root octahedron index
- 5 - 58  Tree traversal (2 bits to partition each triangle, 27 levels of partitions)
- 0 -  4  Resolution indicator, also Terminator indicator if all bits are set
+| BITS | USAGE                                                                         |
+|:----:|:------------------------------------------------------------------------------|
+|63 - 62  |Not used									     |
+|59 - 61  |Root octahedron index							     |
+| 5 - 58  |Tree traversal (2 bits to partition each triangle, 27 levels of partitions)    |
+| 0 -  4  |Resolution indicator, also Terminator indicator if all bits are set            |
 
 See src/EmbeddedLevelNameEncoding.C, EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat.
 
@@ -71,19 +71,19 @@ assumes responsibility for the correctness of the date encoded.
 
 The default partitioning of an HCE word follows. See TemporalIndex for more information.
 
- BITS   WIDTH USAGE
---------------------
-63            Set by the sign (2-s complement), also called the Before/After bit
-44 - 62  19   Year (0..*)
-40 - 43   4   Month (0..13)
-38 - 39   2   Week (0..4)
-35 - 37   3   Day (0..7)
-30 - 34   5   Hour (0..23)
-24 - 29   6   Minute (0..59)
-18 - 23   6   Second (0..59)
- 8 - 17  10   Millisecond (0..999)
- 2 -  7   6   Resolution indicates a time scale associated with a bit position **
- 0 -  1   2   Type indicator (default = 2)
+| BITS |  WIDTH |  USAGE |
+|:-----:|:--------:|:--------|
+|63      |     | Set by the sign (2-s complement), also called the Before/After bit|
+|44 - 62 | 19  | Year (0..*)|
+|40 - 43 |  4  | Month (0..13)|
+|38 - 39 |  2  | Week (0..4)|
+|35 - 37 |  3  | Day (0..7)|
+|30 - 34 |  5  | Hour (0..23)|
+|24 - 29 |  6  | Minute (0..59)|
+|18 - 23 |  6  | Second (0..59)|
+| 8 - 17 | 10  | Millisecond (0..999)|
+| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position **|
+| 0 -  1 |  2  | Type indicator (default = 2)|
  
  * The default STARE temporal index can range between year -262143 and 262143 in the
    internal native format. Year zero and negative years are set by setting
