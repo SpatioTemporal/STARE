@@ -28,6 +28,16 @@ Dependencies:
 #   ./STARE/include contains the headers
 #
 
+# The default location for CMAKE_INSTALL_PREFIX is /usr/local (UNIX)
+#	or c:/Program Files (Windows). Running the below cmake command will
+#	set it to $prefix/deps. If you wish to install it elsewhere, simply
+#	set the environment variable to your preferred location.
+# The environment variable "CUTE_INCLUDE_DIR" has a default value of:
+#	'${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE'
+#	If you want to use a different location for the CUTE headers you
+#	must provide it with the cmake command using
+#	'-DCUTE_INCLUDE_DIR=<CUTE location>'
+
 mkdir build; cd build
 cmake ../STARE
 make

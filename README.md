@@ -8,8 +8,8 @@ This release is being made in the hopes it may be useful for early users wishing
 
 An encoding for high-performance search and subsetting of geospatial data.
 
-*** THIS CODE IS UNDER HEAVY DEVELOPMENT.
-*** IT'S API AND NUMERICAL RESULTS MAY CHANGE.
+### --THIS CODE IS UNDER HEAVY DEVELOPMENT--
+### --IT'S API AND NUMERICAL RESULTS ARE BOUND TO CHANGE--
 
 Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
 
