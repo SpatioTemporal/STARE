@@ -25,6 +25,8 @@ typedef int64_t STARE_ArrayIndexTemporalValue;
 typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_TemporalIntervals;
 typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_ArrayIndexTemporalValues;
 
+#define STARE_VERSION "@VERSION@"
+
 // TODO Consider index vs. array index vs. collections of the same & set logic.
 
 /// A lightweight type for the STARE spatial index
@@ -120,6 +122,10 @@ bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days);
 
 void STARE_test();
+
+// I added this to simplify finding the library with autoconf. jhrg 5/22/19
+extern "C" const char *STARE_version();
+
 // void STARE_Temporal_test();
 
 #endif /* INCLUDE_STARE_H_ */

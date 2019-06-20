@@ -21,7 +21,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConvex.hxx
-  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h
+  #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h		Is this file no longer needed here? -kln 4/25/19
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.bak_h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.hxx
@@ -52,3 +52,44 @@ set (
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 #
 
+install(FILES STARE.h
+  BitField.h
+  BitShiftNameEncoding.h
+  CMakeLists.txt
+  Convexio.h
+  EmbeddedLevelNameEncoding.h
+  HtmRange.h
+  HtmRangeIterator.h
+  HtmRangeMultiLevel.h
+  HtmRangeMultiLevelIterator.h
+  Htmio.h
+  HstmRange.h
+  KeyPair.h
+  NameEncoding.h
+  RangeConvex.h
+  RangeConvex.hxx
+  SkipList.h
+  SkipListElement.h
+  SpatialConstraint.h
+  SpatialConstraint.hxx
+  SpatialConvex.hxx
+  SpatialDomain.bak_h
+  SpatialDomain.h
+  SpatialDomain.hxx
+  SpatialEdge.h
+  SpatialException.h
+  SpatialGeneral.h
+  SpatialIndex.h
+  SpatialIndex.hxx
+  SpatialInterface.h
+  SpatialInterface.hxx
+  SpatialSign.h
+  SpatialVector.h
+  SpatialVector.hxx
+  SpatialRotation.h
+  TemporalIndex.h
+  TemporalWordFormat1.h	
+  VarCmp.h
+  VarStr.h
+  VarStr.hpp
+  VarStr.hxx DESTINATION include)

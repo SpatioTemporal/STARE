@@ -15,6 +15,14 @@
 #include <iostream>
 
 /**
+ * @brief Version function with C linkage to aid in finding the library with autoconf
+ * @return The library's version. Points to static storage.
+ */
+extern "C" const char *STARE_version() {
+    return (const char *)STARE_VERSION;
+}
+    
+/**
  *
  * Major change: The default octahedral rotation is now theta    = 0.25*gPi - 12.0e-9.
  * The 7.6 cm shift puts the north pole in the center of a trixel.

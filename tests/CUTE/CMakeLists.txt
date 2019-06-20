@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.4)
 
 set (
   TestSrcFiles
@@ -18,7 +17,13 @@ find_library( ERFA_LIB erfa )
 
 add_executable(tests ${TestSrcFiles})
 target_link_libraries(tests STARE "${ERFA_LIB}")
-target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute /usr/include)
+
+# target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute /usr/include)
+# ${CUTE_INCLUDE_DIR} is the directory that holds the CUTE library
+# headers, adding a subdir to it is not needed. jhrg 5/1/19
+# target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute)
+
+target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR} )
 
 add_test( STARETests tests )
 
