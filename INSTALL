@@ -42,6 +42,44 @@ mkdir build; cd build
 cmake ../STARE
 make
 
+###########################################################################
+#
+# CUTE additional comments
+
+wget https://github.com/PeterSommerlad/CUTE/archive/master.zip
+unzip master.zip 
+
+# option 1)
+export CUTE_INCLUDE_DIR="/path/to/cute/"
+
+# option 2)
+mkdir STARE/cute/
+cp -r CUTE/cute STARE/cute/
+
+###########################################################################
+#
+# Ubuntu 18.04 additional comments
+
+sudo apt install cmake
+sudo apt install g++
+sudo apt install libboost-python-dev
+sudo apt install libboost-numpy-dev
+
+###########################################################################
+#
+# CentOS 7 additional comments
+
+sudo yum install epel-release
+sudo yum install cmake3
+sudo yum install gcc-c++
+sudo yum install python36-devel.x86_64
+
+# The meta package "boost-python3-devel.x86_64" points to version 1.53, which does not contain boost-numpy
+# therefore, install boost169-python3-devel
+
+sudo yum install boost169-python3-devel.x86_64
+sudo ln -s /usr/lib64/libboost_python34.so.1.69.0 /usr/lib64/libboost_python3.so
+sudo ln -s /usr/lib64/libboost_numpy34.so.1.69.0 /usr/lib64/libboost_numpy3.so
 
 ###########################################################################
 #
@@ -55,4 +93,3 @@ Copyrights and licenses as asserted in individual files. Legacy HTM distributed 
 
 Copyright (c) 2019 Michael Lee Rilee, RSTLLC, mike@rilee.net
 
-###########################################################################

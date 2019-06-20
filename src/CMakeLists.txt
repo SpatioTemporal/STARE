@@ -34,6 +34,7 @@ set (
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
+set(BOOST_ROOT "/usr/include/boost169")
 
 # Boost is deprecated
 find_package(Boost)
@@ -42,7 +43,8 @@ find_package(Boost)
 # set ( Boost_FOUND  OFF )
 
 if(Boost_FOUND)
-  include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.7m"  )
+  message("${Boost_INCLUDE_DIRS}")
+  include_directories( "${Boost_INCLUDE_DIRS}" "/usr/include/python3.6m" "/usr/include/python3.7m" )
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_USE_STATIC_RUNTIME OFF)
