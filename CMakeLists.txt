@@ -57,7 +57,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 #add_library( STARE STATIC ${SOURCES} )
 
 # Read the version number from a file.
-file (STRINGS "version.txt" VERSION)
+file (STRINGS "VERSION" VERSION)
 
 # Generate the header in the source include dir. Not really the
 # best plan since it should be in the build dir, but I cannot get
