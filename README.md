@@ -39,6 +39,8 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 The spatial encoding encodes the traversal through a recursive partitioning
 (quadfurcation) of spherical triangles to find points located on the unit sphere.
 
+STARE API's expects input latitudes and longitudes to be compatible with WGS84, i.e. geocentric.
+
 | BITS | USAGE                                                                         |
 |:----:|:------------------------------------------------------------------------------|
 |63 - 62  |Not used									     |
