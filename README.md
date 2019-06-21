@@ -74,7 +74,7 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 | BITS |  WIDTH |  USAGE |
 |:-----:|:--------:|:--------|
 |63      |     | Set by the sign (2-s complement), also called the Before/After bit|
-|44 - 62 | 19  | Year (0..*)|
+|44 - 62 | 19  | Year (0..[1][1])|
 |40 - 43 |  4  | Month (0..13)|
 |38 - 39 |  2  | Week (0..4)|
 |35 - 37 |  3  | Day (0..7)|
@@ -82,18 +82,18 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 |24 - 29 |  6  | Minute (0..59)|
 |18 - 23 |  6  | Second (0..59)|
 | 8 - 17 | 10  | Millisecond (0..999)|
-| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position **|
+| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position [2][2]|
 | 0 -  1 |  2  | Type indicator (default = 2)|
- 
- * The default STARE temporal index can range between year -262143 and 262143 in the
+
+[1]: The default STARE temporal index can range between year -262143 and 262143 in the
    internal native format. Year zero and negative years are set by setting
    a *positive* number in the year field and setting the Before/After bit to 1.
    Year=0 and Before/After=1 is an error. See TemporalIndex for more detail.
-   
-** A resolution of zero corresponds to the coarsest bit, e.g. the top of the
+
+[2]: A resolution of zero corresponds to the coarsest bit, e.g. the top of the
    year field (bit position 62). A resolution of 54 corresponds to the finest
    resolution, 1 ms (bit position 8). These are for the default encoding,
-   type = 2.   
+   type = 2.
 
 ---
 # HISTORY
