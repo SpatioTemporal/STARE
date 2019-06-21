@@ -82,7 +82,7 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 |24 - 29 |  6  | Minute (0..59)|
 |18 - 23 |  6  | Second (0..59)|
 | 8 - 17 | 10  | Millisecond (0..999)|
-| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position \*\*|
+| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position\*\*|
 | 0 -  1 |  2  | Type indicator (default = 2)|
 
 \*The default STARE temporal index can range between year -262143 and 262143 in the
