@@ -18,23 +18,23 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ###########################################################################
 # Important features, files, directories
 
-VERSION
+## VERSION
   Contains the current version number.
 
-INSTALL
+## INSTALL
   Please see the INSTALL file for more information about dependences and installation.
   
-PySTARE and PySTARE1
+## PySTARE and PySTARE1
   A fledgling Python 3 interface is available. See INSTALL for more information.
   See also contrib/python for examples of how to use the Python interface and the low-level-lookup-tool in the app directory.
   
-GITHUB
+## GITHUB
   STARE is made available at https://github.com/michaelleerilee/STARE
 
 ###########################################################################
 # ENCODING HIGHLIGHTS
 
-* SPATIAL
+## SPATIAL
 
 The spatial encoding encodes the traversal through a recursive partitioning
 (quadfurcation) of spherical triangles to find points located on the unit sphere. 
@@ -48,7 +48,7 @@ The spatial encoding encodes the traversal through a recursive partitioning
 
 See src/EmbeddedLevelNameEncoding.C, EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat.
 
-* TEMPORAL
+## TEMPORAL
 
 The temporal encoding assigns fields of bits to encode calendrical values, e.g. 
 year, month, day, etc., in a 64-bit Hierarchical Calendrical Encoding (HCE). Temporal
