@@ -1,7 +1,7 @@
 
 ### Provisos
 
-This release is being made in the hopes it may be useful for early users wishing to experiment with STARE functions.
+This release is being made in the hope it may be useful for early users wishing to experiment with STARE functions.
 
 ---
 # STARE SpatioTemporal Adaptive Resolution Encoding
