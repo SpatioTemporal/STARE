@@ -3,7 +3,7 @@
 
 This release is being made in the hopes it may be useful for early users wishing to experiment with STARE functions.
 
-###########################################################################
+---
 # STARE SpatioTemporal Adaptive Resolution Encoding
 
 An encoding for high-performance search and subsetting of geospatial data.
@@ -15,7 +15,7 @@ Copyrights and licenses as asserted in individual files. Legacy HTM distributed 
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 
-###########################################################################
+---
 # Important features, files, directories
 
 ## VERSION
@@ -31,7 +31,7 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ## GITHUB
   STARE is made available at https://github.com/michaelleerilee/STARE
 
-###########################################################################
+---
 # ENCODING HIGHLIGHTS
 
 ## SPATIAL
@@ -95,7 +95,7 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
    resolution, 1 ms (bit position 8). These are for the default encoding,
    type = 2.   
 
-###########################################################################
+---
 # HISTORY
 
 2018-2019 Development supported by NASA/ACCESS-17.
