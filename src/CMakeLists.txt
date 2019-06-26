@@ -60,8 +60,9 @@ else()
   message("Boost not found, not creating shared object PySTARE, including the python 3 API. Was BOOST_ROOT set?\nContinuing...\n")  
 endif()
 
+find_package(SWIG)
 # SWIG integration of PySTARE1
-if(true)
+if(SWIG_FOUND)
 	# UseSWIG_TARGET_NAME_PREFERENCE
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )
