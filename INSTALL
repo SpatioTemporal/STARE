@@ -61,6 +61,8 @@ cp -r CUTE/cute STARE/cute/
 # Ubuntu 18.04 additional comments
 
 sudo apt install cmake
+sudo apt install swig
+sudo apt install liberfa-dev
 sudo apt install g++
 sudo apt install libboost-python-dev
 sudo apt install libboost-numpy-dev

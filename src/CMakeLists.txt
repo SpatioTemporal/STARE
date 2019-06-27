@@ -55,22 +55,24 @@ if(Boost_FOUND)
   )
   add_library( PySTARE SHARED ${STARE_SrcFiles} ${STARE_PYTHON_SrcFiles} )
   set_target_properties( PySTARE PROPERTIES PREFIX "" )
-  target_link_libraries( PySTARE ${Boost_LIBRARIES} "/usr/lib64/liberfa.so" )
+    
+  target_link_libraries( PySTARE ${Boost_LIBRARIES} "liberfa.so")
 else()
   message("Boost not found, not creating shared object PySTARE, including the python 3 API. Was BOOST_ROOT set?\nContinuing...\n")  
 endif()
 
 # SWIG integration of PySTARE1
 if(true)
-	# UseSWIG_TARGET_NAME_PREFERENCE
+	# UseSWIG_TARGET_NAME_PREFERENCE	
 	cmake_policy( SET CMP0078 NEW )
-	cmake_policy( SET CMP0086 NEW )
+	#cmake_minimum_required(VERSION 3.14 FATAL ERROR)
+	#cmake_policy( SET CMP0086 NEW )
 
     include_directories( "/usr/include/python3.7m"  )
     add_library(PySTARE1A SHARED PySTARE1.cpp)
     # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
-    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
-    target_link_libraries( PySTARE1A "/usr/lib64/liberfa.so" )
+    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..)     
+    target_link_libraries( PySTARE1A  "liberfa.so")
     
     # SWIG
     find_package(SWIG REQUIRED)
