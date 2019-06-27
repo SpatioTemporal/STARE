@@ -7,6 +7,7 @@
 /.settings/
 .cproject*
 .project*
+.directory*
 .gitignore.*
 .gitignore-*
 .gitignore_*

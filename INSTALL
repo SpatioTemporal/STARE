@@ -72,6 +72,8 @@ sudo apt install libboost-numpy-dev
 # CentOS 7 additional comments
 
 sudo yum install epel-release
+sudo yum install erfa-devel.x86_64
+sudo yum install swig
 sudo yum install cmake3
 sudo yum install gcc-c++
 sudo yum install python36-devel.x86_64
