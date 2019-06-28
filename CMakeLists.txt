@@ -14,6 +14,8 @@ if(CUTE_INCLUDE_DIR MATCHES "ON")
     set( CUTE_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/external/CUTE/cute )
 endif()
 
+set ( ERFA_DIR ${PROJECT_SOURCE_DIR}/external/erfa-single-file )
+
 message("\n------------ Running cmake for project STARE ------------\n")
 
 # Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
@@ -43,6 +45,7 @@ endif()
 #add_subdirectory is used when the subdirectory has its own CMakeLists.txt
 # Otherwise, include_directories is used to access files in the directory
 # include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
+include_directories(${ERFA_DIR} )
 include_directories(${PROJECT_SOURCE_DIR}/include )
 add_subdirectory(${PROJECT_SOURCE_DIR}/include )
 

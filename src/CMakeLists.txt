@@ -27,7 +27,8 @@ set (
   STARE.C
   TemporalIndex.cpp
   TemporalWordFormat1.cpp
-  VarStr.C )
+  VarStr.C
+  ../external/erfa-single-file/erfa.c )
   
 # TODO Trouble with VarStr.hpp
 # Var.Str.C is a kluge because I don't know how to get CMake to handle the hpp files correctly.
