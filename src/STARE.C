@@ -201,6 +201,49 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
 
+STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId) {
+	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+	return leftJustifiedWithResolution.getSciDBTerminatorLeftJustifiedFormat();
+}
+
+/**
+ * Compare two spatial array index values a, b.
+ *
+ * Returns
+ *   1 if b is in a
+ *  -1 if a is in b
+ *   0 otherwise.
+ *
+ */
+int cmpSpatial(STARE_ArrayIndexTemporalValue a_, STARE_ArrayIndexTemporalValue b_) {
+
+	EmbeddedLevelNameEncoding a_elne0,a_elne1,b_elne0,b_elne1;
+
+	a_elne0.setIdFromSciDBLeftJustifiedFormat(a_);
+	b_elne0.setIdFromSciDBLeftJustifiedFormat(b_);
+
+	a_elne1 = a_elne0.clearDeeperThanLevel(a_elne0.getLevel());
+	b_elne1 = b_elne0.clearDeeperThanLevel(b_elne0.getLevel());
+
+	STARE_ArrayIndexSpatialValue
+	a  = a_elne1.getSciDBLeftJustifiedFormat(),
+	at = a_elne1.getSciDBTerminatorLeftJustifiedFormat(),
+	b  = b_elne1.getSciDBLeftJustifiedFormat(),
+	bt = b_elne1.getSciDBTerminatorLeftJustifiedFormat();
+
+	// at = sTerminator(a), bt = sTerminator(b);
+
+	int overlap = 0;
+	if( ( a <= b ) && ( bt <= at ) ) {
+		overlap = 1;
+	} else if( ( b <= a ) && ( at <= bt ) ) {
+		overlap = -1;
+	}
+//	cout << "a,at,b,bt: " << a << " " << at << " " << b << " " << bt << endl << flush;
+	return overlap;
+}
+
 bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	// TODO Figure out how to avoid unneeded reformatting.
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;

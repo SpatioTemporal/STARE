@@ -12,6 +12,8 @@
 #ifndef INCLUDE_STARE_H_
 #define INCLUDE_STARE_H_
 
+#include "General.h"
+
 #include "SpatialGeneral.h"
 #include "SpatialIndex.h"
 #include "SpatialRotation.h"
@@ -116,10 +118,17 @@ public:
 	TemporalIndex&                setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
+	
+	
 
 };
+int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b);
 bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2);
 bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days);
+
+// int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b) {}
+
+STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId);
 
 void STARE_test();
 

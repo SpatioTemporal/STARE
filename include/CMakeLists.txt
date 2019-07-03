@@ -6,6 +6,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
   ${CMAKE_CURRENT_SOURCE_DIR}/Convexio.h
   ${CMAKE_CURRENT_SOURCE_DIR}/EmbeddedLevelNameEncoding.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/General.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRange.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeIterator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeMultiLevel.h

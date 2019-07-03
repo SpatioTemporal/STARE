@@ -4,6 +4,7 @@ set (
   ${STARE_SrcFiles}
   BitShiftNameEncoding.C
   EmbeddedLevelNameEncoding.C
+  General.cpp
   HtmRange.cpp
   HtmRangeIterator.cpp
   HtmRangeMultiLevel.cpp

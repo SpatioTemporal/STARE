@@ -8,6 +8,8 @@
 #ifndef SRC_TEMPORALINDEX_H_
 #define SRC_TEMPORALINDEX_H_
 
+#include "General.h"
+
 #include "SpatialException.h"
 #include <iostream>
 #include <sstream>
@@ -808,8 +810,6 @@ int64_t scidbMaximumTemporalIndex();
 int64_t millisecondsInYear(int64_t CE, int64_t year);
 
 // } /* namespace std */
-
-int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
 
 void TemporalIndex_test();
 
