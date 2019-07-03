@@ -29,15 +29,20 @@ extern "C" const char *STARE_version() {
  *
  */
 STARE::STARE() {
-
-	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
-	float64       theta    = 0.25*gPi - 12.0e-9; // bump it over a 27-level triangle
-	rotate_root_octahedron = SpatialRotation(axis,theta);
+	defaultConfiguration();
 	sIndex                 = SpatialIndex(search_level, build_level, rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(search_level,sIndex));
 	/*if( sIndexes.find(search_level) ) {
 		// The level was found...
 	}*/
+}
+
+STARE::STARE( int search_level, int build_level ) {
+	defaultConfiguration();
+	this->search_level = search_level;
+	this->build_level  = build_level;
+	sIndex                 = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
+	sIndexes.insert(std::make_pair(search_level,sIndex));
 }
 
 STARE::STARE(
@@ -47,13 +52,20 @@ STARE::STARE(
 	this->build_level  = build_level;
 	this->rotate_root_octahedron = rotate_root_octahedron;
 
-	sIndex                 = SpatialIndex(search_level, build_level, this->rotate_root_octahedron);
-	sIndexes.insert(std::make_pair(search_level,sIndex));
+	sIndex                 = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
+	sIndexes.insert(std::make_pair(this->search_level,sIndex));
 }
 
 STARE::~STARE() {
 	// TODO Auto-generated destructor stub
 }
+
+void STARE::defaultConfiguration() {
+	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
+	float64       theta    = 0.25*gPi - 12.0e-9; // bump it over a 27-level triangle
+	rotate_root_octahedron = SpatialRotation(axis,theta);
+}
+
 
 uint32 STARE::sSearchLevel() const {
 	return sIndex.getMaxlevel();
