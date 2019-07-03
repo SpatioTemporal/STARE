@@ -698,6 +698,93 @@ void STARE_test() {
 #undef LATLONID
 	}
 
+	if(false){
+		float
+		lat =  60.0,
+		lon = 123.4;
+
+		int
+		level = 20;
+
+		STARE_ArrayIndexSpatialValue id = 0;
+
+		id = index.ValueFromLatLonDegrees( lat, lon, level );
+
+		cout << "id= 0x" << setw(16) << setfill('0') << hex << id;
+
+		unsigned char ch[4];
+
+		cout << "; ";
+		cout << " lat= " << dec << lat << " "; // << hex << ch[3] << ch[2] << ch[1] << ch[0] << flush;
+
+		memcpy(ch,&lat,sizeof(float));
+		cout << "0x";
+		for(int i=3; i>=0; --i) {
+			cout
+			<< setw(2) << setfill('0')
+			<< hex
+			<< (int) ch[i];
+			// << ".";
+		}
+
+		cout << "; ";
+		cout << " lon= " << dec << lon << " "; //  << hex << ch[3] << ch[2] << ch[1] << ch[0] << flush;
+
+		memcpy(ch,&lon,sizeof(float));
+		cout << "0x";
+		for(int i=3; i>=0; --i) {
+			cout
+			<< setw(2) << setfill('0')
+			<< hex
+			<< (int) ch[i];
+			// << ".";
+		}
+
+		cout << "; ";
+		cout << dec << " level= " << level;
+
+		cout << endl << flush;
+
+	}
+
+	{
+		STARE index;
+
+		if(true) {
+
+			ASSERT_EQUAL(
+					-1,
+					cmpSpatial(
+							index.ValueFromLatLonDegrees( 38.0387, -76.3221, 6 ),
+							index.ValueFromLatLonDegrees( 38.0,    -75.0,    4 )));
+
+			ASSERT_EQUAL(
+					1,
+					cmpSpatial(
+							index.ValueFromLatLonDegrees( 40.0, -75.0, 6 ),
+							index.ValueFromLatLonDegrees( 40.5, -75.0, 6 )));
+
+			ASSERT_EQUAL(
+					0,
+					cmpSpatial(
+							index.ValueFromLatLonDegrees( 43.5, -75.0, 6 ),
+							index.ValueFromLatLonDegrees( 44.0, -74.5, 6 )));
+
+			ASSERT_EQUAL(
+					0,
+					cmpSpatial(
+							index.ValueFromLatLonDegrees( 47.5, -75.5, 6 ),
+							index.ValueFromLatLonDegrees( 48.0, -74.5, 7 )));
+
+			ASSERT_EQUAL(
+					1,
+					cmpSpatial(
+							index.ValueFromLatLonDegrees( 39.5, -85.5, 4 ),
+							index.ValueFromLatLonDegrees( 39.5, -84.5, 6 )));
+
+	}
+	}
+
 //	{
 //		STARE_ArrayIndexSpatialValue spatialStareId = 0;
 //		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);

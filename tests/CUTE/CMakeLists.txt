@@ -13,10 +13,8 @@ set (
 
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -I${PROJECT_SOURCE_DIR}/include" )
 
-find_library( ERFA_LIB erfa )
-
 add_executable(tests ${TestSrcFiles})
-target_link_libraries(tests STARE "${ERFA_LIB}")
+target_link_libraries(tests STARE)
 
 # target_include_directories(tests PUBLIC ${CUTE_INCLUDE_DIR}/cute /usr/include)
 # ${CUTE_INCLUDE_DIR} is the directory that holds the CUTE library

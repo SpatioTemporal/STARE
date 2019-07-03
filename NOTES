@@ -1,4 +1,10 @@
 
+* 2019-07-03 Version 0.5.0
+
+- Added ERFA single file and CUTE. Cf. 6/19.
+- Tests for SWIG.
+- Added integer-based "contains," i.e. cmpSpatial.
+
 * 2019-06-19
 
 ** TODOs

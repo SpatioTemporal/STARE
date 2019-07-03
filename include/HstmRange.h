@@ -24,7 +24,7 @@ namespace std {
  *
  * Special treatment is necessary, because embedding the level complicates the comparison of index values.
  *
- * HstmRange strips the level off a index values (aka KeyPairs) before adding them to this->range.
+ * HstmRange strips the level off index values (aka KeyPairs) before adding them to this->range.
  *
  */
 class HstmRange {
@@ -44,6 +44,9 @@ public:
 	HtmRangeMultiLevel_NameSpace::HtmRangeMultiLevel *range;
 	EmbeddedLevelNameEncoding leftJustifiedEncoding;
 
+	/**
+	 * For STARE we may need to coarsen position information to the resolution level since it points to a 7cm triangle inside a larger triangle.
+	 */
 	void     addRange(Key a, Key b);
 	void     addRange(HstmRange* r);
 
