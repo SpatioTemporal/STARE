@@ -17,6 +17,7 @@ void STARE_test() {
 
 	STARE index;
 	STARE index1(index.getSearchLevel(),index.getBuildLevel(),index.getRotation());
+	STARE index2(index.getSearchLevel(),index.getBuildLevel());
 
 //	ASSERT_EQUAL(1,index.ValueFromLatLonDegrees(45.0, 45.0));
 
@@ -30,13 +31,15 @@ void STARE_test() {
 	cout << "aIndex:  " << hex << aIndex << dec << endl;
 	*/
 	STARE_ArrayIndexSpatialValue aIndex1 = index1.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
+	STARE_ArrayIndexSpatialValue aIndex2 = index2.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,8);
 	/*
 	cout << "aIndex1: " << hex << aIndex1 << dec << endl;
 	cout << "Resolution level tr0: " << index.ResolutionLevelFromValue(aIndex) << endl;
 	*/
 	ASSERT_EQUALM("Compare default and specified constructors",aIndex,aIndex1);
 
-	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex);
+	LatLonDegrees64 latlon1 = index.LatLonDegreesFromValue(aIndex1);
+	LatLonDegrees64 latlon2 = index.LatLonDegreesFromValue(aIndex2);
 	// cout << "latlon1: " << latlon1.lat << " " << latlon1.lon << endl;
 
 	// float64 tol = 1.0e-14; /// What's our floating point error?
@@ -47,6 +50,8 @@ void STARE_test() {
 	// cout << "delta-lon: " << latlon1.lon - latlon0.lon << endl;
 	ASSERT_EQUAL_DELTAM("Round trip lat <-> sIndex",latlon0.lat,latlon1.lat,tol);
 	ASSERT_EQUAL_DELTAM("Round trip lon <-> sIndex",latlon0.lon,latlon1.lon,tol);
+	ASSERT_EQUAL_DELTAM("Round trip lat <-> sIndex",latlon0.lat,latlon2.lat,tol);
+	ASSERT_EQUAL_DELTAM("Round trip lon <-> sIndex",latlon0.lon,latlon2.lon,tol);
 
 	// int level = 27; // works-ish... fails due to rounding errors.
 	// int level = 26; // works-ish...

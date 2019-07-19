@@ -48,8 +48,11 @@ typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_ArrayIndexSpatialValues;
 class STARE {
 public:
 	STARE();
+	STARE( int search_level, int build_level );
 	STARE( int search_level, int build_level, SpatialRotation rotate_root_octahedron );
 	virtual ~STARE();
+	
+	void defaultConfiguration();
 
 	uint32 sSearchLevel() const; /// Location precision level in the sIndex.
 
