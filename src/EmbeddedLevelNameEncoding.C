@@ -153,7 +153,7 @@ uint64 EmbeddedLevelNameEncoding::getIdTerminator_NoDepthBit(uint64 b, uint32 aL
 		one_mask_to_level = one_mask_to_level << 2;
 		one_mask_to_level += 3;
 	}
-	uint64 terminator = b | one_mask_to_level; // Watch out -- b may have stuff in the wrong place. So use bitor and pray.
+	uint64 terminator = b | one_mask_to_level; // TODO Watch out -- b may have stuff in the wrong place. So use bitor and pray.
 	// terminator +=  one_mask_to_level; // Fill up everything with 3s.
 	return terminator;
 }
