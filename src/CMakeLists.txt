@@ -68,11 +68,11 @@ find_package(SWIG)
 if(SWIG_FOUND)
 	# UseSWIG_TARGET_NAME_PREFERENCE
 
+	#cmake_minimum_required(VERSION 3.13 FATAL ERROR)
 	cmake_policy( SET CMP0078 NEW )
-	#cmake_minimum_required(VERSION 3.14 FATAL ERROR)
-	#cmake_policy( SET CMP0086 NEW )
+	cmake_policy( SET CMP0086 NEW )
 
-    include_directories( "/usr/include/python3.7m"  )
+    include_directories("/usr/include/python3.6m"  "/usr/include/python3.7m"  )
     add_library(PySTARE1A SHARED PySTARE1.cpp)
     # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
     #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..)     

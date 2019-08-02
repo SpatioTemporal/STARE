@@ -60,7 +60,7 @@ cp -r CUTE/cute STARE/cute/
 #
 # Ubuntu 18.04 additional comments
 
-sudo apt install cmake
+sudo apt install cmake # Might need to manually update to 3.13+
 sudo apt install swig
 sudo apt install liberfa-dev
 sudo apt install g++
@@ -77,13 +77,14 @@ sudo yum install swig
 sudo yum install cmake3
 sudo yum install gcc-c++
 sudo yum install python36-devel.x86_64
+sudo yum install boost169-python3-devel.x86_64
 
 # The meta package "boost-python3-devel.x86_64" points to version 1.53, which does not contain boost-numpy
 # therefore, install boost169-python3-devel
 
-sudo yum install boost169-python3-devel.x86_64
-sudo ln -s /usr/lib64/libboost_python34.so.1.69.0 /usr/lib64/libboost_python3.so
-sudo ln -s /usr/lib64/libboost_numpy34.so.1.69.0 /usr/lib64/libboost_numpy3.so
+
+sudo ln -s /usr/lib64/libboost_python36.so.1.69.0 /usr/lib64/libboost_python3.so
+sudo ln -s /usr/lib64/libboost_numpy36.so.1.69.0 /usr/lib64/libboost_numpy3.so
 
 ###########################################################################
 #
