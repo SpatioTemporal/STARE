@@ -13,6 +13,11 @@
 
 void STARE_test() {
 
+	SpatialVector
+		xhat(1.0,0.0,0.0),
+		yhat(0.0,1.0,0.0),
+		zhat(0.0,0.0,1.0);
+
 	bool globalPrintFlag = false;
 
 	STARE index;

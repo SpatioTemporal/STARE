@@ -1051,6 +1051,11 @@ void testRotation() {
 	float64 theta;
 	SpatialVector start, axis, rot, expected;
 
+	SpatialVector
+		xhat(1.0,0.0,0.0),
+		yhat(0.0,1.0,0.0),
+		zhat(0.0,0.0,1.0);
+
 	theta = gPi;
 	start = xhat;
 	axis  = zhat;
@@ -4010,6 +4015,50 @@ void HstmRangeAddZeroBug() {
 	ASSERT_EQUALM("Extending left justified to handle S0 == 0","S0",tmp_buf);
 }
 
+/* https://github.com/michaelleerilee/STARE/issues/22
+ *
+ *
+#include "STARE.h"
+
+int main(int argc, char *argv[]) {
+    STARE stare;
+    cout << " " << stare.ValueFromLatLonDegrees(10.1, 15.2, 10) << endl;
+    cout << " " << stare.ValueFromLatLonDegrees(10.1, 15.2, 15) << endl;
+}
+This doesn't (it returns the depth rather than the STARE id)
+
+#include "STARE.h"
+
+STARE stare;
+int main(int argc, char *argv[]) {
+    cout << " " << ::stare.ValueFromLatLonDegrees(10.1, 15.2, 10) << endl;
+    cout << " " << ::stare.ValueFromLatLonDegrees(10.1, 15.2, 15) << endl;
+}
+
+*/
+#define hexOut1(a,b) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+STARE stare_external;
+void ucsbBug1() {
+	STARE stare_internal;
+	if(false) {
+		cout << endl << flush;
+		cout << "s_ext: axis:      " << dec << stare_external.rotate_root_octahedron.axis << endl << flush;
+		cout << "s_int: axis:      " << dec << stare_internal.rotate_root_octahedron.axis << endl << flush;
+		cout << endl << flush;
+		hexOut1("internal 10: ",stare_internal.ValueFromLatLonDegrees(10.1, 15.2, 10));
+		hexOut1("internal 15: ",stare_internal.ValueFromLatLonDegrees(10.1, 15.2, 15));
+		hexOut1("external 10: ",stare_external.ValueFromLatLonDegrees(10.1, 15.2, 10));
+		hexOut1("external 15: ",stare_external.ValueFromLatLonDegrees(10.1, 15.2, 15));
+	}
+
+	ASSERT_EQUAL(0x3fc7c71fb791d8aa,stare_internal.ValueFromLatLonDegrees(10.1, 15.2, 10));
+	ASSERT_EQUAL(0x3fc7c71fb791d8af,stare_internal.ValueFromLatLonDegrees(10.1, 15.2, 15));
+	ASSERT_EQUAL(0x3fc7c71fb791d8aa,stare_external.ValueFromLatLonDegrees(10.1, 15.2, 10));
+	ASSERT_EQUAL(0x3fc7c71fb791d8af,stare_external.ValueFromLatLonDegrees(10.1, 15.2, 15));
+
+}
+#undef hexOut1
+
 void runSuite(int argc, char const *argv[]){
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
@@ -4062,6 +4111,8 @@ void runSuite(int argc, char const *argv[]){
 
 	s.push_back(CUTE(STARE_test));
 	s.push_back(CUTE(TemporalIndex_test));
+
+	s.push_back(CUTE(ucsbBug1));
 
 	//	s.push_back(CUTE(testRange));
 

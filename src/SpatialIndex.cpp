@@ -500,6 +500,11 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation r
   };
   */
 
+	SpatialVector
+		xhat(1.0,0.0,0.0),
+		yhat(0.0,1.0,0.0),
+		zhat(0.0,0.0,1.0);
+
   SpatialVector body_xhat = rot.rotated_from(xhat);
   SpatialVector body_yhat = rot.rotated_from(yhat);
   SpatialVector body_zhat = rot.rotated_from(zhat);

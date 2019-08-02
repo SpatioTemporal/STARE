@@ -12,6 +12,11 @@
 
 void SpatialIndex_test() {
 
+	SpatialVector
+		xhat(1.0,0.0,0.0),
+		yhat(0.0,1.0,0.0),
+		zhat(0.0,0.0,1.0);
+
 	// cout << setprecision(17);
 
 	int maxlevel   = 5;
