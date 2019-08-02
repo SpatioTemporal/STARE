@@ -17,12 +17,12 @@ public:
 	// const -- requires specialized = operator
 	float64 tol = 1.0e-14;
 
-	SpatialVector body_xhat = xhat;
-	SpatialVector body_yhat = yhat;
-	SpatialVector body_zhat = zhat;
+	SpatialVector body_xhat = SpatialVector(1,0,0);
+	SpatialVector body_yhat = SpatialVector(0,1,0);
+	SpatialVector body_zhat = SpatialVector(0,0,1);
 
 	// Rodrigues's formula
-	SpatialVector axis        = zhat;
+	SpatialVector axis        = SpatialVector(0,0,1);
 	float64       theta       = 0.0;
 	float64       mu          = 1; /// cos(theta)
 	float64       muComp      = 0; /// mu - 1

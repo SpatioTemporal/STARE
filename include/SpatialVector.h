@@ -165,8 +165,6 @@ private:
 
 void SpatialVector_test();
 
-extern SpatialVector xhat, yhat, zhat;
-
 /// A collection of vertices
 typedef std::vector<SpatialVector> Vertices;
 /// A Triangle struct for convenience & typing. Note vertices must have the appropriate ordering.
