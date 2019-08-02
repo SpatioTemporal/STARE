@@ -12,6 +12,7 @@
 
 void SpatialVector_test() {
 
+	SpatialVector xhat(1,0,0);
 	SpatialVector v(1,2,3);
 
 	float64 a[] = {1,2,3};

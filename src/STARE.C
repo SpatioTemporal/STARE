@@ -30,7 +30,9 @@ extern "C" const char *STARE_version() {
  */
 STARE::STARE() {
 	defaultConfiguration();
+
 	sIndex                 = SpatialIndex(search_level, build_level, rotate_root_octahedron);
+
 	sIndexes.insert(std::make_pair(search_level,sIndex));
 	/*if( sIndexes.find(search_level) ) {
 		// The level was found...
@@ -61,11 +63,23 @@ STARE::~STARE() {
 }
 
 void STARE::defaultConfiguration() {
+	SpatialVector
+		xhat(1.0,0.0,0.0),
+		yhat(0.0,1.0,0.0),
+		zhat(0.0,0.0,1.0);
+
 	SpatialVector axis     = 0.5*xhat + 0.5*yhat; axis.normalize();
 	float64       theta    = 0.25*gPi - 12.0e-9; // bump it over a 27-level triangle
 	rotate_root_octahedron = SpatialRotation(axis,theta);
+	/*
+	cout << endl << "dc:rot:axis:   " << rotate_root_octahedron.axis << endl << flush;
+	cout         << "dc:rot:theta:  " << rotate_root_octahedron.theta << endl << flush;
+	cout         << "dc:axis:       " << axis << endl << flush;
+	cout         << "dc:theta:      " << theta << endl << flush;
+	cout         << "dc:xhat:       " << xhat << endl << flush;
+	cout         << "dc:yhat:       " << yhat << endl << flush;
+	*/
 }
-
 
 uint32 STARE::sSearchLevel() const {
 	return sIndex.getMaxlevel();
@@ -74,13 +88,26 @@ uint32 STARE::sSearchLevel() const {
 STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 		float64 latDegrees, float64 lonDegrees, int resolutionLevel) {
 
-	// cout << "svflld: lat,lon,rL: " << latDegrees << " " << lonDegrees << " " << resolutionLevel << endl << flush;
+	/*
+	cout << endl << flush;
+	cout << "svflld: lat,lon,rL: " << dec << latDegrees << " " << lonDegrees << " " << resolutionLevel << endl << flush;
+	cout << "svflld: &sI:        " << hex << (&sIndex) << endl << flush;
+	cout << "svflld: axis:       " << dec << rotate_root_octahedron.axis << endl << flush;
+	cout << "svflld: theta:      " << dec << rotate_root_octahedron.theta << endl << flush;
+	*/
 
 	BitShiftNameEncoding       rightJustified(sIndex.idByLatLon(latDegrees,lonDegrees)); // Dip into the legacy code
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
 	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolutionLevel, true);
 
-	// cout << "svflld: result: " << leftJustifiedWithResolution.getSciDBLeftJustifiedFormat() << endl << flush;
+	/*
+	// cout << endl << flush;
+	cout << "svflld: sI.id 0x" << setw(16) << hex << sIndex.idByLatLon(latDegrees,lonDegrees) << endl << flush;
+	cout << "svflld: rj:   0x" << setw(16) << hex << rightJustified.getId() << dec << endl << flush;
+	cout << "svflld: lj:   0x" << setw(16) << hex << leftJustified.getId() << dec << endl << flush;
+	cout << "svflld: ljwr: 0x" << setw(16) << hex << leftJustifiedWithResolution.getId() << dec << endl << flush;
+	cout << "svflld: result: " << leftJustifiedWithResolution.getSciDBLeftJustifiedFormat() << endl << flush;
+	*/
 
 	// NOTE: This is returning a SciDB-formatted index.
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
