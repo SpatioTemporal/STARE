@@ -23,7 +23,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConstraint.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialConvex.hxx
   #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDoc.h		Is this file no longer needed here? -kln 4/25/19
-  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.bak_h
+  #${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.bak_h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialDomain.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialEdge.h
@@ -59,6 +59,7 @@ install(FILES STARE.h
   CMakeLists.txt
   Convexio.h
   EmbeddedLevelNameEncoding.h
+  General.h
   HtmRange.h
   HtmRangeIterator.h
   HtmRangeMultiLevel.h
@@ -74,7 +75,6 @@ install(FILES STARE.h
   SpatialConstraint.h
   SpatialConstraint.hxx
   SpatialConvex.hxx
-  SpatialDomain.bak_h
   SpatialDomain.h
   SpatialDomain.hxx
   SpatialEdge.h
@@ -93,4 +93,5 @@ install(FILES STARE.h
   VarCmp.h
   VarStr.h
   VarStr.hpp
-  VarStr.hxx DESTINATION include)
+  VarStr.hxx 
+  ../external/erfa-single-file/erfa.h DESTINATION include)
