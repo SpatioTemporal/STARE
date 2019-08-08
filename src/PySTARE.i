@@ -1,4 +1,4 @@
-%module PySTARE1
+%module PySTARE
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -9,7 +9,7 @@
 	extern void xdot(int n, double *a, double *b, double *ret);
 	*/
 #include "STARE.h"
-#include "PySTARE1.h"
+#include "PySTARE.h"
 %}
 
 %include "numpy.i"
@@ -18,7 +18,7 @@
 import_array();
 %}
 
-%include "PySTARE1.h"
+%include "PySTARE.h"
 
 /* double doublefun(double b); */
 
@@ -75,12 +75,12 @@ void my_xdot(int len1, double* vec1, int len2, double* vec2, int len3, double* r
 
 %inline %{
 
-PySTARE1* newSTARE() { return new PySTARE1; }
-void deleteSTARE( PySTARE1* p ) { if(p) delete p; p = NULL; }
+PySTARE* newSTARE() { return new PySTARE; }
+void deleteSTARE( PySTARE* p ) { if(p) delete p; p = NULL; }
 
 %}
 
-/* void PySTARE1::ValueFromJDTAI( int len, int64_t* indices, double* JDTAI, int resolution_days ) ; */
+/* void PySTARE::ValueFromJDTAI( int len, int64_t* indices, double* JDTAI, int resolution_days ) ; */
 %apply ( int DIM1, int64_t* INPLACE_ARRAY1 ) {(int len1, int64_t* indices)}
 %apply ( int DIM1, double* IN_ARRAY1 ) {(int len2, double* JDTAI)}
 %rename (ValueFromJDTAINP) my_ValueFromJDTAINP;
@@ -90,7 +90,7 @@ void deleteSTARE( PySTARE1* p ) { if(p) delete p; p = NULL; }
 }
 
 %inline %{
-void ValueFromJDTAINP( PySTARE1* p, int len1, int64_t* indices, int len2, double* JDTAI, int resolution_days ) {
+void ValueFromJDTAINP( PySTARE* p, int len1, int64_t* indices, int len2, double* JDTAI, int resolution_days ) {
 	if ( len1 != len2 ) {
 		PyErr_Format(PyExc_ValueError,
          "Arrays of lengths (%d,%d) given",
@@ -103,7 +103,7 @@ void ValueFromJDTAINP( PySTARE1* p, int len1, int64_t* indices, int len2, double
 %clear (int len1, int64_t* indices);
 %clear (int len2, double* JDTAI);
 
-/* void PySTARE1::JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices ) */
+/* void PySTARE::JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices ) */
 %apply ( int DIM1, double* IN_ARRAY1 ) {(int len1, double* JDTAI)}
 %apply ( int DIM1, int64_t* INPLACE_ARRAY1 ) {(int len2, int64_t* indices)}
 
@@ -114,7 +114,7 @@ void ValueFromJDTAINP( PySTARE1* p, int len1, int64_t* indices, int len2, double
 }
 
 %inline %{
-void my_JDTAIFromValueNP( PySTARE1* p, int len1, double* JDTAI, int len2, int64_t* indices) {
+void my_JDTAIFromValueNP( PySTARE* p, int len1, double* JDTAI, int len2, int64_t* indices) {
 	if ( len1 != len2 ) {
 		PyErr_Format(PyExc_ValueError,
          "Arrays of lengths (%d,%d) given",
@@ -139,7 +139,7 @@ void my_JDTAIFromValueNP( PySTARE1* p, int len1, double* JDTAI, int len2, int64_
 }
 
 %inline %{
-void my_ValueFromLatLonDegreesLevelNP( PySTARE1* p, int len1, int64_t *indices, int len2, double* lat, int len3, double* lon, int resolutionLevel) {
+void my_ValueFromLatLonDegreesLevelNP( PySTARE* p, int len1, int64_t *indices, int len2, double* lat, int len3, double* lon, int resolutionLevel) {
 
 	if ( len1 != len2 || len1 != len3 ) {
 		PyErr_Format(PyExc_ValueError,
@@ -168,7 +168,7 @@ void my_ValueFromLatLonDegreesLevelNP( PySTARE1* p, int len1, int64_t *indices, 
 }
 
 %inline %{
-void my_LatLonDegreesFromValueNP( PySTARE1* p, int len1, double* lat, int len2, double* lon, int len3, int64_t* indices ) {
+void my_LatLonDegreesFromValueNP( PySTARE* p, int len1, double* lat, int len2, double* lon, int len3, int64_t* indices ) {
 	if ( len1 != len2 || len1 != len3 ) {
 		PyErr_Format(PyExc_ValueError,
          "Arrays of lengths (%d,%d,%d) given",

@@ -24,7 +24,7 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ## INSTALL
   Please see the INSTALL file for more information about dependences and installation.
 
-## PySTARE and PySTARE1
+## PySTARE
   A fledgling Python 3 interface is available. See INSTALL for more information.
   See also contrib/python for examples of how to use the Python interface and the low-level-lookup-tool in the app directory.
 

@@ -18,8 +18,8 @@
  *  deleteSTARE(p);
  */
 
-#ifndef INCLUDE_PYSTARE1_H_
-#define INCLUDE_PYSTARE1_H_
+#ifndef INCLUDE_PYSTARE_H_
+#define INCLUDE_PYSTARE_H_
 
 #include <stdio.h>
 #include "STARE.h"
@@ -52,11 +52,11 @@
 //}
 
 
-class PySTARE1 {
+class PySTARE {
 public:
 	STARE index;
-	PySTARE1() {};
-	~PySTARE1() {};
+	PySTARE() {};
+	~PySTARE() {};
 
 	void ValueFromJDTAINP( int len, int64_t* indices, double* JDTAI, int resolution_days );
 	void JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices );
@@ -68,6 +68,4 @@ public:
 
 };
 
-// PySTARE1* PySTARE() { return new PySTARE1; }
-
-#endif /* INCLUDE_PYSTARE1_H_ */
+#endif /* INCLUDE_PYSTARE_H_ */

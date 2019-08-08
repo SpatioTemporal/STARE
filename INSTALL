@@ -10,11 +10,8 @@ Dependencies:
   ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
   CUTE (included) - https://cute-test.com/
 
-2. PySTARE1: Python interface using SWIG
+2. PySTARE: Python interface using SWIG
   Python3, Numpy, SWIG
-
-3. PySTARE: Python interface using Boost (deprecated)
-  Python3, Numpy, Boost, Boost::Python
 
 ########################################################################### 
 #

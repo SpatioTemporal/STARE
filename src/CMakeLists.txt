@@ -38,7 +38,7 @@ set (
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
 find_package(SWIG)
-# SWIG integration of PySTARE1
+# SWIG integration of PySTARE
 if(SWIG_FOUND)
 	# UseSWIG_TARGET_NAME_PREFERENCE
 	cmake_policy( SET CMP0078 NEW )
@@ -46,10 +46,10 @@ if(SWIG_FOUND)
 	
 	# TODO Control following with ENV variable.
     include_directories( "/usr/include/python3.7m"  "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
-    add_library(PySTARE1A SHARED PySTARE1.cpp)
-    # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
-    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
-    target_link_libraries( PySTARE1A "/usr/lib64/liberfa.so" )
+    add_library(PySTAREA SHARED PySTARE.cpp)
+    # set_target_properties( PySTARE PROPERTIES PREFIX "" )
+    #? set target properties(PySTARE PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
+    target_link_libraries( PySTAREA "/usr/lib64/liberfa.so" )
     
     # SWIG
     find_package(SWIG REQUIRED)
@@ -60,13 +60,13 @@ if(SWIG_FOUND)
     # set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
 	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 	
-	set_property(SOURCE PySTARE1.i PROPERTY CPLUSPLUS ON)
+	set_property(SOURCE PySTARE.i PROPERTY CPLUSPLUS ON)
 	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 
-    swig_add_library( PySTARE1 TYPE SHARED LANGUAGE python SOURCES PySTARE1.i )
-    swig_link_libraries( PySTARE1 STARE )
-    swig_link_libraries( PySTARE1 PySTARE1A )
-    swig_link_libraries( PySTARE1 ${PYTHON_LIBRARIES} )
+    swig_add_library( PySTARE TYPE SHARED LANGUAGE python SOURCES PySTARE.i )
+    swig_link_libraries( PySTARE STARE )
+    swig_link_libraries( PySTARE PySTAREA )
+    swig_link_libraries( PySTARE ${PYTHON_LIBRARIES} )
 endif()
 
 install(TARGETS STARE DESTINATION lib)
