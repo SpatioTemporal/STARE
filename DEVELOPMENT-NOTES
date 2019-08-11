@@ -1,0 +1,29 @@
+
+* 2019-0811-1815-DST
+
+Which classes use or depend on SpatialIndex? We need to be concerned about default SpatialIndexes showing up.
+
+RangeConvex.h:
+const SpatialIndex * index_;    // A pointer to the index
+
+An index is passed into RangeConvex, which then uses it for intersections etc. 
+
+SpatialDomain.h:
+const SpatialIndex *index;            /// A pointer to the index
+
+SpatialEdge.h:
+SpatialIndex & tree_;
+
+SpatialInterface.h:
+SpatialIndex *index_;
+
+STARE.h:
+SpatialIndex    sIndex;
+
+* 2019-0810-2331-DST
+
+Can we remove intervals from a range?
+
+* 2019-0809-22231-DST
+
+** Be very careful when calling HTM library from STARE, particularly when the HTM code makes SpatialIndexes. The legacy SpatialIndex default constructor is different from the SpatialIndex created by STARE.
