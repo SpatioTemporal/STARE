@@ -13,7 +13,7 @@
 #define INCLUDE_STARE_H_
 
 #include "General.h"
-
+#include "HstmRange.h"
 #include "SpatialGeneral.h"
 #include "SpatialIndex.h"
 #include "SpatialRotation.h"
@@ -70,8 +70,6 @@ public:
 	uint64       getSearchLevel() { return this->search_level; } // TODO Ugh. See search_level in the privates...
 	uint64       getBuildLevel()  { return this->build_level; }
 	SpatialRotation getRotation() { return this->rotate_root_octahedron; }
-
-	bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
 
 	STARE_SpatialIntervals CoverBoundingBoxFromLatLonDegrees(LatLonDegrees64ValueVector corners, int force_resolution_level = -1);
 	STARE_SpatialIntervals CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level = -1);
@@ -132,6 +130,10 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 // int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b) {}
 
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId);
+
+bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
+
+HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
 
 void STARE_test();
 

@@ -283,12 +283,6 @@ int cmpSpatial(STARE_ArrayIndexTemporalValue a_, STARE_ArrayIndexTemporalValue b
 	return overlap;
 }
 
-bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
-	// TODO Figure out how to avoid unneeded reformatting.
-	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
-	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
-	return leftJustifiedWithResolution.terminatorp();
-}
 
 /**
  * Return a vector of index values of potentially varying sizes (resolution levels) covering the bounding box.
@@ -402,6 +396,12 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 		} while(r.getNext(lo,hi));
 	}
 	return intervals;
+}
+
+STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points) {
+
+
+
 }
 
 /*
@@ -525,3 +525,34 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 	TemporalIndex a(tv1), b(tv2);
 	return cmp_JulianTAIDays3(a,b,days);
 }
+
+bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
+	// TODO Figure out how to avoid unneeded reformatting.
+	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+	return leftJustifiedWithResolution.terminatorp();
+}
+
+/**
+ * Construct a range object (spatial region) from a vector of intervals.
+ *
+ * TODO: Have a SpatialRange class instead of an HstmRange?
+ */
+HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals) {
+	HstmRange range;
+	EmbeddedLevelNameEncoding leftJustified;
+
+	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
+		uint64 a = leftJustified.getId(), b = a;
+		auto i1 = (i0+1);
+		if(terminatorp(*i1)) {
+			leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
+			b = leftJustified.getId();
+			++i0; // Skip to next
+		}
+		range.addRange(a,b);
+	}
+	return range;
+}
+
