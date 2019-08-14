@@ -42,19 +42,20 @@ mkdir build; cd build
 cmake ../STARE
 make
 
-###########################################################################
-#
-# CUTE additional comments
+# To make a source distribution after running cmake...
 
-wget https://github.com/PeterSommerlad/CUTE/archive/master.zip
-unzip master.zip 
+make dist
 
-# option 1)
-export CUTE_INCLUDE_DIR="/path/to/cute/"
+# To install the include files and library, try the following.
 
-# option 2)
-mkdir STARE/cute/
-cp -r CUTE/cute STARE/cute/
+mkdir build; cd build
+cmake -DCMAKE_INSTALL_PREFIX=< install_path > .. 
+make install
+
+# To run tests, after making the library as above, try the following
+# in the build directory.
+
+make test
 
 ###########################################################################
 #
@@ -64,8 +65,6 @@ sudo apt install cmake # Might need to manually update to 3.15+
 sudo apt install swig
 sudo apt install liberfa-dev
 sudo apt install g++
-sudo apt install libboost-python-dev
-sudo apt install libboost-numpy-dev
 
 ###########################################################################
 #
@@ -81,11 +80,6 @@ sudo yum install boost169-python3-devel.x86_64
 sudo yum install devtoolset-3-gcc devtoolset-3-gcc-c++
 scl enable devtoolset-3 bash
 
-# The meta package "boost-python3-devel.x86_64" points to version 1.53, which does not contain boost-numpy
-# therefore, install boost169-python3-devel
-
-sudo ln -s /usr/lib64/libboost_python36.so.1.69.0 /usr/lib64/libboost_python3.so
-sudo ln -s /usr/lib64/libboost_numpy36.so.1.69.0 /usr/lib64/libboost_numpy3.so
 
 ###########################################################################
 #

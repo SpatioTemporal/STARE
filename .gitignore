@@ -32,3 +32,4 @@
 
 # now that STARE.h is a generated file, don't including it in git
 /include/STARE.h
+/DEVELOPMENT-NOTES
