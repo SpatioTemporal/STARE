@@ -485,10 +485,11 @@ TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int m
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
 	// tIndex.fromUTC(year, month,day,hour, minute, second, ms, type);
-	tIndex.fromUTC(year, month,day,hour, minute, second, ms);
+	tIndex.fromUTC(year, month, day, hour, minute, second, ms);
 	tIndex.set_resolution(resolution);
 	return tIndex;
 }
+
 
 void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
 	tIndex.toFormattedJulianTAI(year, month, day, hour, minute, second, ms);
@@ -501,7 +502,11 @@ void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& 
 	type       = tIndex.get_type();
 }
 
-// TemporalIndex& STARE::getTIndex() { return tIndex; }
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTCDatetime(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+    setTIndexUTC(year, month, day, hour, minute, second, ms, resolution, type);
+    return getArrayIndexTemporalValue();
+}
+
 
 STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
 	return tIndex.scidbTemporalIndex();

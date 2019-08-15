@@ -104,6 +104,7 @@ public:
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
+   // Temporal
 	TemporalIndex tIndex;
 
 	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
@@ -118,6 +119,7 @@ public:
 	TemporalIndex& getTIndex() { return tIndex; }
 
 	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
+    STARE_ArrayIndexTemporalValue ValueFromUTCDatetime(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
 	TemporalIndex&                setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
