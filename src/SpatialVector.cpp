@@ -388,6 +388,12 @@ SpatialVector::operator ==(const SpatialVector & v) const
   return ( (x_ == v.x_ && y_ == v.y_ && z_ == v.z_) ? 1 : 0 );
 }
 
+int equal_within_tolerance(const SpatialVector &a, const SpatialVector &b, float64 tolerance2) {
+	SpatialVector c = b-a;
+	float64 delta_dot = c*c;
+  return delta_dot < tolerance2;
+}
+
 /////////////SHOW/////////////////////////////////////////
 // print to stdout
 //

@@ -226,6 +226,9 @@ RangeConvex::simplify0() {
 	ValueVectorSpvec corner;
 	size_t c, currentCorner;
 
+	float64 tol = 1.0e-8;
+	float64 tol2 = tol*tol;
+
 	if (constraints_.size() == 1) { // for one constraint, it is itself the BC
 		boundingCircle_ = constraints_[0];
 		return;
@@ -234,13 +237,18 @@ RangeConvex::simplify0() {
 		// 3 zERO constraints... so this is acceptable.
 	} else if(constraints_.size() == 2) {
 		// test for constraints being identical - rule 1 out
-		if(constraints_[0].a_ == constraints_[1].a_){
+		// if(constraints_[0].a_ == constraints_[1].a_){
+
+		if(equal_within_tolerance(constraints_[0].a_, constraints_[1].a_, tol2)) {
+
 			constraints_.erase(constraints_.end()-1);
 			boundingCircle_ = constraints_[0];
 			return;
 		}
 		// test for constraints being two disjoint half spheres - empty convex!
-		if(constraints_[0].a_ == (-1.0)*constraints_[1].a_){
+		// if(constraints_[0].a_ == (-1.0)*constraints_[1].a_){
+
+		if(equal_within_tolerance(constraints_[0].a_, (-1.0)*constraints_[1].a_, tol2)){
 			constraints_.clear();
 			return;
 		}
@@ -251,15 +259,34 @@ RangeConvex::simplify0() {
 
 	cout << "rc::s0 1000" << endl << flush;
 
+	for(i=0; i < constraints_.size(); ++i ) {
+		cout << dec << i << " i,con_: " << constraints_[i] << endl << flush;
+	}
+
+	cout << "rc::s0 1010" << endl << flush;
+
+	for(i=0; i < constraints_.size()-1; ++i ) {
+		for(j=i+1; j < constraints_.size(); ++j ) {
+			cout << dec << i << "," << j << " ij, cmp(c_i,c_j) == vs. tol : "
+					<< (constraints_[i].a_ == constraints_[j].a_) << ", "
+					<< equal_within_tolerance(constraints_[i].a_, constraints_[j].a_ , tol2)
+					<< endl << flush;
+		}
+	}
+
+	cout << "rc::s0 1099" << endl << flush;
+
 	// Go over all pairs of constraints
 	for(i = 0; i < constraints_.size() - 1; i++) {
 		bool ruledout = true;
 		for(j = i+1; j < constraints_.size(); j ++) {
 			// test for constraints being identical - rule i out
 			cout << "rc::s0 1100 i,j: " << i << " " << j << endl << flush;
-			if(constraints_[i].a_ == constraints_[j].a_) break;
+			// if(constraints_[i].a_ == constraints_[j].a_) break;
+			if(equal_within_tolerance(constraints_[i].a_, constraints_[j].a_, tol2)) break;
 			// test for constraints being two disjoint half spheres - empty convex!
-			if(constraints_[i].a_ == (-1.0)*constraints_[j].a_){
+			// if(constraints_[i].a_ == (-1.0)*constraints_[j].a_){
+			if(equal_within_tolerance(constraints_[i].a_, (-1.0)*constraints_[j].a_, tol2)){
 				constraints_.clear();
 				return;
 			}
@@ -273,8 +300,14 @@ RangeConvex::simplify0() {
 
 			for(k = 0; k < constraints_.size(); k++) {
 				if(k == i || k == j) continue;
+				cout << i << "," << j << " ij,v1,v2: "
+						<< vi1 * constraints_[k].a_ << " "
+						<< vi2 * constraints_[k].a_
+						<< endl << flush;
 				if(vi1ok && vi1 * constraints_[k].a_ <= 0.0) vi1ok = false;
 				if(vi2ok && vi2 * constraints_[k].a_ <= 0.0) vi2ok = false;
+				// if(vi1ok && vi1 * constraints_[k].a_ <= -tol2) vi1ok = false;
+				// if(vi2ok && vi2 * constraints_[k].a_ <= -tol2) vi2ok = false;
 				if(!vi1ok && !vi2ok) break;
 			}
 
