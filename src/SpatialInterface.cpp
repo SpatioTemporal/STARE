@@ -38,14 +38,17 @@ extern long long atoll (const char *str);
 //==============================================================
 
 ///////////CONSTRUCTOR///////////////////////
-htmInterface::htmInterface(size_t searchlevel, size_t buildlevel) : t_(NULL) {
-	index_ = new SpatialIndex(searchlevel, buildlevel);
+htmInterface::htmInterface(size_t searchlevel, size_t buildlevel, SpatialRotation rot) : t_(NULL) {
+	index_ = new SpatialIndex(searchlevel, buildlevel, rot);
 }
 
 ///////////DESTRUCTOR////////////////////////
 htmInterface::~htmInterface() {
+	cout << dec << 10000 << endl << flush;
 	delete index_;
+	cout << dec << 10001 << endl << flush;
 	if(t_ != NULL) delete t_;
+	cout << dec << 10002 << endl << flush;
 }
 
 ///////////LOOKUP METHODS////////////////////
@@ -384,22 +387,22 @@ htmInterface::convexHull(
 const HTMRangeValueVector & 
 htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps ) {
 	polyCorners_.clear();
-//	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
-//	cout << endl;
+	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
+	cout << endl;
 	if (steps == (uint64) -1) {
 		steps = latlon.size();
 	} else {
 		steps = min(steps,latlon.size());
 	}
 	for(size_t i = 0; i < steps; i++) {
-//		cout << " " << i << flush;
-//		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
+		cout << " " << i << flush;
+		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
 		float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
-//		cout << endl << flush;
+		cout << endl << flush;
 	}
-//	cout << endl << flush << 2100 << endl << flush;
+	cout << endl << flush << 2100 << endl << flush;
 	return doHull();
 }
 
@@ -473,7 +476,7 @@ htmInterface::doHull() {
 	//	dom.convexes_[0].boundingCircle_.write(cout);
 	//	dom.write(cout);
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//	cout << 3999 << endl << flush;
+	cout << 3999 << endl << flush;
 
 	return domain(dom);
 }
@@ -607,7 +610,7 @@ const HTMRangeValueVector &
 htmInterface::domain( SpatialDomain & domain ) {
 	HtmRange htmRange;
 
-//	cout << 4000 << endl << flush;
+	cout << 4000 << endl << flush;
 
 	Key gapsize;
 	//  SpatialIndex idx(20, 5);
@@ -615,19 +618,23 @@ htmInterface::domain( SpatialDomain & domain ) {
 
 	domain.intersect(index_, &htmRange, false);
 
-//	cout << 4100 << endl << flush;
+	cout << 4100 << endl << flush;
 
 	gapsize = htmRange.bestgap(MAX_RANGES);
 	htmRange.defrag(gapsize);
 
-//	cout << 4200 << endl << flush;
+	cout << 4200 << endl << flush;
 //	htmRange.defrag();
 	// DONT FORGET to: get best gap and defrag  htmRange.defrag(bestgap);
 
-//	cout << 4300 << endl << flush;
+	cout << 4300 << endl << flush;
 	// Construct the valuevector...
 	fillValueVec( htmRange, range_);
-//	cout << 4999 << endl << flush;
+	cout << 4997 << endl << flush;
+	htmRange.reset();
+	cout << 4998 << endl << flush;
+	htmRange.purge();
+	cout << 4999 << endl << flush;
 	return range_;
 }
 

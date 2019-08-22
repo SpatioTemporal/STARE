@@ -12,6 +12,7 @@
 #include "STARE.h"
 #include "RangeConvex.h"
 #include "SpatialDomain.h"
+#include "SpatialInterface.h"
 #include <iostream>
 
 /**
@@ -398,10 +399,50 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	return intervals;
 }
 
-STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points) {
+STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level) {
 
+	STARE_SpatialIntervals cover;
+	int hullSteps = points.size();
+	htmInterface *htm;
+	cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	if( force_resolution_level > 0 ) {
+		cout << dec << 1100 << endl << flush;
+		// htm = htmInterface(&index_);
+		htm = new htmInterface(
+				this->getIndex(force_resolution_level).getMaxlevel(),
+				this->getIndex(force_resolution_level).getBuildLevel(),
+				this->getIndex(force_resolution_level).getRotation());
+		cout << dec << 1101 << endl << flush;
+	} else {
+		cout << dec << 1200 << endl << flush;
+		// htm = htmInterface(&index_);
+		htm = new htmInterface(
+				this->getIndex().getMaxlevel(),
+				this->getIndex().getBuildLevel(),
+				this->getIndex().getRotation());
+		cout << dec << 1201 << endl << flush;
+	}
 
+	cout << dec << "a2000" << endl << flush;
 
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps);
+
+	cout << dec << "a3000" << endl << flush;
+
+	for(int i=0; i < htmRangeVector.size(); ++i) {
+		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
+		cover.push_back(lo);
+		uint64 hi;
+		if( htmRangeVector[i].lo != htmRangeVector[i].lo ) {
+			hi = sTerminator(ValueFromHtmID(htmRangeVector[i].hi));
+			cover.push_back(hi);
+		}
+	}
+
+	cout << dec << "a4000" << endl << flush;
+
+	delete htm; // TODO Hopefully this will not also delete the index we passed in.
+	return cover;
 }
 
 /*

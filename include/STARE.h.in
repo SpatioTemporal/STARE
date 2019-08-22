@@ -64,6 +64,8 @@ public:
 	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 
+	STARE_SpatialIntervals ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level);
+
 	SpatialIndex getIndex() { return sIndex; }
 	SpatialIndex getIndex(int resolutionLevel);
 	uint64       getMaximumSearchLevel() { return STARE_HARDWIRED_RESOLUTION_LEVEL_MAX; } // TODO Ugh. See search_level in the privates...

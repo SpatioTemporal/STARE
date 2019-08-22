@@ -216,129 +216,154 @@ RangeConvex::add(SpatialConstraint & c)
 void
 RangeConvex::simplify0() {
 
-  size_t i,j,k;
-  SpatialVector vi1, vi2;
-  typedef std::vector<size_t> ValueVectorSzt;
-  ValueVectorSzt cornerConstr1, cornerConstr2, removeConstr;
-  ValueVectorSpvec corner;
-  size_t c, currentCorner;
+	cout << "rc::s0" << endl << flush;
+	cout << "rc::s0 constraints_.size(): " << constraints_.size() << endl << flush;
 
+	size_t i,j,k;
+	SpatialVector vi1, vi2;
+	typedef std::vector<size_t> ValueVectorSzt;
+	ValueVectorSzt cornerConstr1, cornerConstr2, removeConstr;
+	ValueVectorSpvec corner;
+	size_t c, currentCorner;
 
-  if (constraints_.size() == 1) { // for one constraint, it is itself the BC
-    boundingCircle_ = constraints_[0];
-    return;
-    // For 2 constraints, take the bounding circle a 0-constraint...
-    // this is by no means optimal, but the code is optimized for at least
-    // 3 zERO constraints... so this is acceptable.
-  } else if(constraints_.size() == 2) {
-    // test for constraints being identical - rule 1 out
-	if(constraints_[0].a_ == constraints_[1].a_){
-	  constraints_.erase(constraints_.end()-1);
-      boundingCircle_ = constraints_[0];
-      return;
-    }
-    // test for constraints being two disjoint half spheres - empty convex!
-	if(constraints_[0].a_ == (-1.0)*constraints_[1].a_){
-	  constraints_.clear();
-      return;
-    }
-    boundingCircle_ = SpatialConstraint(constraints_[0].v() +
-					constraints_[1].v(),0);
-    return;
-  }
-
-  // Go over all pairs of constraints
-  for(i = 0; i < constraints_.size() - 1; i++) {
-    bool ruledout = true;
-	for(j = i+1; j < constraints_.size(); j ++) {
-      // test for constraints being identical - rule i out
-	  if(constraints_[i].a_ == constraints_[j].a_) break;
-      // test for constraints being two disjoint half spheres - empty convex!
-	  if(constraints_[i].a_ == (-1.0)*constraints_[j].a_){
-		constraints_.clear();
+	if (constraints_.size() == 1) { // for one constraint, it is itself the BC
+		boundingCircle_ = constraints_[0];
 		return;
-      }
-      // vi1 and vi2 are their intersection points
-	  vi1 = constraints_[i].a_ ^ constraints_[j].a_ ;
-      vi1.normalize();
-      vi2 = (-1.0) * vi1;
-      bool vi1ok = true, vi2ok = true;
-      // now test whether vi1 or vi2 or both are inside every other constraint.
-      // if yes, store them in the corner array.
-	  for(k = 0; k < constraints_.size(); k++) {
-		if(k == i || k == j) continue;
-		if(vi1ok && vi1 * constraints_[k].a_ <= 0.0) vi1ok = false;
-		if(vi2ok && vi2 * constraints_[k].a_ <= 0.0) vi2ok = false;
-		if(!vi1ok && !vi2ok) break;
-      }
-      if(vi1ok) {
-	    corner.push_back(vi1);
-		cornerConstr1.push_back(i);
-		cornerConstr2.push_back(j);
-		ruledout = false;
-      }
-      if(vi2ok) {
-		corner.push_back(vi2);
-		cornerConstr1.push_back(i);
-		cornerConstr2.push_back(j);
-		ruledout = false;
-      }
-    }
-    // is this constraint ruled out? i.e. none of its intersections
-    // with other constraints are corners... remove it from constraints_ list.
-	if(ruledout) removeConstr.push_back(i);
-  }
+		// For 2 constraints, take the bounding circle a 0-constraint...
+		// this is by no means optimal, but the code is optimized for at least
+		// 3 zERO constraints... so this is acceptable.
+	} else if(constraints_.size() == 2) {
+		// test for constraints being identical - rule 1 out
+		if(constraints_[0].a_ == constraints_[1].a_){
+			constraints_.erase(constraints_.end()-1);
+			boundingCircle_ = constraints_[0];
+			return;
+		}
+		// test for constraints being two disjoint half spheres - empty convex!
+		if(constraints_[0].a_ == (-1.0)*constraints_[1].a_){
+			constraints_.clear();
+			return;
+		}
+		boundingCircle_ = SpatialConstraint(constraints_[0].v() +
+				constraints_[1].v(),0);
+		return;
+	}
 
-  // Now set the corners into their correct order, which is an
-  // anti-clockwise walk around the polygon.
-  //
-  // start at any corner. so take the first.
+	cout << "rc::s0 1000" << endl << flush;
 
-  corners_.clear();
-  corners_.push_back(corner[0]);
+	// Go over all pairs of constraints
+	for(i = 0; i < constraints_.size() - 1; i++) {
+		bool ruledout = true;
+		for(j = i+1; j < constraints_.size(); j ++) {
+			// test for constraints being identical - rule i out
+			cout << "rc::s0 1100 i,j: " << i << " " << j << endl << flush;
+			if(constraints_[i].a_ == constraints_[j].a_) break;
+			// test for constraints being two disjoint half spheres - empty convex!
+			if(constraints_[i].a_ == (-1.0)*constraints_[j].a_){
+				constraints_.clear();
+				return;
+			}
+			// vi1 and vi2 are their intersection points
+			vi1 = constraints_[i].a_ ^ constraints_[j].a_ ;
+			vi1.normalize();
+			vi2 = (-1.0) * vi1;
+			bool vi1ok = true, vi2ok = true;
+			// now test whether vi1 or vi2 or both are inside every other constraint.
+			// if yes, store them in the corner array.
 
-  // The trick is now to start off into the correct direction.
-  // this corner has two edges it can walk. we have to take the
-  // one where the convex lies on its left side.
-  i = cornerConstr1[0];		// the i'th constraint and j'th constraint
-  j = cornerConstr2[0];		// intersect at 0'th corner
-  size_t c1,c2,k1,k2;
-  // Now find the other corner where the i'th and j'th constraints intersect.
-  // Store the corner in vi1 and vi2, and the other constraint indices
-  // in c1,c2.
-  for( k = 1; k < cornerConstr1.size(); k ++) {
-    if(cornerConstr1[k] == i) {
-      vi1 = corner[k];
-      c1 = cornerConstr2[k];
-      k1 = k;
-    }
-    if(cornerConstr2[k] == i) {
-      vi1 = corner[k];
-      c1 = cornerConstr1[k];
-      k1 = k;
-    }
-    if(cornerConstr1[k] == j) {
-      vi2 = corner[k];
-      c2 = cornerConstr2[k];
-      k2 = k;
-    }
-    if(cornerConstr2[k] == j) {
-      vi2 = corner[k];
-      c2 = cornerConstr1[k];
-      k2 = k;
-    }
-  }
-  // Now test i'th constraint-edge ( corner 0 and corner k ) whether
-  // it is on the correct side (left)
-  //
-  //  ( (corner(k) - corner(0)) x constraint(i) ) * corner(0)
-  //
-  // is >0 if yes, <0 if no...
-  //
+			for(k = 0; k < constraints_.size(); k++) {
+				if(k == i || k == j) continue;
+				if(vi1ok && vi1 * constraints_[k].a_ <= 0.0) vi1ok = false;
+				if(vi2ok && vi2 * constraints_[k].a_ <= 0.0) vi2ok = false;
+				if(!vi1ok && !vi2ok) break;
+			}
 
-  // size_t c, currentCorner;
+			if(vi1ok) {
+				corner.push_back(vi1);
+				cornerConstr1.push_back(i);
+				cornerConstr2.push_back(j);
+				ruledout = false;
+			}
 
-  /*
+			if(vi2ok) {
+				corner.push_back(vi2);
+				cornerConstr1.push_back(i);
+				cornerConstr2.push_back(j);
+				ruledout = false;
+			}
+
+		}
+		// is this constraint ruled out? i.e. none of its intersections
+		// with other constraints are corners... remove it from constraints_ list.
+		// But this only looks at i? What about constraint j? We are looking at pairs...
+		// Also, constraint i is only compared with j=i+1..N. It seems easier to remove
+		// constraints that have greater index values. Why?
+		// Corners belong to pairs of constraints and to individual constraints through the pairs...
+		// Maybe 6 isn't being connected to 7?
+		if(ruledout) {
+			cout << "rc::s0 removing constraint i: " << i << endl;
+			removeConstr.push_back(i);
+		}
+	}
+
+	cout << "rc::s0 1500" << endl << flush;
+
+
+	cout << "rc::s0 2000" << endl << flush;
+
+	// Now set the corners into their correct order, which is an
+	// anti-clockwise walk around the polygon.
+	//
+	// start at any corner. so take the first.
+
+	corners_.clear();
+	corners_.push_back(corner[0]);
+
+	// The trick is now to start off into the correct direction.
+	// this corner has two edges it can walk. we have to take the
+	// one where the convex lies on its left side.
+	i = cornerConstr1[0];		// the i'th constraint and j'th constraint
+	j = cornerConstr2[0];		// intersect at 0'th corner
+	size_t c1,c2,k1,k2;
+	// Now find the other corner where the i'th and j'th constraints intersect.
+	// Store the corner in vi1 and vi2, and the other constraint indices
+	// in c1,c2.
+	for( k = 1; k < cornerConstr1.size(); k ++) {
+		if(cornerConstr1[k] == i) {
+			vi1 = corner[k];
+			c1 = cornerConstr2[k];
+			k1 = k;
+		}
+		if(cornerConstr2[k] == i) {
+			vi1 = corner[k];
+			c1 = cornerConstr1[k];
+			k1 = k;
+		}
+		if(cornerConstr1[k] == j) {
+			vi2 = corner[k];
+			c2 = cornerConstr2[k];
+			k2 = k;
+		}
+		if(cornerConstr2[k] == j) {
+			vi2 = corner[k];
+			c2 = cornerConstr1[k];
+			k2 = k;
+		}
+	}
+
+	cout << "rc::s0 3000" << endl << flush;
+
+	// Now test i'th constraint-edge ( corner 0 and corner k ) whether
+	// it is on the correct side (left)
+	//
+	//  ( (corner(k) - corner(0)) x constraint(i) ) * corner(0)
+	//
+	// is >0 if yes, <0 if no...
+	//
+
+	// size_t c, currentCorner;
+
+	/*
    now append the corners that match the index c until we got corner 0 again
    currentCorner holds the current corners index
    c holds the index of the constraint that has just been intersected with
@@ -349,71 +374,127 @@ RangeConvex::simplify0() {
    x Save that corner, and set c to the constraint that intersects with c
      at that corner. Set currentcorner to that corners index.
    x Loop until 0th corner reached.
-*/
+	 */
 
-  c = 0;
-  currentCorner = 0;
+	c = 0;
+	currentCorner = 0;
 
-  if( ((vi1 - corner[0]) ^ constraints_[i].a_) * corner[0] > 0 ) {
-	corners_.push_back(vi1);
-    c = c1;
-    currentCorner = k1;
-  } else {
-	corners_.push_back(vi2);
-    c = c2;
-    currentCorner = k2;
-  }
-
-  while( currentCorner ) {
-	  for (k = 0; k < cornerConstr1.size(); k++) {
-		  if ( k == currentCorner ) continue;
-		  if ( c == cornerConstr1[k] ) {
-			  if( (currentCorner = k) == 0) break;
-			  corners_.push_back(corner[k]);
-			  c = cornerConstr2[k];
-			  break;
-		  }
-		  if ( c == cornerConstr2[k] ) {
-			  if ( (currentCorner = k) == 0) break;
-			  corners_.push_back(corner[k]);
-			  c = cornerConstr1[k];
-			  break;
-		  }
-	  }
-  }
-
-  // Remove all redundant constraints
-  for ( i = 0; i < removeConstr.size(); i++)
-		 constraints_.erase(constraints_.end()-removeConstr[i]-1);
-
-  // Now calculate the bounding circle for the convex.
-  // We take it as the bounding circle of the triangle with
-  // the widest opening angle. All triangles made out of 3 corners
-  // are considered.
-  boundingCircle_.d_ = 1.0;
-  if (constraints_.size() >=3 ) {
-	for(i = 0; i < corners_.size(); i++)
-    for(j = i+1; j < corners_.size(); j++)
-	for(k = j+1; k < corners_.size(); k++) {
-	  SpatialVector v = ( corners_[j] - corners_[i] ) ^
-	                    ( corners_[k] - corners_[j] );
-	  v.normalize();
-	  // Set the correct opening angle: Since the plane cutting
-	  // out the triangle also correctly cuts out the bounding cap
-	  // of the triangle on the sphere, we can take any corner to
-	  // calculate the opening angle
-	  float64 d = v * corners_[i];
-	  if(boundingCircle_.d_ > d) boundingCircle_ = SpatialConstraint(v,d);
+	if( ((vi1 - corner[0]) ^ constraints_[i].a_) * corner[0] > 0 ) {
+		corners_.push_back(vi1);
+		c = c1;
+		currentCorner = k1;
+	} else {
+		corners_.push_back(vi2);
+		c = c2;
+		currentCorner = k2;
 	}
-  }
+
+	cout << "rc::s0 3500 c:              " << c << endl << flush;
+	cout << "rc::s0 3500 currentCorner:  " << currentCorner << endl << flush;
+	cout << "rc::s0 3501 cornerConstr1.s " << cornerConstr1.size() << endl << flush;
+	cout << "rc::s0 3502 cornerConstr2.s " << cornerConstr2.size() << endl << flush;
+
+//	bool cc_okp = true;
+//	for(int l_ = 0; l_ < cornerConstr1.size(); ++l_) {
+//
+//	}
+
+	int iFuse = 12;
+	while( currentCorner ) {
+		cout << endl << flush;
+		for( int l_=0; l_ < cornerConstr1.size(); ++l_ ) {
+			cout    << "rc::s0 3550 l_,cc1,cc2,crnrs: "
+					<< l_ << " "
+					<< cornerConstr1[l_] << " "
+					<< cornerConstr2[l_];
+			if( l_ < corners_.size() ) {
+				// cout << " " << corners_[l_];
+				cout << " *";
+			}
+			cout << endl << flush;
+		}
+		cout << endl << flush;
+		cout    << "rc::s0 3551 c: " << c << endl << flush;
+		for (k = 0; k < cornerConstr1.size(); k++) {
+
+			cout    << "rc::s0 3600 k,cc,cc1,cc2: "
+					<< k << " "
+					<< currentCorner << " "
+					<< cornerConstr1[k] << " "
+					<< cornerConstr2[k] << endl << flush;
+
+			if ( k == currentCorner ) {
+				cout << "k == currentCorner" << endl << flush;
+				continue;
+			}
+
+			if ( c == cornerConstr1[k] ) {
+				if( (currentCorner = k) == 0) break;
+				corners_.push_back(corner[k]);
+				c = cornerConstr2[k];
+				break;
+			}
+
+			if ( c == cornerConstr2[k] ) {
+				cout    << "rc::s0 3610: " << endl << flush;
+				if ( (currentCorner = k) == 0) break;
+				corners_.push_back(corner[k]);
+				c = cornerConstr1[k];
+				cout    << "rc::s0 3611: k,c: " << k << " " << c << endl << flush;
+				break;
+			}
+		}
+
+		// TODO When c can't be found in both cc1 and cc2, this routine fails spinning.
+		// TODO There's no way back to zero.
+
+
+		if(--iFuse == 0) {
+			cout << endl;
+			cout << "rc::s0 3699 iFuse exit " << endl << flush;
+			exit(1);
+		}
+	}
+
+	cout << "rc::s0 4000" << endl << flush;
+
+	// Remove all redundant constraints
+	for ( i = 0; i < removeConstr.size(); i++)
+		constraints_.erase(constraints_.end()-removeConstr[i]-1);
+
+	// Now calculate the bounding circle for the convex.
+	// We take it as the bounding circle of the triangle with
+	// the widest opening angle. All triangles made out of 3 corners
+	// are considered.
+	boundingCircle_.d_ = 1.0;
+	if (constraints_.size() >=3 ) {
+		for(i = 0; i < corners_.size(); i++)
+			for(j = i+1; j < corners_.size(); j++)
+				for(k = j+1; k < corners_.size(); k++) {
+					SpatialVector v = ( corners_[j] - corners_[i] ) ^
+							( corners_[k] - corners_[j] );
+					v.normalize();
+					// Set the correct opening angle: Since the plane cutting
+					// out the triangle also correctly cuts out the bounding cap
+					// of the triangle on the sphere, we can take any corner to
+					// calculate the opening angle
+					float64 d = v * corners_[i];
+					if(boundingCircle_.d_ > d) boundingCircle_ = SpatialConstraint(v,d);
+				}
+	}
+
+	cout << "rc::s0 5000" << endl << flush;
 
 #ifdef DIAGNOSE
-  cout.precision(16);
-  cout  << "lat"             << ", " << "lon"              << " : " <<"x,y,z" << endl;  
-  for(i = 0; i < corners_.size(); i++) {
-    cout << "(" <<corners_[i].dec() << ", " << corners_[i].ra() << ") : " << corners_[i] << endl;
-  }
+	cout.precision(16);
+	cout  << "lat"             << ", " << "lon"              << " : " <<"x,y,z" << endl;
+	for(i = 0; i < corners_.size(); i++) {
+		cout << "(" <<corners_[i].dec() << ", " << corners_[i].ra() << ") : " << corners_[i] << endl;
+	}
 #endif
+
+	// exit(1);
+
 }
 
 /////////////SIMPLIFY/////////////////////////////////////
@@ -440,6 +521,8 @@ RangeConvex::simplify0() {
 
 void
 RangeConvex::simplify() {
+
+	cout << "rc::s" << endl << flush;
 
   if(sign_ == zERO) {
     simplify0();	// treat zERO convexes separately
@@ -569,28 +652,40 @@ RangeConvex::testConstraints(size_t i, size_t j) {
 //
 void
 RangeConvex::intersect(const SpatialIndex * idx, 
-                       HtmRange * htmrange, 
-                       bool varlen, 
-                       HtmRange *hrInterior, 
-                       HtmRange *hrBoundary ) {
-  
-  hr = htmrange;
-  hrInterior_ = hrInterior;
-  hrBoundary_ = hrBoundary;
-  index_ = idx;
-  varlen_ = varlen;
-  addlevel_ = idx->maxlevel_ - idx->buildlevel_;
-  simplify(); // don't work too hard...
-  
-  if(constraints_.size()==0) {
-    return;   // nothing to intersect!!
-  }
+		HtmRange * htmrange,
+		bool varlen,
+		HtmRange *hrInterior,
+		HtmRange *hrBoundary ) {
 
-  // Start with root nodes (index = 1-8) and intersect triangles
-  // TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
-  for(uint64 i = 1; i <= 8; i++){
-    testTrixel(i);
-  }
+
+	cout << "rc::i sign_: " << sign_ << endl << flush;
+	hr = htmrange;
+	hrInterior_ = hrInterior;
+	hrBoundary_ = hrBoundary;
+	index_ = idx;
+	varlen_ = varlen;
+	addlevel_ = idx->maxlevel_ - idx->buildlevel_;
+
+	cout << "rc::i " << 500 << endl << flush;
+
+	simplify(); // don't work too hard...
+
+	cout << "rc::i " << 1000 << endl << flush;
+
+	if(constraints_.size()==0) {
+		return;   // nothing to intersect!!
+	}
+
+	cout << "rc::i " << 2000 << endl << flush;
+
+	// Start with root nodes (index = 1-8) and intersect triangles
+	// TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
+	for(uint64 i = 1; i <= 8; i++){
+		cout << "rc::i " << 2100 << " i: " << i << endl << flush;
+		testTrixel(i);
+	}
+
+	cout << "rc::i " << 3000 << endl << flush;
 }
 
 ////////////SAVETRIXEL

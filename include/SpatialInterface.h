@@ -18,6 +18,7 @@
 
 #include "SpatialIndex.h"
 #include "SpatialDomain.h"
+#include "SpatialRotation.h"
 #include "VarStr.h"
 
 /**
@@ -69,7 +70,7 @@ public:
       saveDepth parameter can be specified to keep the given amount of
       levels in memory. This can also be altered by changeDepth. */
 
-	htmInterface(size_t searchlevel = 5, size_t buildevel = 5); // [ed:gyuri:saveDepth was 2]
+	htmInterface(size_t searchlevel = 5, size_t buildevel = 5, SpatialRotation rot = rot_identity ); // [ed:gyuri:saveDepth was 2]
 
   /** Destructor. */
   ~htmInterface();

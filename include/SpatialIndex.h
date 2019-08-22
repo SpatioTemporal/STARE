@@ -83,9 +83,14 @@ public:
   SpatialIndex(const char* htmIdName, int buildlevel = 5, SpatialRotation rot = rot_identity) :
 	  SpatialIndex(levelOfName(htmIdName),buildlevel,rot) {};
 
+  virtual ~SpatialIndex();
+
+  SpatialIndex copy() { return SpatialIndex(this->maxlevel_, this->buildlevel_, this->rot_); }
+
   size_t getMaxlevel() const { return maxlevel_; }
   size_t getLeafLevel() const { return maxlevel_; }
   size_t getBuildlevel() const { return buildlevel_; }
+  SpatialRotation getRotation() const { return rot_; }
 
   uint64 indexAtNodeIndex(uint64 nodeIndex);
   uint64 idAtNodeIndex(uint64 nodeIndex);
@@ -292,6 +297,9 @@ private:
 
   size_t 		maxlevel_;		///< the depth of the Layer
   size_t 	    buildlevel_;	///< the depth of the Layer stored
+  SpatialRotation rot_;
+
+
   /**
    * The number of faces (leaf nodes) to the greater of \a buildlevel_ or \a maxlevel_
    */
