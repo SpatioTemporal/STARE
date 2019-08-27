@@ -46,16 +46,21 @@ if(SWIG_FOUND)
 	#cmake_minimum_required(VERSION 3.13 FATAL ERROR)
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )
-
-
-	# TODO Control following with ENV variable.
-    include_directories( "/usr/include/python3.7m"  "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
-    #include_directories("/usr/include/python3.6m"  "/usr/include/python3.7m"  )
+	
+        # message("e-pid: " "$ENV{PYTHON_INCLUDE_DIRS}")
+	if( DEFINED ENV{PYTHON_INCLUDE_DIRS} )
+	  string( REPLACE ":" ";" INCLUDE_LIST $ENV{PYTHON_INCLUDE_DIRS} )
+	  include_directories( ${INCLUDE_LIST} )
+	else()
+	  message("PYTHON_INCLUDE_DIRS not found. Guessing where to find python includes.")
+	  include_directories( "/usr/include/python3.7m" "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
+  	endif()
 
     add_library(PySTARE1A SHARED PySTARE1.cpp)
     # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
-    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..)     
-    target_link_libraries( PySTARE1A  "liberfa.so")
+    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
+    # target_link_libraries( PySTARE1A "/usr/lib64/liberfa.so" )
+
     
     # SWIG
     find_package(SWIG REQUIRED)

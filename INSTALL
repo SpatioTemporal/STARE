@@ -10,11 +10,8 @@ Dependencies:
   ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
   CUTE (included) - https://cute-test.com/
 
-2. PySTARE1: Python interface using SWIG
+2. PySTARE: Python interface using SWIG
   Python3, Numpy, SWIG
-
-3. PySTARE: Python interface using Boost (deprecated)
-  Python3, Numpy, Boost, Boost::Python
 
 ########################################################################### 
 #
@@ -32,11 +29,10 @@ Dependencies:
 #	or c:/Program Files (Windows). Running the below cmake command will
 #	set it to $prefix/deps. If you wish to install it elsewhere, simply
 #	set the environment variable to your preferred location.
-# The environment variable "CUTE_INCLUDE_DIR" has a default value of:
-#	'${PROJECT_SOURCE_DIR}/CUTE_DIR/CUTE'
-#	If you want to use a different location for the CUTE headers you
-#	must provide it with the cmake command using
-#	'-DCUTE_INCLUDE_DIR=<CUTE location>'
+
+# The PYTHON_INCLUDE_DIRS environment variable can be set to the locations
+# of python and numpy/core include directories. See src/CMakeLists.txt for
+# how the include_directories is set.
 
 mkdir build; cd build
 cmake ../STARE
@@ -60,6 +56,7 @@ make test
 ###########################################################################
 #
 # Ubuntu 18.04 additional comments
+#
 
 sudo apt install cmake # Might need to manually update to 3.15+
 sudo apt install swig
@@ -71,6 +68,7 @@ sudo apt install g++
 ###########################################################################
 #
 # CentOS 7 additional comments
+#
 
 sudo yum install epel-release
 sudo yum install erfa-devel.x86_64
