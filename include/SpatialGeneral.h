@@ -120,7 +120,7 @@ const float64 piDiv180 = gPr;
 // const float64 gEpsilon = 1.0E-17;
 // const float64 gEpsilon = 5.0E-18;
 // const float64 gEpsilon = 1.0E-18;
-const float64 gEpsilon = 5.0E-19;
+const float64 gEpsilon = 5.0E-19; // +++ Works well
 // CVSversion = "$Name:  $";
 
 //

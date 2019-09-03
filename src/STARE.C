@@ -301,6 +301,7 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
+		cout << "ERROR: STARE::CoverBoundingBoxFromLatLonDegrees Warning Bounding Box called with 4 != corner.size == " << corners.size() << ", returning." << endl << flush;
 		return intervals;
 	}
 	if( force_resolution_level > -1 ) {
@@ -405,7 +406,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 	int hullSteps = points.size();
 	htmInterface *htm;
 	cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
-	if( force_resolution_level > 0 ) {
+	if( force_resolution_level > -1 ) {
 		cout << dec << 1100 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
@@ -417,9 +418,9 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 		cout << dec << 1200 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
-				this->getIndex().getMaxlevel(),
-				this->getIndex().getBuildLevel(),
-				this->getIndex().getRotation());
+				this->getIndex(8).getMaxlevel(),
+				this->getIndex(8).getBuildLevel(),
+				this->getIndex(8).getRotation());
 		cout << dec << 1201 << endl << flush;
 	}
 
@@ -427,7 +428,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 
 	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps);
 
-	cout << dec << "a3000" << endl << flush;
+	cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?

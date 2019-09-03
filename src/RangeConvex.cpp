@@ -19,6 +19,7 @@
 
 #define SGN(x) ( (x)<0? -1: ( (x)>0? 1:0 ) )		// signum
 
+
 // ===========================================================================
 //
 // Member functions for class RangeConvex
@@ -216,8 +217,12 @@ RangeConvex::add(SpatialConstraint & c)
 void
 RangeConvex::simplify0() {
 
+	// return; // Broken?
+
+#ifdef DIAG
 	cout << "rc::s0" << endl << flush;
 	cout << "rc::s0 constraints_.size(): " << constraints_.size() << endl << flush;
+#endif
 
 	size_t i,j,k;
 	SpatialVector vi1, vi2;
@@ -226,8 +231,12 @@ RangeConvex::simplify0() {
 	ValueVectorSpvec corner;
 	size_t c, currentCorner;
 
-	float64 tol = 1.0e-8;
+	float64 tol = 1.0e-12;
 	float64 tol2 = tol*tol;
+
+#ifdef DIAG
+	cout << "tol,tol2: " << tol << " " << tol2 << endl << flush;
+#endif
 
 	if (constraints_.size() == 1) { // for one constraint, it is itself the BC
 		boundingCircle_ = constraints_[0];
@@ -257,6 +266,7 @@ RangeConvex::simplify0() {
 		return;
 	}
 
+#ifdef DIAG
 	cout << "rc::s0 1000" << endl << flush;
 
 	for(i=0; i < constraints_.size(); ++i ) {
@@ -275,56 +285,88 @@ RangeConvex::simplify0() {
 	}
 
 	cout << "rc::s0 1099" << endl << flush;
+#endif
+
 
 	// Go over all pairs of constraints
 	for(i = 0; i < constraints_.size() - 1; i++) {
 		bool ruledout = true;
-		for(j = i+1; j < constraints_.size(); j ++) {
+			for(j = i+1; j < constraints_.size(); j ++) {
 			// test for constraints being identical - rule i out
+
+#ifdef DIAG
 			cout << "rc::s0 1100 i,j: " << i << " " << j << endl << flush;
+
+			cout << i << "," << j << " |a_i-a_j| = "
+					<< (constraints_[i].a_- constraints_[j].a_ ).length()
+					<< endl << flush;
+#endif
+
 			// if(constraints_[i].a_ == constraints_[j].a_) break;
 			if(equal_within_tolerance(constraints_[i].a_, constraints_[j].a_, tol2)) break;
+
+
 			// test for constraints being two disjoint half spheres - empty convex!
 			// if(constraints_[i].a_ == (-1.0)*constraints_[j].a_){
 			if(equal_within_tolerance(constraints_[i].a_, (-1.0)*constraints_[j].a_, tol2)){
 				constraints_.clear();
 				return;
 			}
+
 			// vi1 and vi2 are their intersection points
 			vi1 = constraints_[i].a_ ^ constraints_[j].a_ ;
+#ifdef DIAG
+			cout << i << " i,vi1,vi1.s: " << vi1 << " " << vi1.length() << endl << flush;
+#endif
 			vi1.normalize();
 			vi2 = (-1.0) * vi1;
+
+#ifdef DIAG
+			cout << i << " i,vi1,vi2: " << vi1 << " : " << vi2 << endl << flush;
+#endif
+
 			bool vi1ok = true, vi2ok = true;
 			// now test whether vi1 or vi2 or both are inside every other constraint.
 			// if yes, store them in the corner array.
 
 			for(k = 0; k < constraints_.size(); k++) {
 				if(k == i || k == j) continue;
-				cout << i << "," << j << " ij,v1,v2: "
+
+#ifdef DIAG
+				cout.precision(16);
+				cout << k << " k: " << i << "," << j << " ij,v1,v2: "
 						<< vi1 * constraints_[k].a_ << " "
-						<< vi2 * constraints_[k].a_
-						<< endl << flush;
+						<< vi2 * constraints_[k].a_ << " "
+						<< " c_[k].a_: " << constraints_[k].a_;
+#endif
+
 				if(vi1ok && vi1 * constraints_[k].a_ <= 0.0) vi1ok = false;
 				if(vi2ok && vi2 * constraints_[k].a_ <= 0.0) vi2ok = false;
-				// if(vi1ok && vi1 * constraints_[k].a_ <= -tol2) vi1ok = false;
-				// if(vi2ok && vi2 * constraints_[k].a_ <= -tol2) vi2ok = false;
+#ifdef DIAG
+				cout << " v12ok: " << vi1ok << " " << vi2ok << endl << flush;
+#endif
+
+				// if(vi1ok && vi1 * constraints_[k].a_ <= tol2) vi1ok = false;
+				// if(vi2ok && vi2 * constraints_[k].a_ <= tol2) vi2ok = false;
 				if(!vi1ok && !vi2ok) break;
 			}
 
-			if(vi1ok) {
+			if(vi1ok) { // vi1 is in all k != i
 				corner.push_back(vi1);
 				cornerConstr1.push_back(i);
 				cornerConstr2.push_back(j);
 				ruledout = false;
 			}
 
-			if(vi2ok) {
+			if(vi2ok) { // vi2 is in all k += i
 				corner.push_back(vi2);
 				cornerConstr1.push_back(i);
 				cornerConstr2.push_back(j);
 				ruledout = false;
 			}
-
+#ifdef DIAG
+			cout << i << " i,ruledout: " << ruledout << endl << flush;
+#endif
 		}
 		// is this constraint ruled out? i.e. none of its intersections
 		// with other constraints are corners... remove it from constraints_ list.
@@ -334,15 +376,16 @@ RangeConvex::simplify0() {
 		// Corners belong to pairs of constraints and to individual constraints through the pairs...
 		// Maybe 6 isn't being connected to 7?
 		if(ruledout) {
+#ifdef DIAG
 			cout << "rc::s0 removing constraint i: " << i << endl;
+#endif
 			removeConstr.push_back(i);
 		}
 	}
-
+#ifdef DIAG
 	cout << "rc::s0 1500" << endl << flush;
-
-
 	cout << "rc::s0 2000" << endl << flush;
+#endif
 
 	// Now set the corners into their correct order, which is an
 	// anti-clockwise walk around the polygon.
@@ -384,7 +427,9 @@ RangeConvex::simplify0() {
 		}
 	}
 
+#ifdef DIAG
 	cout << "rc::s0 3000" << endl << flush;
+#endif
 
 	// Now test i'th constraint-edge ( corner 0 and corner k ) whether
 	// it is on the correct side (left)
@@ -422,10 +467,12 @@ RangeConvex::simplify0() {
 		currentCorner = k2;
 	}
 
+#ifdef DIAG
 	cout << "rc::s0 3500 c:              " << c << endl << flush;
 	cout << "rc::s0 3500 currentCorner:  " << currentCorner << endl << flush;
 	cout << "rc::s0 3501 cornerConstr1.s " << cornerConstr1.size() << endl << flush;
 	cout << "rc::s0 3502 cornerConstr2.s " << cornerConstr2.size() << endl << flush;
+#endif
 
 //	bool cc_okp = true;
 //	for(int l_ = 0; l_ < cornerConstr1.size(); ++l_) {
@@ -434,6 +481,8 @@ RangeConvex::simplify0() {
 
 	int iFuse = 12;
 	while( currentCorner ) {
+
+#ifdef DIAG
 		cout << endl << flush;
 		for( int l_=0; l_ < cornerConstr1.size(); ++l_ ) {
 			cout    << "rc::s0 3550 l_,cc1,cc2,crnrs: "
@@ -448,16 +497,22 @@ RangeConvex::simplify0() {
 		}
 		cout << endl << flush;
 		cout    << "rc::s0 3551 c: " << c << endl << flush;
+#endif
+
 		for (k = 0; k < cornerConstr1.size(); k++) {
 
+#ifdef DIAG
 			cout    << "rc::s0 3600 k,cc,cc1,cc2: "
 					<< k << " "
 					<< currentCorner << " "
 					<< cornerConstr1[k] << " "
 					<< cornerConstr2[k] << endl << flush;
+#endif
 
 			if ( k == currentCorner ) {
+#ifdef DIAG
 				cout << "k == currentCorner" << endl << flush;
+#endif
 				continue;
 			}
 
@@ -469,11 +524,16 @@ RangeConvex::simplify0() {
 			}
 
 			if ( c == cornerConstr2[k] ) {
+#ifdef DIAG
 				cout    << "rc::s0 3610: " << endl << flush;
+#endif
 				if ( (currentCorner = k) == 0) break;
 				corners_.push_back(corner[k]);
 				c = cornerConstr1[k];
+
+#ifdef DIAG
 				cout    << "rc::s0 3611: k,c: " << k << " " << c << endl << flush;
+#endif
 				break;
 			}
 		}
@@ -483,13 +543,17 @@ RangeConvex::simplify0() {
 
 
 		if(--iFuse == 0) {
+#ifdef DIAG
 			cout << endl;
+#endif
 			cout << "rc::s0 3699 iFuse exit " << endl << flush;
+
 			exit(1);
 		}
 	}
-
+#ifdef DIAG
 	cout << "rc::s0 4000" << endl << flush;
+#endif
 
 	// Remove all redundant constraints
 	for ( i = 0; i < removeConstr.size(); i++)
@@ -515,8 +579,9 @@ RangeConvex::simplify0() {
 					if(boundingCircle_.d_ > d) boundingCircle_ = SpatialConstraint(v,d);
 				}
 	}
-
+#ifdef DIAG
 	cout << "rc::s0 5000" << endl << flush;
+#endif
 
 #ifdef DIAGNOSE
 	cout.precision(16);
@@ -554,8 +619,9 @@ RangeConvex::simplify0() {
 
 void
 RangeConvex::simplify() {
-
-	cout << "rc::s" << endl << flush;
+#ifdef DIAG
+  cout << "rc::s" << endl << flush;
+#endif
 
   if(sign_ == zERO) {
     simplify0();	// treat zERO convexes separately
@@ -690,35 +756,39 @@ RangeConvex::intersect(const SpatialIndex * idx,
 		HtmRange *hrInterior,
 		HtmRange *hrBoundary ) {
 
-
+#ifdef DIAG
 	cout << "rc::i sign_: " << sign_ << endl << flush;
+#endif
 	hr = htmrange;
 	hrInterior_ = hrInterior;
 	hrBoundary_ = hrBoundary;
 	index_ = idx;
 	varlen_ = varlen;
 	addlevel_ = idx->maxlevel_ - idx->buildlevel_;
-
+#ifdef DIAG
 	cout << "rc::i " << 500 << endl << flush;
-
+#endif
 	simplify(); // don't work too hard...
-
+#ifdef DIAG
 	cout << "rc::i " << 1000 << endl << flush;
-
+#endif
 	if(constraints_.size()==0) {
 		return;   // nothing to intersect!!
 	}
-
+#ifdef DIAG
 	cout << "rc::i " << 2000 << endl << flush;
-
+#endif
 	// Start with root nodes (index = 1-8) and intersect triangles
 	// TODO If we ever switch to an ICOSAHEDRAL root, we'll have to change this intersection iteration.
 	for(uint64 i = 1; i <= 8; i++){
+#ifdef DIAG
 		cout << "rc::i " << 2100 << " i: " << i << endl << flush;
+#endif
 		testTrixel(i);
 	}
-
+#ifdef DIAG
 	cout << "rc::i " << 3000 << endl << flush;
+#endif
 }
 
 ////////////SAVETRIXEL

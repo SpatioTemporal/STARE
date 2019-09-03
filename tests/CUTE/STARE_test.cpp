@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Test.h"
 
+#include "SpatialInterface.h"
 
 void STARE_test() {
 
@@ -834,7 +835,37 @@ void STARE_test() {
 
 		}
 
-		if(true) {
+		if(false) {
+			cout << dec << 10 << " 5 points" << endl << flush;
+			LatLonDegrees64ValueVector points;
+
+			points.push_back(LatLonDegrees64( 0, 0));
+			points.push_back(LatLonDegrees64( 0,10));
+			points.push_back(LatLonDegrees64( 5, 10));
+			// points.push_back(LatLonDegrees64(10,10));
+			points.push_back(LatLonDegrees64(10, 0));
+			// points.push_back(LatLonDegrees64( 5, 0));
+			// points.push_back(LatLonDegrees64( 5, 5)); // Completes normally
+			// points.push_back(LatLonDegrees64( 5, 5));
+			// points.push_back(LatLonDegrees64( 5, 10));
+			points.push_back(LatLonDegrees64(10,10));
+
+			int resolution_level = 4;
+
+			cout << dec << 20 << dec << "res level: " << resolution_level << endl << flush;
+
+			try {
+				cout << dec << 100 << endl << flush;
+				STARE_SpatialIntervals cover_hull = index.ConvexHull(points,resolution_level);
+				cout << dec << 110 << endl << flush;
+			} catch (const SpatialException & e) {
+				cout << dec << 200 << endl << flush;
+				cout << "Exception " << e.what() << endl << flush;
+			}
+			cout << dec << 300 << endl << flush;
+		}
+
+		if(false) {
 			cout << dec << 10 << endl << flush;
 			LatLonDegrees64ValueVector points;
 
@@ -846,8 +877,10 @@ void STARE_test() {
 //			float64 delta = 1.0;
 //			for(float64 lat = 20; lat < 45; lat += delta ) {
 //				for(float64 lon = -120; lon < -80; lon += delta ) {
-			for(float64 lat = 20; lat < 45; lat += delta ) {
-				for(float64 lon = -120; lon < -80; lon += delta ) {
+			int k=11; // iFuse fail (12 points)
+			// int k=10; // iFuse success
+			for(float64 lat = 20; lat < 45 && k >= 0; lat += delta ) {
+				for(float64 lon = -120; lon < -80 && k-- >= 0 ; lon += delta ) {
 					points.push_back(LatLonDegrees64(lat,lon));
 				}
 			}
@@ -866,6 +899,7 @@ void STARE_test() {
 			}
 			cout << dec << 300 << endl << flush;
 		}
+
 	}
 
 //	{
