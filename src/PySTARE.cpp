@@ -10,49 +10,55 @@
 
 #include "PySTARE.h"
 
-double doublefun(double b);
-void range(int *rangevec, int n);
-double dot(int n, double *a, double *b);
-void xdot(int n, double *a, double *b, double *ret);
-
-void PySTARE::ValueFromJDTAINP( int len, int64_t* indices, double* JDTAI, int resolution_days ) {
-	for(int i=0; (i<len); ++i) {
-		indices[i] = index.fromJulianDayTAI(JDTAI[i]).scidbTemporalIndex();
-	}
+// Spatial
+void from_latlon(double* lat, int len_lat, double * lon, int len_lon, int64_t* indices, int level) {            
+    for (int i=0; i<len_lat; i++) {        
+        indices[i] = stare.ValueFromLatLonDegrees(lat[i], lon[i], level);
+    }
 }
 
-void PySTARE::JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices ) {
-	for(int i=0; (i<len); ++i) {
-		// indices[i] = index.fromJulianDayTAI(JDTAI[i]).scidbTemporalIndex();
-		double d1, d2;
-		index.setArrayIndexTemporalValue(indices[i]).toJulianTAI(d1, d2);
-		JDTAI[i] = d1 + d2;
-	}
+void to_latlon(int64_t* indices, int len, double* lat, double* lon) { 
+    for (int i=0; i< len; i++) { 
+        LatLonDegrees64 latlon = stare.LatLonDegreesFromValue(indices[i]);
+		lat[i] = latlon.lat; 
+        lon[i] = latlon.lon;
+    }    
 }
 
-void PySTARE::ValueFromLatLonDegreesLevelNP( int len, int64_t* indices, double* lat, double* lon, int resolutionLevel ) {
-	for( int i=0; i < len; ++i) {
-		indices[i] = index.ValueFromLatLonDegrees(lat[i], lon[i], resolutionLevel);
-	}
+void to_latlonlevel(int64_t* indices, int len, double* lat, double* lon, int* levels) {
+    for (int i=0; i<len; i++) {                
+        LatLonDegrees64 latlon = stare.LatLonDegreesFromValue(indices[i]);
+        lat[i] = latlon.lat; 
+        lon[i] = latlon.lon;
+        levels[i] = stare.ResolutionLevelFromValue(indices[i]);
+    }
 }
 
-void PySTARE::LatLonDegreesFromValueNP( int len, double* lat, double* lon, int64_t* indices ) {
-	for( int i=0; i < len; ++i) {
-		LatLonDegrees64 latlon = index.LatLonDegreesFromValue(indices[i]);
-		lat[i] = latlon.lat; lon[i] = latlon.lon;
-	}
+void to_level(int64_t* indices, int len, int* levels) {
+    for (int i=0; i<len; i++) {                
+        levels[i] = stare.ResolutionLevelFromValue(indices[i]);
+    }    
+
 }
 
-/*
-bn::ndarray JDTAIFromValueNP(bn::ndarray values) {
-	const Py_intptr_t *shape = {values.get_shape()};
-	Py_intptr_t const * strides = values.get_strides();
-	bn::ndarray result_jdtai = bn::zeros(1,shape,bn::dtype::get_builtin<float64>());
-	for(int i=0; i<shape[0]; ++i) {
-		STARE_ArrayIndexTemporalValue idx = *reinterpret_cast<STARE_ArrayIndexTemporalValue*>(values.get_data() + i*strides[0]);
-		index.setArrayIndexTemporalValue(idx);
-		result_jdtai[i] = index.toJulianDayTAI();
-	}
-	return result_jdtai;
+void to_triangle(int64_t* indices, int len) {
+    for (int i=0; i<len; i++) {             
+        stare.TriangleFromValue(indices[i]);
+        //TBD
+    }
 }
-*/
+
+void to_area(int64_t* indices, int len, double* areas) {
+    for (int i=0; i<len; i++) {                
+        areas[i] = stare.AreaFromValue(indices[i]);        
+    }
+    
+}
+
+// Temporal
+void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution) {
+    int type = 2;
+    for (int i=0; i<len; i++) {                       
+        indices[i] = stare.ValueFromUTC(datetime[i], resolution, type);
+    }
+}

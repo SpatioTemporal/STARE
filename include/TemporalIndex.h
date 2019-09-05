@@ -18,6 +18,7 @@
 #include <map>
 
 #include <ctime>
+#include <cmath>
 
 #include "BitField.h"
 #include "TemporalWordFormat1.h"

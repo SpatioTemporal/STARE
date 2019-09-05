@@ -1,5 +1,5 @@
 /**
- * PySTARE1.h
+ * PySTARE.h
  *
  *  Created on: Jun 13, 2019
  *      Author: mrilee
@@ -18,54 +18,29 @@
  *  deleteSTARE(p);
  */
 
+
 #ifndef INCLUDE_PYSTARE_H_
 #define INCLUDE_PYSTARE_H_
+
 
 #include <stdio.h>
 #include "STARE.h"
 
-//double doublefun(double b){
-//        printf("c(%g)",b);
-//        return b+12.5;
-//}
-//
-//void range(int *rangevec, int n)
-//{
-//    int i;
-//
-//    for (i=0; i< n; i++)
-//        rangevec[i] = i;
-//}
-//
-//double dot(int n, double *a, double *b) {
-//	double sum = 0;
-//	for( int i=0; i<n; ++i ) {
-//		sum += a[i]*b[i];
-//	}
-//	return sum;
-//}
-//
-//void xdot(int n, double *a, double *b, double *ret) {
-//	for( int i=0; i<n; ++i ) {
-//		ret[i] += a[i]*b[i];
-//	}
-//}
+static STARE stare;
 
+// Spatial
+void from_latlon(double* lat, int len_lat,  double * lon, int len_lon, int64_t* indices, int level);        
+void to_latlon(int64_t* indices, int len, double* lat, double* lon);
+void to_latlonlevel(int64_t* indices, int len, double* lat, double* lon, int* levels);
+void to_level(int64_t* indices, int len,  int* levels);
+void to_triangle(int64_t* indices, int len);
+void to_area(int64_t* indices, int len, double* areas);
 
-class PySTARE {
-public:
-	STARE index;
-	PySTARE() {};
-	~PySTARE() {};
+// Temporal
+void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution);
+//void to_utc(int64_t* indices, int len, double* julian_day);
+//void from_tai(double* julian_day, int len, int64_t indices);
+//void to_tai(int64_t* indices, int len, double* julian_day);
 
-	void ValueFromJDTAINP( int len, int64_t* indices, double* JDTAI, int resolution_days );
-	void JDTAIFromValueNP( int len, double* JDTAI, int64_t* indices );
-	// void ResolutionDaysLevelFromValueNP();
+#endif
 
-	void ValueFromLatLonDegreesLevelNP( int len, int64_t* indices, double* lat, double* lon, int resolutionLevel );
-	void LatLonDegreesFromValueNP( int len, double* lat, double* lon, int64_t* indices );
-	// void ResolutionLevelFromValueNP();
-
-};
-
-#endif /* INCLUDE_PYSTARE_H_ */

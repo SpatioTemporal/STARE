@@ -143,7 +143,8 @@ TemporalIndex& TemporalIndex::fromNativeYear(double year) {
 }
 
 string TemporalIndex::toStringJulianTAI() {
-	double d1,d2; this->toJulianTAI(d1, d2);
+	double d1, d2; 
+    this->toJulianTAI(d1, d2);
 	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
 	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
 	hour        = ihmsf[0];
@@ -177,7 +178,8 @@ string TemporalIndex::toStringJulianTAI() {
 void TemporalIndex::toFormattedJulianTAI(
 		int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
 		) {
-	double d1,d2; this->toJulianTAI(d1, d2);
+	double d1,d2; 
+    this->toJulianTAI(d1, d2);
 	int ihmsf[4];
 	int not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day, ihmsf );
 	hour        = ihmsf[0];
@@ -227,14 +229,15 @@ void TemporalIndex::toUTC(
 		int& _millisecond 	// 0..999
 ) {
 	int not_ok;
-	double d1,d2; this->toJulianTAI(d1,d2); // Get the TAI encoded time.
+	double d1,d2; 
+    this->toJulianTAI(d1,d2); // Get the TAI encoded time.
 
 	// Convert TAI to UTC.
 	double utc1, utc2; not_ok = eraTaiutc(d1, d2, &utc1, &utc2);
 
 	int ihmsf[4];
 	// The following takes as input the date and then formats it...
-	not_ok      = eraD2dtf ( "UTC", 3, utc1, utc2, &_year, &_month, &_day_of_month, ihmsf );
+	not_ok       = eraD2dtf ( "UTC", 3, utc1, utc2, &_year, &_month, &_day_of_month, ihmsf );
 	_hour        = ihmsf[0];
 	_minute      = ihmsf[1];
 	_second      = ihmsf[2];

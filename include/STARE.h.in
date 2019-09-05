@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "TemporalIndex.h"
+#include "TemporalGeneral.h"
 
 typedef int64_t STARE_ArrayIndexTemporalValue;
 typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_TemporalIntervals;
@@ -104,6 +105,7 @@ public:
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
+   // Temporal
 	TemporalIndex tIndex;
 
 	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
@@ -117,11 +119,17 @@ public:
 
 	TemporalIndex& getTIndex() { return tIndex; }
 
-	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
-	TemporalIndex&                setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
+	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();        
+	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
+    
 	
+    STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int& resolution, int& type);
+    
+    Datetime UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue);
 	
 
 };
