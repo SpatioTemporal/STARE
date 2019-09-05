@@ -316,41 +316,41 @@ void SkipList::freeRange(const Key loKey, const Key hiKey)
 ////////////////////////////////////////////////////////////////////////////////
 void SkipList::free(const Key searchKey)
 {
-  int i;
-  SkipListElement* element;
-  SkipListElement* nextElement;
-  SkipListElement  update(SKIPLIST_MAXLEVEL);
+	int i;
+	SkipListElement* element;
+	SkipListElement* nextElement;
+	SkipListElement  update(SKIPLIST_MAXLEVEL);
 
-  // scan all levels while key < searchKey
-  // starting with header in his level
-  element = myHeader;
-  for(i=myHeader->getLevel(); i>=0; i--) {
-    nextElement = element->getElement(i);
-    while( (nextElement != NIL) && (nextElement->getKey() < searchKey) ) {
-      element=nextElement;
-      nextElement = element->getElement(i);
-    }
-    update.setElement(i, element); // save level pointer
-  }
+	// scan all levels while key < searchKey
+	// starting with header in his level
+	element = myHeader;
+	for(i=myHeader->getLevel(); i>=0; i--) {
+		nextElement = element->getElement(i);
+		while( (nextElement != NIL) && (nextElement->getKey() < searchKey) ) {
+			element=nextElement;
+			nextElement = element->getElement(i);
+		}
+		update.setElement(i, element); // save level pointer
+	}
 
-  element=element->getElement(0);  // key is < searchKey
+	element=element->getElement(0);  // key is < searchKey
 
-  // if key exists
-  if( (element != NIL) && (element->getKey() == searchKey) ) {    
-    for(i=0; i<=myHeader->getLevel(); i++) { // save next pointers
-      if (update.getElement(i)->getElement(i) == element) {
-	update.getElement(i)->setElement(i, element->getElement(i));
-      }
-    }
-    
-    delete (element); // free memory of element
-    myLength--;
+	// if key exists
+	if( (element != NIL) && (element->getKey() == searchKey) ) {
+		for(i=0; i<=myHeader->getLevel(); i++) { // save next pointers
+			if (update.getElement(i)->getElement(i) == element) {
+				update.getElement(i)->setElement(i, element->getElement(i));
+			}
+		}
 
-    // set new header level
-    while ( (myHeader->getLevel() > 0) && (myHeader->getElement(myHeader->getLevel()) == NIL) ) {
-      myHeader->setLevel(myHeader->getLevel()-1);
-    }
-  }
+		delete (element); // free memory of element
+		myLength--;
+
+		// set new header level
+		while ( (myHeader->getLevel() > 0) && (myHeader->getElement(myHeader->getLevel()) == NIL) ) {
+			myHeader->setLevel(myHeader->getLevel()-1);
+		}
+	}
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SkipList::freeAll()

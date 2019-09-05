@@ -41,12 +41,13 @@ add_library( STARE STATIC ${STARE_SrcFiles} )
 # the 'find_package()' call as a second argument. jhrg 8/27/19
 find_package(SWIG)
 
-# SWIG integration of PySTARE1
+# SWIG integration of PySTARE
 
 # Adding the two 'POLICY' clauses protects older versions of CMake
 # from policies they don;t know about. jhrg 8/27/19
 if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
-	# UseSWIG_TARGET_NAME_PREFERENCE	
+	# UseSWIG_TARGET_NAME_PREFERENCE
+	#cmake_minimum_required(VERSION 3.13 FATAL ERROR)
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )
 	
@@ -59,11 +60,10 @@ if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
 	  include_directories( "/usr/include/python3.7m" "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
   	endif()
 
-    add_library(PySTARE1A SHARED PySTARE1.cpp)
-   
-    # set_target_properties( PySTARE1 PROPERTIES PREFIX "" )
-    #? set target properties(PySTARE1 PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
-    # target_link_libraries( PySTARE1A "/usr/lib64/liberfa.so" )
+    add_library(PySTAREA SHARED PySTARE.cpp)
+    # set_target_properties( PySTARE PROPERTIES PREFIX "" )
+    #? set target properties(PySTARE PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
+    # target_link_libraries( PySTAREA "/usr/lib64/liberfa.so" )
     
     # SWIG
     find_package(SWIG REQUIRED)
@@ -74,13 +74,14 @@ if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
     # set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
 	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 	
-	set_property(SOURCE PySTARE1.i PROPERTY CPLUSPLUS ON)
+	set_property(SOURCE PySTARE.i PROPERTY CPLUSPLUS ON)
 	# swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
 
-    swig_add_library( PySTARE1 TYPE SHARED LANGUAGE python SOURCES PySTARE1.i )
-    swig_link_libraries( PySTARE1 STARE )
-    swig_link_libraries( PySTARE1 PySTARE1A )
-    swig_link_libraries( PySTARE1 ${PYTHON_LIBRARIES} )
+    # swig_add_library( PySTARE TYPE SHARED LANGUAGE python SOURCES PySTARE.i )
+    swig_add_library( pystare TYPE SHARED LANGUAGE python SOURCES PySTARE.i )
+    swig_link_libraries( pystare STARE )
+    swig_link_libraries( pystare PySTAREA )
+    swig_link_libraries( pystare ${PYTHON_LIBRARIES} )
 endif()
 
 install(TARGETS STARE DESTINATION lib)

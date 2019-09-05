@@ -89,11 +89,23 @@ SpatialDomain::intersect(HtmRange *htmrange, bool varlen, HtmRange *hrInterior, 
 {
 	size_t i;
 	bool ok = false;
+#ifdef DIAG
+	cout << "sd::i: " << "1000" << endl << flush;
+#endif
 	if(index) {
+#ifdef DIAG
+		cout << "sd::i: " << "1001 size: " << convexes_.size() << endl << flush;
+#endif
 		for(i = 0; i < convexes_.size(); i++)  // intersect every convex
 			convexes_[i].intersect(index, htmrange, varlen, hrInterior, hrBoundary);
+#ifdef DIAG
+		cout << "sd::i: " << "1002" << endl << flush;
+#endif
 		ok = true;
 	}
+#ifdef DIAG
+	cout << "sd::i: " << "1003" << endl << flush;
+#endif
 	return ok;
 }
 /////////////Write////////////////////////////////////////

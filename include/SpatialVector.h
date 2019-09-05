@@ -165,6 +165,8 @@ private:
 
 void SpatialVector_test();
 
+int equal_within_tolerance(const SpatialVector &a, const SpatialVector &b, float64 tolerance);
+
 /// A collection of vertices
 typedef std::vector<SpatialVector> Vertices;
 /// A Triangle struct for convenience & typing. Note vertices must have the appropriate ordering.

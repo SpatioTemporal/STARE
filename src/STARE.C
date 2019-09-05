@@ -12,6 +12,7 @@
 #include "STARE.h"
 #include "RangeConvex.h"
 #include "SpatialDomain.h"
+#include "SpatialInterface.h"
 #include <iostream>
 
 /**
@@ -54,7 +55,7 @@ STARE::STARE(
 	this->build_level  = build_level;
 	this->rotate_root_octahedron = rotate_root_octahedron;
 
-	sIndex                 = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
+	sIndex = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(this->search_level,sIndex));
 }
 
@@ -283,12 +284,6 @@ int cmpSpatial(STARE_ArrayIndexTemporalValue a_, STARE_ArrayIndexTemporalValue b
 	return overlap;
 }
 
-bool STARE::terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
-	// TODO Figure out how to avoid unneeded reformatting.
-	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
-	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
-	return leftJustifiedWithResolution.terminatorp();
-}
 
 /**
  * Return a vector of index values of potentially varying sizes (resolution levels) covering the bounding box.
@@ -306,6 +301,7 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
+		cout << "ERROR: STARE::CoverBoundingBoxFromLatLonDegrees Warning Bounding Box called with 4 != corner.size == " << corners.size() << ", returning." << endl << flush;
 		return intervals;
 	}
 	if( force_resolution_level > -1 ) {
@@ -404,6 +400,52 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	return intervals;
 }
 
+STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level) {
+
+	STARE_SpatialIntervals cover;
+	int hullSteps = points.size();
+	htmInterface *htm;
+	cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	if( force_resolution_level > -1 ) {
+		cout << dec << 1100 << endl << flush;
+		// htm = htmInterface(&index_);
+		htm = new htmInterface(
+				this->getIndex(force_resolution_level).getMaxlevel(),
+				this->getIndex(force_resolution_level).getBuildLevel(),
+				this->getIndex(force_resolution_level).getRotation());
+		cout << dec << 1101 << endl << flush;
+	} else {
+		cout << dec << 1200 << endl << flush;
+		// htm = htmInterface(&index_);
+		htm = new htmInterface(
+				this->getIndex(8).getMaxlevel(),
+				this->getIndex(8).getBuildLevel(),
+				this->getIndex(8).getRotation());
+		cout << dec << 1201 << endl << flush;
+	}
+
+	cout << dec << "a2000" << endl << flush;
+
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps);
+
+	cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
+
+	for(int i=0; i < htmRangeVector.size(); ++i) {
+		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
+		cover.push_back(lo);
+		uint64 hi;
+		if( htmRangeVector[i].lo != htmRangeVector[i].lo ) {
+			hi = sTerminator(ValueFromHtmID(htmRangeVector[i].hi));
+			cover.push_back(hi);
+		}
+	}
+
+	cout << dec << "a4000" << endl << flush;
+
+	delete htm; // TODO Hopefully this will not also delete the index we passed in.
+	return cover;
+}
+
 /*
  * Return a spatial index object with a given search level. If one does not already exist, construct and memoize.
  */
@@ -474,7 +516,6 @@ TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int m
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
-	// tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms, type);
 	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
 	tIndex.set_resolution(resolution);
 	return tIndex;
@@ -484,8 +525,7 @@ TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int m
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
-	// tIndex.fromUTC(year, month,day,hour, minute, second, ms, type);
-	tIndex.fromUTC(year, month,day,hour, minute, second, ms);
+	tIndex.fromUTC(year, month, day, hour, minute, second, ms);
 	tIndex.set_resolution(resolution);
 	return tIndex;
 }
@@ -495,13 +535,38 @@ void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& 
 	resolution = tIndex.get_resolution();
 	type       = tIndex.get_type();
 }
+
 void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
 	tIndex.toUTC(year, month, day, hour, minute, second, ms);
 	resolution = tIndex.get_resolution();
 	type       = tIndex.get_type();
 }
 
-// TemporalIndex& STARE::getTIndex() { return tIndex; }
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+    setTIndexUTC(year, month, day, hour, minute, second, ms, resolution, type);
+    return getArrayIndexTemporalValue();
+}
+
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {        
+    tm.tm_year += 1900;         // tm stores years since 1900 ...
+    tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
+    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
+}    
+
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
+    struct tm tm;                       // time_t as seconds since UNIX epoch
+    gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
+    return ValueFromUTC(tm, resolution, type);    
+}
+
+Datetime STARE::UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue) {
+    tIndex.fromTemporalIndexValue(temporalValue);
+    Datetime datetime;
+    int resolution;
+    int type;
+    toUTC(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, datetime.ms, resolution, type);
+    return datetime;
+}
 
 STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
 	return tIndex.scidbTemporalIndex();
@@ -525,3 +590,34 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 	TemporalIndex a(tv1), b(tv2);
 	return cmp_JulianTAIDays3(a,b,days);
 }
+
+bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
+	// TODO Figure out how to avoid unneeded reformatting.
+	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+	return leftJustifiedWithResolution.terminatorp();
+}
+
+/**
+ * Construct a range object (spatial region) from a vector of intervals.
+ *
+ * TODO: Have a SpatialRange class instead of an HstmRange?
+ */
+HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals) {
+	HstmRange range;
+	EmbeddedLevelNameEncoding leftJustified;
+
+	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
+		uint64 a = leftJustified.getId(), b = a;
+		auto i1 = (i0+1);
+		if(terminatorp(*i1)) {
+			leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
+			b = leftJustified.getId();
+			++i0; // Skip to next
+		}
+		range.addRange(a,b);
+	}
+	return range;
+}
+

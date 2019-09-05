@@ -1,3 +1,8 @@
+
+* 2019-09-05 Version 0.7.0
+
+Added Griessenbaum's new apps and python interface.
+
 * 2019-08-27 Version 0.6.3
 
 Older versions of cmake that don't have the two policies used in the 
@@ -5,10 +10,21 @@ if(SWIG_FOUND) section are now supported (i.e., the build doesn't break).
 However, the python bindings don't build for those versions of cmake,
 even if swig is present.
 
+* 2019-09-03 Version 0.6.3
+
+Convex hull fixes. Note that the convex hull is still producing triangles in the interior.
+
 * 2019-08-17 Version 0.6.2
 
 Improved build. Python include directories now controlled by environment
 variable PYTHON_INCLUDE_DIRS.
+
+* 2019-08-08 Version 0.6.2*
+
+- Rename PySTARE1 to PySTARE.
+
+- PySTARE has a slightly different usage and no tuple/list support
+   currently depending on Numpy. (See contrib/python examples.)
 
 * 2019-08-06 Version 0.6.1
 
@@ -21,17 +37,15 @@ Corrected NOTES and INSTALL documentation.
 - Tests for SWIG.
 - Added integer-based "contains," i.e. cmpSpatial.
 
+- ERFA provides datum mappings for precise positioning in time. We should
+  take advantage of this when we need to associate longitude and time.
+
 * 2019-06-19
 
 ** TODOs
 
 - Add ERFA and CUTE to the root directory of the distribution.
 - Update the CMakeLists.txt to reflect those changes and reduce hardcoding.
-
-- The Boost-based Python API is deprecated and will be deleted soon.
--- The current PySTARE has tuple and list support.
--- The future PySTARE1 has a slightly different usage and no tuple/list support
-   currently depending on Numpy. (See contrib/python examples.)
 
 - A number of classes & files have a "1" at the end of their names This
   generally indicates a need to refactor as the "1" is either a
@@ -40,9 +54,6 @@ Corrected NOTES and INSTALL documentation.
 - The TemporalIndex hierarchy of classes needs more thought. Currently
   the default type is #2 and different implementations for the other
   types is left for the future.
-
-- ERFA provides datum mappings for precise positioning in time. We should
-  take advantage of this when we need to associate longitude and time.
 
 ** ODDITIES
 

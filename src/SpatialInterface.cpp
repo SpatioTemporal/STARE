@@ -24,6 +24,8 @@
 #define MAX_RANGES 100
 
 // #define DIAG
+// #define DIAG_OUT cout
+// #define DIAG_OUT cerr
 
 #ifdef SpatialSGI
 extern long long atoll (const char *str);
@@ -38,14 +40,17 @@ extern long long atoll (const char *str);
 //==============================================================
 
 ///////////CONSTRUCTOR///////////////////////
-htmInterface::htmInterface(size_t searchlevel, size_t buildlevel) : t_(NULL) {
-	index_ = new SpatialIndex(searchlevel, buildlevel);
+htmInterface::htmInterface(size_t searchlevel, size_t buildlevel, SpatialRotation rot) : t_(NULL) {
+	index_ = new SpatialIndex(searchlevel, buildlevel, rot);
 }
 
 ///////////DESTRUCTOR////////////////////////
 htmInterface::~htmInterface() {
+	// cout << dec << 10000 << endl << flush;
 	delete index_;
+	// cout << dec << 10001 << endl << flush;
 	if(t_ != NULL) delete t_;
+	// cout << dec << 10002 << endl << flush;
 }
 
 ///////////LOOKUP METHODS////////////////////
@@ -384,22 +389,22 @@ htmInterface::convexHull(
 const HTMRangeValueVector & 
 htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps ) {
 	polyCorners_.clear();
-//	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
-//	cout << endl;
+	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
+	cout << endl;
 	if (steps == (uint64) -1) {
 		steps = latlon.size();
 	} else {
 		steps = min(steps,latlon.size());
 	}
 	for(size_t i = 0; i < steps; i++) {
-//		cout << " " << i << flush;
-//		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
+		cout << " " << i << flush;
+		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
 		float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
-//		cout << endl << flush;
+		cout << endl << flush;
 	}
-//	cout << endl << flush << 2100 << endl << flush;
+	cout << endl << flush << 2100 << endl << flush;
 	return doHull();
 }
 
@@ -462,7 +467,7 @@ htmInterface::doHull() {
 	for(i = 0; i < len; i++) {
 		v = polyCorners_[i].c_ ^ polyCorners_[ i == len-1 ? 0 : i + 1].c_;
 #ifdef DIAG
-		cerr << "doHull:: " << v << " " << i << "," << i+1 << endl;
+		DIAG_OUT << "doHull:: " << v << " " << i << "," << i+1 << endl;
 #endif
 		v.normalize();
 		SpatialConstraint c(v,0);
@@ -473,7 +478,7 @@ htmInterface::doHull() {
 	//	dom.convexes_[0].boundingCircle_.write(cout);
 	//	dom.write(cout);
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//	cout << 3999 << endl << flush;
+	cout << 3999 << endl << flush;
 
 	return domain(dom);
 }
@@ -492,10 +497,14 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 
 //	cout << " spc: v " << v.x() << " " << v.y() << " " << v.z() << " " ;
 
+	float64 tol = 1.0e-8; // The smaller this parameter, the more mistakes it will make.
+	float64 tol2 = tol*tol;
+
 	size_t i,len = polyCorners_.size();
 	// test for already existing points
 	for(i = 0; i < len; i++)
-		if(v == polyCorners_[i].c_)return;
+		if(equal_within_tolerance(v, polyCorners_[i].c_, tol2)) return;
+	    // if(v == polyCorners_[i].c_)return;
 
 	if(len < 2) {
 		// just append first two points.
@@ -523,6 +532,8 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		// we set polyCorners_[i].inside_ to true.
 		//
 		// if it is outside, and the previous side was also outside,
+
+		// if it is outside, and outside the previous side, // MLR???
 		// set the replace_ flag to true(this corner will be dropped)
 		// (be careful on the edges - that's the trackoutside flag)
 
@@ -532,10 +543,68 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			polyCorners_[i].inside_  = false;
 
 			// test if new point is inside the constraint given by a,b
-			if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v > 0 ) {
+
+			// 2019-0829 MLR There's a problem handling points on edges.
+			// if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v > 0 ) {
+
+
+			// if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v >= 0 ) {
+			// if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v > tol2 ) {
+
+			float64 delta = (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v;
+#ifdef DIAG
+			DIAG_OUT
+			<< i << " i,"
+			<< "polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v : "
+			<< setprecision(17)
+			<< delta
+			// << 	(polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v
+			<< endl << flush;
+#endif
+			// if( delta > 0 ) {
+			if( delta > tol2 ) {
+#ifdef DIAG
+				DIAG_OUT << "gt" << endl << flush;
+#endif
 				polyCorners_[i].inside_ = true;
 				polyTrackOutside = false;
+			// } else if( delta >= 0 ) {
+			} else if( delta >= -tol2 ) {
+#ifdef DIAG
+				DIAG_OUT << "eq";
+#endif
+				//+ polyCorners_[i].inside_ = true;
+				// polyTrackOutside = false;
+
+				SpatialVector av = polyCorners_[i].c_ ^ v;
+				SpatialVector vb = v ^ polyCorners_[i+1==len ? 0 : i+1].c_;
+				float64 dot = av*vb;
+
+#ifdef DIAG
+				DIAG_OUT << "dot: " << dot << " ";
+#endif
+
+				if( dot > 0 ) {
+				// if( dot >= 0 ) {
+					// v in a..b
+#ifdef DIAG
+					DIAG_OUT << " dot>=0 "<< endl << flush;
+#endif
+					polyCorners_[i].inside_ = true;
+					polyTrackOutside = false;
+				} else {
+					// v outside a..b
+#ifdef DIAG
+					DIAG_OUT << " dot<0 "<< endl << flush;
+#endif
+					// no
+					if(polyTrackOutside) polyCorners_[i].replace_ = true;
+					polyTrackOutside = true;
+				}
 			} else {
+#ifdef DIAG
+				DIAG_OUT << "lt" << endl << flush;
+#endif
 				if(polyTrackOutside) polyCorners_[i].replace_ = true;
 				polyTrackOutside = true;
 			}
@@ -544,11 +613,26 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			polyCorners_[0].replace_ = true;
 
 #ifdef DIAG
-		for(i = 0; i < len; i++)
-			cerr << "setPolyCorner " << i << " : "
+
+		float64 lat,lon;
+		v.getLatLonDegrees(lat, lon);
+		DIAG_OUT << "setPolycorner n" << " : "
+				<< v
+				<< " -- lat,lon: "
+				<< lat << " " << lon
+				<< endl;
+
+		for(i = 0; i < len; i++) {
+
+			polyCorners_[i].c_.getLatLonDegrees(lat, lon);
+			DIAG_OUT << "setPolyCorner " << i << " : "
 			<< (polyCorners_[i].replace_ ? "replace" : "keep   ")
 			<< (polyCorners_[i].inside_ ? "inside  : " : "outside : ")
-			<< polyCorners_[i].c_ << endl;
+			<< polyCorners_[i].c_
+			<< " -- lat,lon: "
+			<< lat << " " << lon
+			<< endl;
+		}
 #endif
 		// now delete all corners that have the 'replace' flag set
 		// If called from test11, seems to die in the loop. Only when len > 2 (GYF)
@@ -574,7 +658,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		for(i = 0; i < len; i++) {
 			if(!polyCorners_[i].inside_) {
 #ifdef DIAG
-				cerr << "setPolyCorner: Insert after " << i << " length = " << len << endl;
+				DIAG_OUT << "setPolyCorner: Insert after " << i << " length = " << len << endl;
 #endif
 				if(i == len-1) { // append if last
 					//			polyCorners_.resize(polyCorners_.size() + 1);
@@ -583,7 +667,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 					//was: polyCorners_.insert(polyCorners_.end() - i - 1);
 					// cf. AJM: polyCorners_.insert(polyCorners_.end() - i - 1);
 					//???			cout << "setPolyCorner: the other case" << flush;
-					// cerr << "setPolyCorner: the other case" << endl;
+					// DIAG_OUT << "setPolyCorner: the other case" << endl;
 					polyCorners_.insert(polyCorners_.begin()+i+1,htmPolyCorner(v)); // Really insert...
 				}
 //				cout << " adding ( " << i+1 << " " << v << " ) " << flush;
@@ -591,13 +675,20 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 				//		polyCorners_.insert(polyCorners_.begin()+i+1,htmPolyCorner(v));
 				break;
 			}
-			// cerr << "setPolyCorner: still living" << endl;
+			// DIAG_OUT << "setPolyCorner: still living" << endl;
 		}
 	}
 #ifdef DIAG
-	cerr << "QL: Polygon: now " << polyCorners_.size() << endl;
-	for(i = 0; i < polyCorners_.size(); i++)
-		cerr << polyCorners_[i].c_ << endl;
+	DIAG_OUT << "QL: Polygon: now " << polyCorners_.size() << endl;
+	for(i = 0; i < polyCorners_.size(); i++) {
+		float64 lat,lon;
+		polyCorners_[i].c_.getLatLonDegrees(lat,lon);
+		DIAG_OUT
+		<< polyCorners_[i].c_
+		<< " -- latlon: "
+		<< lat << " " << lon
+		<< endl;
+	}
 #endif
 }
 
@@ -607,7 +698,7 @@ const HTMRangeValueVector &
 htmInterface::domain( SpatialDomain & domain ) {
 	HtmRange htmRange;
 
-//	cout << 4000 << endl << flush;
+	cout << 4000 << endl << flush;
 
 	Key gapsize;
 	//  SpatialIndex idx(20, 5);
@@ -615,19 +706,23 @@ htmInterface::domain( SpatialDomain & domain ) {
 
 	domain.intersect(index_, &htmRange, false);
 
-//	cout << 4100 << endl << flush;
+	cout << 4100 << endl << flush;
 
-	gapsize = htmRange.bestgap(MAX_RANGES);
-	htmRange.defrag(gapsize);
+//	gapsize = htmRange.bestgap(MAX_RANGES);
+//	htmRange.defrag(gapsize);
 
-//	cout << 4200 << endl << flush;
+	cout << 4200 << endl << flush;
 //	htmRange.defrag();
 	// DONT FORGET to: get best gap and defrag  htmRange.defrag(bestgap);
 
-//	cout << 4300 << endl << flush;
+	cout << 4300 << endl << flush;
 	// Construct the valuevector...
 	fillValueVec( htmRange, range_);
-//	cout << 4999 << endl << flush;
+	cout << 4997 << endl << flush;
+	htmRange.reset();
+	cout << 4998 << endl << flush;
+	htmRange.purge();
+	cout << 4999 << endl << flush;
 	return range_;
 }
 

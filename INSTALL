@@ -7,7 +7,7 @@ Dependencies:
 
 1. STARE library
   C++ (std11)
-  ERFA - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
+  ERFA (included) - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
   CUTE (included) - https://cute-test.com/
 
 2. PySTARE: Python interface using SWIG
@@ -58,7 +58,11 @@ make test
 # Ubuntu 18.04 additional comments
 #
 
-sudo apt install cmake
+sudo apt install cmake # Might need to manually update to 3.15+
+sudo apt install swig
+# sudo apt install liberfa-dev # optional, STARE contains a copy
+sudo apt install python3-numpy
+sudo apt install python3-dev
 sudo apt install g++
 
 ###########################################################################
@@ -67,9 +71,13 @@ sudo apt install g++
 #
 
 sudo yum install epel-release
-sudo yum install cmake3
+# sudo yum install erfa-devel.x86_64 # optional, STARE contains a copy
+sudo yum install swig
+sudo yum install cmake3 # Might have to manually update to 3.15+
 sudo yum install gcc-c++
 sudo yum install python36-devel.x86_64
+sudo yum install devtoolset-3-gcc devtoolset-3-gcc-c++
+scl enable devtoolset-3 bash
 
 
 ###########################################################################

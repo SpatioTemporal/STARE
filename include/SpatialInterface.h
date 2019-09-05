@@ -18,6 +18,7 @@
 
 #include "SpatialIndex.h"
 #include "SpatialDomain.h"
+#include "SpatialRotation.h"
 #include "VarStr.h"
 
 /**
@@ -50,6 +51,8 @@ struct htmPolyCorner {
    The SpatialInterface class contains all methods to interface the
    HTM index with external applications.
 
+   // TODO Consider renaming htmInterface to SpatialInterface
+
 */
 
 class  LINKAGE htmInterface {
@@ -69,7 +72,7 @@ public:
       saveDepth parameter can be specified to keep the given amount of
       levels in memory. This can also be altered by changeDepth. */
 
-	htmInterface(size_t searchlevel = 5, size_t buildevel = 5); // [ed:gyuri:saveDepth was 2]
+	htmInterface(size_t searchlevel = 5, size_t buildevel = 5, SpatialRotation rot = rot_identity ); // [ed:gyuri:saveDepth was 2]
 
   /** Destructor. */
   ~htmInterface();
@@ -257,6 +260,10 @@ public:
   typedef std::vector<htmPolyCorner> ValueVectorPolyCor;
   ValueVectorPolyCor polyCorners_;
 
+  // add a polygon corner to the list, sort it counterclockwise
+  // and ignore if inside the convex hull
+  void setPolyCorner(SpatialVector &v);
+
 private:
 
   enum cmdCode {
@@ -290,14 +297,16 @@ private:
   uint64  getInt64();     // get an int off the command string
   float64 getFloat();     // get a float off the command string
 
-  // add a polygon corner to the list, sort it counterclockwise
-  // and ignore if inside the convex hull
-  void setPolyCorner(SpatialVector &v);
+//  // add a polygon corner to the list, sort it counterclockwise
+//  // and ignore if inside the convex hull
+//  void setPolyCorner(SpatialVector &v);
 
   // this routine does the work for all convexHull calls
   const HTMRangeValueVector & doHull();
 
 };
+
+void SpatialInterface_test();
 
 #include "SpatialInterface.hxx"
 #endif

@@ -466,7 +466,8 @@ void SpatialIndex::printNode(int nodeIndex) const {
 
 SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation rot) :
 		maxlevel_(maxlevel),
-		buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel)
+		buildlevel_( (buildlevel == 0 || buildlevel > maxlevel) ? maxlevel : buildlevel),
+		rot_(rot)
 {
 //	debug = false;
 
@@ -547,6 +548,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation r
 //  for(int nodeIndex=0;nodeIndex<1000;nodeIndex++) {
 //	  printNode(nodeIndex);
 //  }
+}
+
+SpatialIndex::~SpatialIndex() {
+
 }
 
 /////////////SHOWVERTICES/////////////////////////////////

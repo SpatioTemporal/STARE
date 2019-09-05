@@ -13,7 +13,7 @@
 #define INCLUDE_STARE_H_
 
 #include "General.h"
-
+#include "HstmRange.h"
 #include "SpatialGeneral.h"
 #include "SpatialIndex.h"
 #include "SpatialRotation.h"
@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "TemporalIndex.h"
+#include "TemporalGeneral.h"
 
 typedef int64_t STARE_ArrayIndexTemporalValue;
 typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_TemporalIntervals;
@@ -64,14 +65,14 @@ public:
 	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 
+	STARE_SpatialIntervals ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level);
+
 	SpatialIndex getIndex() { return sIndex; }
 	SpatialIndex getIndex(int resolutionLevel);
 	uint64       getMaximumSearchLevel() { return STARE_HARDWIRED_RESOLUTION_LEVEL_MAX; } // TODO Ugh. See search_level in the privates...
 	uint64       getSearchLevel() { return this->search_level; } // TODO Ugh. See search_level in the privates...
 	uint64       getBuildLevel()  { return this->build_level; }
 	SpatialRotation getRotation() { return this->rotate_root_octahedron; }
-
-	bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
 
 	STARE_SpatialIntervals CoverBoundingBoxFromLatLonDegrees(LatLonDegrees64ValueVector corners, int force_resolution_level = -1);
 	STARE_SpatialIntervals CoverCircleFromLatLonRadiusDegrees(float64 latDegrees, float64 lonDegrees, float64 radius_degrees, int force_resolution_level = -1);
@@ -104,6 +105,7 @@ public:
 	uint64 htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int force_resolution_level=-1);
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
+   // Temporal
 	TemporalIndex tIndex;
 
 	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
@@ -117,11 +119,17 @@ public:
 
 	TemporalIndex& getTIndex() { return tIndex; }
 
-	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();
-	TemporalIndex&                setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
+	STARE_ArrayIndexTemporalValue getArrayIndexTemporalValue();        
+	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
+    
 	
+    STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int& resolution, int& type);
+    
+    Datetime UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue);
 	
 
 };
@@ -132,6 +140,10 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 // int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b) {}
 
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId);
+
+bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
+
+HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
 
 void STARE_test();
 

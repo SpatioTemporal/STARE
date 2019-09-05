@@ -10,6 +10,7 @@
 #include <iostream>
 #include "Test.h"
 
+#include "SpatialInterface.h"
 
 void STARE_test() {
 
@@ -708,6 +709,46 @@ void STARE_test() {
 #undef LATLONID
 	}
 
+	if(true) {
+	/*
+	All with level = 8.
+
+	#starting STARE_test
+
+	lat,lon,id:    0  -90 0x28fe71a91bda2428
+
+	lat,lon,id:    0  360 0x3d7e69d09dbc4248
+
+	lat,lon,id:    0    0 0x3d7e69d09dbc4248
+
+	lat,lon,id:    0  180 0x10fe71a91bda2428
+
+	lat,lon,id:  -90 -180 0x1fbff9ff807819e8
+
+	lat,lon,id:  -90  360 0x1fbff9ff807819e8
+
+	#success STARE_test OK
+	*/
+		double lat, lon, level;
+		STARE_ArrayIndexSpatialValue id;
+		stringstream ss;
+#define SS_LATLONID(lat,lon,id) \
+		ss.clear(); ss.str(string()); \
+		ss << "lat,lon,id: " \
+				<< setw(4) << setfill(' ') << dec << lat << " " \
+				<< setw(4) << setfill(' ') << dec << lon << " " \
+				<< "0x" << setw(16) << setfill('0') << hex << id << dec;
+		lat = 0.0; lon = -90.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x28fe71a91bda2428,id);
+		lat = 0.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
+		lat = 0.0; lon = 0.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level);   SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
+		lat = 0.0; lon = 180.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x10fe71a91bda2428,id);
+		lat = -90.0; lon = -180.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x1fbff9ff807819e8,id);
+		lat = -90.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x1fbff9ff807819e8,id);
+#undef SS_LATLONID
+
+
+	}
+
 	if(false){
 		float
 		lat =  60.0,
@@ -792,7 +833,73 @@ void STARE_test() {
 							index.ValueFromLatLonDegrees( 39.5, -85.5, 4 ),
 							index.ValueFromLatLonDegrees( 39.5, -84.5, 6 )));
 
-	}
+		}
+
+		if(false) {
+			cout << dec << 10 << " 5 points" << endl << flush;
+			LatLonDegrees64ValueVector points;
+
+			points.push_back(LatLonDegrees64( 0, 0));
+			points.push_back(LatLonDegrees64( 0,10));
+			points.push_back(LatLonDegrees64( 5, 10));
+			// points.push_back(LatLonDegrees64(10,10));
+			points.push_back(LatLonDegrees64(10, 0));
+			// points.push_back(LatLonDegrees64( 5, 0));
+			// points.push_back(LatLonDegrees64( 5, 5)); // Completes normally
+			// points.push_back(LatLonDegrees64( 5, 5));
+			// points.push_back(LatLonDegrees64( 5, 10));
+			points.push_back(LatLonDegrees64(10,10));
+
+			int resolution_level = 4;
+
+			cout << dec << 20 << dec << "res level: " << resolution_level << endl << flush;
+
+			try {
+				cout << dec << 100 << endl << flush;
+				STARE_SpatialIntervals cover_hull = index.ConvexHull(points,resolution_level);
+				cout << dec << 110 << endl << flush;
+			} catch (const SpatialException & e) {
+				cout << dec << 200 << endl << flush;
+				cout << "Exception " << e.what() << endl << flush;
+			}
+			cout << dec << 300 << endl << flush;
+		}
+
+		if(false) {
+			cout << dec << 10 << endl << flush;
+			LatLonDegrees64ValueVector points;
+
+			// points.push_back(LatLonDegrees64(10,10));
+			// points.push_back(LatLonDegrees64(20,20));
+			// points.push_back(LatLonDegrees64(0,10));
+
+			float64 delta = 10.0;
+//			float64 delta = 1.0;
+//			for(float64 lat = 20; lat < 45; lat += delta ) {
+//				for(float64 lon = -120; lon < -80; lon += delta ) {
+			int k=11; // iFuse fail (12 points)
+			// int k=10; // iFuse success
+			for(float64 lat = 20; lat < 45 && k >= 0; lat += delta ) {
+				for(float64 lon = -120; lon < -80 && k-- >= 0 ; lon += delta ) {
+					points.push_back(LatLonDegrees64(lat,lon));
+				}
+			}
+
+			int resolution_level = 4;
+
+			cout << dec << 20 << dec << "res level: " << resolution_level << endl << flush;
+
+			try {
+				cout << dec << 100 << endl << flush;
+				STARE_SpatialIntervals cover_hull = index.ConvexHull(points,resolution_level);
+				cout << dec << 110 << endl << flush;
+			} catch (const SpatialException & e) {
+				cout << dec << 200 << endl << flush;
+				cout << "Exception " << e.what() << endl << flush;
+			}
+			cout << dec << 300 << endl << flush;
+		}
+
 	}
 
 //	{

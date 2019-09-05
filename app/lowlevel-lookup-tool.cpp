@@ -98,8 +98,7 @@ usage(char *name) {
 	cout << "usage: " << endl
 			<< name << " [--hex] [--symbol] [--numeric] [--area] [--corner] [--verbose] [--quiet] [--n n] [--text] [--latlon] depth ( x y z | ra dec | lat lon )" << endl
 			<< " e.g. lowlevel-lookup-tool --latlon 5 45.0 45.0" << endl
-			<< " e.g. lowlevel-lookup-tool --quiet --hex --STARE --latlon 5 45.0 45.0" << endl
-			;
+			<< " e.g. lowlevel-lookup-tool --quiet --hex --STARE --latlon 5 45.0 45.0" << endl;
 	cout <<    " [--hex]      : print node id in hexadecimal" << endl
 			<< " [--dec]      : print node id as a decimal" << endl
 			<< " [--symbol]   : print node id as a string symbol" << endl
@@ -379,7 +378,6 @@ main(int argc, char *argv[]) {
 						if(decimal) cout << " " << encoding->bareId_NoShift_NoEmbeddedLevel();
 					}
 					if(STARE_flag) {
-						STARE stareIndex;
 						if(!quiet)  cout << " STARE: ";
 						if(decimal) cout << " " << stareIndex.ValueFromLatLonDegrees(ra, dec, depth);
 					}
