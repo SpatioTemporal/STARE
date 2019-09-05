@@ -1,3 +1,8 @@
+
+* 2019-09-05 Version 0.7.0
+
+Added Griessenbaum's new apps and python interface.
+
 * 2019-08-27 Version 0.6.3
 
 Older versions of cmake that don't have the two policies used in the 
@@ -5,16 +10,16 @@ if(SWIG_FOUND) section are now supported (i.e., the build doesn't break).
 However, the python bindings don't build for those versions of cmake,
 even if swig is present.
 
-2019-09-03 Version 0.6.3 
+* 2019-09-03 Version 0.6.3
 
-Convex hull fixes.
+Convex hull fixes. Note that the convex hull is still producing triangles in the interior.
 
 * 2019-08-17 Version 0.6.2
 
 Improved build. Python include directories now controlled by environment
 variable PYTHON_INCLUDE_DIRS.
 
-* 2019-0808 Version 0.6.2*
+* 2019-08-08 Version 0.6.2*
 
 - Rename PySTARE1 to PySTARE.
 
