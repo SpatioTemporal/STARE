@@ -39,13 +39,23 @@ add_library( STARE STATIC ${STARE_SrcFiles} )
 
 find_package(SWIG)
 # SWIG integration of PySTARE
-if(SWIG_FOUND)
-	# UseSWIG_TARGET_NAME_PREFERENCE
+
+# Adding the two 'POLICY' clauses protects older versions of CMake
+# from policies they don;t know about. jhrg 8/27/19
+if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
+	# UseSWIG_TARGET_NAME_PREFERENCE	
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )
 	
-	# TODO Control following with ENV variable.
-    include_directories( "/usr/include/python3.7m"  "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
+        # message("e-pid: " "$ENV{PYTHON_INCLUDE_DIRS}")
+	if( DEFINED ENV{PYTHON_INCLUDE_DIRS} )
+	  string( REPLACE ":" ";" INCLUDE_LIST $ENV{PYTHON_INCLUDE_DIRS} )
+	  include_directories( ${INCLUDE_LIST} )
+	else()
+	  message("PYTHON_INCLUDE_DIRS not found. Guessing where to find python includes.")
+	  include_directories( "/usr/include/python3.7m" "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
+  	endif()
+
     add_library(PySTAREA SHARED PySTARE.cpp)
     # set_target_properties( PySTARE PROPERTIES PREFIX "" )
     #? set target properties(PySTARE PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 

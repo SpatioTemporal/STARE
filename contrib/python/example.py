@@ -10,6 +10,24 @@
 # Michael Rilee, mike@rilee.net, 2019 June 18.
 #
 
+# [mrilee@noggin-1 src]$ export PYTHONPATH=`pwd`:${PYTHONPATH}
+# [mrilee@noggin-1 src]$ python ../../../contrib/python/example.py 
+# 100 [30. 45.]
+# 101 2
+# input
+#  lata,lona:  30.0 45.0
+# output
+#  lat,lon:    30.000000122871402 44.99999990571498
+#  idx:        0x399d1bcabd6f9268
+#  ll-tool:    0x399d1bcabd6f9268
+# 
+# input
+#  lata,lona:  45.0 60.0
+# output
+#  lat,lon:    45.00000002707218 60.00000013355399
+#  idx:        0x39c1ea506ef249c8
+#  ll-tool:    0x39c1ea506ef249c8
+
 import numpy as np; from PySTARE import *;
 
 import os;
