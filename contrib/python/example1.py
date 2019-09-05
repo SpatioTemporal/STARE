@@ -1,43 +1,30 @@
-#
-# contrib/python/example1.py
-#
-# Example script for comparing the legacy lowlevel-lookup-tool with PySTARE1.
-#
-# Usage: python example1.py
-#
-# Note the hardwired reference to the lowlevel-lookup-tool. The PySTARE1 module must be available in the PYTHONPATH.
-#
-# Michael Rilee, mike@rilee.net, 2019 June 18.
-#
+#!/usr/bin/python3
 
-import numpy as np; from PySTARE1 import *;
+import numpy
+import pystare
 
-import os;
 
-idx       = np.zeros(2,      dtype=np.int64)
-lat_array = np.array([30,45],dtype=np.double)
-lon_array = np.array([45,60],dtype=np.double)
-level     = 8
+lat = numpy.array([30,45,60], dtype=numpy.double)
+lon = numpy.array([45,60,10], dtype=numpy.double)
 
-p = newSTARE();
 
-ValueFromLatLonDegreesLevelNP( p, idx, lat_array, lon_array, level )
+indices = pystare.from_latlon(lat, lon, 12)
+print(indices)
 
-lat = np.zeros(2, dtype=np.double)
-lon = np.zeros(2, dtype=np.double)
+lat, lon = pystare.to_latlon(indices)
+print(lat, lon)
 
-LatLonDegreesFromValueNP(p,lat,lon,idx)
+lat, lon, level = pystare.to_latlonlevel(indices)
+print(lat, lon, level)
 
-print(100,lat_array)
-print(101,len(lat_array))
+level = pystare.to_level(indices)
+print(level)
 
-for i in range(len(lat_array)):
-    print('input')
-    print( ' lata,lona: ',lat_array[i],lon_array[i] )
-    print('output')
-    print( ' lat,lon:   ',lat[i],lon[i] )
-    print( ' idx:       ',hex(idx[i]))
-    print( " ll-tool:   ",os.popen("~/workspace/STARE-CMAKE/build/default/app/lowlevel-lookup-tool --quiet --STARE --latlon "+str(level)+" "+str(lat_array[i])+" "+str(lon_array[i]),'r',1).read() )
+area = pystare.to_area(indices)
+print(area)
 
-# This doesn't seem to actually delete p, so watch out for memory leaks and double-free crashes.
-deleteSTARE(p);
+datetime = numpy.array(['2002-02-03T13:56:03.172', '2016-01-05T17:26:00.172'], dtype=numpy.datetime64)
+print(datetime)
+
+index = pystare.from_utc(datetime, 6)
+print(res)

@@ -38,6 +38,7 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialVector.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialRotation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/STARE.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/TemporalGeneral.h
   ${CMAKE_CURRENT_SOURCE_DIR}/TemporalIndex.h
   ${CMAKE_CURRENT_SOURCE_DIR}/TemporalWordFormat1.h	
   ${CMAKE_CURRENT_SOURCE_DIR}/VarCmp.h

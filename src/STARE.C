@@ -54,7 +54,7 @@ STARE::STARE(
 	this->build_level  = build_level;
 	this->rotate_root_octahedron = rotate_root_octahedron;
 
-	sIndex                 = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
+	sIndex = SpatialIndex(this->search_level, this->build_level, this->rotate_root_octahedron);
 	sIndexes.insert(std::make_pair(this->search_level,sIndex));
 }
 
@@ -474,7 +474,6 @@ TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int m
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
-	// tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms, type);
 	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
 	tIndex.set_resolution(resolution);
 	return tIndex;
@@ -484,8 +483,7 @@ TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int m
 	if( type != 2 ) {
 		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
 	}
-	// tIndex.fromUTC(year, month,day,hour, minute, second, ms, type);
-	tIndex.fromUTC(year, month,day,hour, minute, second, ms);
+	tIndex.fromUTC(year, month, day, hour, minute, second, ms);
 	tIndex.set_resolution(resolution);
 	return tIndex;
 }
@@ -495,13 +493,38 @@ void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& 
 	resolution = tIndex.get_resolution();
 	type       = tIndex.get_type();
 }
+
 void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
 	tIndex.toUTC(year, month, day, hour, minute, second, ms);
 	resolution = tIndex.get_resolution();
 	type       = tIndex.get_type();
 }
 
-// TemporalIndex& STARE::getTIndex() { return tIndex; }
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
+    setTIndexUTC(year, month, day, hour, minute, second, ms, resolution, type);
+    return getArrayIndexTemporalValue();
+}
+
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {        
+    tm.tm_year += 1900;         // tm stores years since 1900 ...
+    tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
+    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
+}    
+
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
+    struct tm tm;                       // time_t as seconds since UNIX epoch
+    gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
+    return ValueFromUTC(tm, resolution, type);    
+}
+
+Datetime STARE::UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue) {
+    tIndex.fromTemporalIndexValue(temporalValue);
+    Datetime datetime;
+    int resolution;
+    int type;
+    toUTC(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, datetime.ms, resolution, type);
+    return datetime;
+}
 
 STARE_ArrayIndexTemporalValue STARE::getArrayIndexTemporalValue() {
 	return tIndex.scidbTemporalIndex();
