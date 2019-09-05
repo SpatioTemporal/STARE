@@ -37,27 +37,17 @@ set (
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
-<<<<<<< HEAD
+
 # NB: If this code needs a certain version of SWIG, add that number to
 # the 'find_package()' call as a second argument. jhrg 8/27/19
-=======
-
->>>>>>> 363a0572b3372633ee508217531fb12b69299c3d
 find_package(SWIG)
 
 # SWIG integration of PySTARE1
-<<<<<<< HEAD
-
 # Adding the two 'POLICY' clauses protects older versions of CMake
 # from policies they don;t know about. jhrg 8/27/19
 if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
-	# UseSWIG_TARGET_NAME_PREFERENCE	
-=======
-if(SWIG_FOUND)
 	# UseSWIG_TARGET_NAME_PREFERENCE
-
 	#cmake_minimum_required(VERSION 3.13 FATAL ERROR)
->>>>>>> 363a0572b3372633ee508217531fb12b69299c3d
 	cmake_policy( SET CMP0078 NEW )
 	cmake_policy( SET CMP0086 NEW )
 	
