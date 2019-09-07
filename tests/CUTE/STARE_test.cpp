@@ -908,6 +908,106 @@ void STARE_test() {
 //		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
 //	}
 
-//	FAIL();
+
+	if(false) {
+		LatLonDegrees64 latlon(32.5735,-100.05);
+		STARE index2;
+		int resolution = 1;
+		STARE_ArrayIndexSpatialValue idx = index2.ValueFromLatLonDegrees(latlon.lat,latlon.lon,resolution);
+
+		idx = shiftSpatialIdAtLevel( idx, resolution, 1 );
+
+		cout << endl << "base..." << endl << flush;
+		cout
+		<< setprecision(18)
+		<< setw(23)
+		<< "  idx = 0x" << hex << idx << dec
+		<< scientific
+		<< " latlon = "
+		<< latlon.lat << "," << latlon.lon
+		<< dec << " rLevel = " << resolution
+		<< endl << flush;
+
+
+		cout << endl << "increasing resolution" << endl << flush;
+		for(int resolution_ = 0; resolution_ < 12; ++ resolution_) {
+			STARE_ArrayIndexSpatialValue idx1 = shiftSpatialIdAtLevel( idx, resolution_, 1 );
+			LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+			int resolution1 = idx1 & spatialLevelMask();
+
+			cout
+			<< setprecision(18)
+			<< setw(23)
+			<< "  idx = 0x" << hex << idx1 << dec
+			<< scientific
+			<< " latlon = "
+			<< latlon1.lat << "," << latlon1.lon
+			<< dec << " rLevel = " << resolution1
+			<< " resLevel = " << resolution_
+			<< endl << flush;
+		}
+
+		cout << endl << "decreasing resolution" << endl << flush;
+		for(int resolution_ = 0; resolution_ < 12; ++ resolution_) {
+			STARE_ArrayIndexSpatialValue idx1 = shiftSpatialIdAtLevel( idx, resolution_, -1 );
+			LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+			int resolution1 = idx1 & spatialLevelMask();
+
+			cout
+			<< setprecision(18)
+			<< setw(23)
+			<< "  idx = 0x" << hex << idx1 << dec
+			<< scientific
+			<< " latlon = "
+			<< latlon1.lat << "," << latlon1.lon
+			<< dec << " rLevel = " << resolution1
+			<< " resLevel = " << resolution_
+			<< endl << flush;
+		}
+
+		{
+			cout << endl << "incrementing at resolution" << endl << flush;
+			uint64 resolution_ = 0;
+			STARE_ArrayIndexSpatialValue idx1 = 0x0000000000000001;
+			stringstream ss;
+
+			for( resolution_ = 0; resolution_ < 8; ++resolution_) {
+				for(uint64 itmp = 0; itmp < 7; ++itmp) {
+
+					// cout << resolution_ << "," << itmp << " res,i" << endl << flush;
+
+					try {
+						idx1 = shiftSpatialIdAtLevel( 0x0000000000000000+resolution_, resolution_, itmp );
+						// idx1 = shiftSpatialIdAtLevel( 0ul+resolution_, resolution_, itmp );
+					} catch (const SpatialException & e ) {
+						cout << "Exception: " << dec << e.what() << endl << flush;
+						FAIL();
+					}
+
+					LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+
+					int resolution1 = idx1 & spatialLevelMask();
+
+					ss.clear(); ss.str(string());
+					ss << "Increment by " << itmp << " at resolution level " << resolution_;
+
+					cout
+					<< "  idx = 0x" << setw(16) << hex << idx1 << dec
+					<< "  cmp = 0x" << setw(16) << hex << (itmp << 59) << dec
+					<< scientific << setprecision(18) << setw(23)
+					<< " latlon = "
+					<< setfill(' ')
+					<< latlon1.lat << "," << latlon1.lon
+					<< dec << " rLevel = " << resolution1
+					<< " resLevel = " << resolution_
+					<< endl << flush;
+
+					ASSERT_EQUALM(ss.str().c_str(),((itmp << (59 - 2*resolution_)) || resolution_),idx1);
+
+				}
+			}
+		}
+	}
+	// FAIL();
 }
 

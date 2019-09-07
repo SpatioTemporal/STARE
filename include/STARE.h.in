@@ -145,6 +145,14 @@ bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the 
 
 HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
 
+STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
+		STARE_ArrayIndexSpatialValue spatialStareId,
+		int resolution,
+		int shiftAmount
+		);
+
+uint64 spatialLevelMask();
+
 void STARE_test();
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19

@@ -348,6 +348,9 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 				id1 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat();
 				intervals.push_back(id1);
 			}
+
+
+
 		} while( r.getNext(lo,hi) );
 	}
 	return intervals;
@@ -621,3 +624,29 @@ HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals) {
 	return range;
 }
 
+STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
+		STARE_ArrayIndexSpatialValue spatialStareId,
+		int resolution,
+		int shiftAmount
+		) {
+//	if( shiftAmount == 0 ) {
+//		return spatialStareId
+//	} else {
+		EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+		leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+
+		if( shiftAmount >= 0) {
+			leftJustifiedWithResolution.setId(
+					leftJustifiedWithResolution.increment(leftJustifiedWithResolution.getId(), resolution, shiftAmount));
+		} else {
+			leftJustifiedWithResolution.setId(
+					leftJustifiedWithResolution.decrement(leftJustifiedWithResolution.getId(), resolution, -shiftAmount));
+		}
+		return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+//	}
+}
+
+uint64 spatialLevelMask() {
+	EmbeddedLevelNameEncoding leftJustified;
+	return leftJustified.levelMaskSciDB;
+}
