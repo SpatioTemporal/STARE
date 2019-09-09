@@ -403,6 +403,12 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	return intervals;
 }
 
+/**
+ * Returns a list of STARE spatial IDs on the hull about @param points.
+ *
+ * Unfortunately, it erroneously returns a few spatial IDs from the interior as well.
+ *
+ */
 STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level) {
 
 	STARE_SpatialIntervals cover;
@@ -601,28 +607,7 @@ bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	return leftJustifiedWithResolution.terminatorp();
 }
 
-/**
- * Construct a range object (spatial region) from a vector of intervals.
- *
- * TODO: Have a SpatialRange class instead of an HstmRange?
- */
-HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals) {
-	HstmRange range;
-	EmbeddedLevelNameEncoding leftJustified;
 
-	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
-		uint64 a = leftJustified.getId(), b = a;
-		auto i1 = (i0+1);
-		if(terminatorp(*i1)) {
-			leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
-			b = leftJustified.getId();
-			++i0; // Skip to next
-		}
-		range.addRange(a,b);
-	}
-	return range;
-}
 
 STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 		STARE_ArrayIndexSpatialValue spatialStareId,

@@ -1581,8 +1581,10 @@ int HtmRangeMultiLevel::getNext(Key &lo, Key &hi)
 //	cout << " " << hi << " " << flush;
 	// OLD if (hi <= (Key) 0){
 	if (hi < (Key) 0){
+#if DIAG
 		cout << endl;
 		cout << " getNext error!! " << endl << flush;
+#endif
 		// hi = lo = (Key) 0;
 		hi = lo = (Key) -1;
 		return 0;

@@ -24,7 +24,7 @@
 #include "TemporalIndex.h"
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
-
+#include "SpatialRange.h"
 #include "SpatialRotation.h"
 
 #include "SpatiallyAdaptiveDataCover.h"

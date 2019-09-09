@@ -63,8 +63,12 @@ public:
 			uint32 aLevel
 			) const; ///< Somewhat dangerous to use.
 	uint64 idFromTerminatorAndLevel_NoDepthBit(uint64 terminator, uint32 level); ///< Also a little dangerous.
-	bool terminatorp();
-	bool terminatorp(uint64 terminatorCandidate);
+
+	bool terminatorp() const;
+	bool terminatorp(uint64 terminatorCandidate) const;
+
+	bool SciDBterminatorp() const;
+	bool SciDBterminatorp(uint64 terminatorCandidate) const;
 
 	/// What triangle is just after the terminator?
 	uint64 successorToTerminator_NoDepthBit(uint64 terminator, uint32 level) const;
@@ -100,11 +104,6 @@ public:
 
 	uint64 increment(uint64 lowerBound, uint32 level, int steps = 1) const;
 	uint64 decrement(uint64 lowerBound, uint32 level, int steps = 1) const;
-
-	bool terminatorp(uint64 terminator) const {
-		uint64 levelBits = terminator & levelMask;
-		return levelBits == levelMask;
-	}
 
 	EmbeddedLevelNameEncoding& operator=(EmbeddedLevelNameEncoding obj) {
 		this->setId(obj.getId());
@@ -221,5 +220,7 @@ public:
 	const uint64 levelMaskSciDB = 31;
 
 };
+
+void EmbeddedLevelNameEncoding_test();
 
 #endif /* INCLUDE_EMBEDDEDLEVELNAMEENCODING_H_ */

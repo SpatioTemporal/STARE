@@ -192,7 +192,7 @@ uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 ter
 int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) const {
 
 	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
-	uint64 level             = leftId & levelMask;
+	uint64 level         = leftId & levelMask;
 
 	// TODO Repent the sin of redundant code.
 	int64 leftId_scidb = id_NoLevelBit;
@@ -223,7 +223,7 @@ int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat() const {
 
 	// *** TODO *** NEED ERROR CHECKING & SIGNALLING FOR INVALID IDs
 
-	int64 leftId_scidb = 0; // Erf... // What's the invalid id now? Anything negative.
+	int64 leftId_scidb = 0; // Erf... // What's the invalid id now? Anything negative?
 
 	uint64 id_NoLevelBit = this->maskOffLevelBit();
 	int64  level         = this->getLevel();
@@ -240,6 +240,9 @@ int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat() const {
 }
 
 int64 EmbeddedLevelNameEncoding::getSciDBTerminatorLeftJustifiedFormat() const {
+	if(terminatorp()) {
+		return getSciDBLeftJustifiedFormat(); // Just return what we have.
+	}
 	return getSciDBLeftJustifiedFormat(getIdTerminator_NoDepthBit());
 }
 
@@ -252,6 +255,10 @@ void EmbeddedLevelNameEncoding::setIdFromSciDBLeftJustifiedFormat( int64 id_scid
 	iTmp = iTmp | level;
 	iTmp = iTmp | TopBit; // This says we have a valid ID. How does this relate to HTM-ID?
 //	this->id = iTmp; // hacking...
+	// if(SciDBterminatorp(id_scidb)) {
+	if( level == levelMaskSciDB ) {
+		iTmp = iTmp | levelMask; // Fill in the extra bit.
+	}
 	this->setId(iTmp);
 }
 
@@ -355,15 +362,20 @@ uint64 EmbeddedLevelNameEncoding::predecessorToLowerBound_NoDepthBit(uint64 lowe
 	return terminator;
 }
 
-bool EmbeddedLevelNameEncoding::terminatorp() {
+bool EmbeddedLevelNameEncoding::terminatorp() const {
 	return terminatorp(this->id);
 }
-
-bool EmbeddedLevelNameEncoding::terminatorp(uint64 terminatorCandidate) {
-	uint64 level = terminatorCandidate & levelMask;
-	return level == 63;
+bool EmbeddedLevelNameEncoding::terminatorp(uint64 terminator) const {
+	uint64 levelBits = terminator & levelMask;
+	return levelBits == levelMask;
 }
-
+bool EmbeddedLevelNameEncoding::SciDBterminatorp() const {
+	return SciDBterminatorp(this->id);
+}
+bool EmbeddedLevelNameEncoding::SciDBterminatorp(uint64 terminator) const {
+	uint64 levelBits = terminator & levelMaskSciDB;
+	return levelBits == levelMaskSciDB;
+}
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
 	/// TODO Error checking of overflow not trustworthy here.
 	using namespace std;
@@ -508,5 +520,7 @@ uint64 EmbeddedLevelNameEncoding::decrement(uint64 lowerBound, uint32 level, int
 	}
 	return successor;
 }
+
+
 
 
