@@ -13,8 +13,6 @@
 #include "STARE.h"
 #include "HstmRange.h"
 
-namespace std {
-
 /**
  * A wrapper for an HstmRange that knows about STARE to provide htm-range-like functions.
  *
@@ -54,6 +52,5 @@ inline SpatialRange operator& ( const SpatialRange& a,  const SpatialRange& b) {
 
 void SpatialRange_test();
 
-} /* namespace std */
 
 #endif /* INCLUDE_SPATIALRANGE_H_ */

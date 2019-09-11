@@ -9,8 +9,6 @@
 
 #include "Test.h"
 
-namespace std {
-
 void SpatialRange_test () {
 
 	STARE index;
@@ -78,4 +76,3 @@ void SpatialRange_test () {
 
 }
 
-} /* namespace std */

@@ -1008,6 +1008,71 @@ void STARE_test() {
 			}
 		}
 	}
+
+#define SIVOUT(m,siv)
+// #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+	if(true) {
+		// cout << "expandIntervals 10" << endl << flush;
+		EmbeddedLevelNameEncoding leftJustified;
+		uint64 one_mask_to_level, one_at_level;
+		leftJustified.increment_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+
+		// cout << "expandIntervals 20" << endl << flush;
+
+		// STARE Spatial index value and interval arrays.
+		// STARE_ArrayIndexSpatialValue siv0 = 0x3300000000000008;
+		STARE_ArrayIndexSpatialValue siv0 = 0x3213213213213208;
+		SIVOUT("siv0",siv0)
+
+		STARE_SpatialIntervals intervals;
+		intervals.push_back(siv0);
+
+		// cout << "expandIntervals 30" << endl << flush;
+
+		STARE_ArrayIndexSpatialValues expanded_values = expandIntervals(intervals,8);
+		ASSERT_EQUAL((siv0 & ~one_mask_to_level) | 8,expanded_values[0]);
+
+		// cout << "expandIntervals 40" << endl << flush;
+
+		intervals.push_back(0x2000000000000008);
+		expanded_values = expandIntervals(intervals,8);
+
+		ASSERT_EQUAL(intervals[1],expanded_values[0]);
+
+		siv0 = 0x00000000000000008;
+		intervals.push_back(siv0);
+		siv0+=6*one_at_level;
+		SIVOUT("siv0+6@8",siv0);
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
+		intervals.push_back(leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		SIVOUT("siv0+6@8",leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		STARE_ArrayIndexSpatialValue expected6_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+
+		expanded_values = expandIntervals(intervals,8);
+
+		ASSERT_EQUAL(0x0000300000000008,expanded_values[3]);
+
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(expanded_values[6]);
+		SIVOUT("6's     ",leftJustified.getSciDBLeftJustifiedFormat());
+		SIVOUT("6's term",leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		ASSERT_EQUAL(expected6_term,leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+
+		expanded_values = expandIntervals(intervals,7);
+
+#ifdef DIAG
+		cout << "intervals "<< dec << endl <<flush;
+		for( int i=0; i<intervals.size(); ++i ) {
+			SIVOUT(i,intervals[i]);
+		}
+
+		cout << "expanded "<< dec << endl <<flush;
+		for( int i=0; i<expanded_values.size(); ++i ) {
+			SIVOUT(i,expanded_values[i]);
+		}
+#endif
+#undef SIVOUT
+	}
+
 	// FAIL();
 }
 

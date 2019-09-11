@@ -24,7 +24,7 @@
 #include "TemporalIndex.h"
 #include "SpatialVector.h"
 #include "SpatialInterface.h"
-#include "SpatialRange.h"
+
 #include "SpatialRotation.h"
 
 #include "SpatiallyAdaptiveDataCover.h"
@@ -40,6 +40,7 @@
 
 #include "STARE.h"
 
+#include "SpatialRange.h"
 
 #ifndef TESTS_CUTE_TEST_H_
 #define TESTS_CUTE_TEST_H_

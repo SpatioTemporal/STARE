@@ -86,6 +86,7 @@ install(FILES STARE.h
   SpatialIndex.hxx
   SpatialInterface.h
   SpatialInterface.hxx
+  SpatialRange.h
   SpatialSign.h
   SpatialVector.h
   SpatialVector.hxx

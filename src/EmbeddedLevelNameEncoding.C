@@ -376,6 +376,20 @@ bool EmbeddedLevelNameEncoding::SciDBterminatorp(uint64 terminator) const {
 	uint64 levelBits = terminator & levelMaskSciDB;
 	return levelBits == levelMaskSciDB;
 }
+
+void EmbeddedLevelNameEncoding::increment_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const {
+	one_mask_to_level = 0;
+	one_at_level      = one;
+	for(uint64 shift = 2;
+			shift <= ( (topBitPosition-3) - 2*(level) );
+			shift +=2 ) {
+		one_mask_to_level = one_mask_to_level << 2;
+		one_mask_to_level += 3;
+		one_at_level = one_at_level << 2;
+	}
+//	one_at_level = one_at_level >> 2;
+}
+
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
 	/// TODO Error checking of overflow not trustworthy here.
 	using namespace std;
@@ -384,6 +398,8 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 
 	uint64 successor = lowerBound; // Bump up one, but we still need the level.
 	// Should clean up successor just in case terminator non-3 prefix is not consistent with level.
+
+	/*
 	uint64 one_mask_to_level = 0;
 	uint64 one_at_level      = one;
 	for(uint64 shift = 2;
@@ -394,6 +410,10 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 		one_at_level = one_at_level << 2;
 	}
 //	one_at_level = one_at_level >> 2;
+*/
+
+	uint64 one_mask_to_level, one_at_level;
+	increment_LevelToMaskDelta(level,one_mask_to_level,one_at_level);
 
 #ifdef DIAG
 	cout << "lowerBound:     " << setw(23) << hex << lowerBound << endl << flush;

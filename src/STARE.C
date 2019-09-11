@@ -14,6 +14,7 @@
 #include "SpatialDomain.h"
 #include "SpatialInterface.h"
 #include <iostream>
+#include <algorithm>
 
 /**
  * @brief Version function with C linkage to aid in finding the library with autoconf
@@ -21,6 +22,21 @@
  */
 extern "C" const char *STARE_version() {
     return (const char *)STARE_VERSION;
+}
+
+void STARE_ArrayIndexSpatialValues_insert(STARE_ArrayIndexSpatialValues& v,  STARE_ArrayIndexSpatialValue siv) {
+	// cout << dec << 1000 << endl;
+	STARE_ArrayIndexSpatialValues::iterator
+	it = std::lower_bound( v.begin(), v.end(), siv);
+	// cout << dec << 1010 << endl;
+	if(it == v.end()) {
+		v.insert( it, siv );
+	} else if( (*it) != siv) {
+		// cout << dec << 1020 << endl;
+		v.insert( it, siv );
+		// cout << dec << 1030 << endl;
+	}
+	// cout << dec << 1040 << endl;
 }
     
 /**
@@ -249,6 +265,9 @@ STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialSta
 
 /**
  * Compare two spatial array index values a, b.
+ *
+ * Suffers some overhead, but should handle the overlap. For other
+ * kinds of intersection we need to handle intervals or move to a range.
  *
  * Returns
  *   1 if b is in a
@@ -607,8 +626,6 @@ bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	return leftJustifiedWithResolution.terminatorp();
 }
 
-
-
 STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 		STARE_ArrayIndexSpatialValue spatialStareId,
 		int resolution,
@@ -634,4 +651,83 @@ STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 uint64 spatialLevelMask() {
 	EmbeddedLevelNameEncoding leftJustified;
 	return leftJustified.levelMaskSciDB;
+}
+
+STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
+	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
+	// cout << dec << 200 << endl << flush;
+	STARE_ArrayIndexSpatialValue siv0 = interval[0];
+	EmbeddedLevelNameEncoding leftJustified;
+	// cout << dec << 220 << endl << flush;
+	uint64 return_resolution = siv0 & leftJustified.levelMaskSciDB;
+	// cout << dec << 225 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	if( force_resolution > -1 ) {
+		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
+		return_resolution = force_resolution;
+	}
+	// cout << dec << 230 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
+	// cout << dec << 235 << endl << flush;
+	STARE_ArrayIndexSpatialValue siv_term;
+	if( interval.size() > 1 ) {
+		siv_term = interval[1];
+	} else {
+		siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+	}
+	// cout << dec << 240 << endl << flush;
+	uint64 one_mask_to_resolution, one_at_resolution;
+	leftJustified.increment_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+	// cout << dec << 245 << endl << flush;
+	// Give as much rope as needed.
+	siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
+	STARE_ArrayIndexSpatialValues expanded_interval;
+	while( siv0 < siv_term ) {
+		expanded_interval.push_back(siv0);
+		siv0 += one_at_resolution;
+	}
+	// cout << dec << 250 << endl << flush;
+	return expanded_interval;
+}
+
+/**
+ *
+ */
+STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
+	STARE_ArrayIndexSpatialValues expanded_values;
+	EmbeddedLevelNameEncoding leftJustified;
+
+	int i=0;
+	while( i < intervals.size() ) {
+		// cout << dec << 100 << endl << flush;
+		STARE_ArrayIndexSpatialValue siv0, siv1;
+		STARE_SpatialIntervals interval;
+		siv0 = intervals[i];
+		interval.push_back(siv0);
+		// cout << dec << 110 << endl << flush;
+		++i;
+		if( i < intervals.size() ) {
+			// peek
+			// cout << dec << 120 << endl << flush;
+			siv1 = intervals[i];
+			// cout << dec << 120 << " " << i << " " << setw(16) << setfill('0') << hex << siv1 << dec << endl << flush;
+			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) {
+				// cout << dec << 121 << " " << i << endl << flush;
+				interval.push_back(siv1);
+				++i;
+			}
+		}
+		// cout << dec << 130 << " " << i << endl << flush;
+		STARE_SpatialIntervals expandOne = expandInterval(interval,force_resolution);
+		// cout << dec << 140 << " " << i << endl << flush;
+		for(int j=0; j < expandOne.size(); ++j) {
+//			cout << dec << 142 << " " << i << " " << j
+//					<< setw(16) << setfill('0') << hex << expandOne[j] << dec
+//					<< endl << flush;
+			STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+//			cout << dec << 143 << " " << i << " " << j << endl << flush;
+		}
+//		cout << dec << 150 << " " << i << endl << flush;
+	}
+//	cout << dec << 160 << " " << i << endl << flush;
+	return expanded_values;
 }

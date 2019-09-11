@@ -145,6 +145,11 @@ bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the 
 
 HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
 
+void STARE_ArrayIndexSpatialValues_insert(STARE_ArrayIndexSpatialValues& v,  STARE_ArrayIndexSpatialValue siv);
+
+STARE_SpatialIntervals expandInterval(STARE_SpatialIntervals interval, int64 force_resolution = -1);
+STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution = -1);
+
 STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 		STARE_ArrayIndexSpatialValue spatialStareId,
 		int resolution,

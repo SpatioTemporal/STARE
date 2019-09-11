@@ -1,8 +1,8 @@
 
 set (
   TestSrcFiles
+  Test.h 
   EmbeddedLevelNameEncoding_test.cpp
-  Test.cpp
   SpatialFailure_test.cpp
   SpatialIndex_test.cpp
   SpatialInterface_test.cpp
@@ -11,7 +11,7 @@ set (
   SpatialVector_test.cpp
   STARE_test.cpp
   TemporalIndex_test.cpp
-  Test.h 
+  Test.cpp
   )
 
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -I${PROJECT_SOURCE_DIR}/include" )

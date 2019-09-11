@@ -9,7 +9,6 @@
 
 #include "SpatialRange.h"
 
-namespace std {
 
 SpatialRange::SpatialRange() {
 	this->range = new HstmRange;
@@ -106,4 +105,3 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
 }
 
 
-} /* namespace std */

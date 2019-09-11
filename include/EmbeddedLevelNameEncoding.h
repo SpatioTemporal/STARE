@@ -102,6 +102,7 @@ public:
 
 	EmbeddedLevelNameEncoding clearDeeperThanLevel(uint64 level);
 
+	void increment_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const;
 	uint64 increment(uint64 lowerBound, uint32 level, int steps = 1) const;
 	uint64 decrement(uint64 lowerBound, uint32 level, int steps = 1) const;
 
