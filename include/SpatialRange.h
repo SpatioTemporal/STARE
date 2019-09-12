@@ -46,10 +46,11 @@ public:
 
 };
 
-inline SpatialRange operator& ( const SpatialRange& a,  const SpatialRange& b) {
-	return SpatialRange(new HstmRange(a.range->range->HtmRangeMultiLevelAtLevelFromIntersection(b.range->range))); // NOTE mlr Probably about the safest way to inst. SpatialRange.
-}
+SpatialRange* sr_intersect(const SpatialRange&a, const SpatialRange& b);
 
+inline SpatialRange* operator& ( const SpatialRange& a,  const SpatialRange& b) {
+	return new SpatialRange(new HstmRange(a.range->range->RangeFromIntersection(b.range->range))); // NOTE mlr Probably about the safest way to inst. SpatialRange.
+}
 void SpatialRange_test();
 
 

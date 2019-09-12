@@ -28,7 +28,7 @@ HstmRange::~HstmRange() {
  * @param b_ a Key (int64)
  */
 void HstmRange::addRange(Key a_, Key b_) {
-	Key a = leftJustifiedEncoding.maskOffLevelBit(a_);
+	Key a = leftJustifiedEncoding.maskOffLevelBit(a_); // The level bit is a bit at the top used as a validity check. A deprecated feature and not needed for a left-justified index value.
 	int aLevel = leftJustifiedEncoding.levelById(a_);
 	Key b = leftJustifiedEncoding.maskOffLevelAndLevelBit(b_);
 	int bLevel = leftJustifiedEncoding.levelById(b_);
@@ -83,7 +83,8 @@ void HstmRange::addRange(Key a_, Key b_) {
 	*/
 
 // #define DIAG
-#define IDOUT(p,m,s) p << m << " " << setw(16) << setfill(' ') << hex << s << dec << " " << s << endl << flush;
+#undef DIAG
+#define IDOUT(p,m,s) p << m << " " << setw(16) << setfill('0') << hex << s << dec << " " << s << endl << flush;
 #ifdef DIAG
 	IDOUT(cout,"hr::ar a_: ",a_)
 	IDOUT(cout,"hr::ar a : ",a)

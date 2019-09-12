@@ -12,7 +12,7 @@
 #include <iomanip>  // setw()
 #include <Htmio.h> // various *RepresentationString elements
 #include <HtmRangeMultiLevel.h>
-#include <SpatialIndex.h> // levelOfId
+#include <SpatialIndex.h> // levelOfId // Do wwe really need this? // TODO If levelOfId not needed, remove.
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -26,6 +26,15 @@
 
 using namespace std;
 using namespace HtmRangeMultiLevel_NameSpace;
+
+uint64 HRML_levelOfId(uint64 id,bool embeddedLevel,uint64 levelMask) {
+	if( embeddedLevel ) {
+		return id & levelMask;
+	} else {
+		// legacy behavior
+		return levelOfId(id);
+	}
+}
 
 /**
  * Translate an HtmRangeMultiLevel to one at a greater level.  If the desired level is
@@ -41,11 +50,11 @@ using namespace HtmRangeMultiLevel_NameSpace;
  */
 KeyPair HtmRangeMultiLevelAtLevelFromHtmRangeMultiLevel(int htmIdLevel, Key lo, Key hi) {
 	// htmIdLevel is used to set maxlevel in the index. aka olevel.
-	int levelLo = levelOfId(lo);
+	int levelLo = HRML_levelOfId(lo,false,63);
 	if(levelLo<htmIdLevel) {
 		lo = lo << (2*(htmIdLevel-levelLo));
 	}
-	int levelHi = levelOfId(hi);
+	int levelHi = HRML_levelOfId(hi,false,63);
 	if(levelHi<htmIdLevel) {
 		for(int shift=0; shift < (htmIdLevel-levelHi); shift++) {
 			hi = hi << 2;
@@ -66,7 +75,7 @@ KeyPair HtmRangeMultiLevelAtLevelFromHtmRangeMultiLevel(int htmIdLevel, Key lo, 
  * @return
  */
 HtmRangeMultiLevel *HtmRangeMultiLevel::HtmRangeMultiLevelAtLevelFromIntersection(HtmRangeMultiLevel *range2, int htmIdLevel){
-	//	cout << "Comparing..." << endl << flush;
+	// cout << "Comparing..." << endl << flush;
 	HtmRangeMultiLevel *range1 = this; // Rename to use existing code. TODO rename to this.
 	if((!range1)||(!range2)) return 0;
 	if((range1->nranges()<=0)||(range2->nranges()<=0)) return 0;
@@ -78,14 +87,14 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::HtmRangeMultiLevelAtLevelFromIntersectio
 	if (!indexp1) return 0;
 
 	if(htmIdLevel<0) {
-		htmIdLevel = levelOfId(lo1);
+		htmIdLevel = HRML_levelOfId(lo1,false,63);
 	}
 
 	//	cout << "indexp1: " << indexp1 << endl << flush;
 	//	cout << "l,lo,hi1: " << htmIdLevel << " " << lo1 << " " << hi1 << endl << flush;
-	//	cout << "a" << flush;
+	cout << "a" << flush;
 	do {
-		//		cout << "b" << endl << flush;
+		cout << "b" << endl << flush;
 		KeyPair testRange1 = HtmRangeMultiLevelAtLevelFromHtmRangeMultiLevel(htmIdLevel,lo1,hi1);
 		range2->reset();
 		uint64 indexp2 = range2->getNext(lo2,hi2);
@@ -119,8 +128,90 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::HtmRangeMultiLevelAtLevelFromIntersectio
 	return resultRange;
 }
 
+KeyPair HRML_AtLevelFromMultiLevel(uint64 htmIdLevel, Key lo, Key hi, uint64 levelMask) {
+	uint64 levelLo = lo & levelMask;
+	const uint64 one = 1;
+	if( levelLo < htmIdLevel) {
+		lo = (lo & ~levelMask) | htmIdLevel;
+		// Ignore weird cases where level(lo) != level(hi)
+		// Make hi into a terminator for htmIdLevel.
+		hi = hi | ( (one << (6+54-2*htmIdLevel)) - 1 );
+	}
+	KeyPair levelAdaptedRange;
+	levelAdaptedRange.lo = lo;
+	levelAdaptedRange.hi = hi;
+	return levelAdaptedRange;
+}
+
+/**
+ * Find intersection of two ranges and return as a range.
+ *
+ * TODO Replace double-nested-loop with SkipLists search or find functionality.
+ *
+ */
+HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel *range2, int force_htmIdLevel) {
+	HtmRangeMultiLevel *range1 = this; // Just an alias
+	if((!range1)||(!range2)) return 0;
+	if((range1->nranges()<=0)||(range2->nranges()<=0)) return 0;
+	Key lo1,hi1,lo2,hi2;
+	range1->reset();
+	uint64 indexp1 = range1->getNext(lo1,hi1);
+	if(!indexp1) return 0;
+	if(force_htmIdLevel<0) {
+		force_htmIdLevel = lo1 & this->encoding->levelMask; // TODO Establish 31 or 63?
+	}
+	HtmRangeMultiLevel *resultRange = new HtmRangeMultiLevel();	resultRange->purge();
+	do {
+		KeyPair testRange1 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo1,hi1,this->encoding->levelMask);
+		range2->reset(); // Sigh. Reset and loop from the beginning. TODO Avoid restarting loop. There must be a faster way.
+		uint64 indexp2 = range2->getNext(lo2,hi2); // TODO Implement a find or search for inserting.
+		if(!indexp2) return 0;
+		bool intersects = false;
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+		do {
+			KeyPair testRange2 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo2,hi2,this->encoding->levelMask);
+			intersects = testRange2.lo <= testRange1.hi
+					&& testRange2.hi >= testRange1.lo;
+#ifdef DIAG
+			cout << "lh1,lh2: "
+					<< FMTX(lo1) << " " << FMTX(hi1) << ", "
+					<< FMTX(lo2) << " " << FMTX(hi2) << ", "
+					<< intersects << flush;
+#endif
+			if(intersects){
+				Key lo_ = max(testRange1.lo,testRange2.lo);
+				Key hi_ = min(testRange1.hi,testRange2.hi);
+				resultRange->addRange(lo_,hi_);
+#ifdef DIAG
+				cout << ", added "
+						<< FMTX(lo_) << " "
+						<< FMTX(hi_) << flush;
+#endif
+			}
+#ifdef DIAG
+			cout << "." << endl << flush;
+#endif
+		} while (range2->getNext(lo2,hi2));
+	} while (range1->getNext(lo1,hi1)); // TODO Can we replace getNext with some sort of find or search.
+#undef FMTX
+	// cout << "d" << flush;
+	// cout << "d nr " << resultRange->nranges() << endl << flush;
+	// cout << "d rr " << hex << resultRange << dec << endl << flush;
+	if(resultRange->nranges()>0)resultRange->defrag();
+	// cout << "e" << flush;
+	return resultRange;
+}
+
+
 // Note the default use of EmbeddedLevelNameEncoding.
-HtmRangeMultiLevel::HtmRangeMultiLevel() : HtmRangeMultiLevel(new EmbeddedLevelNameEncoding()) {}
+// HtmRangeMultiLevel::HtmRangeMultiLevel() : HtmRangeMultiLevel(new EmbeddedLevelNameEncoding()) {}
+HtmRangeMultiLevel::HtmRangeMultiLevel() {
+	encoding = new EmbeddedLevelNameEncoding();
+	my_los = new SkipList(SKIP_PROB);
+	// cout << "hrml my_los " << hex << my_los << dec << endl << flush;
+	my_his = new SkipList(SKIP_PROB);
+	symbolicOutput = false;
+}
 
 HtmRangeMultiLevel::HtmRangeMultiLevel(EmbeddedLevelNameEncoding *encoding) {
 	this->encoding = encoding;
@@ -1076,14 +1167,17 @@ void HtmRangeMultiLevel::reset()
 /// The number of ranges.
 int HtmRangeMultiLevel::nranges()
 {
-//	cout << "z000" << endl << flush;
+	// cout << "z000" << endl << flush;
 	Key lo;
 	// Key hi;
 	int n_ranges;
 	n_ranges = 0;
+	// cout << "z001" << endl << flush;
+	// cout << "z001 my_los " << hex << my_los << dec << endl << flush;
 	my_los->reset();
+	// cout << "z002" << endl << flush;
 	my_his->reset();
-//	cout << "z010" << endl << flush;
+	// cout << "z010" << endl << flush;
 
 	// This is a problem when lo can be zero. Is it?
 	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327

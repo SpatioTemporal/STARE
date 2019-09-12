@@ -22,11 +22,11 @@
 namespace HtmRangeMultiLevel_NameSpace {
 
 enum InclusionType {
-  InclOutside = 0,  /* */
-  InclInside,       /* */
-  InclLo,			/* number is on low end of an interval */
-  InclHi,			/* number is on high end of an interval */
-  InclAdjacentXXX
+	InclOutside = 0,  /* */
+	InclInside,       /* */
+	InclLo,			/* number is on low end of an interval */
+	InclHi,			/* number is on high end of an interval */
+	InclAdjacentXXX
 };
 
 struct TInsideResult {
@@ -47,89 +47,97 @@ struct TInsideResult {
  */
 class LINKAGE HtmRangeMultiLevel {
 
- public:
-  static int HIGHS;
-  static int LOWS;
-  static int BOTH;
-  int getNext(Key &lo, Key &hi);
-  int getNext(Key *lo, Key *hi);
-  KeyPair getNext();
-  int getNext(KeyPair &kp);
+public:
 
-  void setSymbolic(bool flag);
+	// For the stored indices
+	bool embeddedLevel = true; // Set to false for deprecated legacy behavior.
 
-  void addRange(const Key lohi);
-  void addRange(const Key lo, const Key hi);
-  void addRange(HtmRangeMultiLevel *range);
-  void mergeRange(const Key lo, const Key hi);
-  void defrag();
-  void defrag(Key gap);
-  void CompressionPass();
-  void purge();
-  int isIn(Key key);
-  int isIn(Key lo, Key hi);
-  int isIn(HtmRangeMultiLevel & otherRange);
-  Key bestgap(Key desiredSize);
+	// For the range data type
+	static int HIGHS;
+	static int LOWS;
+	static int BOTH;
+	int getNext(Key &lo, Key &hi);
+	int getNext(Key *lo, Key *hi);
+	KeyPair getNext();
+	int getNext(KeyPair &kp);
 
-  HtmRangeMultiLevel getSpan();
-  void parse(std::string rangeString);
+	void setSymbolic(bool flag);
 
-  bool equalp(HtmRangeMultiLevel *other);
+	void addRange(const Key lohi);
+	void addRange(const Key lo, const Key hi);
+	void addRange(HtmRangeMultiLevel *range);
+	void mergeRange(const Key lo, const Key hi);
+	void defrag();
+	void defrag(Key gap);
+	void CompressionPass();
+	void purge();
+	int isIn(Key key);
+	int isIn(Key lo, Key hi);
+	int isIn(HtmRangeMultiLevel & otherRange);
+	Key bestgap(Key desiredSize);
 
-  int stats(int desiredSize);
-  int nranges();
-  int nindexes_in_ranges();
+	HtmRangeMultiLevel getSpan();
+	void parse(std::string rangeString);
 
-  int getLosLength() {
-	  return my_los->getLength();
-  }
-  int getHisLength() {
-	  return my_his->getLength();
-  }
-  void reset();
+	bool equalp(HtmRangeMultiLevel *other);
 
-  void print(std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
-  void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
+	int stats(int desiredSize);
+	int nranges();
+	int nindexes_in_ranges();
 
-  int compare(const HtmRangeMultiLevel & other) const;
+	int getLosLength() {
+		return my_los->getLength();
+	}
+	int getHisLength() {
+		return my_his->getLength();
+	}
+	void reset();
 
-  /** Hold the encoding scheme for the symbolic representation.
-   */
-  EmbeddedLevelNameEncoding *encoding;
-  /** Change or set symbolic encoding.
-   */
-  void setEncoding(EmbeddedLevelNameEncoding *encoding) { this->encoding = encoding; }
-  /** Return the encoding for translations, etc.
-   */
-  EmbeddedLevelNameEncoding *getEncoding() { return encoding; }
+	void print(std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
+	void print(int what, std::ostream& os, bool symbolic = false); // FIX THIS, so caller does not set symbolic here....
 
-  // Moved here per ajmendez.
-  // TODO MLR Why two skip lists for ranges?  Why not one skip list? Or an interval arithmetic package?
-  SkipList *my_los;
-  SkipList *my_his;
-  bool symbolicOutput;
+	int compare(const HtmRangeMultiLevel & other) const;
 
-  HtmRangeMultiLevel();
-  HtmRangeMultiLevel(EmbeddedLevelNameEncoding *encoding);
-  ~HtmRangeMultiLevel(){
-    purge();
-    delete encoding;
-    delete my_los;
-    delete my_his;
-  };
-  
-  HtmRangeMultiLevel *HtmRangeMultiLevelAtLevelFromIntersection(HtmRangeMultiLevel *range2, int htmIdLevel=-1);
-  int contains(Key a, Key b);
+	/** Hold the encoding scheme for the symbolic representation.
+	 */
+	EmbeddedLevelNameEncoding *encoding;
+	/** Change or set symbolic encoding.
+	 */
+	void setEncoding(EmbeddedLevelNameEncoding *encoding) { this->encoding = encoding; }
+	/** Return the encoding for translations, etc.
+	 */
+	EmbeddedLevelNameEncoding *getEncoding() { return encoding; }
 
-  friend LINKAGE ostream& operator<<(ostream& os, const HtmRangeMultiLevel& range);
+	// Moved here per ajmendez.
+	// TODO MLR Why two skip lists for ranges?  Why not one skip list? Or an interval arithmetic package?
+	SkipList *my_los;
+	SkipList *my_his;
+	bool symbolicOutput;
 
- protected:
-  TInsideResult tinside(const Key mid) const;
-  // const char buffer[256];
-//  bool symbolicOutput;
-// private:
-//  SkipList *my_los;
-//  SkipList *my_his;
+	HtmRangeMultiLevel();
+	HtmRangeMultiLevel(EmbeddedLevelNameEncoding *encoding);
+	~HtmRangeMultiLevel(){
+		purge();
+		delete encoding;
+		delete my_los;
+		delete my_his;
+	};
+
+	HtmRangeMultiLevel *HtmRangeMultiLevelAtLevelFromIntersection(HtmRangeMultiLevel *range2, int htmIdLevel=-1);
+	HtmRangeMultiLevel *RangeFromIntersection(HtmRangeMultiLevel *range2, int force_htmIdLevel=-1);
+
+	int contains(Key a, Key b);
+	// TODO KeyPair contains(Key a, Key b);
+
+	friend LINKAGE ostream& operator<<(ostream& os, const HtmRangeMultiLevel& range);
+
+protected:
+	TInsideResult tinside(const Key mid) const;
+	// const char buffer[256];
+	//  bool symbolicOutput;
+	// private:
+	//  SkipList *my_los;
+	//  SkipList *my_his;
 };
 
 #define SKIP_PROB (0.5)

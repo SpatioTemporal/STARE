@@ -1457,14 +1457,15 @@ int depthOfId(uint64 htmId) {
 int levelOfId(uint64 htmId) {
 	int i;
 	uint32 size;
+	// cout << "loid: " << setw(16) << setfill('0') << hex << htmId << dec << endl << flush;
 	// determine index of first set bit
 	for(i = 0; i < IDSIZE; i+=2) {
 		if ( (htmId << i) & IDHIGHBIT ) break;
 		if ( (htmId << i) & IDHIGHBIT2 )  // invalid id
-			throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+			throw SpatialFailure("SpatialIndex:nameById: invalid ID 1");
 	}
 	if(htmId == 0)
-		throw SpatialFailure("SpatialIndex:nameById: invalid ID");
+		throw SpatialFailure("SpatialIndex:nameById: invalid ID 2");
 	size=(IDSIZE-i) >> 1;
 	return size-2;
 }

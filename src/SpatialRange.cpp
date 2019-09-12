@@ -62,7 +62,7 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	}
 }
 
-
+// #define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 	KeyPair kp(-1,-2);
 	int istat = this->getNext(kp);
@@ -99,9 +99,39 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 
 STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
 	STARE_SpatialIntervals intervals;
-	this->range->reset();
-	while( this->getNextSpatialInterval(intervals) > 0 );
+	if(this->range) {
+		this->range->reset();
+		while( this->getNextSpatialInterval(intervals) > 0 );
+	}
 	return intervals;
+}
+
+/*
+ * Odd. The following does not seem to work if we just return the SpatialRange itself. Some of the pointers seem to be either corrupted or eliminated.
+ */
+SpatialRange *sr_intersect(const SpatialRange&a, const SpatialRange& b) {
+	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
+// #define DIAG
+#ifdef DIAG
+	KeyPair kp; range->reset(); range->getNext(kp);
+	cout << "sr_i range,r->r,nr " << range << " " << range->range << " " << range->range->nranges() << " : "
+			<< setw(16) << setfill('0') << hex << kp.lo << " "
+			<< setw(16) << setfill('0') << hex << kp.hi << " "
+			<< dec
+			<< endl << flush;
+	EmbeddedLevelNameEncoding leftJustified;
+	leftJustified.setId(kp.lo); cout << "kp.lo lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
+	leftJustified.setId(kp.hi); cout << "kp.hi lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
+	cout << " r-r-my_los " << hex << range->range->my_los << endl << flush;
+	cout << dec;
+#endif
+	SpatialRange *sr = new SpatialRange(range);
+#ifdef DIAG
+	cout << "sr-r          " << hex << sr->range << endl << flush;
+	cout << "sr-r-r        " << hex << sr->range->range << endl << flush;
+	cout << "sr-r-r-my_los " << hex << sr->range->range->my_los << endl << flush;
+#endif
+	return sr;
 }
 
 
