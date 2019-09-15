@@ -143,7 +143,7 @@ STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialSta
 
 bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId); /// Check if the index value is a terminator.
 
-HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
+// Deprecated... cf. SpatialRange - HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals);
 
 void STARE_ArrayIndexSpatialValues_insert(STARE_ArrayIndexSpatialValues& v,  STARE_ArrayIndexSpatialValue siv);
 
@@ -155,6 +155,8 @@ STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 		int resolution,
 		int shiftAmount
 		);
+		
+STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp);
 
 uint64 spatialLevelMask();
 

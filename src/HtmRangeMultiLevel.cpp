@@ -168,6 +168,8 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel
 		if(!indexp2) return 0;
 		bool intersects = false;
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+		// Search forward until we find an intersection. Once an intersection is found,
+		// figure out what the intersection is and add it to the result range.
 		do {
 			KeyPair testRange2 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo2,hi2,this->encoding->levelMask);
 			intersects = testRange2.lo <= testRange1.hi

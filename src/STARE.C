@@ -731,3 +731,11 @@ STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, 
 //	cout << dec << 160 << " " << i << endl << flush;
 	return expanded_values;
 }
+
+STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp) {
+	STARE_SpatialIntervals interval;
+	interval.push_back(EmbeddedLevelNameEncoding(BitShiftNameEncoding(kp.lo).leftJustifiedId()).getSciDBLeftJustifiedFormat());
+	interval.push_back(EmbeddedLevelNameEncoding(BitShiftNameEncoding(kp.hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat());
+	return interval;
+}
+
