@@ -29,12 +29,13 @@
 static STARE stare;
 
 // Spatial
-void from_latlon(double* lat, int len_lat,  double * lon, int len_lon, int64_t* indices, int level);        
+void from_latlon(double* lat, int len_lat,  double * lon, int len_lon, int64_t* indices, int level);
 void to_latlon(int64_t* indices, int len, double* lat, double* lon);
 void to_latlonlevel(int64_t* indices, int len, double* lat, double* lon, int* levels);
 void to_level(int64_t* indices, int len,  int* levels);
 void to_triangle(int64_t* indices, int len);
 void to_area(int64_t* indices, int len, double* areas);
+// void intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
 
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution);

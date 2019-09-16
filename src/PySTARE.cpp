@@ -49,11 +49,24 @@ void to_triangle(int64_t* indices, int len) {
 }
 
 void to_area(int64_t* indices, int len, double* areas) {
-    for (int i=0; i<len; i++) {                
+    for (int i=0; i<len; i++) {
         areas[i] = stare.AreaFromValue(indices[i]);        
     }
     
 }
+
+/*
+void intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
+	SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
+	SpatialRange r1(si1), r2(si2);
+	SpatialRange *ri = r1 & r2;
+	SpatialIntervals result = ri->toSpatialIntervals();
+	leni = result->size();
+	for(int i=0; i<leni; ++i) {
+		intersection[i] = result[i];
+	}
+}
+*/
 
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution) {

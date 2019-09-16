@@ -139,6 +139,15 @@
   $5 = (int*) array_data((PyArrayObject*)out3);
 }
 
+/*
+ * void intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
+ *
+%typemap(in,numinputs=2)
+  (int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int length)
+  (PyObject* out1=NULL, PyObject* out2=NULL)
+ {
+ }
+ */ 
 
 /****************/
 /* OUT typemaps */
