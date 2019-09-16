@@ -161,19 +161,29 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel
 		force_htmIdLevel = lo1 & this->encoding->levelMask; // TODO Establish 31 or 63?
 	}
 	HtmRangeMultiLevel *resultRange = new HtmRangeMultiLevel();	resultRange->purge();
+
 	do {
 		KeyPair testRange1 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo1,hi1,this->encoding->levelMask);
 		range2->reset(); // Sigh. Reset and loop from the beginning. TODO Avoid restarting loop. There must be a faster way.
+		/* Try to skip past by using SkipList functions. */
+		// TODO do something like range2->findMAX...
+		Key   loKey = range2->my_los->findMAX(testRange1.lo);
+		Value hiKey = range2->my_los->search(loKey,true);
+		Value vhi = range2->my_his->search(hiKey,true);
+		/**/
 		uint64 indexp2 = range2->getNext(lo2,hi2); // TODO Implement a find or search for inserting.
-		if(!indexp2) return 0;
-		bool intersects = false;
+		bool intersects = false, past_chance;
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec
 		// Search forward until we find an intersection. Once an intersection is found,
 		// figure out what the intersection is and add it to the result range.
+		// int kount=0;
+		if(indexp2)
 		do {
+			// ++kount;
 			KeyPair testRange2 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo2,hi2,this->encoding->levelMask);
 			intersects = testRange2.lo <= testRange1.hi
 					&& testRange2.hi >= testRange1.lo;
+// #define DIAG
 #ifdef DIAG
 			cout << "lh1,lh2: "
 					<< FMTX(lo1) << " " << FMTX(hi1) << ", "
@@ -193,7 +203,10 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel
 #ifdef DIAG
 			cout << "." << endl << flush;
 #endif
-		} while (range2->getNext(lo2,hi2));
+#undef DIAG
+			past_chance = (uint64) testRange2.lo > (uint64) testRange1.hi;
+		} while (range2->getNext(lo2,hi2) && !past_chance);
+		// cout << "kount = " << kount << endl << flush;
 	} while (range1->getNext(lo1,hi1)); // TODO Can we replace getNext with some sort of find or search.
 #undef FMTX
 	// cout << "d" << flush;
@@ -542,7 +555,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 
 	// Add the first one.
 	if( my_los->myHeader->getElement(0) == NIL ) {
-		my_los->insert(lo,100);
+		// my_los->insert(lo,100);
+		my_los->insert(lo,hi);
 		my_his->insert(hi,100);
 		// cout << 8002 << " First one inserted. " << endl << flush;
 		return;
@@ -601,7 +615,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			// Don't know what's above h.  Iterate.
 		} else if( hi1 < l ) {
 			// Case 1. A is below B.  Just add
-			my_los->insert(lo1,10001);
+			// my_los->insert(lo1,10001);
+			my_los->insert(lo1,hi1);
 			my_his->insert(hi1,10001);
 			done = true;
 		} else if( (lo1 < l) && ( (l <= hi1) && (hi1 <= h) ) ) {
@@ -630,14 +645,16 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				// At the same level, merge the two.
 				my_los->freeRange(l_m,h_p); // Freeing up to h_p is okay because h_p==h is still part of current interval.
 				my_his->freeRange(l_m,h_p);
-				my_los->insert(l_m,100021);
+				// my_los->insert(l_m,100021);
+				my_los->insert(l_m,h_p);
 				my_his->insert(h_p,100021);
 			} else {
 				// The lower part overlaps an empty part. Just add.  // ??? Don't need a freeRange ??? Okay...
 				if(level > l_level) {
 //					cout << "8000-1031" << endl << flush;
 					// If the new interval's level is greater, just skip in the current, add before.
-					my_los->insert(l_m,100022);
+					// my_los->insert(l_m,100022);
+					my_los->insert(l_m,h_m);
 					my_his->insert(h_m,100022);
 				} else if(true) { // Case 2.3 level < l_level -- new interval wins
 					// TODO WORRY -- What about collisions? If we have a collision, will we simply put in the value back in?
@@ -654,10 +671,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 //					}
 					my_los->freeRange(l_m,h_p);
 					my_his->freeRange(l_m,h_p);
-					my_los->insert(l_m,100023); // lo1 // this changes the level to level
+					// my_los->insert(l_m,100023); // lo1 // this changes the level to level
+					my_los->insert(l_m,h_0); // lo1 // this changes the level to level
 					my_his->insert(h_0,100023); // hi1
 					if(h_0 < h_p) {
-						my_los->insert(l_p,100023);
+						// my_los->insert(l_p,100023);
+						my_los->insert(l_p,h_p);
 						my_his->insert(h_p,100023);
 					}
 					my_los->reset(); my_his->reset();
@@ -690,7 +709,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 					cout << "HtmRangeMultiLevel::mergeRange::ERROR!!! SUCC(H) > HI1, I.E. THEY'RE EQUIVALENT." << endl << flush;
 				}
 				if( l_m < h_m ) { // If lo1 and l are equivalent, current one wins, and we ignore the new one.
-					my_los->insert(l_m,1000421);
+					// my_los->insert(l_m,1000421);
+					my_los->insert(l_m,h_m);
 					my_his->insert(h_m,1000421);
 //					my_los->reset(); my_his->reset();
 //				} else {
@@ -726,13 +746,16 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				my_los->freeRange(l_m,h_p);
 				my_his->freeRange(l_m,h_p);
 				if( l_m < h_m ) { // If l_m and l_0 are "equivalent", so the current interval wins and we ignore interval_m.
-					my_los->insert(l_m,10004);
+					// my_los->insert(l_m,10004);
+					my_los->insert(l_m,h_m);
 					my_his->insert(h_m,10004);
 				}
-				my_los->insert(l_0,10004);
+				// my_los->insert(l_0,10004);
+				my_los->insert(l_0,h_0);
 				my_his->insert(h_0,10004); // TODO Subtle bug?  Need to verify edge case.
 				if( l_p < h_p ) { // Non equivalent h_0 and h_p.
-					my_los->insert(l_p,10004);
+					// my_los->insert(l_p,10004);
+					my_los->insert(l_p,h_p);
 					my_his->insert(h_p,10004);
 				}
 				}
@@ -787,10 +810,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				my_his->freeRange(l_m,h_0);
 				// TODO NOTE:  When predecessor is used, you have to check to see if pred(b) is less than inf(interval).
 				if( l_m < h_m ) { // If l_m and l_0 are "equivalent", so the current interval wins and we ignore interval_m.
-					my_los->insert(l_m,100052);
+					// my_los->insert(l_m,100052);
+					my_los->insert(l_m,h_m);
 					my_his->insert(h_m,100052);
 				}
-				my_los->insert(l_0,100052);
+				// my_los->insert(l_0,100052);
+				my_los->insert(l_0,h_0);
 				my_his->insert(h_0,100052); // TODO Subtle bug?  Need to verify edge case.
 				// update for iteration
 				lo1 = l_p;
@@ -808,7 +833,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	if(not done) {
 		// The new interval goes at the end of the skiplists.
 		// Case 6. We're at the top.  Just add.
-		my_los->insert(lo1,10006);
+		// my_los->insert(lo1,10006);
+		my_los->insert(lo1,hi1);
 		my_his->insert(hi1,10006);
 		done = true;
 	}
@@ -834,7 +860,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
  */
 void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
-//	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)...
+//	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)... Like storing hi...
 //	my_his->insert(hi, (Value) 0);
 	// cout << "x200: " << hex << lo << " " << hi << endl;
 	// cout << "x201: " << (lo == hi) << endl;
@@ -1103,7 +1129,8 @@ void HtmRangeMultiLevel::CompressionPass() {
 				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
 				// oldLo..newLoPredecessor; newLo..hi0 Modify the skiplists.
 				my_his->insert(newLoPredecessor,1024);
-				my_los->insert(newLo,1024);
+				// my_los->insert(newLo,1024);
+				my_los->insert(newLo,newLoPredecessor);
 				// Set lists to the new lo
 				my_los->reset(); my_his->reset(); // TODO Until we know better, start over. Bad, bad, bad.
 				// TODO Perhaps instead try a find or a search that would set the iterators.
@@ -1119,11 +1146,13 @@ void HtmRangeMultiLevel::CompressionPass() {
 				}
 				my_los->free(oldLo);
 				--oldLo; // Reduce level
-				my_los->insert(oldLo,1025);
+				// my_los->insert(oldLo,1025);
+				my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
 				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
 				if(newLoPredecessor != hi0) {
 					my_his->insert(newLoPredecessor,1025);
-					my_los->insert(newLo,1025);
+					// my_los->insert(newLo,1025);
+					my_los->insert(newLo,newLoPredecessor);
 				}
 				my_los->reset(); my_his->reset(); // TODO Reset is too drastic. Prefer to step back a little... Bad, bad, bad.
 			}
