@@ -213,6 +213,19 @@ void SpatialRange_test () {
 #undef DIAG
 	}
 
+	// TODO Write many more tests & consider edge cases.
+	if(true) {
+		STARE_ArrayIndexSpatialValue siv1[2] = { 0x0000000000000008, 0x000067ffffffffff };
+		STARE_ArrayIndexSpatialValue siv2[2] = { 0x000030000000000a, 0x0000907fffffffff };
+		STARE_SpatialIntervals sis1(siv1,siv1+2);
+		STARE_SpatialIntervals sis2(siv2,siv2+2);
+		SpatialRange r1(sis1), r2(sis2);
+		SpatialRange *ri = r1 & r2;
+		STARE_SpatialIntervals result = ri->toSpatialIntervals();
+		ASSERT_EQUAL(0x000030000000000a,result[0]);
+		ASSERT_EQUAL(0x000067ffffffffff,result[1]);
+	}
+
 // TODO Add intersection tests.
 
 }
