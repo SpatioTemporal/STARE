@@ -60,6 +60,7 @@ public:
 	// Spatial array index functions. [Maybe change the name StareId to spatialStareId in the following...]
 	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, int resolutionLevel = STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);
 	LatLonDegrees64 LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
+	SpatialVector SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 
 	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);

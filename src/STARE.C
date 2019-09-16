@@ -181,6 +181,14 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 
 }
 
+SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
+	uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	SpatialVector v;
+	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
+	sIndex.pointByHtmId(v, htmID);
+	return v;
+}
+
 Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel) {
 	// Users are going to expect the default resolution level to be that embedded in the sStareId.
 	uint64 htmID = -1;
@@ -433,30 +441,30 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 	STARE_SpatialIntervals cover;
 	int hullSteps = points.size();
 	htmInterface *htm;
-	cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	// cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
 	if( force_resolution_level > -1 ) {
-		cout << dec << 1100 << endl << flush;
+		// cout << dec << 1100 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(force_resolution_level).getMaxlevel(),
 				this->getIndex(force_resolution_level).getBuildLevel(),
 				this->getIndex(force_resolution_level).getRotation());
-		cout << dec << 1101 << endl << flush;
+		// cout << dec << 1101 << endl << flush;
 	} else {
-		cout << dec << 1200 << endl << flush;
+		// cout << dec << 1200 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(8).getMaxlevel(),
 				this->getIndex(8).getBuildLevel(),
 				this->getIndex(8).getRotation());
-		cout << dec << 1201 << endl << flush;
+		// cout << dec << 1201 << endl << flush;
 	}
 
-	cout << dec << "a2000" << endl << flush;
+	// cout << dec << "a2000" << endl << flush;
 
-	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps);
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // TODO FIX interiorp = false is broken
 
-	cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
+	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
@@ -468,7 +476,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 		}
 	}
 
-	cout << dec << "a4000" << endl << flush;
+	// cout << dec << "a4000" << endl << flush;
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
