@@ -9,6 +9,8 @@
 
 #include "Test.h"
 
+// #define DIAG
+
 void SpatialRange_test () {
 
 	STARE index;
@@ -72,13 +74,17 @@ void SpatialRange_test () {
 	ASSERT_EQUAL(sis[0],sis_out[0]);
 	ASSERT_EQUAL(sis[1],sis_out[1]);
 
-
 	if(true) {
 		// TODO Fix the following to use the new 0/1 variables defined above.
+
+#undef DIAG
+#ifndef DIAG
 #define SIVOUT(m,siv)
-// #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
 #define SISOUT(m,sis)
-// #define SISOUT(m,sis) { cout << endl << m << endl; for(int i=0; i < sis.size(); ++i ) { cout << i << " i,si: " << setw(16) << setfill('0') << hex << sis[i] << dec << endl << flush; }}
+#else
+#define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SISOUT(m,sis) { cout << endl << m << endl; for(int i=0; i < sis.size(); ++i ) { cout << i << " i,si: " << setw(16) << setfill('0') << hex << sis[i] << dec << endl << flush; }}
+#endif
 		// #define DIAGOUT
 		// #define DIAGOUT(m) {cout << m << endl << flush;}
 		// Note level is 8.
@@ -205,12 +211,9 @@ void SpatialRange_test () {
 		SISOUT("deltaSis",deltaSis);
 		// cout << 400 << endl << flush;
 
+		ASSERT_EQUAL(2,deltaSis.size());
 		ASSERT_EQUAL(sis1[0],deltaSis[0]);
 		ASSERT_EQUAL(sis0[1],deltaSis[1]);
-
-#undef SIVOUT
-#undef SISOUT
-#undef DIAG
 	}
 
 	// TODO Write many more tests & consider edge cases.
@@ -221,11 +224,35 @@ void SpatialRange_test () {
 		STARE_SpatialIntervals sis2(siv2,siv2+2);
 		SpatialRange r1(sis1), r2(sis2);
 		SpatialRange *ri = r1 & r2;
+		// SpatialRange *ri = sr_intersect(r1, r2);
+
 		STARE_SpatialIntervals result = ri->toSpatialIntervals();
+		ASSERT_EQUAL(2,result.size());
 		ASSERT_EQUAL(0x000030000000000a,result[0]);
 		ASSERT_EQUAL(0x000067ffffffffff,result[1]);
+
+		ri->range->range->CompressionPass();
+		result = ri->toSpatialIntervals();
+		ASSERT_EQUAL(4,result.size());
+		ASSERT_EQUAL(0x0000300000000008,result[0]);
+		ASSERT_EQUAL(0x00003fffffffffff,result[1]);
+		ASSERT_EQUAL(0x0000400000000007,result[2]);
+		ASSERT_EQUAL(0x0000600000000008,result[3]);
+
+		delete ri;
+		ri = sr_intersect(r1, r2, true); // Run a compression pass on the range.
+		result.clear();
+		result = ri->toSpatialIntervals();
+		ASSERT_EQUAL(4,result.size());
+		ASSERT_EQUAL(0x0000300000000008,result[0]);
+		ASSERT_EQUAL(0x00003fffffffffff,result[1]);
+		ASSERT_EQUAL(0x0000400000000007,result[2]);
+		ASSERT_EQUAL(0x0000600000000008,result[3]);
 	}
 
+#undef SIVOUT
+#undef SISOUT
+#undef DIAG
 // TODO Add intersection tests.
 
 }

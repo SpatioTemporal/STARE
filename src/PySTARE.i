@@ -112,6 +112,31 @@
   $4 = (double*) array_data((PyArrayObject*)out2);
 }
 
+/* maps 1-D integer input array to TWO 1-D int64_t output array with the same length */
+/* We use this to convert STARE intervals to start/terminator arrays to aid comparison */
+%typemap(in, numinputs=1)
+  (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2)
+  (PyObject* out1=NULL, PyObject* out2=NULL)
+{
+  int is_new_object=0;
+  npy_intp size[1] = { -1};
+  PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
+  if (!array || !require_dimensions(array, 1)) SWIG_fail;
+ 
+  size[0] = PyArray_DIM(array, 0);  
+   
+  out1 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out1) SWIG_fail;
+  out2 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out2) SWIG_fail;
+   
+  $1 = (int64_t*) array_data(array);
+  $2 = (int) array_size(array,0);  
+  $3 = (int64_t*) array_data((PyArrayObject*)out1);
+  $4 = (int64_t*) array_data((PyArrayObject*)out2);
+}
+
+
 /* maps 1-D double input array to TWO 1-D double and ONE 1D int output array with the same length */
 /* We use this to convert STARE index to lat+lon+level */
 %typemap(in, numinputs=1)
@@ -186,6 +211,14 @@
 }
 
 %typemap(argout)
+    (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2)
+{
+  $result = PyTuple_New(2);
+  PyTuple_SetItem($result, 0, (PyObject*)out1$argnum);
+  PyTuple_SetItem($result, 1, (PyObject*)out2$argnum);
+}
+
+%typemap(argout)
     (int64_t* in_array, int length, double* out_array1, double* out_array2, int* out_array3)
 {
   $result = PyTuple_New(3);
@@ -227,6 +260,10 @@
 
 %apply (int64_t* in_array, int length, double* out_array1, double* out_array2, int* out_array3) {
     (int64_t* indices, int len, double* lat, double* lon, int* levels)
+}
+
+%apply (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2) {
+	(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators )
 }
 
 // 

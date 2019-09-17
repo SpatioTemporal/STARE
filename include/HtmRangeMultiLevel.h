@@ -124,7 +124,7 @@ public:
 	};
 
 	HtmRangeMultiLevel *HtmRangeMultiLevelAtLevelFromIntersection(HtmRangeMultiLevel *range2, int htmIdLevel=-1);
-	HtmRangeMultiLevel *RangeFromIntersection(HtmRangeMultiLevel *range2, int force_htmIdLevel=-1);
+	HtmRangeMultiLevel *RangeFromIntersection(HtmRangeMultiLevel *range2, bool compress = true, int force_htmIdLevel=-1);
 
 	int contains(Key a, Key b);
 	// TODO KeyPair contains(Key a, Key b);

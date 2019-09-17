@@ -408,7 +408,8 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
 
 	// TODO The following pattern repeats...
-	bool varlen_false = false;
+	// bool varlen_false = false;
+	bool varlen_false = true;
 	bool overlap = d.intersect(&index,&r,&varlen_false);
 	r.reset();
 

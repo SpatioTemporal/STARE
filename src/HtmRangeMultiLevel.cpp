@@ -149,7 +149,8 @@ KeyPair HRML_AtLevelFromMultiLevel(uint64 htmIdLevel, Key lo, Key hi, uint64 lev
  * TODO Replace double-nested-loop with SkipLists search or find functionality.
  *
  */
-HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel *range2, int force_htmIdLevel) {
+HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(
+		HtmRangeMultiLevel *range2, bool compress, int force_htmIdLevel ) {
 	HtmRangeMultiLevel *range1 = this; // Just an alias
 	if((!range1)||(!range2)) return 0;
 	if((range1->nranges()<=0)||(range2->nranges()<=0)) return 0;
@@ -212,7 +213,12 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(HtmRangeMultiLevel
 	// cout << "d" << flush;
 	// cout << "d nr " << resultRange->nranges() << endl << flush;
 	// cout << "d rr " << hex << resultRange << dec << endl << flush;
-	if(resultRange->nranges()>0)resultRange->defrag();
+	if(resultRange->nranges()>0) {
+		if(compress) {
+			resultRange->CompressionPass();
+		}
+		resultRange->defrag();
+	}
 	// cout << "e" << flush;
 	return resultRange;
 }

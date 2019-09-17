@@ -24,7 +24,7 @@
 #define MAX_RANGES 100
 
 // #define DIAG
-// #define DIAG_OUT cout
+#define DIAG_OUT cout
 // #define DIAG_OUT cerr
 
 #ifdef SpatialSGI
@@ -527,6 +527,25 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		} else if( (polyCorners_[0].c_ ^ polyCorners_[1].c_)*v < 0 ) {
 			polyCorners_.insert(polyCorners_.end(), polyCorners_[1]); // GYF polyCorners_[1] was missing!!!!
 			polyCorners_[1].c_ = v;
+		} else {
+			// Nuts. It's zero. Have to think now.
+			// Which one is in the middle?
+			SpatialVector ab = polyCorners_[0].c_ ^ polyCorners_[1].c_;
+			SpatialVector av = polyCorners_[0].c_ ^ v;
+			SpatialVector vb = v ^ polyCorners_[1].c_;
+			float64 dot_ab_av = ab*av;
+			float64 dot_ab_vb = ab*vb;
+
+			if( dot_ab_av*dot_ab_vb < 0 ) {
+				// v is not in the middle
+				if( dot_ab_av > 0 ) {
+					// b is in the middle
+					polyCorners_[1].c_ = v;
+				} else {
+					// a is in the middle
+					polyCorners_[0].c_ = v;
+				}
+			} // dot_ab_av*dot_ab_vb == 0 is an error and > 0 means v is in the middle.
 		}
 	} else {
 		//
@@ -556,6 +575,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			// if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v > tol2 ) {
 
 			float64 delta = (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v;
+// #define DIAG
 #ifdef DIAG
 			DIAG_OUT
 			<< i << " i,"

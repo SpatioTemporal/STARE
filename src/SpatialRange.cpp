@@ -109,8 +109,8 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
 /*
  * Odd. The following does not seem to work if we just return the SpatialRange itself. Some of the pointers seem to be either corrupted or eliminated.
  */
-SpatialRange *sr_intersect(const SpatialRange&a, const SpatialRange& b) {
-	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
+SpatialRange *sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
+	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 // #define DIAG
 #ifdef DIAG
 	KeyPair kp; range->reset(); range->getNext(kp);
