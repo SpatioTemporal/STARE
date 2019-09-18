@@ -265,22 +265,20 @@
 	(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators )
 }
 
-
 %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
     import numpy
     datetime = datetime.astype(numpy.int64)
 %}
 
-
 %pythoncode %{
 import numpy
-def intersect(indices1, indices2, multilevel=True):
+def intersect(indices1, indices2, multiresolution=True):
     out_length = 2*max(len(indices1),len(indices2))
     # intersected = numpy.zeros([out_length], dtype=numpy.int64)
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)
     leni = 0
-    if(multilevel):
-      _intersect_multilevel(indices1, indices2, intersected)
+    if(multiresolution):
+      _intersect_multiresolution(indices1, indices2, intersected)
     else:
       _intersect(indices1, indices2, intersected)
     endarg = numpy.argmax(intersected < 0)
