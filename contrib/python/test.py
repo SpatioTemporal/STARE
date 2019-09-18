@@ -38,5 +38,7 @@ print('1 intersected: ',[hex(i) for i in intersected] )
 intersected = pystare.intersect(indices, indices)
 print('2 intersected: ',[hex(i) for i in intersected])
 
+intersected = pystare.intersect(indices, indices, multilevel=True)
+print('3 intersected: ',[hex(i) for i in intersected])
 
 

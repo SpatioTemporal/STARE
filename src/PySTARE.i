@@ -280,9 +280,9 @@ def intersect(indices1, indices2, multilevel=True):
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)
     leni = 0
     if(multilevel):
-      _intersect(indices1, indices2, intersected)
-    else:
       _intersect_multilevel(indices1, indices2, intersected)
+    else:
+      _intersect(indices1, indices2, intersected)
     endarg = numpy.argmax(intersected < 0)
     # intersected = intersected.trim_zeros()
     intersected = intersected[:endarg]
