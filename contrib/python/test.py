@@ -53,11 +53,13 @@ print("")
 vertices0 = numpy.zeros([3], dtype=numpy.int64)
 vertices1 = numpy.zeros([3], dtype=numpy.int64)
 vertices2 = numpy.zeros([3], dtype=numpy.int64)
+print('')
 
 vertices0,vertices1,vertices2 = pystare.to_vertices(indices)
 print('vertices0: ',[hex(i) for i in vertices0])
 print('vertices1: ',[hex(i) for i in vertices1])
 print('vertices2: ',[hex(i) for i in vertices2])
+print('')
 
 vertices0_lats,vertices0_lons = pystare.to_latlon(vertices0)
 vertices1_lats,vertices1_lons = pystare.to_latlon(vertices1)
@@ -68,6 +70,14 @@ for i in range(len(vertices0_lats)):
   print(i," vert1 lat,lon: ",vertices1_lats[i],vertices1_lons[i])
   print(i," vert2 lat,lon: ",vertices2_lats[i],vertices2_lons[i])
   print("")
+
+indices1 = numpy.array([0,0,0], dtype=numpy.int64)
+pystare._to_compressed_range(indices,indices1)
+print('_indices1: ',[hex(i) for i in indices1])
+
+indices1 = numpy.array([0,0,0], dtype=numpy.int64)
+indices1 = pystare.to_compressed_range(indices)
+print('indices1:  ',list(map(hex,indices1)))
 
 
 

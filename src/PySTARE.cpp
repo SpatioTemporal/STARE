@@ -109,6 +109,15 @@ void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_
 //	}
 }
 
+void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int len_ri) {
+	STARE_SpatialIntervals si(indices, indices+len);
+	SpatialRange r(si);
+	STARE_SpatialIntervals result = r.toSpatialIntervals();
+	for(int i=0; i<result.size(); ++i) {
+		range_indices[i] = result[i];
+	}
+}
+
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
 	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
     // intersection[0] = 69;

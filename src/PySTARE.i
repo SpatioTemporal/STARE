@@ -53,7 +53,7 @@
 }
 
 /* maps ONE int64_t input vector to ONE int64_t output vector of the same length */
-/* We use this to create a STARE array of the same size as a numpy datetime64 (aka int64_t, aka NPY_INT64) array. */
+/* We use this to create a STARE array ... to_compressed_range */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, int64_t* out_array)
    (PyObject* out=NULL)
@@ -256,17 +256,19 @@
 
 /* Applying the typemaps */
 %apply (double * IN_ARRAY1, int DIM1) {
-    (double* lat, int len_lat)              
+    (double* lat, int len_lat)        
 }
 
 %apply (int64_t * IN_ARRAY1, int DIM1) {
     (int64_t* datetime, int len),
     (int64_t* indices1, int len1),
-    (int64_t* indices2, int len2)
+    (int64_t* indices2, int len2),
+    (int64_t* indices, int len)
 }
 
 %apply (int64_t * INPLACE_ARRAY1, int DIM1) {
-    (int64_t* intersection, int leni)
+    (int64_t* intersection, int leni),
+    (int64_t* range_indices, int len_ri)
 }
 
 %apply (double* in_array, int length, int64_t* out_array) {
@@ -279,6 +281,7 @@
 
 %apply (int64_t* in_array, int length, int64_t* out_array) {
     (int64_t* datetime, int len, int64_t* indices)
+    
 }
 
 %apply (int64_t* in_array, int length, double* out_array) {
@@ -308,9 +311,20 @@
 
 %pythoncode %{
 import numpy
+def to_compressed_range(indices):
+    out_length = len(indices)
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    len_ri = 0
+    _to_compressed_range(indices,range_indices)
+    endarg = 0
+    while (endarg < out_length) and (range_indices[endarg] > 0):
+      endarg = endarg + 1
+    # endarg = numpy.argmax(range_indices < 0)
+    range_indices = range_indices[:endarg]
+    return range_indices
+    
 def intersect(indices1, indices2, multiresolution=True):
     out_length = 2*max(len(indices1),len(indices2))
-    # intersected = numpy.zeros([out_length], dtype=numpy.int64)
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)
     leni = 0
     if(multiresolution):
@@ -318,10 +332,8 @@ def intersect(indices1, indices2, multiresolution=True):
     else:
       _intersect(indices1, indices2, intersected)
     endarg = numpy.argmax(intersected < 0)
-    # intersected = intersected.trim_zeros()
     intersected = intersected[:endarg]
     return intersected
-
 %}   
    
 %include "PySTARE.h"

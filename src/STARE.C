@@ -284,6 +284,8 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
 
+/// TODO STARE::InfoFromValue // Get all the info from a volume, so we only translate between forms once.
+
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId) {
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
