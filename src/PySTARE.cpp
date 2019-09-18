@@ -91,17 +91,16 @@ void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
 	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
-    intersection[0] = 69;
-	//SpatialRange r1(si1), r2(si2);
-	//SpatialRange *ri = r1 & r2;
-	//STARE_SpatialIntervals result = ri->toSpatialIntervals();
-	//leni = result.size();
-	//for(int i=0; i<leni; ++i) {
-	//	intersection[i] = result[i];
-	//}
+    // intersection[0] = 69;
+	SpatialRange r1(si1), r2(si2);
+	// SpatialRange *ri = r1 & r2;
+	SpatialRange *ri = sr_intersect(r1,r2,false);
+	STARE_SpatialIntervals result = ri->toSpatialIntervals();
+	leni = result.size();
+	for(int i=0; i<leni; ++i) {
+		intersection[i] = result[i];
+	}
 }
-
-
 
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution) {

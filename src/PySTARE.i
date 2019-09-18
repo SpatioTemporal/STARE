@@ -276,10 +276,13 @@
 import numpy
 def intersect(indices1, indices2):
     out_length = 2*max(len(indices1),len(indices2))
-    intersected = numpy.zeros([out_length], dtype=numpy.int64)
+    # intersected = numpy.zeros([out_length], dtype=numpy.int64)
+    intersected = numpy.full([out_length],-1,dtype=numpy.int64)
     leni = 0
     _intersect(indices1, indices2, intersected)
-    intersected = intersected.trim_zeros()
+    endarg = numpy.argmax(intersected < 0)
+    # intersected = intersected.trim_zeros()
+    intersected = intersected[:endarg]
     return intersected
 
 %}   

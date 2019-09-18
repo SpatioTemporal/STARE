@@ -250,6 +250,29 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(0x0000600000000008,result[3]);
 	}
 
+	if(false) {
+		// From PySTARE.cpp
+		// void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
+		int len1 = 3, len2 = 3, leni = 3;
+		int64_t
+		indices1[len1] = {0,0,0},
+		// indices2[len2] = {0,0,0},
+		intersection[leni];
+
+		int64_t *indices2 = indices1;
+
+		STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
+		// intersection[0] = 69;
+		SpatialRange r1(si1), r2(si2);
+		SpatialRange *ri = r1 & r2;
+		STARE_SpatialIntervals result = ri->toSpatialIntervals();
+		leni = result.size();
+		for(int i=0; i<leni; ++i) {
+			intersection[i] = result[i];
+		}
+		// }
+	}
+
 #undef SIVOUT
 #undef SISOUT
 #undef DIAG
