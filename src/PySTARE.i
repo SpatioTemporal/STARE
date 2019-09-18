@@ -274,12 +274,15 @@
 
 %pythoncode %{
 import numpy
-def intersect(indices1, indices2):
+def intersect(indices1, indices2, multilevel=True):
     out_length = 2*max(len(indices1),len(indices2))
     # intersected = numpy.zeros([out_length], dtype=numpy.int64)
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)
     leni = 0
-    _intersect(indices1, indices2, intersected)
+    if(multilevel):
+      _intersect(indices1, indices2, intersected)
+    else:
+      _intersect_multilevel(indices1, indices2, intersected)
     endarg = numpy.argmax(intersected < 0)
     # intersected = intersected.trim_zeros()
     intersected = intersected[:endarg]
