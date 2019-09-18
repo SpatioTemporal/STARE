@@ -1,6 +1,24 @@
 
 * 2019-09-X Version 0.8.0
 
+Added a number of tests using Constraint.
+
+
+
+Improved intersection behavior by injecting dependency on varlen, i.e.
+interior vs. boundary calculation. Setting varlen to false tends to 
+force calculation all the way down to leaf, whereas varlen true
+stops on reaching a fully enclosed trixel, leading to the multi-resolution
+partitioning.
+
+Corrected bug in SetPolyCorner of ConvexHull calculation. 2-corner list would
+throw out co-linear third point without checking if it extended the side
+or not.
+
+Changed HtmRangeMultiLevel::RangeFromIntersection to eliminate iteration over
+the range in favor of using the SkipList's findMAX. Also eliminated superfluous
+iteration after intersection is found.
+
 Added SpatialRange to use SkipList to generate intersections. Note the intersect
 doesn't use find or search, so it's not clear we're getting the benefit of the SkipLists.
 

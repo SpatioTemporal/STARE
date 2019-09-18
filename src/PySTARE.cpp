@@ -76,6 +76,10 @@ void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_
 		}
 		++i; // Next
 	} while(i<len);
+	if(iDest<len) {
+		indices_starts[iDest]=-998;
+		indices_terminators[iDest]=-999;
+	}
 //	}
 //	for(int i=0; i< len; ++i) {
 //		indices_starts[i]=i*10;

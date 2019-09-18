@@ -463,7 +463,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 
 	// cout << dec << "a2000" << endl << flush;
 
-	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // TODO FIX interiorp = false is broken
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // Compress result
 
 	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
@@ -471,7 +471,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
 		cover.push_back(lo);
 		uint64 hi;
-		if( htmRangeVector[i].lo != htmRangeVector[i].lo ) {
+		if( htmRangeVector[i].lo != htmRangeVector[i].hi ) {
 			hi = sTerminator(ValueFromHtmID(htmRangeVector[i].hi));
 			cover.push_back(hi);
 		}
