@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include "STARE.h"
+#include "SpatialRange.h"
 
 static STARE stare;
 
@@ -38,7 +39,7 @@ void to_area(int64_t* indices, int len, double* areas);
 
 void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators );
 
-// void intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
+void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
 
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution);

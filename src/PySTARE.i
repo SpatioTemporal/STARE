@@ -14,7 +14,7 @@
 %}
 
 
-/* maps 1-D double input array to ONE 1-D integer output array with the same length */
+/* maps ONE double input vector to ONE int64_t output vector of the same length */
 /* We use this to create a STARE array of the same size as a longitude array. 
 /* The latitude array is passed separately. We have to do it separately since we can only map ONE input at a time */
 /* Consequently, we are not verifying that lat and lon are the same length within the typemap */
@@ -34,8 +34,8 @@
   $3 = (int64_t*) array_data((PyArrayObject*)out);
 }
 
-/* maps 1-D int64_t input array to ONE 1-D integer output array with the same length */
-/* We use this to create a level array of the same size as a STARE array. */
+/* maps ONE int64_t input vector to ONE int output vector of the same length */
+/* We use this to create a level/resolution array of the same size as a STARE array. */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, int* out_array)
    (PyObject* out=NULL)
@@ -52,8 +52,8 @@
   $3 = (int*) array_data((PyArrayObject*)out);
 }
 
-/* maps 1-D int64_t input array to ONE 1-D int64_t output array with the same length */
-/* We use this to create a STARE array of the same size as a numpy64 array. */
+/* maps ONE int64_t input vector to ONE int64_t output vector of the same length */
+/* We use this to create a STARE array of the same size as a numpy datetime64 (aka int64_t, aka NPY_INT64) array. */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, int64_t* out_array)
    (PyObject* out=NULL)
@@ -70,7 +70,7 @@
   $3 = (int64_t*) array_data((PyArrayObject*)out);
 }
 
-/* maps 1-D int64_t input array to ONE 1-D double output array with the same length */
+/* maps ONE int64_t input vector to ONE double output vector of the same length */
 /* We use this to create an area array of the same size as a STARE array. */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, double* out_array)
@@ -88,7 +88,7 @@
   $3 = (double*) array_data((PyArrayObject*)out);
 }
 
-/* maps 1-D integer input array to TWO 1-D double output array with the same length */
+/* maps ONE int64_t input vector to TWO double output vectors of the same length */
 /* We use this to convert STARE index to lat+lon */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, double* out_array1, double* out_array2)
@@ -112,7 +112,7 @@
   $4 = (double*) array_data((PyArrayObject*)out2);
 }
 
-/* maps 1-D integer input array to TWO 1-D int64_t output array with the same length */
+/* maps ONE int64_t input vector to TWO int64_t output vectors of the same length */
 /* We use this to convert STARE intervals to start/terminator arrays to aid comparison */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2)
@@ -137,7 +137,7 @@
 }
 
 
-/* maps 1-D double input array to TWO 1-D double and ONE 1D int output array with the same length */
+/* maps ONE int64_t input array to TWO double and ONE 1D int output array with the same length */
 /* We use this to convert STARE index to lat+lon+level */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, double* out_array1, double* out_array2, int* out_array3)
@@ -164,15 +164,8 @@
   $5 = (int*) array_data((PyArrayObject*)out3);
 }
 
-/*
- * void intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
- *
-%typemap(in,numinputs=2)
-  (int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int length)
-  (PyObject* out1=NULL, PyObject* out2=NULL)
- {
- }
- */ 
+
+
 
 /****************/
 /* OUT typemaps */
@@ -235,7 +228,13 @@
 }
 
 %apply (int64_t * IN_ARRAY1, int DIM1) {
-    (int64_t* datetime, int len)            
+    (int64_t* datetime, int len),
+    (int64_t* indices1, int len1),
+    (int64_t* indices2, int len2)
+}
+
+%apply (int64_t * INPLACE_ARRAY1, int DIM1) {
+    (int64_t* intersection, int leni)
 }
 
 %apply (double* in_array, int length, int64_t* out_array) {
@@ -266,7 +265,6 @@
 	(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators )
 }
 
-// 
 
 %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
     import numpy
@@ -274,4 +272,16 @@
 %}
 
 
+%pythoncode %{
+import numpy
+def intersect(indices1, indices2):
+    out_length = 2*max(len(indices1),len(indices2))
+    intersected = numpy.zeros([out_length], dtype=numpy.int64)
+    leni = 0
+    _intersect(indices1, indices2, intersected)
+    intersected = intersected.trim_zeros()
+    return intersected
+
+%}   
+   
 %include "PySTARE.h"
