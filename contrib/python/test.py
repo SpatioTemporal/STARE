@@ -41,4 +41,10 @@ print('2 intersected: ',[hex(i) for i in intersected])
 intersected = pystare.intersect(indices, indices, multiresolution=True)
 print('3 intersected: ',[hex(i) for i in intersected])
 
+indices1 = numpy.array([indices[1]], dtype=numpy.int64)
+intersected = pystare.intersect(indices, indices1, multiresolution=True)
+print('4 intersected: ',[hex(i) for i in intersected])
 
+indices1 = numpy.array([0x100000000000000c], dtype=numpy.int64)
+intersected = pystare.intersect(indices, indices1, multiresolution=True)
+print('5 intersected: ',[hex(i) for i in intersected])
