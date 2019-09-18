@@ -1073,6 +1073,22 @@ void STARE_test() {
 #undef SIVOUT
 	}
 
+	if(true) {
+		EmbeddedLevelNameEncoding lj;
+		STARE index;
+		SpatialVector x(1,1,0); x.normalize();
+		STARE_ArrayIndexSpatialValue siv = index.ValueFromSpatialVector(x);
+		SpatialVector v = index.SpatialVectorFromValue(siv); v.normalize();
+		// cout << "v: " << v << endl << flush;
+		ASSERT_EQUALDM("x-to-siv",x,v,1.0e-8);
+
+		siv = 0x0001000000000008;
+		v = index.SpatialVectorFromValue(siv); v.normalize(); // Note, wipes out resolution info.
+		STARE_ArrayIndexSpatialValue siv1 = index.ValueFromSpatialVector(v);
+		// cout << "iv: " << hex << siv << " " << hex << siv1 << endl << flush;
+		ASSERT_EQUALM("iv-to-v-roundtrip",siv,(siv1 & ~lj.levelMaskSciDB) | 8);
+	}
+
 	// FAIL();
 }
 

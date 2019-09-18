@@ -164,7 +164,32 @@
   $5 = (int*) array_data((PyArrayObject*)out3);
 }
 
-
+/* maps ONE int64_t input array to THREE 1D int output array with the same length */
+/* We use this to convert STARE index to triangle vertices */
+%typemap(in, numinputs=1)
+  (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2, int64_t* out_array3)
+  (PyObject* out1=NULL, PyObject* out2=NULL, PyObject* out3=NULL)
+{
+  int is_new_object=0;
+  npy_intp size[1] = { -1};
+  PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
+  if (!array || !require_dimensions(array, 1)) SWIG_fail;
+ 
+  size[0] = PyArray_DIM(array, 0);  
+   
+  out1 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out1) SWIG_fail;
+  out2 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out2) SWIG_fail;
+  out3 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out3) SWIG_fail;
+   
+  $1 = (int64_t*) array_data(array);
+  $2 = (int) array_size(array,0);  
+  $3 = (int64_t*) array_data((PyArrayObject*)out1);
+  $4 = (int64_t*) array_data((PyArrayObject*)out2);
+  $5 = (int64_t*) array_data((PyArrayObject*)out3);
+}
 
 
 /****************/
@@ -220,7 +245,14 @@
   PyTuple_SetItem($result, 2, (PyObject*)out3$argnum);
 }
 
-
+%typemap(argout)
+    (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2, int64_t* out_array3)
+{
+  $result = PyTuple_New(3);
+  PyTuple_SetItem($result, 0, (PyObject*)out1$argnum);
+  PyTuple_SetItem($result, 1, (PyObject*)out2$argnum);
+  PyTuple_SetItem($result, 2, (PyObject*)out3$argnum);
+}
 
 /* Applying the typemaps */
 %apply (double * IN_ARRAY1, int DIM1) {
@@ -259,6 +291,10 @@
 
 %apply (int64_t* in_array, int length, double* out_array1, double* out_array2, int* out_array3) {
     (int64_t* indices, int len, double* lat, double* lon, int* levels)
+}
+
+%apply (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2, int64_t* out_array3) {
+    (int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2)
 }
 
 %apply (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2) {

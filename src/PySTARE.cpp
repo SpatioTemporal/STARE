@@ -47,6 +47,26 @@ void to_triangle(int64_t* indices, int len) {
     }
 }
 
+void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2) {
+    for (int i=0; i<len; i++) {
+        Triangle tr = stare.TriangleFromValue(indices[i]);
+#if DIAG
+        cout << "tr: " << setw(16) << hex << indices[i] << dec << " ";
+        for(int j=0; j<3; ++j) { cout << setw(16) << tr.vertices[j] << "; "; }
+#endif
+        vertices0[i] = stare.ValueFromSpatialVector(tr.vertices[0]);
+        vertices1[i] = stare.ValueFromSpatialVector(tr.vertices[1]);
+        vertices2[i] = stare.ValueFromSpatialVector(tr.vertices[2]);
+#if DIAG
+        cout << setw(16) << hex
+        		<< vertices0[i] << " "
+				<< vertices1[i] << " "
+				<< vertices2[i] << dec;
+        cout << endl << flush;
+#endif
+    }
+}
+
 void to_area(int64_t* indices, int len, double* areas) {
     for (int i=0; i<len; i++) {
         areas[i] = stare.AreaFromValue(indices[i]);        

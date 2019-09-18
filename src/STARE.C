@@ -130,6 +130,13 @@ STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
 }
 
+STARE_ArrayIndexSpatialValue STARE::ValueFromSpatialVector(SpatialVector v, int resolution) {
+	BitShiftNameEncoding       rightJustified(sIndex.idByPoint(v));
+	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
+	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
+	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+}
+
 /**
  * Extract the resolution information from the spatial array index value. Since this
  * does not use the sIndex, it doesn't really need to be a method of this class.
@@ -182,7 +189,8 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 }
 
 SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
-	uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	// uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	uint64 htmID = htmIDFromValue(spatialStareId);  // Max resolution
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
 	sIndex.pointByHtmId(v, htmID);
@@ -234,6 +242,17 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	Vertices vertices; vertices.push_back(v1); vertices.push_back(v2); vertices.push_back(v3);
 	// std::cout << 230 << std::endl;
 	return {.centroid=vc, .vertices=vertices};
+}
+
+STARE_ArrayIndexSpatialValues STARE::toVertices(STARE_ArrayIndexSpatialValues spatialStareIds) {
+	STARE_ArrayIndexSpatialValues spatialValues;
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		Triangle tr = TriangleFromValue(spatialStareIds[i]);
+		for(int j=0; j<3; ++j) {
+			spatialValues.push_back(ValueFromSpatialVector(tr.vertices[j]));
+		}
+	}
+	return spatialValues;
 }
 
 /**
@@ -496,6 +515,8 @@ SpatialIndex STARE::getIndex(int resolutionLevel) {
 /**
  * Return the legacy htmID value from the spatialStareId.
  *
+ * NOTE THIS IGNORES EMBEDDED RESOLUTION
+ *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
  * This is important when calling into the legacy htm foundation and why it's kept private.
  */
@@ -513,6 +534,7 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	uint64 htmID = rightJustified.getId();
 	return htmID;
 }
+
 /**
  * Return the spatialStareId from the legacy htmID.
  *
