@@ -159,6 +159,17 @@ void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, 
 	}
 }
 
+void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12) {
+	STARE_ArrayIndexSpatialValues sivs1(indices1, indices1+len1), sivs2(indices2, indices2+len2);
+	int k=0;
+	for(int i=0; i<len1; ++i) {
+		for(int j=0; j<len2; ++j) {
+			cmp[k] = cmpSpatial(indices1[i],indices2[j]); // i.e. [i*len2+j]
+			++k;
+		}
+	}
+}
+
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution) {
     int type = 2;

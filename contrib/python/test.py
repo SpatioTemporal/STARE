@@ -94,7 +94,37 @@ hull_indices = pystare.to_hull_range(indices,8,2000)
 print('hull_indices size: ',hull_indices.size)
 print('')
 
-
-
-
-
+cmp = numpy.zeros([9],dtype=numpy.int64)
+pystare._cmp_spatial(indices,indices,cmp)
+print('cmp input: ',indices)
+print('cmp:       ',cmp,' i.e. diagonal')
+print('')
+cmp = numpy.zeros([3*1],dtype=numpy.int64)
+indices1 = numpy.zeros([1],dtype=numpy.int64)
+indices1[0] = indices[1]
+print('cmp input1: ',indices)
+print('cmp input2: ',indices1)
+pystare._cmp_spatial(indices,indices1,cmp)
+print('cmp:        ',cmp)
+print('')
+cmp = numpy.zeros([3*2],dtype=numpy.int64)
+indices1 = numpy.zeros([2],dtype=numpy.int64)
+indices1[0] = indices[1]
+indices1[1] = indices[1]+3
+print('cmp input1: ',indices)
+print('cmp input2: ',indices1)
+pystare._cmp_spatial(indices,indices1,cmp)
+print('cmp:        ',cmp)
+pystare._cmp_spatial(indices1,indices,cmp)
+print('cmp:        ',cmp)
+print('')
+mp = numpy.zeros([3*2],dtype=numpy.int64)
+indices1 = numpy.zeros([2],dtype=numpy.int64)
+indices1[0] = indices[1]-2
+indices1[1] = indices[1]
+print('cmp input1: ',indices)
+print('cmp input2: ',indices1)
+# pystare._cmp_spatial(indices,indices1,cmp)
+cmp1 = pystare.cmp_spatial(indices,indices1)
+print('cmp1:       ',cmp1)
+print('')

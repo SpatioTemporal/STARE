@@ -215,6 +215,29 @@
   $6 = (int64_t*) array_data((PyArrayObject*)out4);
 }
 
+/* maps TWO int64_t input arrays to ONE 1D int64_t output array with the cross-product length */
+/* We use this to compare two lists of spatial ids, i.e. a cross-join of sorts. */
+%typemap(in, numinputs=1)
+  (int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int out_length)
+  (PyObject* out=NULL)
+{
+  int is_new_object=0;
+  npy_intp size[1] = { -1};
+  PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
+  if (!array || !require_dimensions(array, 1)) SWIG_fail;
+ 
+  size[0] = PyArray_DIM(array, 0);  
+   
+  out1 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out1) SWIG_fail;
+   
+  $1 = (int64_t*) array_data(array);
+  $2 = (int) array_size(array,0);  
+  $3 = (int64_t*) array_data(array);
+  $4 = (int) array_size(array,0);  
+  $5 = (int64_t*) array_data((PyArrayObject*)out1);
+  $6 = (int) array_size(array,0);  
+}
 
 /****************/
 /* OUT typemaps */
@@ -279,6 +302,12 @@
   PyTuple_SetItem($result, 3, (PyObject*)out4$argnum);
 }
 
+%typemap(argout) 
+(int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int out_length)
+{
+  $result = (PyObject*)out$argnum;
+}
+
 /* Applying the typemaps */
 %apply (double * IN_ARRAY1, int DIM1) {
     (double* lat, int len_lat)        
@@ -294,10 +323,13 @@
 %apply (int64_t * INPLACE_ARRAY1, int DIM1) {
     (int64_t* intersection, int leni),
     (int64_t* range_indices, int len_ri),
-    (int64_t* result_size, int len_rs)
+    (int64_t* result_size, int len_rs),
+    (int64_t* out_array, int out_length),
+    (int64_t* cmp, int len12)
 }
 
-# %apply (int64_t * ARGOUT_ARRAY1, int DIM1 ) {    
+# %apply (int64_t * ARGOUT_ARRAY1, int DIM1 ) {
+# 	(int64_t* out_array, int out_length)
 #   (int64_t* range_indices, int len_ri)
 # }
 
@@ -333,6 +365,10 @@
 	(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators )
 }
 
+# %apply   (int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int out_length) {
+# 	(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12)
+# }
+
 %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
     import numpy
     datetime = datetime.astype(numpy.int64)
@@ -340,6 +376,7 @@
 
 %pythoncode %{
 import numpy
+
 def to_compressed_range(indices):
     out_length = len(indices)
     range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
@@ -360,6 +397,12 @@ def to_hull_range(indices,resolution,range_size_limit=1000):
     range_indices = range_indices[:result_size[0]]
     return range_indices
     
+def cmp_spatial(indices1, indices2):
+	out_length = len(indices1)*len(indices2)
+	cmp = numpy.zeros([out_length],dtype=numpy.int64)
+	_cmp_spatial(indices1,indices2,cmp)
+	return cmp    
+
 def intersect(indices1, indices2, multiresolution=True):
     out_length = 2*max(len(indices1),len(indices2))
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)
