@@ -1,9 +1,14 @@
 
 * 2019-09-X Version 0.8.0
 
+Many improvements to pystare.
+- Vertices & Centroids
+- ConvexHull
+- SpatialRange lists
+Some use is made of the STARE spatial index as a way to convey
+location information.
+
 Added a number of tests using Constraint.
-
-
 
 Improved intersection behavior by injecting dependency on varlen, i.e.
 interior vs. boundary calculation. Setting varlen to false tends to 

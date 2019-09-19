@@ -504,6 +504,14 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 	return cover;
 }
 
+STARE_SpatialIntervals STARE::ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level) {
+	LatLonDegrees64ValueVector latlon;
+	for(auto i=points.begin(); i != points.end(); ++i) {
+		latlon.push_back(LatLonDegreesFromValue(*i));
+	}
+	return ConvexHull(latlon,force_resolution_level);
+}
+
 /*
  * Return a spatial index object with a given search level. If one does not already exist, construct and memoize.
  */

@@ -47,7 +47,7 @@ void to_triangle(int64_t* indices, int len) {
     }
 }
 
-void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2) {
+void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2, int64_t* centroid) {
     for (int i=0; i<len; i++) {
         Triangle tr = stare.TriangleFromValue(indices[i]);
 #if DIAG
@@ -57,6 +57,7 @@ void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertice
         vertices0[i] = stare.ValueFromSpatialVector(tr.vertices[0]);
         vertices1[i] = stare.ValueFromSpatialVector(tr.vertices[1]);
         vertices2[i] = stare.ValueFromSpatialVector(tr.vertices[2]);
+        centroid[i]  = stare.ValueFromSpatialVector(tr.centroid);
 #if DIAG
         cout << setw(16) << hex
         		<< vertices0[i] << " "
@@ -116,6 +117,20 @@ void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int
 	for(int i=0; i<result.size(); ++i) {
 		range_indices[i] = result[i];
 	}
+}
+
+void _to_hull_range(int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+	STARE_ArrayIndexSpatialValues sivs(indices, indices+len);
+	STARE_SpatialIntervals result = stare.ConvexHull(sivs, resolution);
+	if(len_ri < result.size()) {
+		cout << dec;
+		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
+		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
+	}
+	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
+		range_indices[i] = result[i];
+	}
+	result_size[0] = result.size();
 }
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
