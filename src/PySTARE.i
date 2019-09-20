@@ -133,6 +133,32 @@
   $4 = (double*) array_data((PyArrayObject*)out2);
 }
 
+/* maps ONE int64_t input vector to TWO double output vectors of 4 times the length */
+/* We use this to convert STARE index to lat+lon */
+%typemap(in, numinputs=1)
+  (int64_t* in_array, int length, double* out_array1, int dmy1, double* out_array2, int dmy2)
+  (PyObject* out1=NULL, PyObject* out2=NULL)
+{
+  int is_new_object=0;
+  npy_intp size[1] = { -1};
+  PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
+  if (!array || !require_dimensions(array, 1)) SWIG_fail;
+ 
+  size[0] = 4*PyArray_DIM(array, 0);  
+   
+  out1 = PyArray_SimpleNew(1, size, NPY_DOUBLE);
+  if (!out1) SWIG_fail;
+  out2 = PyArray_SimpleNew(1, size, NPY_DOUBLE);
+  if (!out2) SWIG_fail;
+   
+  $1 = (int64_t*) array_data(array);
+  $2 = (int) array_size(array,0);  
+  $3 = (double*) array_data((PyArrayObject*)out1);
+  $4 = (int) array_size(array,0);
+  $5 = (double*) array_data((PyArrayObject*)out2);
+  $6 = (int) array_size(array,0);
+}
+
 /* maps ONE int64_t input vector to TWO int64_t output vectors of the same length */
 /* We use this to convert STARE intervals to start/terminator arrays to aid comparison */
 %typemap(in, numinputs=1)
@@ -198,7 +224,7 @@
   PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
   if (!array || !require_dimensions(array, 1)) SWIG_fail;
  
-  size[0] = PyArray_DIM(array, 0);  
+  size[0] = PyArray_DIM(array, 0); 
    
   out1 = PyArray_SimpleNew(1, size, NPY_INT64);
   if (!out1) SWIG_fail;
@@ -252,7 +278,13 @@
   PyTuple_SetItem($result, 0, (PyObject*)out1$argnum);
   PyTuple_SetItem($result, 1, (PyObject*)out2$argnum);
 }
-
+%typemap(argout)
+    (int64_t* in_array, int length, double* out_array1, int dmy1, double* out_array2, int dmy2)
+{
+  $result = PyTuple_New(2);
+  PyTuple_SetItem($result, 0, (PyObject*)out1$argnum);
+  PyTuple_SetItem($result, 1, (PyObject*)out2$argnum);
+}
 %typemap(argout)
     (int64_t* in_array, int length, int64_t* out_array1, int64_t* out_array2)
 {
@@ -286,9 +318,17 @@
   $result = (PyObject*)out$argnum;
 }
 
+# %typemap(argout) 
+# (double* in_array1, int length1, double* in_array2, int length2, int resolution, int64_t* out_array1, int out_length1, int64_t* out_array2, int out_length2)
+# {
+#   $result = (PyObject*)out$argnum;
+# }
+
+
 /* Applying the typemaps */
 %apply (double * IN_ARRAY1, int DIM1) {
-    (double* lat, int len_lat)        
+    (double* lat, int len_lat),
+    (double* lon, int len_lon)
 }
 
 %apply (int64_t * IN_ARRAY1, int DIM1) {
@@ -304,6 +344,11 @@
     (int64_t* result_size, int len_rs),
     (int64_t* out_array, int out_length),
     (int64_t* cmp, int len12)
+}
+
+%apply (double * INPLACE_ARRAY1, int DIM1) {
+	(double* triangle_info_lats, int dmy1),
+	(double* triangle_info_lons, int dmy2)
 }
 
 # %apply (int64_t * ARGOUT_ARRAY1, int DIM1 ) {
@@ -343,6 +388,10 @@
 	(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators )
 }
 
+%apply (int64_t* in_array, int length, double* out_array1, int dmy1, double* out_array2, int dmy2) {
+   (int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2)
+}
+
 %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
     import numpy
     datetime = datetime.astype(numpy.int64)
@@ -370,6 +419,41 @@ def to_hull_range(indices,resolution,range_size_limit=1000):
     _to_hull_range(indices,resolution,range_indices,result_size)
     range_indices = range_indices[:result_size[0]]
     return range_indices
+    
+def to_hull_range_from_latlon(lat,lon,resolution,range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    result_size = numpy.full([1],-1,dtype=numpy.int64)
+    _to_hull_range_from_latlon(lat,lon,resolution,range_indices,result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+    
+def to_vertices_latlon(indices):
+	out_length = len(indices)
+	lats = numpy.zeros([4*out_length],dtype=numpy.double)
+	lons = numpy.zeros([4*out_length],dtype=numpy.double)
+	# _to_vertices_latlon(indices,lats,lons,0)
+	lats,lons = _to_vertices_latlon(indices)
+	latsv = numpy.zeros([3*out_length],dtype=numpy.double)
+	lonsv = numpy.zeros([3*out_length],dtype=numpy.double)
+	latc  = numpy.zeros([out_length],dtype=numpy.double)
+	lonc  = numpy.zeros([out_length],dtype=numpy.double)
+	
+	k=0; l=0
+	for i in range(out_length):
+		latsv[l]   = lats[ k   ]
+		lonsv[l]   = lons[ k   ]
+		
+		latsv[l+1] = lats[ k+1 ]
+		lonsv[l+1] = lons[ k+1 ]
+				
+		latsv[l+2] = lats[ k+2 ]
+		lonsv[l+2] = lons[ k+2 ]
+				
+		latc [i]   = lats[ k+3 ]
+		lonc [i]   = lons[ k+3 ]
+		k = k + 4; l = l + 3
+	return latsv,lonsv,latc,lonc
     
 def cmp_spatial(indices1, indices2):
 	out_length = len(indices1)*len(indices2)

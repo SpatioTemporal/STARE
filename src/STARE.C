@@ -131,7 +131,28 @@ STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 }
 
 STARE_ArrayIndexSpatialValue STARE::ValueFromSpatialVector(SpatialVector v, int resolution) {
-	BitShiftNameEncoding       rightJustified(sIndex.idByPoint(v));
+	uint64 htmID;
+	SpatialVector vtry(v);
+	int k = 3;
+	while(k>0) {
+		try {
+			--k;
+			htmID = sIndex.idByPoint(vtry);
+		} catch( SpatialException e ) {
+			cerr << e.what();
+			if( k > 0 ) {
+				cerr << " " << k << " Trying again... " << endl << flush;
+				vtry = vtry + 1.0e-10*SpatialVector(1,0,0); vtry.normalize();
+			} else {
+				cerr << endl << flush;
+				stringstream ss; ss << setprecision(16);
+				ss << "STARE::ValueFromSpatialVector can't find vector v= " << v << endl;
+				throw SpatialFailure(ss.str().c_str());
+			}
+
+		}
+	}
+	BitShiftNameEncoding       rightJustified(htmID);
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
 	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();

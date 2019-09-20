@@ -15,6 +15,7 @@
 //#		Jul 25, 2002 : Gyorgy Fekete -- Added pointById()
 //#
 
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
@@ -1363,7 +1364,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 		}
 	}
 	DIAGOUT2(cout,"1 preamble i: " << index << endl << flush;);
-	// int index_barycentric = index;
+	int index_barycentric = index;
 	/**/
 
 	// if(index == 9) {
@@ -1423,18 +1424,47 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	float64 dc_improvement = 2.0;
 	int attempt = 0;
 	int index_tried = index;
+	int index_last_found = index;
 	int itry = 0;
 	do {
 		++attempt;
 		if(attempt == 9) {
-			throw SpatialFailure("SpatialIndex::idByPoint(sv): Lost Point Failure 1.");
+			stringstream ss;
+			float64 lat,lon;
+			v.getLatLonDegrees(lat, lon);
+			ss << setprecision(16);
+			ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 1. No convergence."
+					<< " point = " << v
+					<< " index_barycentric = " << index_barycentric
+					<< " index_last_found = " << index_last_found
+					<< " latlon = " <<  lat << "," << lon
+					<< " nudge " << ( nudge ? "true" : "false" )
+					<< " dc_improvement = " << dc_improvement
+					<< " dc_start = " << dc_start
+					<< " dc_end = " << dc_end
+					<< endl << flush;
+			throw SpatialFailure(ss.str().c_str());
 		}
 		if(attempt>1) {
 			index = index_dcs_sort[itry]+1;
 			if( index == index_tried ) {
 				++itry;
 				if(itry == 8) {
-					throw SpatialFailure("SpatialIndex::idByPoint(sv): Lost Point Failure 2.");
+					stringstream ss;
+					float64 lat,lon;
+					v.getLatLonDegrees(lat, lon);
+					ss << setprecision(16);
+					ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 2. No convergence."
+							<< " point = " << v
+							<< " index_barycentric = " << index_barycentric
+							<< " index_last_found = " << index_last_found
+							<< " latlon = " <<  lat << "," << lon
+							<< " nudge " << ( nudge ? "true" : "false" )
+							<< " dc_improvement = " << dc_improvement
+							<< " dc_start = " << dc_start
+							<< " dc_end = " << dc_end
+							<< endl << flush;
+					throw SpatialFailure(ss.str().c_str());
 				}
 				index = index_dcs_sort[itry]+1;
 			}
@@ -1461,8 +1491,8 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 		dc_end = dc.length();
 		dc_improvement = dc_end/dc_start;
 		DIAG1(cout << "dc start, end, ratio: " << dc_start << " " << dc_end << " " << dc_improvement << endl << flush;);
-	} while ( dc_improvement > 0.25 && dc_end > 0.25 );
-
+		index_last_found = index;
+	} while ( dc_improvement > 0.125 && dc_end > 0.25 && !nudge );
 	// }
 	/**/
 

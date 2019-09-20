@@ -47,6 +47,9 @@ void to_triangle(int64_t* indices, int len) {
     }
 }
 
+/*
+ * Broken or dangerous
+ *
 void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2, int64_t* centroid) {
     for (int i=0; i<len; i++) {
         Triangle tr = stare.TriangleFromValue(indices[i]);
@@ -58,6 +61,37 @@ void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertice
         vertices1[i] = stare.ValueFromSpatialVector(tr.vertices[1]);
         vertices2[i] = stare.ValueFromSpatialVector(tr.vertices[2]);
         centroid[i]  = stare.ValueFromSpatialVector(tr.centroid);
+#if DIAG
+        cout << setw(16) << hex
+        		<< vertices0[i] << " "
+				<< vertices1[i] << " "
+				<< vertices2[i] << dec;
+        cout << endl << flush;
+#endif
+    }
+}
+*/
+
+/*
+ * len of the output arrays is 4 times the input array lenght (len).
+ */
+void _to_vertices_latlon(int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2 ) {
+	double lat, lon;
+	int k=0;
+    for (int i=0; i<len; i++) {
+        Triangle tr = stare.TriangleFromValue(indices[i]);
+#if DIAG
+        cout << "tr: " << setw(16) << hex << indices[i] << dec << " ";
+        for(int j=0; j<3; ++j) { cout << setw(16) << tr.vertices[j] << "; "; }
+#endif
+        for(int j=0; j<3; ++j) {
+        	tr.vertices[j].getLatLonDegrees(lat,lon);
+        	triangle_info_lats[k] = lat; triangle_info_lons[k] = lon;
+        	++k;
+        }
+    	tr.centroid.getLatLonDegrees(lat, lon);
+    	triangle_info_lats[k] = lat; triangle_info_lons[k] = lon;
+    	++k;
 #if DIAG
         cout << setw(16) << hex
         		<< vertices0[i] << " "
@@ -122,6 +156,28 @@ void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int
 void _to_hull_range(int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
 	STARE_ArrayIndexSpatialValues sivs(indices, indices+len);
 	STARE_SpatialIntervals result = stare.ConvexHull(sivs, resolution);
+	if(len_ri < result.size()) {
+		cout << dec;
+		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
+		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
+	}
+	int k=10;
+	cout << "thr ";
+	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
+		if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
+		range_indices[i] = result[i];
+	}
+	cout << dec << endl << flush;
+	result_size[0] = result.size();
+}
+
+void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_lon, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+
+	LatLonDegrees64ValueVector points;
+	for(int i=0; i<len_lat; ++i) {
+		points.push_back(LatLonDegrees64(lat[i],lon[i]));
+	}
+	STARE_SpatialIntervals result = stare.ConvexHull(points, resolution);
 	if(len_ri < result.size()) {
 		cout << dec;
 		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;

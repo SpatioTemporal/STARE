@@ -43,8 +43,11 @@ typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_ArrayIndexSpatialValues;
 
 /// TODO The following is a stopgap on the way to completely removing this hardcoded bit.
 #define STARE_HARDWIRED_RESOLUTION_LEVEL_MAX 27
+// < 2019-0919 #define STARE_HARDWIRED_BUILD_LEVEL_MAX       5
 #define STARE_HARDWIRED_BUILD_LEVEL_MAX       5
-
+// #define STARE_HARDWIRED_BUILD_LEVEL_MAX       7
+// #define STARE_HARDWIRED_BUILD_LEVEL_MAX       8
+// #define STARE_HARDWIRED_BUILD_LEVEL_MAX       10 bad alloc
 
 class STARE {
 public:
@@ -61,12 +64,16 @@ public:
 	STARE_ArrayIndexSpatialValue ValueFromLatLonDegrees(float64 latDegrees, float64 lonDegrees, int resolutionLevel = STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);
 	LatLonDegrees64 LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 	SpatialVector SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
+	STARE_ArrayIndexSpatialValue ValueFromSpatialVector(SpatialVector v, int resolution);
 	uint32 ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStareId);
 
 	Triangle TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
 	float64  AreaFromValue    (STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel = -1);
+	
+	STARE_ArrayIndexSpatialValues toVertices(STARE_ArrayIndexSpatialValues spatialStareIds); 
 
 	STARE_SpatialIntervals ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level);
+	STARE_SpatialIntervals ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level);
 
 	SpatialIndex getIndex() { return sIndex; }
 	SpatialIndex getIndex(int resolutionLevel);
