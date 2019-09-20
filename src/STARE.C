@@ -164,6 +164,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	// cout << "sid: " << spatialStareId << endl << flush;
 
 	uint64 htmID = htmIDFromValue(spatialStareId);
+	cout << "lldfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
@@ -172,10 +173,12 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
 
-	// cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
+	cout << "0 sid-latlon: " << lat << ", " << lon << endl << flush;
 
 	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
 	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };
+
+	cout << "1 sid-latlon: " << latlon.lat << ", " << latlon.lon << endl << flush;
 
 	// return latlon;
 	return LatLonDegrees64(lat, lon);
@@ -191,6 +194,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
 	// uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
 	uint64 htmID = htmIDFromValue(spatialStareId);  // Max resolution
+	cout << "svfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
 	sIndex.pointByHtmId(v, htmID);
@@ -506,7 +510,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 
 STARE_SpatialIntervals STARE::ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level) {
 	LatLonDegrees64ValueVector latlon;
-	for(auto i=points.begin(); i != points.end(); ++i) {
+	for( STARE_ArrayIndexSpatialValues::iterator i=points.begin(); i != points.end(); ++i) {
 		latlon.push_back(LatLonDegreesFromValue(*i));
 	}
 	return ConvexHull(latlon,force_resolution_level);
