@@ -24,10 +24,15 @@ void SpatialIndex_test() {
 
 	// cout << 100 << endl << flush;
 
-	ASSERT_EQUAL("S010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,gPi)).nameByPoint(zhat)).c_str());
 	// SpatialVector zhat_r = -1.0*zhat;
 	SpatialVector zhat_r = zhat.reverse();
+
+	ASSERT_EQUAL("N010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,0)).nameByPoint(zhat)).c_str());
+	ASSERT_EQUAL("S010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,0)).nameByPoint(zhat_r)).c_str());
+
+	ASSERT_EQUAL("S010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,gPi)).nameByPoint(zhat)).c_str());
 	ASSERT_EQUAL("N010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,gPi)).nameByPoint(zhat_r)).c_str());
+
 	// TODO Figure out how to have the following work. Probably by littering the call sequence with const.
 	// ASSERT_EQUAL("N010000",string(SpatialIndex(maxlevel,buildlevel,SpatialRotation(xhat,gPi)).nameByPoint(zhat.reverse())).c_str());
 

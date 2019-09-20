@@ -12,6 +12,16 @@
 
 #include "SpatialInterface.h"
 
+#ifndef DIAG
+#define DIAG1(expr)
+#define DIAGOUT2(out,expr)
+#define DIAGOUTDELTA(out,a,b)
+#else
+#define DIAG1(expr) expr;
+#define DIAGOUT2(out,expr) out << expr;
+#define DIAGOUTDELTA(out,a,b) {SpatialVector delta_ = a-b; cout << delta_.length() << " ";}
+#endif
+
 void STARE_test() {
 
 	SpatialVector
@@ -1095,11 +1105,14 @@ void STARE_test() {
 		STARE_ArrayIndexSpatialValue sid = index.ValueFromSpatialVector(v);
 		SpatialVector vr = index.SpatialVectorFromValue(sid);
 		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
+#ifdef DIAG
 		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
 		cout << "sidr 0x" << setw(16) << setfill('0') << hex << sidr << dec << endl << flush;
 		cout << "v  " << v << endl << flush;
 		cout << "vr " << vr << endl << flush;
 		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
 	}
 
 	if(true) {
@@ -1120,14 +1133,21 @@ void STARE_test() {
 		float64 v_lat,v_lon;
 		v_sid.getLatLonDegrees(v_lat, v_lon);
 
+#ifdef DIAG
 		cout << "v_sid " << v_sid << endl << flush;
 		cout << "v_sid ll " << v_lat << " " << v_lon << endl << flush;
 		cout << "v idx ll " << v_ll.lat << " " << v_ll.lon << endl << flush;
 		cout << "sid 0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
 		cout << endl << flush;
+#endif
 
-		cout << "Triangle " << endl << flush;
+		ASSERT_EQUAL(v_lat,v_ll.lat);
+		ASSERT_EQUAL(v_lon,v_ll.lon);
+
 		Triangle tr = index.TriangleFromValue(sid);
+
+#ifdef DIAG
+		cout << "Triangle " << endl << flush;
 		for( int i=0; i<3; ++i) {
 			float64 lt,ln;
 			tr.vertices[i].getLatLonDegrees(lt,ln);
@@ -1145,6 +1165,7 @@ void STARE_test() {
 			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
 		}
 		cout << endl << flush;
+#endif
 
 		SpatialVector vecs[3] = {
 				SpatialVector( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 ),
@@ -1152,6 +1173,7 @@ void STARE_test() {
 				SpatialVector( 0.4619397591445266, 0.8446232068078616, 0.2705980366578833 )
 		};
 
+#ifdef DIAG
 		cout << "index... from Explicit vecs" << endl << flush;
 		for( int i=0; i<3; ++i) {
 			sidtmp = index.ValueFromSpatialVector(vecs[i]);
@@ -1161,7 +1183,6 @@ void STARE_test() {
 			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
 		}
 		cout << endl << flush;
-
 
 		for( int i=0; i<3; ++i) {
 			float64 lat, lon;
@@ -1179,8 +1200,10 @@ void STARE_test() {
 					<< endl << flush;
 		}
 		cout << endl << flush;
+#endif
 
-		cout << setprecision(16); cout << "tr.v[1] " << tr.vertices[1] << endl << flush;
+
+		DIAGOUT2(cout,setprecision(16); cout << "tr.v[1] " << tr.vertices[1] << endl << flush;);
 		SpatialVector v = tr.vertices[1];
 		sid = index.ValueFromSpatialVector(v);
 		SpatialVector vr = index.SpatialVectorFromValue(sid);
@@ -1188,6 +1211,7 @@ void STARE_test() {
 		float64 lat,lon;
 		LatLonDegrees64 ll = index.LatLonDegreesFromValue(sid);
 		LatLonDegrees64 llr = index.LatLonDegreesFromValue(sidr);
+#ifdef DIAG
 		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec
 				<< " - " << ll.lat << " " << ll.lon
 				<< endl << flush;
@@ -1205,11 +1229,14 @@ void STARE_test() {
 				<< " - " << lat << " " << lon
 				<< endl << flush;
 		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
+		ASSERT_EQUALDM("v-to-vr",v,vr,1.0e-8);
 
 	}
 
 	if(true) {
-		cout << endl << "------" << endl << endl << flush;
+		DIAGOUT2(cout,endl << "------" << endl << endl << flush;);
 		STARE index;
 		int resolution = 27;
 		SpatialIndex sIndex = index.getIndex(resolution);
@@ -1217,31 +1244,35 @@ void STARE_test() {
 			SpatialVector v0 ( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 );
 			// SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-16);
 			SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-15);
-			cout << i << " i,delta " << delta << endl << flush;
 			// v0 = v0 + SpatialVector(0.0,0.0,0.9e-8);
 			v0 = v0 - delta;
 			v0.normalize();
 			// SpatialVector v0 ( 1, 0, 0); // Works for this one.
 			STARE_ArrayIndexSpatialValue siv0 = index.ValueFromSpatialVector(v0,resolution);
 			BitShiftNameEncoding       rightJustified(sIndex.idByPoint(v0));
+#ifdef DIAG
+			cout << i << " i,delta " << delta << endl << flush;
 			cout << "sI idbp 0x" << setw(16) << setfill('0') << hex << sIndex.idByPoint(v0) << dec << endl << flush;
 			cout << "rj name   "<< rightJustified.getName() << endl << flush;
+#endif
 
 			EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
 			EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
 			STARE_ArrayIndexSpatialValue siv = leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
-			cout << "siv0  " << setw(16) << setfill('0') << hex << siv0 << endl << flush;
-			cout << "siv   " << setw(16) << setfill('0') << hex << siv << endl << flush;
 			SpatialVector v_siv0 = index.SpatialVectorFromValue(siv0);
 			SpatialVector v_siv = index.SpatialVectorFromValue(siv);
+#ifdef DIAG
+			cout << "siv0  " << setw(16) << setfill('0') << hex << siv0 << endl << flush;
+			cout << "siv   " << setw(16) << setfill('0') << hex << siv << endl << flush;
 			cout << setprecision(16);
 			cout << "v0     " << v0 << endl << flush;
 			cout << "v_siv0 " << v_siv0 << endl << flush;
 			cout << "v_siv  " << v_siv << endl << flush;
 			cout << endl << "--" << endl << endl << flush;
+#endif
+			ASSERT_EQUALDM("v0-to-siv0",v0,v_siv0,1.0e-8);
+			ASSERT_EQUALDM("v0-to-siv",v0,v_siv,1.0e-8);
 		}
-
-
 	}
 
 	// FAIL();
