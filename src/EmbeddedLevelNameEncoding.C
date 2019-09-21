@@ -391,6 +391,14 @@ void EmbeddedLevelNameEncoding::increment_LevelToMaskDelta(uint32 level,uint64 &
 //	one_at_level = one_at_level >> 2;
 }
 
+void EmbeddedLevelNameEncoding::SciDBincrement_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const {
+	increment_LevelToMaskDelta(level,one_mask_to_level,one_at_level);
+	one_mask_to_level = one_mask_to_level >> 1;
+	one_at_level = one_at_level >> 1;
+
+//	one_at_level = one_at_level >> 2;
+}
+
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
 	/// TODO Error checking of overflow not trustworthy here.
 	using namespace std;

@@ -1019,13 +1019,21 @@ void STARE_test() {
 		}
 	}
 
+// #define DIAG
+#ifndef DIAG
+#define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
-// #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SIVSOUT(p,m,v)
+#else
+#define DIAGOUT2(p,m) p << m;
+#define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
+#endif
 	if(true) {
-		// cout << "expandIntervals 10" << endl << flush;
+		DIAGOUT2(cout,"expandIntervals 10" << endl << flush;);
 		EmbeddedLevelNameEncoding leftJustified;
 		uint64 one_mask_to_level, one_at_level;
-		leftJustified.increment_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+		leftJustified.SciDBincrement_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
 
 		// cout << "expandIntervals 20" << endl << flush;
 
@@ -1040,13 +1048,16 @@ void STARE_test() {
 		// cout << "expandIntervals 30" << endl << flush;
 
 		STARE_ArrayIndexSpatialValues expanded_values = expandIntervals(intervals,8);
+		SIVSOUT(cout,"0 intervals ",intervals);
+		SIVSOUT(cout,"0 expanded_values ",expanded_values);
 		ASSERT_EQUAL((siv0 & ~one_mask_to_level) | 8,expanded_values[0]);
 
 		// cout << "expandIntervals 40" << endl << flush;
 
 		intervals.push_back(0x2000000000000008);
 		expanded_values = expandIntervals(intervals,8);
-
+		SIVSOUT(cout,"1 intervals ",intervals);
+		SIVSOUT(cout,"1 expanded_values ",expanded_values);
 		ASSERT_EQUAL(intervals[1],expanded_values[0]);
 
 		siv0 = 0x00000000000000008;
@@ -1059,8 +1070,9 @@ void STARE_test() {
 		STARE_ArrayIndexSpatialValue expected6_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
 
 		expanded_values = expandIntervals(intervals,8);
-
-		ASSERT_EQUAL(0x0000300000000008,expanded_values[3]);
+		SIVSOUT(cout,"2 intervals ",intervals);
+		SIVSOUT(cout,"2 expanded_values ",expanded_values);
+		ASSERT_EQUAL(0x0000300000000008,expanded_values[6]);
 
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(expanded_values[6]);
 		SIVOUT("6's     ",leftJustified.getSciDBLeftJustifiedFormat());
@@ -1080,7 +1092,10 @@ void STARE_test() {
 			SIVOUT(i,expanded_values[i]);
 		}
 #endif
-#undef SIVOUT
+// #undef DIAGOUT2
+// #undef SIVOUT
+// #define DIAGOUT2(out,expr)
+// #undef DIAG
 	}
 
 	if(true) {
@@ -1203,7 +1218,7 @@ void STARE_test() {
 #endif
 
 
-		DIAGOUT2(cout,setprecision(16); cout << "tr.v[1] " << tr.vertices[1] << endl << flush;);
+		DIAGOUT2(cout,setprecision(16) << "tr.v[1] " << tr.vertices[1] << endl << flush;);
 		SpatialVector v = tr.vertices[1];
 		sid = index.ValueFromSpatialVector(v);
 		SpatialVector vr = index.SpatialVectorFromValue(sid);
@@ -1272,6 +1287,19 @@ void STARE_test() {
 #endif
 			ASSERT_EQUALDM("v0-to-siv0",v0,v_siv0,1.0e-8);
 			ASSERT_EQUALDM("v0-to-siv",v0,v_siv,1.0e-8);
+		}
+
+		if(true) {
+			// Motivated by confusing EmbeddedLevelNameEncoding internal format with the SciDB format.
+			DIAG1(cout << "ExpandInterval tests" << endl << flush;)
+			// STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution)
+			STARE_SpatialIntervals interval;
+			interval.push_back(0x2324000000000005);
+			interval.push_back(0x2327ffffffffffff);
+			STARE_ArrayIndexSpatialValues values = expandInterval(interval);
+			DIAG1(for(int i = 0; i < values.size(); ++i ) { cout << dec << i << " i,v 0x" << setw(16) << setfill('0') << hex << values[i] << endl << flush << dec; })
+			ASSERT_EQUAL(0x2324000000000005,values[0]);
+			ASSERT_EQUAL(0x2326000000000005,values[1]);
 		}
 	}
 

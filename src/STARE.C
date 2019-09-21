@@ -16,6 +16,12 @@
 #include <iostream>
 #include <algorithm>
 
+#ifndef DIAG
+#define DIAGOUT1(a)
+#else
+#define DIAGOUT1(a) a
+#endif
+
 /**
  * @brief Version function with C linkage to aid in finding the library with autoconf
  * @return The library's version. Points to static storage.
@@ -721,17 +727,18 @@ uint64 spatialLevelMask() {
 
 STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
 	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-	// cout << dec << 200 << endl << flush;
+	DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
 	STARE_ArrayIndexSpatialValue siv0 = interval[0];
 	EmbeddedLevelNameEncoding leftJustified;
-	// cout << dec << 220 << endl << flush;
+	DIAGOUT1(cout << dec << 220 << endl << flush;)
 	uint64 return_resolution = siv0 & leftJustified.levelMaskSciDB;
-	// cout << dec << 225 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	if( force_resolution > -1 ) {
 		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
 		return_resolution = force_resolution;
 	}
-	// cout << dec << 230 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	DIAGOUT1(cout << dec << 229 << " f & resolution: " << dec << force_resolution << " " << return_resolution << endl << flush;)
+	DIAGOUT1(cout << dec << 230 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
 	// cout << dec << 235 << endl << flush;
 	STARE_ArrayIndexSpatialValue siv_term;
@@ -740,23 +747,39 @@ STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, in
 	} else {
 		siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
 	}
-	// cout << dec << 240 << endl << flush;
+	DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << endl << dec << 240 << endl << flush;)
 	uint64 one_mask_to_resolution, one_at_resolution;
-	leftJustified.increment_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
-	// cout << dec << 245 << endl << flush;
+	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+	// cout << dec << 242 << endl << flush;
+
+	uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB));
+
+	DIAGOUT1(cout << endl;)
+	uint64 one = 1;
+	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << delta << " " << dec << (delta/one_at_resolution) << endl << flush;)
+
 	// Give as much rope as needed.
+	DIAGOUT1(cout << dec << 246 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << endl << flush;)
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << one_at_resolution << dec << endl << endl << flush;)
 	STARE_ArrayIndexSpatialValues expanded_interval;
 	while( siv0 < siv_term ) {
+		DIAGOUT1(cout << dec << 249 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 		expanded_interval.push_back(siv0);
 		siv0 += one_at_resolution;
 	}
-	// cout << dec << 250 << endl << flush;
+	DIAGOUT1(cout << dec << 250 << endl << endl << flush;)
 	return expanded_interval;
 }
 
 /**
- *
+ * TODO Fix expandIntervals...
  */
 STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
 	STARE_ArrayIndexSpatialValues expanded_values;

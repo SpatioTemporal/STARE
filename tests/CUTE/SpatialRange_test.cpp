@@ -89,7 +89,7 @@ void SpatialRange_test () {
 		// #define DIAGOUT(m) {cout << m << endl << flush;}
 		// Note level is 8.
 		uint64 one_mask_to_level, one_at_level;
-		leftJustified.increment_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+		leftJustified.SciDBincrement_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
 
 		STARE_SpatialIntervals sis0;
 		SpatialRange range0;
@@ -161,7 +161,7 @@ void SpatialRange_test () {
 		// #define DIAGOUT(m) {cout << m << endl << flush;}
 		// Note level is 8.
 		uint64 one_mask_to_level, one_at_level;
-		leftJustified.increment_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+		leftJustified.SciDBincrement_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
 
 		STARE_SpatialIntervals sis0;
 		SpatialRange range0;
