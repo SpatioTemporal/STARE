@@ -161,13 +161,13 @@ void _to_hull_range(int64_t* indices, int len, int resolution, int64_t* range_in
 		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
 		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
 	}
-	int k=10;
-	cout << "thr ";
+	// int k=10;
+	// cout << "thr ";
 	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
-		if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
+		// if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
 		range_indices[i] = result[i];
 	}
-	cout << dec << endl << flush;
+	// cout << dec << endl << flush;
 	result_size[0] = result.size();
 }
 
@@ -184,12 +184,12 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
 	}
 	int k=10;
-	cout << "thr ";
+	// cout << "thr ";
 	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
-		if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
+		// if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
 		range_indices[i] = result[i];
 	}
-	cout << dec << endl << flush;
+	// cout << dec << endl << flush;
 	result_size[0] = result.size();
 }
 
