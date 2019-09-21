@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
@@ -444,6 +445,7 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 
 	// Check for overflow. Not a completely accurate check.
 	if( (successor & TopBit) == TopBit ) {
+
 #ifdef DIAG
 		cout << "n:              " << setw(23) << dec << n << endl << flush;
 		cout << "lowerBound:     " << setw(23) << hex << lowerBound << endl << flush;

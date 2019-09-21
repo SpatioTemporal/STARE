@@ -207,16 +207,26 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 }
 
 void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
+	cout << "lens: " << len1 << " " << len2 << " " << leni << endl << flush;
 	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
+	cout << 100 << endl << flush;
+
     // intersection[0] = 69;
 	SpatialRange r1(si1), r2(si2);
+	cout << 200 << endl << flush;
 	// SpatialRange *ri = r1 & r2;
 	SpatialRange *ri = sr_intersect(r1,r2,true);
-	STARE_SpatialIntervals result = ri->toSpatialIntervals();
+	// SpatialRange *ri = sr_intersect(r1,r2,false);
+	cout << 300 << endl << flush;
+	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
+	STARE_ArrayIndexSpatialValues result = expandIntervals(result_intervals);
+	cout << 400 << endl << flush;
 	leni = result.size();
+	cout << 500 << " result size " << result.size() << endl << flush;
 	for(int i=0; i<leni; ++i) {
 		intersection[i] = result[i];
 	}
+	cout << 600 << endl << flush;
 }
 
 void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12) {

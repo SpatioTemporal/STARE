@@ -1142,24 +1142,50 @@ void HtmRangeMultiLevel::CompressionPass() {
 				// TODO Perhaps instead try a find or a search that would set the iterators.
 			} else {
 //				cout << "400: " << endl << flush;
+//				cout << "400: blo = 0x" << setw(16) << setfill('0') << hex << bareLo << endl << flush;
+//				cout << "400: bhi = 0x" << setw(16) << setfill('0') << hex << bareHi << endl << flush;
+//				cout << "400: dlt = 0x" << setw(16) << setfill('0') << hex << delta << endl << flush;
+//				cout << "400: dlt =   " << setw(16)                 << dec << delta << endl << flush;
 				// Snip off as much as possible
 				int numberToCoalesce = (delta+1) / 4;
+				// cout << "410: ntc " << dec << numberToCoalesce << endl << flush;
 				Key oldLo = lo0; Key newLo = oldLo;
-				for(int i=0; i<numberToCoalesce; ++i) {
-					for(int k=0; k<4; ++k) {
-						newLo = encoding->increment(newLo,level0);
-					}
-				}
+				// cout << "420: lo0 = 0x" << setw(16) << setfill('0') << hex << lo0 << endl << flush;
+
+//				for(int i=0; i<numberToCoalesce; ++i) {
+//					for(int k=0; k<4; ++k) {
+//						newLo = encoding->increment(newLo,level0);
+//					}
+//				}
+
 				my_los->free(oldLo);
 				--oldLo; // Reduce level
 				// my_los->insert(oldLo,1025);
 				my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
-				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
-				if(newLoPredecessor != hi0) {
-					my_his->insert(newLoPredecessor,1025);
-					// my_los->insert(newLo,1025);
-					my_los->insert(newLo,newLoPredecessor);
+
+				try {
+					// Scoop up a bunch
+					for(int i=0; i<numberToCoalesce; ++i) {
+						for(int k=0; k<4; ++k) {
+							newLo = encoding->increment(newLo,level0);
+						}
+					}
+					// Then break it in half.
+					Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
+					if(newLoPredecessor != hi0) {
+						my_his->insert(newLoPredecessor,1025);
+						// my_los->insert(newLo,1025);
+						my_los->insert(newLo,newLoPredecessor);
+					}
+				} catch ( SpatialException &e ) {
+					// What if we're at the top index already? Ooops, there's no new low at the new break.
+					// cout << "400: " << e.what() << endl << flush;
+					if( string(e.what()) != string("EmbeddedLevelNameEncoding::error-increment-overflow") ) {
+						throw SpatialFailure("HtmRangeMultiLevel::Compress::unknown error while incrementing to newLo.");
+					}
 				}
+
+
 				my_los->reset(); my_his->reset(); // TODO Reset is too drastic. Prefer to step back a little... Bad, bad, bad.
 			}
 		}
