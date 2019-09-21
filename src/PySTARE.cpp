@@ -144,6 +144,20 @@ void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_
 //	}
 }
 
+void _expand_intervals(int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri,  int64_t* result_size, int len_rs) {
+	STARE_SpatialIntervals si(indices, indices+len);
+	STARE_ArrayIndexSpatialValues result = expandIntervals(si,resolution);
+	if(len_ri < result.size()) {
+		cout << dec;
+		cout << "_expand_intervals-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
+		cout << "_expand_intervals-warning: result size        = " << result.size() << "." << endl << flush;
+	}
+	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
+		range_indices[i] = result[i];
+	}
+	result_size[0] = result.size();
+}
+
 void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int len_ri) {
 	STARE_SpatialIntervals si(indices, indices+len);
 	SpatialRange r(si);

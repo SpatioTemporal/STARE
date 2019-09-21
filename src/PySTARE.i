@@ -243,6 +243,35 @@
   $6 = (int64_t*) array_data((PyArrayObject*)out4);
 }
 
+/* We use this to create a STARE array ... _to_expand_intervals
+%typemap(in, numinputs=1)
+  (int64_t* in_array, int length, int resolution, int64_t* out_array1, int dmy1, int64_t* out_array2, int dmy2)
+  (PyObject* out1=NULL, PyObject* out2=NULL)
+{
+  int is_new_object=0;
+  npy_intp size[1] = { -1};
+  PyArrayObject* array = obj_to_array_contiguous_allow_conversion($input, NPY_INT64, &is_new_object);
+  if (!array || !require_dimensions(array, 1)) SWIG_fail;
+ 
+  size[0] = PyArray_DIM(array, 0); 
+   
+  out1 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out1) SWIG_fail;
+  
+  size[0] = 1;
+  out2 = PyArray_SimpleNew(1, size, NPY_INT64);
+  if (!out2) SWIG_fail;
+   
+  $1 = (int64_t*) array_data(array);
+  $2 = (int) array_size(array,0);  
+  $3 = (int) array_size(array,0);  
+  $4 = (int64_t*) array_data((PyArrayObject*)out1);
+  $5 = (int) array_size(array,0);  
+  $6 = (int64_t*) array_data((PyArrayObject*)out2);
+  $7 = (int) array_size(array,0);  
+}
+*/
+
 /****************/
 /* OUT typemaps */
 /****************/
@@ -312,6 +341,16 @@
   PyTuple_SetItem($result, 3, (PyObject*)out4$argnum);
 }
 
+/* expand_intervals
+%typemap(argout)
+    (int64_t* in_array, int length, int resolution, int64_t* out_array1, int dmy1, int64_t* out_array2, int dmy2)
+{
+  $result = PyTuple_New(2);
+  PyTuple_SetItem($result, 0, (PyObject*)out1$argnum);
+  PyTuple_SetItem($result, 1, (PyObject*)out2$argnum);
+}
+ */
+
 %typemap(argout) 
 (int64_t* in_array1, int length1, int64_t* in_array2, int length2, int64_t* out_array, int out_length)
 {
@@ -326,6 +365,7 @@
 
 
 /* Applying the typemaps */
+
 %apply (double * IN_ARRAY1, int DIM1) {
     (double* lat, int len_lat),
     (double* lon, int len_lon)
@@ -392,6 +432,12 @@
    (int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2)
 }
 
+/* _expand_intervals
+%apply (int64_t* in_array, int length, int resolution, int64_t* out_array1, int dmy1, int64_t* out_array2, int dmy2) {
+	(int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs)
+}
+ */
+ 
 %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
     import numpy
     datetime = datetime.astype(numpy.int64)
@@ -411,6 +457,13 @@ def to_compressed_range(indices):
     # endarg = numpy.argmax(range_indices < 0)
     range_indices = range_indices[:endarg]
     return range_indices
+    
+def expand_intervals(intervals,resolution,result_size_limit=1000):
+	result      = numpy.full([result_size_limit],-1,dtype=numpy.int64)
+	result_size = numpy.full([1],-1,dtype=numpy.int64)
+	_expand_intervals(intervals,resolution,result,result_size)
+	result = result[:result_size[0]]
+	return result
     
 def to_hull_range(indices,resolution,range_size_limit=1000):
     out_length = range_size_limit

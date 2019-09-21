@@ -48,30 +48,6 @@ intersected = pystare.intersect(indices, indices1, multiresolution=True)
 print('5 intersected: ',[hex(i) for i in intersected])
 print('')
 
-vertices0 = numpy.zeros([3], dtype=numpy.int64)
-vertices1 = numpy.zeros([3], dtype=numpy.int64)
-vertices2 = numpy.zeros([3], dtype=numpy.int64)
-centroid  = numpy.zeros([3], dtype=numpy.int64)
-
-vertices0,vertices1,vertices2,centroid = pystare.to_vertices(indices)
-print('vertices0: ',[hex(i) for i in vertices0])
-print('vertices1: ',[hex(i) for i in vertices1])
-print('vertices2: ',[hex(i) for i in vertices2])
-print('centroid:  ',[hex(i) for i in centroid])
-print('')
-
-vertices0_lats,vertices0_lons = pystare.to_latlon(vertices0)
-vertices1_lats,vertices1_lons = pystare.to_latlon(vertices1)
-vertices2_lats,vertices2_lons = pystare.to_latlon(vertices2)
-centroid_lats,centroid_lons = pystare.to_latlon(centroid)
-
-for i in range(len(vertices0_lats)):
-  print(i," vert0 lat,lon: ",vertices0_lats[i],vertices0_lons[i])
-  print(i," vert1 lat,lon: ",vertices1_lats[i],vertices1_lons[i])
-  print(i," vert2 lat,lon: ",vertices2_lats[i],vertices2_lons[i])
-  print(i," centr lat,lon: ",centroid_lats[i],centroid_lons[i])
-  print("")
-
 indices1 = numpy.array([0,0,0], dtype=numpy.int64)
 pystare._to_compressed_range(indices,indices1)
 print('_indices1: ',[hex(i) for i in indices1])
@@ -129,14 +105,156 @@ cmp1 = pystare.cmp_spatial(indices,indices1)
 print('cmp1:       ',cmp1)
 print('')
 
-tid = numpy.array([0x4c0000000000003],dtype=numpy.int64)
-t0,t1,t2,tc = pystare.to_vertices(tid)
-print('t0: ',hex(t0[0]))
-print('t1: ',hex(t1[0]))
-print('t2: ',hex(t2[0]))
-print('tc: ',hex(tc[0]))
-print('t0 ll : ',pystare.to_latlon(t0))
-print('t1 ll : ',pystare.to_latlon(t1))
-print('t2 ll : ',pystare.to_latlon(t2))
-print('tc ll : ',pystare.to_latlon(tc))
-print('')
+
+print('Expand intervals')
+intervals_src = [\
+ 0x2320000000000005,\
+ 0x2324000000000005,\
+ 0x2327ffffffffffff,\
+ 0x3aa0000000000005,\
+ 0x3aa7ffffffffffff,\
+ 0x3aa8000000000004,\
+ 0x3ab2000000000005,\
+ 0x3ac7ffffffffffff,\
+ 0x3ad0000000000005,\
+ 0x3ae7ffffffffffff,\
+ 0x3af2000000000005,\
+ 0x3afa000000000005,\
+ 0x3b40000000000004,\
+ 0x3b4c000000000005,\
+ 0x3b52000000000005,\
+ 0x3b5a000000000005,\
+ 0x3b5fffffffffffff,\
+ 0x3b80000000000004,\
+ 0x3b8a000000000005,\
+ 0x3b8fffffffffffff,\
+ 0x3b90000000000004,\
+ 0x3b9fffffffffffff,\
+ 0x3bc0000000000005,\
+ 0x3bc7ffffffffffff,\
+ 0x3bc8000000000004,\
+ 0x3bd0000000000005,\
+ 0x3bdfffffffffffff,\
+ 0x3be2000000000005,\
+ 0x3be8000000000004,\
+ 0x3bf4000000000005,\
+ 0x3bf8000000000005,\
+ 0x3bfc000000000005,\
+ 0x3bffffffffffffff,\
+ 0x3e40000000000005,\
+ 0x3e43ffffffffffff,\
+ 0x3e46000000000005,\
+ 0x3f20000000000005,\
+ 0x3f24000000000005,\
+ 0x3f27ffffffffffff,\
+ 0x3f32000000000005,\
+ 0x3f36000000000005,\
+ 0x3f3a000000000005,\
+ 0x3fa0000000000005\
+]
+
+intervals_expanded_src = [\
+ 0x2320000000000005 ,\
+ 0x2324000000000005 ,\
+ 0x2326000000000005 ,\
+ 0x3aa0000000000005 ,\
+ 0x3aa2000000000005 ,\
+ 0x3aa4000000000005 ,\
+ 0x3aa6000000000005 ,\
+ 0x3aa8000000000004 ,\
+ 0x3ab2000000000005 ,\
+ 0x3ab4000000000005 ,\
+ 0x3ab6000000000005 ,\
+ 0x3ab8000000000005 ,\
+ 0x3aba000000000005 ,\
+ 0x3abc000000000005 ,\
+ 0x3abe000000000005 ,\
+ 0x3ac0000000000005 ,\
+ 0x3ac2000000000005 ,\
+ 0x3ac4000000000005 ,\
+ 0x3ac6000000000005 ,\
+ 0x3ad0000000000005 ,\
+ 0x3ad2000000000005 ,\
+ 0x3ad4000000000005 ,\
+ 0x3ad6000000000005 ,\
+ 0x3ad8000000000005 ,\
+ 0x3ada000000000005 ,\
+ 0x3adc000000000005 ,\
+ 0x3ade000000000005 ,\
+ 0x3ae0000000000005 ,\
+ 0x3ae2000000000005 ,\
+ 0x3ae4000000000005 ,\
+ 0x3ae6000000000005 ,\
+ 0x3af2000000000005 ,\
+ 0x3afa000000000005 ,\
+ 0x3b40000000000004 ,\
+ 0x3b4c000000000005 ,\
+ 0x3b52000000000005 ,\
+ 0x3b5a000000000005 ,\
+ 0x3b5c000000000005 ,\
+ 0x3b5e000000000005 ,\
+ 0x3b80000000000004 ,\
+ 0x3b8a000000000005 ,\
+ 0x3b8c000000000005 ,\
+ 0x3b8e000000000005 ,\
+ 0x3b90000000000004 ,\
+ 0x3b98000000000004 ,\
+ 0x3bc0000000000005 ,\
+ 0x3bc2000000000005 ,\
+ 0x3bc4000000000005 ,\
+ 0x3bc6000000000005 ,\
+ 0x3bc8000000000004 ,\
+ 0x3bd0000000000005 ,\
+ 0x3bd2000000000005 ,\
+ 0x3bd4000000000005 ,\
+ 0x3bd6000000000005 ,\
+ 0x3bd8000000000005 ,\
+ 0x3bda000000000005 ,\
+ 0x3bdc000000000005 ,\
+ 0x3bde000000000005 ,\
+ 0x3be2000000000005 ,\
+ 0x3be8000000000004 ,\
+ 0x3bf4000000000005 ,\
+ 0x3bf8000000000005 ,\
+ 0x3bfc000000000005 ,\
+ 0x3bfe000000000005 ,\
+ 0x3e40000000000005 ,\
+ 0x3e42000000000005 ,\
+ 0x3e46000000000005 ,\
+ 0x3f20000000000005 ,\
+ 0x3f24000000000005 ,\
+ 0x3f26000000000005 ,\
+ 0x3f32000000000005 ,\
+ 0x3f36000000000005 ,\
+ 0x3f3a000000000005 ,\
+ 0x3fa0000000000005 \
+]                  
+intervals          = numpy.array(intervals_src,dtype=numpy.int64)
+expected_expanded  = numpy.array(intervals_expanded_src,dtype=numpy.int64)
+intervals_expanded = numpy.zeros([len(expected_expanded)],dtype=numpy.int64)
+expected_len       = numpy.zeros([1],dtype=numpy.int64)
+
+print('len(intervals)          ',len(intervals))
+print('len(expected_expanded)  ',len(expected_expanded))
+print('len(intervals_expanded) ',len(intervals_expanded))
+print('len(expected_len)       ',len(expected_len))
+intervals_len = len(intervals)
+resolution = -1
+pystare._expand_intervals(intervals,resolution,intervals_expanded,expected_len)
+# print('intervals_expanded: ',[hex(i) for i in intervals_expanded])
+print('expected_len:           ',expected_len)
+error_found = False
+for i in range(len(intervals_expanded)):
+  if(intervals_expanded[i] != expected_expanded[i]):
+    error_found = True
+    print('_expanded_intervals error at i = ',i,' ',intervals_expanded[i],' != ',expected_expanded[i])
+if(not error_found):
+  print('_expanded_intervals ok')
+  
+intervals_expanded_1 = pystare.expand_intervals(intervals,resolution)
+for i in range(len(intervals_expanded_1)):
+  if(intervals_expanded_1[i] != expected_expanded[i]):
+    error_found = True
+    print('expanded_intervals error at i = ',i,' ',intervals_expanded_1[i],' != ',expected_expanded[i])
+if(not error_found):
+  print('expanded_intervals ok')
