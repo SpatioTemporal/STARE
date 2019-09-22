@@ -160,7 +160,7 @@ STARE_ArrayIndexSpatialValue STARE::ValueFromSpatialVector(SpatialVector v, int 
 	}
 	BitShiftNameEncoding       rightJustified(htmID);
 	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
-	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
+	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution >= 0 ? resolution : leftJustified.getLevel(), true); // True means keep all bits
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
 }
 

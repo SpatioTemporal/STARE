@@ -1,4 +1,9 @@
 
+* 2019-09-22 Version 0.8.1
+
+Made change to STARE.h not STARE.h.in in 0.8.0 that
+broke compilation and hid problem with STARE::ValueFromSpatialVector.
+
 * 2019-09-21 Version 0.8.0
 
 Many improvements to pystare.
