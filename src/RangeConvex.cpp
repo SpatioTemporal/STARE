@@ -920,7 +920,7 @@ SpatialMarkup RangeConvex::testTrixel(uint64 nodeIndex) {
   //  cout << endl << flush;
   //  cout << " check children & partials " << endl << flush;
 
-  // NEW NEW algorithm  Disabled when enablenew is 0
+  // NEW < algorithm  Disabled when enablenew is 0
   {
 	  childID = indexNode->childID_[0];
 	  if (childID != 0) {
@@ -951,7 +951,7 @@ SpatialMarkup RangeConvex::testTrixel(uint64 nodeIndex) {
      If partial, then we look ahead to see how many children are rejected.
      But ah, next iteration could benefit from having computed this already.
 
-     If two chidlren are rejected, then we stop
+     If two children are rejected, then we stop
      If one or 0 nodes are rejected, then we
   */
 //  cout << " mark: " << mark << endl << flush;

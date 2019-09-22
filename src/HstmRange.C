@@ -6,16 +6,19 @@
  */
 
 #include "HstmRange.h"
+#include <iomanip>
 
 namespace std {
 
 HstmRange::HstmRange() {
-	// TODO Auto-generated constructor stub
 	range = new HtmRangeMultiLevel_NameSpace::HtmRangeMultiLevel();
 }
 
+HstmRange::HstmRange(HtmRangeMultiLevel_NameSpace::HtmRangeMultiLevel *range){
+	this->range = range;
+}
+
 HstmRange::~HstmRange() {
-	// TODO Auto-generated destructor stub
 	delete range;
 }
 
@@ -25,7 +28,7 @@ HstmRange::~HstmRange() {
  * @param b_ a Key (int64)
  */
 void HstmRange::addRange(Key a_, Key b_) {
-	Key a = leftJustifiedEncoding.maskOffLevelBit(a_);
+	Key a = leftJustifiedEncoding.maskOffLevelBit(a_); // The level bit is a bit at the top used as a validity check. A deprecated feature and not needed for a left-justified index value.
 	int aLevel = leftJustifiedEncoding.levelById(a_);
 	Key b = leftJustifiedEncoding.maskOffLevelAndLevelBit(b_);
 	int bLevel = leftJustifiedEncoding.levelById(b_);
@@ -35,13 +38,22 @@ void HstmRange::addRange(Key a_, Key b_) {
 //	cout << dec << 902 << " : aLevel = " << aLevel << endl << flush;
 
 	if( aLevel != bLevel ) {
-		cout << "HstmRange::addRange::ERROR::KeyLevelMismatch "
-				<< aLevel << " != " << bLevel << " "
-				<< "a = " << a_ << " "
-				<< "b = " << b_ << " "
-				<< endl << flush;
-		// TODO Throw?
-		throw SpatialException("HstmRange::addRange::ERROR::KeyLevelMismatch");
+		if( !leftJustifiedEncoding.terminatorp(b_) ) {
+#ifdef DIAG
+			cout << "HstmRange::addRange::ERROR::KeyLevelMismatch "
+					<< aLevel << " != " << bLevel << " "
+					<< "a = " << a_ << " "
+					<< "b = " << b_ << " "
+					<< endl << flush;
+#endif
+			// TODO Throw?
+			throw SpatialException("HstmRange::addRange::ERROR::KeyLevelMismatch");
+		} else {
+			b = b | leftJustifiedEncoding.levelMask;
+		}
+	} else {
+		leftJustifiedEncoding.setId(b_);
+		b = leftJustifiedEncoding.getIdTerminator_NoDepthBit();
 	}
 
     // Put a into HtmRange without change
@@ -65,8 +77,20 @@ void HstmRange::addRange(Key a_, Key b_) {
 	Key bSave = b;
 */
 
+	/* 2019-0909 MLR THIS PIECE "WORKS".
 	leftJustifiedEncoding.setId(b_);
 	b = leftJustifiedEncoding.getIdTerminator_NoDepthBit();
+	*/
+
+// #define DIAG
+#undef DIAG
+#define IDOUT(p,m,s) p << m << " " << setw(16) << setfill('0') << hex << s << dec << " " << s << endl << flush;
+#ifdef DIAG
+	IDOUT(cout,"hr::ar a_: ",a_)
+	IDOUT(cout,"hr::ar a : ",a)
+	IDOUT(cout,"hr::ar b_: ",b_)
+	IDOUT(cout,"hr::ar b : ",b)
+#endif
 
 //	cout << dec << 1000 << " : " << hex << "0x" << a_ << " 0x" << bSave << endl << flush;
 

@@ -40,6 +40,7 @@
 
 #include "STARE.h"
 
+#include "SpatialRange.h"
 
 #ifndef TESTS_CUTE_TEST_H_
 #define TESTS_CUTE_TEST_H_

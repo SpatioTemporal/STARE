@@ -36,7 +36,8 @@
 
 typedef int64 Key;            // key type TODO Why not uint64?
 // typedef uint64 Key;            // key type TODO Why not uint64?
-typedef int Value;          // value type
+// typedef int Value;          // value type
+typedef int64 Value; // mlr...
 
 // class ostream;
 class SkipListElement;

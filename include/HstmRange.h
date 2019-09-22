@@ -36,6 +36,8 @@ namespace std {
 class HstmRange {
 public:
 	HstmRange();
+	HstmRange(HtmRangeMultiLevel_NameSpace::HtmRangeMultiLevel *range);
+	// TOO Deep copy? HstmRange(HstmRange range);
 	virtual ~HstmRange();
 
 	// TODO Note the int in the following is a return code, not an index.
@@ -52,8 +54,6 @@ public:
 
 	/**
 	 * For STARE we may need to coarsen position information to the resolution level since it points to a 7cm triangle inside a larger triangle.
-	 *
-	 *
 	 *
 	 */
 	void     addRange(Key a, Key b);

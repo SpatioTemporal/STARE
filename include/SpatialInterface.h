@@ -48,10 +48,11 @@ struct htmPolyCorner {
 
 /**
    htmInterface class.
+
    The SpatialInterface class contains all methods to interface the
    HTM index with external applications.
 
-   // TODO Consider renaming htmInterface to SpatialInterface
+   // TODO Consider renaming htmInterface to SpatialInterface, but maybe "htm" is a good indicator that we're working at a low level with this interface.
 
 */
 
@@ -71,6 +72,8 @@ public:
       be specified with one of the string command interfaces. The
       saveDepth parameter can be specified to keep the given amount of
       levels in memory. This can also be altered by changeDepth. */
+
+	htmInterface(const SpatialIndex *index);
 
 	htmInterface(size_t searchlevel = 5, size_t buildevel = 5, SpatialRotation rot = rot_identity ); // [ed:gyuri:saveDepth was 2]
 
@@ -187,7 +190,8 @@ public:
    * @return
    */
   const HTMRangeValueVector & convexHull( LatLonDegrees64ValueVector latlon,
-		  size_t steps = -1);
+		  size_t steps = -1,
+		  bool interiorp = false);
 
   /** Request all triangles in the convex hull of a given set of 
       points.
@@ -302,6 +306,7 @@ private:
 //  void setPolyCorner(SpatialVector &v);
 
   // this routine does the work for all convexHull calls
+  bool hull_interiorp_ = false;
   const HTMRangeValueVector & doHull();
 
 };

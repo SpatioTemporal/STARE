@@ -24,7 +24,7 @@
 #define MAX_RANGES 100
 
 // #define DIAG
-// #define DIAG_OUT cout
+#define DIAG_OUT cout
 // #define DIAG_OUT cerr
 
 #ifdef SpatialSGI
@@ -40,6 +40,9 @@ extern long long atoll (const char *str);
 //==============================================================
 
 ///////////CONSTRUCTOR///////////////////////
+htmInterface::htmInterface(const SpatialIndex *index) {
+	index_ = new SpatialIndex(index->maxlevel_, index->buildlevel_, index->rot_); // TODO delete bait? maxlevel is searchlevel, no?
+}
 htmInterface::htmInterface(size_t searchlevel, size_t buildlevel, SpatialRotation rot) : t_(NULL) {
 	index_ = new SpatialIndex(searchlevel, buildlevel, rot);
 }
@@ -387,24 +390,25 @@ htmInterface::convexHull(
 }
 
 const HTMRangeValueVector & 
-htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps ) {
+htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool interiorp ) {
+	hull_interiorp_ = interiorp;
 	polyCorners_.clear();
-	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
-	cout << endl;
+	// cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
+	// cout << endl;
 	if (steps == (uint64) -1) {
 		steps = latlon.size();
 	} else {
 		steps = min(steps,latlon.size());
 	}
 	for(size_t i = 0; i < steps; i++) {
-		cout << " " << i << flush;
-		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
+		// cout << " " << i << flush;
+		// cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
 		float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
-		cout << endl << flush;
+		// cout << endl << flush;
 	}
-	cout << endl << flush << 2100 << endl << flush;
+	// cout << endl << flush << 2100 << endl << flush;
 	return doHull();
 }
 
@@ -478,7 +482,7 @@ htmInterface::doHull() {
 	//	dom.convexes_[0].boundingCircle_.write(cout);
 	//	dom.write(cout);
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	cout << 3999 << endl << flush;
+	// cout << 3999 << endl << flush;
 
 	return domain(dom);
 }
@@ -523,6 +527,25 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		} else if( (polyCorners_[0].c_ ^ polyCorners_[1].c_)*v < 0 ) {
 			polyCorners_.insert(polyCorners_.end(), polyCorners_[1]); // GYF polyCorners_[1] was missing!!!!
 			polyCorners_[1].c_ = v;
+		} else {
+			// Nuts. It's zero. Have to think now.
+			// Which one is in the middle?
+			SpatialVector ab = polyCorners_[0].c_ ^ polyCorners_[1].c_;
+			SpatialVector av = polyCorners_[0].c_ ^ v;
+			SpatialVector vb = v ^ polyCorners_[1].c_;
+			float64 dot_ab_av = ab*av;
+			float64 dot_ab_vb = ab*vb;
+
+			if( dot_ab_av*dot_ab_vb < 0 ) {
+				// v is not in the middle
+				if( dot_ab_av > 0 ) {
+					// b is in the middle
+					polyCorners_[1].c_ = v;
+				} else {
+					// a is in the middle
+					polyCorners_[0].c_ = v;
+				}
+			} // dot_ab_av*dot_ab_vb == 0 is an error and > 0 means v is in the middle.
 		}
 	} else {
 		//
@@ -552,6 +575,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			// if( (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v > tol2 ) {
 
 			float64 delta = (polyCorners_[i].c_ ^ polyCorners_[i+1==len ? 0 : i+1].c_)*v;
+// #define DIAG
 #ifdef DIAG
 			DIAG_OUT
 			<< i << " i,"
@@ -698,31 +722,34 @@ const HTMRangeValueVector &
 htmInterface::domain( SpatialDomain & domain ) {
 	HtmRange htmRange;
 
-	cout << 4000 << endl << flush;
+//	cout << 4000 << endl << flush;
+//	cout << 4001 << " hull_interiorp_ " << hull_interiorp_ << endl << flush;
 
 	Key gapsize;
 	//  SpatialIndex idx(20, 5);
 	//  domain.setOlevel(20);
 
-	domain.intersect(index_, &htmRange, false);
+	// domain.intersect(index_, &htmRange, false);
+	// domain.intersect(index_, &htmRange, true);
+	domain.intersect(index_, &htmRange, hull_interiorp_);
 
-	cout << 4100 << endl << flush;
+//	cout << 4100 << endl << flush;
 
 //	gapsize = htmRange.bestgap(MAX_RANGES);
 //	htmRange.defrag(gapsize);
 
-	cout << 4200 << endl << flush;
-//	htmRange.defrag();
+//	cout << 4200 << endl << flush;
+	htmRange.defrag();
 	// DONT FORGET to: get best gap and defrag  htmRange.defrag(bestgap);
 
-	cout << 4300 << endl << flush;
+//	cout << 4300 << endl << flush;
 	// Construct the valuevector...
 	fillValueVec( htmRange, range_);
-	cout << 4997 << endl << flush;
+//	cout << 4997 << endl << flush;
 	htmRange.reset();
-	cout << 4998 << endl << flush;
+//	cout << 4998 << endl << flush;
 	htmRange.purge();
-	cout << 4999 << endl << flush;
+//	cout << 4999 << endl << flush;
 	return range_;
 }
 

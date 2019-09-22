@@ -81,6 +81,10 @@ public:
   /// Initialization constructor
   SpatialConstraint(SpatialVector, float64);
 
+  /// Construct a zero constraint through two points
+  //  Makes a zero-angle constraint directed towards v0^v1.
+  SpatialConstraint(SpatialVector v0, SpatialVector v1);
+
   /// Copy constructor
   SpatialConstraint(const SpatialConstraint &);
 

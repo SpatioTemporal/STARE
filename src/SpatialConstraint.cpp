@@ -60,6 +60,14 @@ SpatialConstraint::SpatialConstraint(SpatialVector a, float64 d) :
   if(d_ >=  gEpsilon) sign_ = pOS;
 }
 
+/////////////CONSTRUCTOR Zero Constraint through two points//////////////////////////////////
+//
+SpatialConstraint::SpatialConstraint(SpatialVector v0, SpatialVector v1)
+{
+	a_ = v0 ^ v1; a_.normalize(); d_ = 0; s_ = acos(d_);
+}
+
+
 /////////////COPY CONSTRUCTOR/////////////////////////////
 //
 SpatialConstraint::SpatialConstraint(const SpatialConstraint & old) :

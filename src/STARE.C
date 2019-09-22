@@ -14,6 +14,13 @@
 #include "SpatialDomain.h"
 #include "SpatialInterface.h"
 #include <iostream>
+#include <algorithm>
+
+#ifndef DIAG
+#define DIAGOUT1(a)
+#else
+#define DIAGOUT1(a) a
+#endif
 
 /**
  * @brief Version function with C linkage to aid in finding the library with autoconf
@@ -21,6 +28,21 @@
  */
 extern "C" const char *STARE_version() {
     return (const char *)STARE_VERSION;
+}
+
+void STARE_ArrayIndexSpatialValues_insert(STARE_ArrayIndexSpatialValues& v,  STARE_ArrayIndexSpatialValue siv) {
+	// cout << dec << 1000 << endl;
+	STARE_ArrayIndexSpatialValues::iterator
+	it = std::lower_bound( v.begin(), v.end(), siv);
+	// cout << dec << 1010 << endl;
+	if(it == v.end()) {
+		v.insert( it, siv );
+	} else if( (*it) != siv) {
+		// cout << dec << 1020 << endl;
+		v.insert( it, siv );
+		// cout << dec << 1030 << endl;
+	}
+	// cout << dec << 1040 << endl;
 }
     
 /**
@@ -114,6 +136,34 @@ STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
 }
 
+STARE_ArrayIndexSpatialValue STARE::ValueFromSpatialVector(SpatialVector v, int resolution) {
+	uint64 htmID;
+	SpatialVector vtry(v);
+	int k = 3;
+	while(k>0) {
+		try {
+			--k;
+			htmID = sIndex.idByPoint(vtry);
+		} catch( SpatialException e ) {
+			cerr << e.what();
+			if( k > 0 ) {
+				cerr << " " << k << " Trying again... " << endl << flush;
+				vtry = vtry + 1.0e-10*SpatialVector(1,0,0); vtry.normalize();
+			} else {
+				cerr << endl << flush;
+				stringstream ss; ss << setprecision(16);
+				ss << "STARE::ValueFromSpatialVector can't find vector v= " << v << endl;
+				throw SpatialFailure(ss.str().c_str());
+			}
+
+		}
+	}
+	BitShiftNameEncoding       rightJustified(htmID);
+	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
+	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
+	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+}
+
 /**
  * Extract the resolution information from the spatial array index value. Since this
  * does not use the sIndex, it doesn't really need to be a method of this class.
@@ -141,6 +191,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	// cout << "sid: " << spatialStareId << endl << flush;
 
 	uint64 htmID = htmIDFromValue(spatialStareId);
+	// cout << "lldfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
@@ -149,10 +200,12 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
 
-	// cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
+	// cout << "0 sid-latlon: " << lat << ", " << lon << endl << flush;
 
 	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
 	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };
+
+	// cout << "1 sid-latlon: " << latlon.lat << ", " << latlon.lon << endl << flush;
 
 	// return latlon;
 	return LatLonDegrees64(lat, lon);
@@ -163,6 +216,16 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	rightJustified.setId(hid);
 	EmbeddedLevelNameEncoding leftJustified(rightJustified.leftJustifiedId());*/
 
+}
+
+SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
+	// uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	uint64 htmID = htmIDFromValue(spatialStareId);  // Max resolution
+	// cout << "svfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
+	SpatialVector v;
+	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
+	sIndex.pointByHtmId(v, htmID);
+	return v;
 }
 
 Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel) {
@@ -212,6 +275,17 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	return {.centroid=vc, .vertices=vertices};
 }
 
+STARE_ArrayIndexSpatialValues STARE::toVertices(STARE_ArrayIndexSpatialValues spatialStareIds) {
+	STARE_ArrayIndexSpatialValues spatialValues;
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		Triangle tr = TriangleFromValue(spatialStareIds[i]);
+		for(int j=0; j<3; ++j) {
+			spatialValues.push_back(ValueFromSpatialVector(tr.vertices[j]));
+		}
+	}
+	return spatialValues;
+}
+
 /**
  * Return the area associated with the index value based on the embedded resolution level, by default.
  * The calculation may be coerced to another resolution level, e.g. search_level.
@@ -241,6 +315,8 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
 
+/// TODO STARE::InfoFromValue // Get all the info from a volume, so we only translate between forms once.
+
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId) {
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
@@ -249,6 +325,9 @@ STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialSta
 
 /**
  * Compare two spatial array index values a, b.
+ *
+ * Suffers some overhead, but should handle the overlap. For other
+ * kinds of intersection we need to handle intervals or move to a range.
  *
  * Returns
  *   1 if b is in a
@@ -348,6 +427,9 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 				id1 = EmbeddedLevelNameEncoding(BitShiftNameEncoding(hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat();
 				intervals.push_back(id1);
 			}
+
+
+
 		} while( r.getNext(lo,hi) );
 	}
 	return intervals;
@@ -378,7 +460,8 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
 
 	// TODO The following pattern repeats...
-	bool varlen_false = false;
+	// bool varlen_false = false;
+	bool varlen_false = true;
 	bool overlap = d.intersect(&index,&r,&varlen_false);
 	r.reset();
 
@@ -400,50 +483,64 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	return intervals;
 }
 
+/**
+ * Returns a list of STARE spatial IDs on the hull about @param points.
+ *
+ * Unfortunately, it erroneously returns a few spatial IDs from the interior as well.
+ *
+ */
 STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level) {
 
 	STARE_SpatialIntervals cover;
 	int hullSteps = points.size();
 	htmInterface *htm;
-	cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	// cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
 	if( force_resolution_level > -1 ) {
-		cout << dec << 1100 << endl << flush;
+		// cout << dec << 1100 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(force_resolution_level).getMaxlevel(),
 				this->getIndex(force_resolution_level).getBuildLevel(),
 				this->getIndex(force_resolution_level).getRotation());
-		cout << dec << 1101 << endl << flush;
+		// cout << dec << 1101 << endl << flush;
 	} else {
-		cout << dec << 1200 << endl << flush;
+		// cout << dec << 1200 << endl << flush;
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(8).getMaxlevel(),
 				this->getIndex(8).getBuildLevel(),
 				this->getIndex(8).getRotation());
-		cout << dec << 1201 << endl << flush;
+		// cout << dec << 1201 << endl << flush;
 	}
 
-	cout << dec << "a2000" << endl << flush;
+	// cout << dec << "a2000" << endl << flush;
 
-	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps);
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // Compress result
 
-	cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
+	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
 		cover.push_back(lo);
 		uint64 hi;
-		if( htmRangeVector[i].lo != htmRangeVector[i].lo ) {
+		if( htmRangeVector[i].lo != htmRangeVector[i].hi ) {
 			hi = sTerminator(ValueFromHtmID(htmRangeVector[i].hi));
 			cover.push_back(hi);
 		}
 	}
 
-	cout << dec << "a4000" << endl << flush;
+	// cout << dec << "a4000" << endl << flush;
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
+}
+
+STARE_SpatialIntervals STARE::ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level) {
+	LatLonDegrees64ValueVector latlon;
+	for( STARE_ArrayIndexSpatialValues::iterator i=points.begin(); i != points.end(); ++i) {
+		latlon.push_back(LatLonDegreesFromValue(*i));
+	}
+	return ConvexHull(latlon,force_resolution_level);
 }
 
 /*
@@ -458,6 +555,8 @@ SpatialIndex STARE::getIndex(int resolutionLevel) {
 
 /**
  * Return the legacy htmID value from the spatialStareId.
+ *
+ * NOTE THIS IGNORES EMBEDDED RESOLUTION
  *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
  * This is important when calling into the legacy htm foundation and why it's kept private.
@@ -476,6 +575,7 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	uint64 htmID = rightJustified.getId();
 	return htmID;
 }
+
 /**
  * Return the spatialStareId from the legacy htmID.
  *
@@ -598,26 +698,133 @@ bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	return leftJustifiedWithResolution.terminatorp();
 }
 
+STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
+		STARE_ArrayIndexSpatialValue spatialStareId,
+		int resolution,
+		int shiftAmount
+		) {
+//	if( shiftAmount == 0 ) {
+//		return spatialStareId
+//	} else {
+		EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+		leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+
+		if( shiftAmount >= 0) {
+			leftJustifiedWithResolution.setId(
+					leftJustifiedWithResolution.increment(leftJustifiedWithResolution.getId(), resolution, shiftAmount));
+		} else {
+			leftJustifiedWithResolution.setId(
+					leftJustifiedWithResolution.decrement(leftJustifiedWithResolution.getId(), resolution, -shiftAmount));
+		}
+		return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+//	}
+}
+
+uint64 spatialLevelMask() {
+	EmbeddedLevelNameEncoding leftJustified;
+	return leftJustified.levelMaskSciDB;
+}
+
+STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
+	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
+	DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
+	STARE_ArrayIndexSpatialValue siv0 = interval[0];
+	EmbeddedLevelNameEncoding leftJustified;
+	DIAGOUT1(cout << dec << 220 << endl << flush;)
+	uint64 return_resolution = siv0 & leftJustified.levelMaskSciDB;
+	DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	if( force_resolution > -1 ) {
+		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
+		return_resolution = force_resolution;
+	}
+	DIAGOUT1(cout << dec << 229 << " f & resolution: " << dec << force_resolution << " " << return_resolution << endl << flush;)
+	DIAGOUT1(cout << dec << 230 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
+	// cout << dec << 235 << endl << flush;
+	STARE_ArrayIndexSpatialValue siv_term;
+	if( interval.size() > 1 ) {
+		siv_term = interval[1];
+	} else {
+		siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+	}
+	DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << endl << dec << 240 << endl << flush;)
+	uint64 one_mask_to_resolution, one_at_resolution;
+	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+	// cout << dec << 242 << endl << flush;
+
+	uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB));
+
+	DIAGOUT1(cout << endl;)
+	uint64 one = 1;
+	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << delta << " " << dec << (delta/one_at_resolution) << endl << flush;)
+
+	// Give as much rope as needed.
+	DIAGOUT1(cout << dec << 246 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << endl << flush;)
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << one_at_resolution << dec << endl << endl << flush;)
+	STARE_ArrayIndexSpatialValues expanded_interval;
+	while( siv0 < siv_term ) {
+		DIAGOUT1(cout << dec << 249 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+		expanded_interval.push_back(siv0);
+		siv0 += one_at_resolution;
+	}
+	DIAGOUT1(cout << dec << 250 << endl << endl << flush;)
+	return expanded_interval;
+}
+
 /**
- * Construct a range object (spatial region) from a vector of intervals.
- *
- * TODO: Have a SpatialRange class instead of an HstmRange?
+ * TODO Fix expandIntervals...
  */
-HstmRange SpatialRangeFromSpatialIntervals(STARE_SpatialIntervals intervals) {
-	HstmRange range;
+STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
+	STARE_ArrayIndexSpatialValues expanded_values;
 	EmbeddedLevelNameEncoding leftJustified;
 
-	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
-		uint64 a = leftJustified.getId(), b = a;
-		auto i1 = (i0+1);
-		if(terminatorp(*i1)) {
-			leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
-			b = leftJustified.getId();
-			++i0; // Skip to next
+	int i=0;
+	while( i < intervals.size() ) {
+		// cout << dec << 100 << endl << flush;
+		STARE_ArrayIndexSpatialValue siv0, siv1;
+		STARE_SpatialIntervals interval;
+		siv0 = intervals[i];
+		interval.push_back(siv0);
+		// cout << dec << 110 << endl << flush;
+		++i;
+		if( i < intervals.size() ) {
+			// peek
+			// cout << dec << 120 << endl << flush;
+			siv1 = intervals[i];
+			// cout << dec << 120 << " " << i << " " << setw(16) << setfill('0') << hex << siv1 << dec << endl << flush;
+			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) {
+				// cout << dec << 121 << " " << i << endl << flush;
+				interval.push_back(siv1);
+				++i;
+			}
 		}
-		range.addRange(a,b);
+		// cout << dec << 130 << " " << i << endl << flush;
+		STARE_SpatialIntervals expandOne = expandInterval(interval,force_resolution);
+		// cout << dec << 140 << " " << i << endl << flush;
+		for(int j=0; j < expandOne.size(); ++j) {
+//			cout << dec << 142 << " " << i << " " << j
+//					<< setw(16) << setfill('0') << hex << expandOne[j] << dec
+//					<< endl << flush;
+			STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+//			cout << dec << 143 << " " << i << " " << j << endl << flush;
+		}
+//		cout << dec << 150 << " " << i << endl << flush;
 	}
-	return range;
+//	cout << dec << 160 << " " << i << endl << flush;
+	return expanded_values;
+}
+
+STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp) {
+	STARE_SpatialIntervals interval;
+	interval.push_back(EmbeddedLevelNameEncoding(BitShiftNameEncoding(kp.lo).leftJustifiedId()).getSciDBLeftJustifiedFormat());
+	interval.push_back(EmbeddedLevelNameEncoding(BitShiftNameEncoding(kp.hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat());
+	return interval;
 }
 

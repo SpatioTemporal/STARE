@@ -114,5 +114,59 @@ void SpatialInterface_test() {
 			v.setLatLonDegrees(  45, -140);ASSERT_EQUALDM("4polyC.3",htm->polyCorners_[3].c_,v,1.0e-12);
 			delete htm;
 		}
+
+		if( true ) {
+
+			// cout << endl << "----" << endl << endl << endl << flush;
+
+			// Try a grid...
+			int nLat = 11,nLon = 11, nLatLon=nLat*nLon;
+			float64 lat[nLat], lon[nLon];
+			SpatialVector vs[nLatLon], cs[nLatLon], vs1[nLatLon];
+			for( int i = 0; i < nLon; ++i ) {
+				lon[i] = i*5.0;
+			}
+			for( int j = 0; j < nLat; ++j ) {
+				lat[j] = j*5.0;
+			}
+			int k = 0;
+			for( int i = 0; i < nLon; ++i ) {
+				for( int j = 0; j < nLat; ++j ) {
+					vs[k++].setLatLonDegrees(lat[j], lon[i]);
+				}
+			}
+
+			STARE index;
+			htmInterface *htm;
+			int resolution_level = 4;
+			htm = new htmInterface(
+					index.getIndex(resolution_level).getMaxlevel(),
+					index.getIndex(resolution_level).getBuildLevel(),
+					index.getIndex(resolution_level).getRotation());
+			htm->polyCorners_.clear();
+			SpatialVector v;
+
+			k = 0;
+			for( int i=0; i<nLon; ++i ) {
+				for( int j=0; j<nLat; ++j ) {
+					htm->setPolyCorner(vs[k]);
+					// cout << k << " k, hpc size " << htm->polyCorners_.size() << endl << flush;
+					float64 lat_,lon_; vs[k].getLatLonDegrees(lat_,lon_);
+					// cout << k << " k, try "
+					// << lat_ << " " << lon_	<< endl << flush;
+					for(int l=0; l<htm->polyCorners_.size(); ++l) {
+						htm->polyCorners_[l].c_.getLatLonDegrees(lat_,lon_);
+						// cout << l << " l, hpc "
+						//		<< lat_ << " " << lon_	<< endl << flush;
+					}
+					// cout << "-----" << endl << flush;
+					++k;
+					// if(k>5) exit(1);
+				}
+			}
+
+			delete htm;
+
+		}
 	}
 }

@@ -1589,22 +1589,59 @@ void htmRangeMultiLevel() {
 	A = rangeFromSymbols("N0001", "N0030");
 	B = rangeFromSymbols("N0002", "N0030");
 
+#ifdef DIAG
+#define hexOut(a,b) cout << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+	cout << "A "; hexOut(A.lo,A.hi);
+	cout << "B "; hexOut(B.lo,B.hi);
+	cout << "A+"; hexOut(leftJustified.increment(A.lo,3),0);
+	cout << "B-"; hexOut(leftJustified.decrement(B.lo,3),0);
+#undef hexOut
+#endif
+
 	ASSERT_EQUAL(B.lo,leftJustified.increment(A.lo,3));
 	ASSERT_EQUAL(A.lo,leftJustified.decrement(B.lo,3));
 	ASSERT_EQUAL(A.lo,leftJustified.increment(leftJustified.decrement(A.lo,3),3));
 
 	A = rangeFromSymbols("S0000", "N0030");
-	ASSERT_EQUAL(0,leftJustified.decrement(A.lo,3));
+	string failureMessage; uint64 ljx = 0;
+	failureMessage = "'";
+	try {
+		ljx = leftJustified.decrement(A.lo,3);
+	} catch ( SpatialFailure& failure ) {
+		failureMessage += failure.what();
+	}
+	failureMessage += "'";
+	ASSERT_EQUALM("Underflow from S0000","'EmbeddedLevelNameEncoding::error-decrement-wrap-around'",failureMessage);
+	// ASSERT_EQUAL(0,leftJustified.decrement(A.lo,3));
 
 	A = rangeFromSymbols("N3333333333333333333333333333","N3333333333333333333333333333"); // Level 27
+	failureMessage = "'";
+	try {
+		ljx = leftJustified.increment(A.lo,27);
+	} catch ( SpatialFailure& failure ) {
+		failureMessage += failure.what();
+	}
+	failureMessage += "'";
+	ASSERT_EQUALM("++A.lo,27","'EmbeddedLevelNameEncoding::error-increment-overflow'",failureMessage);
+
 	//#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
 	//	cout << "level(A.lo) " << leftJustified.levelById(A.lo) << endl << flush;
 	//	hexOut("A.lo ",A.lo);
 	//#undef hexOut
-	ASSERT_EQUAL(0,leftJustified.increment(A.lo,27));
+	// ASSERT_EQUAL(0,leftJustified.increment(A.lo,27));
 
 	A = rangeFromSymbols("N3333","N3333");
-	ASSERT_EQUAL(0,leftJustified.increment(A.lo,3));
+
+	failureMessage = "'";
+	try {
+		ljx = leftJustified.increment(A.lo,3);
+	} catch ( SpatialFailure& failure ) {
+		failureMessage += failure.what();
+	}
+	failureMessage += "'";
+	ASSERT_EQUALM("++A.lo,3","'EmbeddedLevelNameEncoding::error-increment-overflow'",failureMessage);
+
+	// ASSERT_EQUAL(0,leftJustified.increment(A.lo,3));
 
 	A = rangeFromSymbols("N33000","N33330");
 	B = rangeFromSymbols("N3301","N3333");
@@ -3964,9 +4001,18 @@ void LeftJustifiedDecrementBug() {
 	// cout << "ljx: " << hex << ljx << dec << endl << flush;
 	ASSERT_EQUALM("Max left inc2 dec2",0xfff0000000000004,ljx);
 
-	ljx = lj.increment(ljx,4);
+	string failureMessage = "'";
+	try {
+		ljx = lj.increment(ljx,4);
+	} catch ( SpatialFailure& failure ) {
+		failureMessage += failure.what();
+	}
+	failureMessage += "'";
 	// cout << "ljx: " << hex << ljx << dec << endl << flush;
-	ASSERT_EQUALM("Max left inc3 dec2",0,ljx);
+	ASSERT_EQUALM("Max left inc3 dec2","'EmbeddedLevelNameEncoding::error-increment-overflow'",failureMessage);
+
+	// 0 Used to be an error return code.
+	// ASSERT_EQUALM("Max left inc3 dec2",0,ljx);
 
 	// cout << "--" << endl;
 
@@ -3990,9 +4036,16 @@ void LeftJustifiedDecrementBug() {
 	// cout << "ljx: " << hex << ljx << dec << endl << flush;
 	ASSERT_EQUALM("Min left dec2 inc2",0x8000000000000004,ljx);
 
-	ljx = lj.decrement(ljx,4);
+	failureMessage = "'";
+	try {
+		ljx = lj.decrement(ljx,4);
+	} catch ( SpatialFailure& failure ) {
+		failureMessage += failure.what();
+	}
+	failureMessage += "'";
 	// cout << "ljx: " << hex << ljx << dec << endl << flush;
-	ASSERT_EQUALM("Min left dec3 inc2",0,ljx);
+	// ASSERT_EQUALM("Min left dec3 inc2",0,ljx);
+	ASSERT_EQUALM("Min left dec3 inc2","'EmbeddedLevelNameEncoding::error-decrement-wrap-around'",failureMessage);
 
 	// FAIL();
 }
@@ -4109,11 +4162,14 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(LeftJustifiedDecrementBug));
 	s.push_back(CUTE(HstmRangeAddZeroBug));
 
-	s.push_back(CUTE(STARE_test));
 	s.push_back(CUTE(TemporalIndex_test));
 
 	s.push_back(CUTE(ucsbBug1));
 	s.push_back(CUTE(SpatialInterface_test));
+	s.push_back(CUTE(SpatialRange_test));
+
+	s.push_back(CUTE(EmbeddedLevelNameEncoding_test));
+	s.push_back(CUTE(STARE_test));
 
 	//	s.push_back(CUTE(testRange));
 

@@ -12,6 +12,16 @@
 
 #include "SpatialInterface.h"
 
+#ifndef DIAG
+#define DIAG1(expr)
+#define DIAGOUT2(out,expr)
+#define DIAGOUTDELTA(out,a,b)
+#else
+#define DIAG1(expr) expr;
+#define DIAGOUT2(out,expr) out << expr;
+#define DIAGOUTDELTA(out,a,b) {SpatialVector delta_ = a-b; cout << delta_.length() << " ";}
+#endif
+
 void STARE_test() {
 
 	SpatialVector
@@ -908,6 +918,391 @@ void STARE_test() {
 //		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
 //	}
 
-//	FAIL();
+
+	if(false) {
+		LatLonDegrees64 latlon(32.5735,-100.05);
+		STARE index2;
+		int resolution = 1;
+		STARE_ArrayIndexSpatialValue idx = index2.ValueFromLatLonDegrees(latlon.lat,latlon.lon,resolution);
+
+		idx = shiftSpatialIdAtLevel( idx, resolution, 1 );
+
+		cout << endl << "base..." << endl << flush;
+		cout
+		<< setprecision(18)
+		<< setw(23)
+		<< "  idx = 0x" << hex << idx << dec
+		<< scientific
+		<< " latlon = "
+		<< latlon.lat << "," << latlon.lon
+		<< dec << " rLevel = " << resolution
+		<< endl << flush;
+
+
+		cout << endl << "increasing resolution" << endl << flush;
+		for(int resolution_ = 0; resolution_ < 12; ++ resolution_) {
+			STARE_ArrayIndexSpatialValue idx1 = shiftSpatialIdAtLevel( idx, resolution_, 1 );
+			LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+			int resolution1 = idx1 & spatialLevelMask();
+
+			cout
+			<< setprecision(18)
+			<< setw(23)
+			<< "  idx = 0x" << hex << idx1 << dec
+			<< scientific
+			<< " latlon = "
+			<< latlon1.lat << "," << latlon1.lon
+			<< dec << " rLevel = " << resolution1
+			<< " resLevel = " << resolution_
+			<< endl << flush;
+		}
+
+		cout << endl << "decreasing resolution" << endl << flush;
+		for(int resolution_ = 0; resolution_ < 12; ++ resolution_) {
+			STARE_ArrayIndexSpatialValue idx1 = shiftSpatialIdAtLevel( idx, resolution_, -1 );
+			LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+			int resolution1 = idx1 & spatialLevelMask();
+
+			cout
+			<< setprecision(18)
+			<< setw(23)
+			<< "  idx = 0x" << hex << idx1 << dec
+			<< scientific
+			<< " latlon = "
+			<< latlon1.lat << "," << latlon1.lon
+			<< dec << " rLevel = " << resolution1
+			<< " resLevel = " << resolution_
+			<< endl << flush;
+		}
+
+		{
+			cout << endl << "incrementing at resolution" << endl << flush;
+			uint64 resolution_ = 0;
+			STARE_ArrayIndexSpatialValue idx1 = 0x0000000000000001;
+			stringstream ss;
+
+			for( resolution_ = 0; resolution_ < 8; ++resolution_) {
+				for(uint64 itmp = 0; itmp < 7; ++itmp) {
+
+					// cout << resolution_ << "," << itmp << " res,i" << endl << flush;
+
+					try {
+						idx1 = shiftSpatialIdAtLevel( 0x0000000000000000+resolution_, resolution_, itmp );
+						// idx1 = shiftSpatialIdAtLevel( 0ul+resolution_, resolution_, itmp );
+					} catch (const SpatialException & e ) {
+						cout << "Exception: " << dec << e.what() << endl << flush;
+						FAIL();
+					}
+
+					LatLonDegrees64 latlon1 = index2.LatLonDegreesFromValue(idx1);
+
+					int resolution1 = idx1 & spatialLevelMask();
+
+					ss.clear(); ss.str(string());
+					ss << "Increment by " << itmp << " at resolution level " << resolution_;
+
+					cout
+					<< "  idx = 0x" << setw(16) << hex << idx1 << dec
+					<< "  cmp = 0x" << setw(16) << hex << (itmp << 59) << dec
+					<< scientific << setprecision(18) << setw(23)
+					<< " latlon = "
+					<< setfill(' ')
+					<< latlon1.lat << "," << latlon1.lon
+					<< dec << " rLevel = " << resolution1
+					<< " resLevel = " << resolution_
+					<< endl << flush;
+
+					ASSERT_EQUALM(ss.str().c_str(),((itmp << (59 - 2*resolution_)) || resolution_),idx1);
+
+				}
+			}
+		}
+	}
+
+// #define DIAG
+#ifndef DIAG
+#define DIAGOUT2(p,m)
+#define SIVOUT(m,siv)
+#define SIVSOUT(p,m,v)
+#else
+#define DIAGOUT2(p,m) p << m;
+#define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
+#endif
+	if(true) {
+		DIAGOUT2(cout,"expandIntervals 10" << endl << flush;);
+		EmbeddedLevelNameEncoding leftJustified;
+		uint64 one_mask_to_level, one_at_level;
+		leftJustified.SciDBincrement_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+
+		// cout << "expandIntervals 20" << endl << flush;
+
+		// STARE Spatial index value and interval arrays.
+		// STARE_ArrayIndexSpatialValue siv0 = 0x3300000000000008;
+		STARE_ArrayIndexSpatialValue siv0 = 0x3213213213213208;
+		SIVOUT("siv0",siv0)
+
+		STARE_SpatialIntervals intervals;
+		intervals.push_back(siv0);
+
+		// cout << "expandIntervals 30" << endl << flush;
+
+		STARE_ArrayIndexSpatialValues expanded_values = expandIntervals(intervals,8);
+		SIVSOUT(cout,"0 intervals ",intervals);
+		SIVSOUT(cout,"0 expanded_values ",expanded_values);
+		ASSERT_EQUAL((siv0 & ~one_mask_to_level) | 8,expanded_values[0]);
+
+		// cout << "expandIntervals 40" << endl << flush;
+
+		intervals.push_back(0x2000000000000008);
+		expanded_values = expandIntervals(intervals,8);
+		SIVSOUT(cout,"1 intervals ",intervals);
+		SIVSOUT(cout,"1 expanded_values ",expanded_values);
+		ASSERT_EQUAL(intervals[1],expanded_values[0]);
+
+		siv0 = 0x00000000000000008;
+		intervals.push_back(siv0);
+		siv0+=6*one_at_level;
+		SIVOUT("siv0+6@8",siv0);
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
+		intervals.push_back(leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		SIVOUT("siv0+6@8",leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		STARE_ArrayIndexSpatialValue expected6_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+
+		expanded_values = expandIntervals(intervals,8);
+		SIVSOUT(cout,"2 intervals ",intervals);
+		SIVSOUT(cout,"2 expanded_values ",expanded_values);
+		ASSERT_EQUAL(0x0000300000000008,expanded_values[6]);
+
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(expanded_values[6]);
+		SIVOUT("6's     ",leftJustified.getSciDBLeftJustifiedFormat());
+		SIVOUT("6's term",leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+		ASSERT_EQUAL(expected6_term,leftJustified.getSciDBTerminatorLeftJustifiedFormat());
+
+		expanded_values = expandIntervals(intervals,7);
+
+#ifdef DIAG
+		cout << "intervals "<< dec << endl <<flush;
+		for( int i=0; i<intervals.size(); ++i ) {
+			SIVOUT(i,intervals[i]);
+		}
+
+		cout << "expanded "<< dec << endl <<flush;
+		for( int i=0; i<expanded_values.size(); ++i ) {
+			SIVOUT(i,expanded_values[i]);
+		}
+#endif
+// #undef DIAGOUT2
+// #undef SIVOUT
+// #define DIAGOUT2(out,expr)
+// #undef DIAG
+	}
+
+	if(true) {
+		EmbeddedLevelNameEncoding lj;
+		STARE index;
+		SpatialVector x(1,1,0); x.normalize();
+		STARE_ArrayIndexSpatialValue siv = index.ValueFromSpatialVector(x);
+		SpatialVector v = index.SpatialVectorFromValue(siv); v.normalize();
+		// cout << "v: " << v << endl << flush;
+		ASSERT_EQUALDM("x-to-siv",x,v,1.0e-8);
+
+		siv = 0x0001000000000008;
+		v = index.SpatialVectorFromValue(siv); v.normalize(); // Note, wipes out resolution info.
+		STARE_ArrayIndexSpatialValue siv1 = index.ValueFromSpatialVector(v);
+		// cout << "iv: " << hex << siv << " " << hex << siv1 << endl << flush;
+		ASSERT_EQUALM("iv-to-v-roundtrip",siv,(siv1 & ~lj.levelMaskSciDB) | 8);
+	}
+
+	if(true) {
+		STARE index;
+		SpatialVector v(1,1,1); v.normalize();
+		STARE_ArrayIndexSpatialValue sid = index.ValueFromSpatialVector(v);
+		SpatialVector vr = index.SpatialVectorFromValue(sid);
+		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
+#ifdef DIAG
+		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
+		cout << "sidr 0x" << setw(16) << setfill('0') << hex << sidr << dec << endl << flush;
+		cout << "v  " << v << endl << flush;
+		cout << "vr " << vr << endl << flush;
+		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
+	}
+
+	if(true) {
+		/*
+		i,id  :  3 ['0x4c0000000000003']
+		test id:    ['0x4c0000000000003']
+		test ll :  [(14.255438319990454, 64.21872912284311), (-22.58410062366997, 70.08873514750778), (0.8929126045078797, 67.65325299601919)]
+		test im :  [[0, 1, 2]]
+		test lat:  [ 14.25543832 -22.58410062   0.8929126 ]
+		test lon:  [64.21872912 70.08873515 67.653253  ]
+		*/
+		STARE index;
+		// STARE_ArrayIndexSpatialValue sid = 0x4c0000000000003;
+		STARE_ArrayIndexSpatialValue sid = 0x4c000000000001b;
+		STARE_ArrayIndexSpatialValue sidtmp;
+		SpatialVector v_sid  = index.SpatialVectorFromValue(sid);
+		LatLonDegrees64 v_ll = index.LatLonDegreesFromValue(sid);
+		float64 v_lat,v_lon;
+		v_sid.getLatLonDegrees(v_lat, v_lon);
+
+#ifdef DIAG
+		cout << "v_sid " << v_sid << endl << flush;
+		cout << "v_sid ll " << v_lat << " " << v_lon << endl << flush;
+		cout << "v idx ll " << v_ll.lat << " " << v_ll.lon << endl << flush;
+		cout << "sid 0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
+		cout << endl << flush;
+#endif
+
+		ASSERT_EQUAL(v_lat,v_ll.lat);
+		ASSERT_EQUAL(v_lon,v_ll.lon);
+
+		Triangle tr = index.TriangleFromValue(sid);
+
+#ifdef DIAG
+		cout << "Triangle " << endl << flush;
+		for( int i=0; i<3; ++i) {
+			float64 lt,ln;
+			tr.vertices[i].getLatLonDegrees(lt,ln);
+			cout << setprecision(16);
+			cout << i << " i,v  " << tr.vertices[i]  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+
+		cout << "index.ValueFromSpatialVector triangle" << endl << flush;
+		for( int i=0; i<3; ++i) {
+			sidtmp = index.ValueFromSpatialVector(tr.vertices[i],27);
+			SpatialVector vtmp = index.SpatialVectorFromValue(sidtmp);
+			float64 lt,ln;
+			vtmp.getLatLonDegrees(lt,ln);
+			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+#endif
+
+		SpatialVector vecs[3] = {
+				SpatialVector( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 ),
+				SpatialVector( 0.4619397725326853, 0.8446231986774957, 0.2705980391803436 ),
+				SpatialVector( 0.4619397591445266, 0.8446232068078616, 0.2705980366578833 )
+		};
+
+#ifdef DIAG
+		cout << "index... from Explicit vecs" << endl << flush;
+		for( int i=0; i<3; ++i) {
+			sidtmp = index.ValueFromSpatialVector(vecs[i]);
+			SpatialVector vtmp = index.SpatialVectorFromValue(sidtmp);
+			float64 lt,ln;
+			vtmp.getLatLonDegrees(lt,ln);
+			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+
+		for( int i=0; i<3; ++i) {
+			float64 lat, lon;
+			SpatialVector vtmp = tr.vertices[i];
+			vtmp.getLatLonDegrees(lat,lon);
+			// tr.vertices[i].getLatLonDegrees(lat,lon);
+			sidtmp = index.ValueFromSpatialVector(vtmp,27);
+			// sidtmp = index.ValueFromSpatialVector(vtmp);
+			// sidtmp = index.ValueFromSpatialVector(tr.vertices[i]);
+			LatLonDegrees64 latlontmp = index.LatLonDegreesFromValue(sidtmp);
+			cout << i << " i,tr latlon " << lat << " " << lon << " -- "
+					<< latlontmp.lat << " " << latlontmp.lon
+					<< " -- "
+					<< "0x" << setw(16) << setfill('0') << hex << sidtmp << dec
+					<< endl << flush;
+		}
+		cout << endl << flush;
+#endif
+
+
+		DIAGOUT2(cout,setprecision(16) << "tr.v[1] " << tr.vertices[1] << endl << flush;);
+		SpatialVector v = tr.vertices[1];
+		sid = index.ValueFromSpatialVector(v);
+		SpatialVector vr = index.SpatialVectorFromValue(sid);
+		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
+		float64 lat,lon;
+		LatLonDegrees64 ll = index.LatLonDegreesFromValue(sid);
+		LatLonDegrees64 llr = index.LatLonDegreesFromValue(sidr);
+#ifdef DIAG
+		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec
+				<< " - " << ll.lat << " " << ll.lon
+				<< endl << flush;
+		cout << "sidr 0x" << setw(16) << setfill('0') << hex << sidr << dec
+				<< " - " << llr.lat << " " << llr.lon
+				<< endl << flush;
+		v.getLatLonDegrees(lat, lon);
+		cout << setprecision(16);
+		cout << "tr.v[1] " << tr.vertices[1] << endl << flush;
+		cout << "v       " << v
+				<< " - " << lat << " " << lon
+				<< endl << flush;
+		vr.getLatLonDegrees(lat, lon);
+		cout << "vr      " << vr
+				<< " - " << lat << " " << lon
+				<< endl << flush;
+		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
+		ASSERT_EQUALDM("v-to-vr",v,vr,1.0e-8);
+
+	}
+
+	if(true) {
+		DIAGOUT2(cout,endl << "------" << endl << endl << flush;);
+		STARE index;
+		int resolution = 27;
+		SpatialIndex sIndex = index.getIndex(resolution);
+		for( int i = 0; i < 11; ++i ) {
+			SpatialVector v0 ( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 );
+			// SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-16);
+			SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-15);
+			// v0 = v0 + SpatialVector(0.0,0.0,0.9e-8);
+			v0 = v0 - delta;
+			v0.normalize();
+			// SpatialVector v0 ( 1, 0, 0); // Works for this one.
+			STARE_ArrayIndexSpatialValue siv0 = index.ValueFromSpatialVector(v0,resolution);
+			BitShiftNameEncoding       rightJustified(sIndex.idByPoint(v0));
+#ifdef DIAG
+			cout << i << " i,delta " << delta << endl << flush;
+			cout << "sI idbp 0x" << setw(16) << setfill('0') << hex << sIndex.idByPoint(v0) << dec << endl << flush;
+			cout << "rj name   "<< rightJustified.getName() << endl << flush;
+#endif
+
+			EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
+			EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
+			STARE_ArrayIndexSpatialValue siv = leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+			SpatialVector v_siv0 = index.SpatialVectorFromValue(siv0);
+			SpatialVector v_siv = index.SpatialVectorFromValue(siv);
+#ifdef DIAG
+			cout << "siv0  " << setw(16) << setfill('0') << hex << siv0 << endl << flush;
+			cout << "siv   " << setw(16) << setfill('0') << hex << siv << endl << flush;
+			cout << setprecision(16);
+			cout << "v0     " << v0 << endl << flush;
+			cout << "v_siv0 " << v_siv0 << endl << flush;
+			cout << "v_siv  " << v_siv << endl << flush;
+			cout << endl << "--" << endl << endl << flush;
+#endif
+			ASSERT_EQUALDM("v0-to-siv0",v0,v_siv0,1.0e-8);
+			ASSERT_EQUALDM("v0-to-siv",v0,v_siv,1.0e-8);
+		}
+
+		if(true) {
+			// Motivated by confusing EmbeddedLevelNameEncoding internal format with the SciDB format.
+			DIAG1(cout << "ExpandInterval tests" << endl << flush;)
+			// STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution)
+			STARE_SpatialIntervals interval;
+			interval.push_back(0x2324000000000005);
+			interval.push_back(0x2327ffffffffffff);
+			STARE_ArrayIndexSpatialValues values = expandInterval(interval);
+			DIAG1(for(int i = 0; i < values.size(); ++i ) { cout << dec << i << " i,v 0x" << setw(16) << setfill('0') << hex << values[i] << endl << flush << dec; })
+			ASSERT_EQUAL(0x2324000000000005,values[0]);
+			ASSERT_EQUAL(0x2326000000000005,values[1]);
+		}
+	}
+
+	// FAIL();
 }
 

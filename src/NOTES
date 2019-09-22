@@ -1,3 +1,14 @@
+
+
+
+2019-0920 HtmRangeMultiLevel Compress bug
+
+TODO add a unit test for edge cases for this file
+The compress bug resulted from the logic not accounting for what happens when you're at the last index value at a level. I.e. you're at the end of the road.
+
+
+2019 Early
+
 test if a triangle (id) is rejected:
 
 	Implicitly, id is used in macro NV

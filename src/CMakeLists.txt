@@ -26,6 +26,7 @@ set (
   SpatialVector.cpp
   SpatialRotation.C
   STARE.C
+  SpatialRange.cpp
   TemporalIndex.cpp
   TemporalWordFormat1.cpp
   VarStr.C
@@ -79,9 +80,9 @@ if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
 
     # swig_add_library( PySTARE TYPE SHARED LANGUAGE python SOURCES PySTARE.i )
     swig_add_library( pystare TYPE SHARED LANGUAGE python SOURCES PySTARE.i )
-    swig_link_libraries( pystare STARE )
     swig_link_libraries( pystare PySTAREA )
     swig_link_libraries( pystare ${PYTHON_LIBRARIES} )
+    swig_link_libraries( pystare STARE )
 endif()
 
 install(TARGETS STARE DESTINATION lib)
