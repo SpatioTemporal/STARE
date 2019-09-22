@@ -1,12 +1,20 @@
 
-* 2019-09-X Version 0.8.0
+* 2019-09-21 Version 0.8.0
 
 Many improvements to pystare.
 - Vertices & Centroids
 - ConvexHull
-- SpatialRange lists
-Some use is made of the STARE spatial index as a way to convey
-location information.
+- SpatialRange interval lists
+- Expand intervals into spatial id values
+- Intersection
+- Visualization examples
+
+Some use is made of the STARE spatial index as a way to convey location information,
+however there is some difficulty going back and forth to SpatialVectors. Note
+that vertices and edges are not the easiest points to determine.
+
+There was a bug in expandIntervals due to the confusing nature of
+EmbeddedLevelNameEncoding with its native and SciDB formats.
 
 Added a number of tests using Constraint.
 
