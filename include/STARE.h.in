@@ -114,7 +114,12 @@ public:
 	STARE_ArrayIndexSpatialValue ValueFromHtmID(uint64 htmID); // * UNTESTED * //
 
    // Temporal
+
+	// TODO Review these API methods and determine which should be functions not methods.
+
 	TemporalIndex tIndex;
+
+	double toJulianDayUTC()                   { double utc1,utc2; tIndex.toJulianUTC(utc1,utc2); return utc1+utc2; }
 
 	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
 	TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);

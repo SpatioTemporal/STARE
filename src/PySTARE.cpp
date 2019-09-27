@@ -256,9 +256,23 @@ void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int6
 }
 
 // Temporal
-void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution) {
+void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution) {
+  // out << "from_utc resolution: " << resolution << endl << flush;
     int type = 2;
     for (int i=0; i<len; i++) {                       
-        indices[i] = stare.ValueFromUTC(datetime[i], resolution, type);
+        indices_out[i] = stare.ValueFromUTC(datetime[i], resolution, type);
     }
+}
+
+void to_utc_approximate(int64_t *indices, int len, int64_t *datetime_out) {
+  // Wiki says: JD = 2443144.5 (1 January 1977 00:00:00)
+  double d19700101 = 2443144.5;
+  for (int i=0; i<len; i++) {
+    stare.setArrayIndexTemporalValue(indices[i]);
+    double jd = stare.toJulianDayUTC();
+    double delta = jd-d19700101;
+    int64_t iDelta = delta*86400.0; // sec now.
+    // cout << i << " i,id, jd, delta, iDelta " << hex();
+    datetime_out[i] = iDelta;
+  }
 }

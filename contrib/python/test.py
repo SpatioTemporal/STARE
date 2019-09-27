@@ -21,12 +21,31 @@ print(level)
 area = pystare.to_area(indices)
 print(area)
 
-datetime = numpy.array(['2002-02-03T13:56:03.172', '2016-01-05T17:26:00.172'], dtype=numpy.datetime64)
+print('\nDatetime tests')
+datetime = numpy.array(['1970-01-01T00:00:00', '2000-01-01T00:00:00', '2002-02-03T13:56:03.172', '2016-01-05T17:26:00.172'], dtype=numpy.datetime64)
 print(datetime)
+print(datetime.astype(numpy.int64))
 
-index = pystare.from_utc(datetime, 6)
-print(index)
+index = pystare.from_utc(datetime.astype(numpy.int64), 6)
+print([hex(i) for i in index])
 
+index = pystare.from_utc(datetime.astype(numpy.int64), 8)
+print([hex(i) for i in index])
+
+# datetime_r = pystare.to_utc_approximate(index).astype(numpy.datetime64)
+# datetime_r = pystare.to_utc_approximate(index)
+datetime_r = numpy.array(pystare.to_utc_approximate(index),dtype='datetime64[ms]')
+print('type datetime_r: ',type(datetime_r))
+print('type datetime_r: ',datetime_r.dtype)
+print(datetime_r)
+print(datetime_r.astype(numpy.int64))
+print('delta datetime:    ',datetime-datetime_r)
+print('delta datetime/dy: ',datetime-datetime_r)
+
+exit()
+
+
+print('\nIntersection tests')
 intersected = numpy.zeros([3], dtype=numpy.int64)
 #? leni = 0
 pystare._intersect(indices, indices, intersected)

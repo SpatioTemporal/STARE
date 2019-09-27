@@ -243,6 +243,12 @@ void TemporalIndex::toUTC(
 	_second      = ihmsf[2];
 	_millisecond = ihmsf[3];
 }
+void TemporalIndex::toJulianUTC( double& utc1, double &utc2 ) const {
+  int not_ok;
+  double d1,d2;
+  this->toJulianTAI(d1,d2); // Get the TAI encoded time.
+  not_ok = eraTaiutc(d1, d2, &utc1, &utc2); // Convert to UTC's quasi JD.
+}
 /**
  * Convert and store a UTC coordinate into the native TAI-based value.
  */

@@ -51,7 +51,8 @@ void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, 
 void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12);
 
 // Temporal
-void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution);
+void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution);
+void to_utc_approximate(int64_t* indices, int len, int64_t* datetime_out);
 //void to_utc(int64_t* indices, int len, double* julian_day);
 //void from_tai(double* julian_day, int len, int64_t indices);
 //void to_tai(int64_t* indices, int len, double* julian_day);
