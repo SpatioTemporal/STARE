@@ -275,3 +275,14 @@ void to_utc_approximate(int64_t *indices, int len, int64_t *datetime_out) {
     datetime_out[i] = iDelta;
   }
 }
+
+void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12) {
+	STARE_ArrayIndexTemporalValues tivs1(indices1,indices1+len1), tivs2(indices2,indices2+len2);
+	int k=0;
+	for(int i=0; i<len1; ++i) {
+		for(int j=0; j<len2; ++j) {
+			cmp[k] = cmpTemporalAtResolution2(indices1[i],indices2[j]); // i.e. [i*len2+j]
+			++k;
+		}
+	}
+}

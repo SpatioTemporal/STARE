@@ -503,8 +503,14 @@ def cmp_spatial(indices1, indices2):
 	out_length = len(indices1)*len(indices2)
 	cmp = numpy.zeros([out_length],dtype=numpy.int64)
 	_cmp_spatial(indices1,indices2,cmp)
-	return cmp    
-
+	return cmp
+	    
+def cmp_temporal(indices1, indices2):
+	out_length = len(indices1)*len(indices2)
+	cmp = numpy.zeros([out_length],dtype=numpy.int64)
+	_cmp_temporal(indices1,indices2,cmp)
+	return cmp   
+	
 def intersect(indices1, indices2, multiresolution=True):
     out_length = 2*max(len(indices1),len(indices2))
     intersected = numpy.full([out_length],-1,dtype=numpy.int64)

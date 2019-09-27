@@ -34,6 +34,11 @@ print([hex(i) for i in index])
 index = pystare.from_utc(datetime.astype(numpy.int64), 8)
 print([hex(i) for i in index])
 
+print('cmp_temporal: should be diagonal')
+# print(' cmp \n',pystare.cmp_temporal(index,index).reshape(4,4))
+for i in range(index.size):
+  print(i,' cmp ',pystare.cmp_temporal(numpy.array([index[i]],dtype=numpy.int64),index))
+
 # datetime_r = pystare.to_utc_approximate(index).astype(numpy.datetime64)
 # datetime_r = pystare.to_utc_approximate(index)
 datetime_r = numpy.array(pystare.to_utc_approximate(index),dtype='datetime64[ms]')
