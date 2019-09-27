@@ -427,10 +427,12 @@
    (int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2)
 }
 
-# %pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
-#     import numpy
-#     datetime = datetime.astype(numpy.int64)
-# %}
+/*
+%pythonprepend from_utc(int64_t*, int, int64_t*, int) %{
+    import numpy
+    datetime = datetime.astype(numpy.int64)
+%}
+*/
 
 %pythoncode %{
 import numpy

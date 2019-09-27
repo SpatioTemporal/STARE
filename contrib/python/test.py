@@ -3,6 +3,8 @@
 import numpy
 import pystare
 
+
+print('\nSpatial tests')
 lat = numpy.array([30,45,60], dtype=numpy.double)
 lon = numpy.array([45,60,10], dtype=numpy.double)
 
@@ -42,8 +44,7 @@ print(datetime_r.astype(numpy.int64))
 print('delta datetime:    ',datetime-datetime_r)
 print('delta datetime/dy: ',datetime-datetime_r)
 
-exit()
-
+# exit()
 
 print('\nIntersection tests')
 intersected = numpy.zeros([3], dtype=numpy.int64)

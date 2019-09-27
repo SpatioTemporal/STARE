@@ -623,6 +623,68 @@ void STARE_test() {
 		ASSERT(cmpTemporalAtResolution3(id0,id1,1.5));
 	}
 
+	if(false) {
+		// index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(10).set_type(2);
+		cout << endl << "1970-01-01 Direct set." << endl << flush;
+		index.tIndex.fromUTC(1970, 1, 1, 0, 0, 0, 0);
+		if(globalPrintFlag) {
+		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+		// cout << "tI: utcjd: " << index.tIndex. ;
+		}
+
+		int year,month,dom,hr,min,sec,msec;
+		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+		if(globalPrintFlag) {
+		cout << "tI: utc: "
+				<< year << " "
+				<< month << " "
+				<< dom << " "
+				<< hr << " "
+				<< min << " "
+				<< sec << " "
+				<< msec
+				<< endl << flush;
+		cout << setprecision(16);
+		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+		}
+
+		time_t datetime = 0;
+		int resolution = 10;
+		int tValType       = 2;
+		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+		if(globalPrintFlag) {
+		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
+		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+		// cout << "tI: utcjd: " << index.tIndex. ;
+		}
+
+		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+		if(globalPrintFlag) {
+		cout << "tI: utc: "
+				<< year << " "
+				<< month << " "
+				<< dom << " "
+				<< hr << " "
+				<< min << " "
+				<< sec << " "
+				<< msec
+				<< endl << flush;
+		cout << setprecision(16);
+		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+		}
+
+		year = 1970; month = 1; dom = 1;
+		double djm0,djm;
+		int not_ok = eraCal2jd(year,month,dom,&djm0,&djm);
+		if(globalPrintFlag) {
+		cout << "erfa jd:   " << djm0+djm << endl << flush;
+		}
+	}
+
 
 	/*
 	 * Review the question the question about the sign of the spatial index.
