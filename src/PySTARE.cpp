@@ -257,23 +257,71 @@ void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int6
 
 // Temporal
 void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution) {
-  // out << "from_utc resolution: " << resolution << endl << flush;
+	// datetime is in ms (numpy default).
+	// double jd19700101_erfa = 2440587.5;
+
+//    cout << "from_utc resolution: " << resolution << endl << flush;
+	// cout << "from_utc" << endl << flush;
     int type = 2;
-    for (int i=0; i<len; i++) {                       
-        indices_out[i] = stare.ValueFromUTC(datetime[i], resolution, type);
+    for (int i=0; i<len; i++) {
+    	int64_t idt = datetime[i]/1000;
+        indices_out[i] = stare.ValueFromUTC(idt, resolution, type);
+        idt = datetime[i]%1000;
+        stare.tIndex.set_millisecond(idt);
+        indices_out[i] = stare.getArrayIndexTemporalValue();
+        double jd = stare.toJulianDayUTC();
+        double delta = jd - 2440587.5;
+        double iDelta = delta*86400.0;
+        /*
+        cout
+		<< setprecision(16)
+		<< dec << i << " dt,jd,delta,iDelta "
+		<< datetime[i] << " "
+		<< setw(16) << setfill('0')	<< hex
+		<< indices_out[i] << " "
+		 << dec
+		 << setw(20) << setfill(' ') << scientific
+		 << jd << " "
+		 << setw(20) << setfill(' ') << scientific
+	     << delta << " "
+		 << setw(20) << setfill(' ') << scientific
+		 << iDelta << " "
+		 << stare.tIndex.toStringJulianTAI()
+		 << endl << flush;
+		 */
     }
+//    cout << endl << flush;
 }
 
 void to_utc_approximate(int64_t *indices, int len, int64_t *datetime_out) {
-  double jd19700101_erfa = 2440587.5;
+	double jd19700101_erfa = 2440587.5;
+//	cout << "to_utc_approximate" << endl << flush;
   for (int i=0; i<len; i++) {
     stare.setArrayIndexTemporalValue(indices[i]);
     double jd = stare.toJulianDayUTC();
+    double jdt = stare.toJulianDayTAI();
     double delta = jd-jd19700101_erfa;
-    int64_t iDelta = delta*86400.0; // sec now.
-    // cout << i << " i,id, jd, delta, iDelta " << hex();
+    int64_t iDelta = int64_t(delta*86400000.0+0.5); // m-sec now. since that's what numpy defaults to it seems
+    /*
+	   cout << setprecision(16)
+		 << " jd,jdt,delta,iDelta "
+		 << hex << setw(16) << setfill('0')
+		 << indices[i] << " "
+		 << dec
+		 << setw(20) << setfill(' ') << scientific
+		 << jd << " "
+		 << setw(20) << setfill(' ') << scientific
+		 << jdt << " "
+		 << setw(20) << setfill(' ') << scientific
+	     << delta << " "
+		 << setw(20) << setfill(' ') << scientific
+		 << iDelta << " "
+		 << stare.tIndex.toStringJulianTAI()
+		 << endl << flush;
+     */
     datetime_out[i] = iDelta;
   }
+//  cout << endl << flush;
 }
 
 void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12) {

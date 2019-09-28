@@ -31,7 +31,7 @@ print(datetime.astype(numpy.int64))
 index = pystare.from_utc(datetime.astype(numpy.int64), 6)
 print([hex(i) for i in index])
 
-index = pystare.from_utc(datetime.astype(numpy.int64), 8)
+index = pystare.from_utc(datetime.astype(numpy.int64), 27)
 print([hex(i) for i in index])
 
 print('cmp_temporal: should be diagonal')
@@ -39,16 +39,18 @@ print('cmp_temporal: should be diagonal')
 for i in range(index.size):
   print(i,' cmp ',pystare.cmp_temporal(numpy.array([index[i]],dtype=numpy.int64),index))
 
-# datetime_r = pystare.to_utc_approximate(index).astype(numpy.datetime64)
-# datetime_r = pystare.to_utc_approximate(index)
+datetime_x = pystare.to_utc_approximate(index)
 datetime_r = numpy.array(pystare.to_utc_approximate(index),dtype='datetime64[ms]')
 print('type datetime_r: ',type(datetime_r))
 print('type datetime_r: ',datetime_r.dtype)
 print(datetime_r)
 print(datetime_r.astype(numpy.int64))
 print('delta datetime:    ',datetime-datetime_r)
-print('delta datetime/dy: ',datetime-datetime_r)
 
+for i in range(index.size):
+  print(i,' o,r ',datetime[i],datetime_r[i],' x ',datetime[i].astype(numpy.int64),datetime_x[i])
+
+exit()
 # exit()
 
 print('\nIntersection tests')

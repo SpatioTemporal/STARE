@@ -90,7 +90,7 @@ STARE_ArrayIndexTemporalValue makeIndexValue(string timestamp, int resolution) {
     struct tm tm;    
     int type = 2;
     strptime(timestamp.data(), "%Y-%m-%dT%H:%M:%S", &tm);
-    return stare.ValueFromUTC(tm, resolution, type);
+    return stare.ValueFromUTC_tm(tm, resolution, type);
 }
 
 STARE_ArrayIndexTemporalValue makeIndexValue(int dt[7], int resolution) {

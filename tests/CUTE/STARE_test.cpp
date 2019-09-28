@@ -624,18 +624,22 @@ void STARE_test() {
 	}
 
 	if(false) {
+		// Analyze transformations supporting datetime interface and pystare.
+		// Turns out we were passing ms into pystare, not seconds, so the
+		// problem was mis-calling the datetime call in the STARE interface.
+
 		// index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(10).set_type(2);
 		cout << endl << "1970-01-01 Direct set." << endl << flush;
 		index.tIndex.fromUTC(1970, 1, 1, 0, 0, 0, 0);
-		if(globalPrintFlag) {
+		// if(globalPrintFlag) {
 		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
 		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
 		// cout << "tI: utcjd: " << index.tIndex. ;
-		}
+		// }
 
 		int year,month,dom,hr,min,sec,msec;
 		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
-		if(globalPrintFlag) {
+		// if(globalPrintFlag) {
 		cout << "tI: utc: "
 				<< year << " "
 				<< month << " "
@@ -648,21 +652,20 @@ void STARE_test() {
 		cout << setprecision(16);
 		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
 		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
-		}
-
+		// }
 		time_t datetime = 0;
 		int resolution = 10;
 		int tValType       = 2;
 		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
-		if(globalPrintFlag) {
+		// if(globalPrintFlag) {
 		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
 		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
 		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
 		// cout << "tI: utcjd: " << index.tIndex. ;
-		}
+		// }
 
 		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
-		if(globalPrintFlag) {
+		// if(globalPrintFlag) {
 		cout << "tI: utc: "
 				<< year << " "
 				<< month << " "
@@ -675,14 +678,105 @@ void STARE_test() {
 		cout << setprecision(16);
 		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
 		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+		// }
+
+		{
+			cout << endl << "2000-01-01 Direct set." << endl << flush;
+			index.tIndex.fromUTC(2000, 1, 1, 0, 0, 0, 0);
+			// if(globalPrintFlag) {
+			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+			cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+			// cout << "tI: utcjd: " << index.tIndex. ;
+			// }
+
+			int year,month,dom,hr,min,sec,msec;
+			index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+			// if(globalPrintFlag) {
+			cout << "tI: utc: "
+					<< year << " "
+					<< month << " "
+					<< dom << " "
+					<< hr << " "
+					<< min << " "
+					<< sec << " "
+					<< msec
+					<< endl << flush;
+			cout << setprecision(16);
+			cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+			// }
+			time_t datetime = (30*365+7)*86400;
+			int resolution = 10;
+			int tValType       = 2;
+			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+			// if(globalPrintFlag) {
+			cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
+			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+			cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+			// cout << "tI: utcjd: " << index.tIndex. ;
+			// }
+
+			index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+			// if(globalPrintFlag) {
+			cout << "tI: utc: "
+					<< year << " "
+					<< month << " "
+					<< dom << " "
+					<< hr << " "
+					<< min << " "
+					<< sec << " "
+					<< msec
+					<< endl << flush;
+			cout << setprecision(16);
+			cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+			// }
 		}
 
+		{
+			cout << endl << "PySTARE debugging" << endl << flush;
+			STARE stare;
+			int resolution = 10;
+			int type = 2;
+			time_t datetime = (30*365+7)*86400;
+			// int64_t datetime = (30*365+7)*86400;
+			STARE_ArrayIndexTemporalValue idx = stare.ValueFromUTC(datetime, resolution, type);
+			stare.setArrayIndexTemporalValue(idx);
+			double jd19700101_erfa = 2440587.5;
+			double jd = stare.toJulianDayUTC();
+			double jdt = stare.toJulianDayTAI();
+			double delta = jd-jd19700101_erfa;
+			int64_t iDelta = delta*86400.0; // sec now.
+
+			cout << setprecision(16)
+							 << " jd,jdt,delta,iDelta "
+							 << hex << setw(16) << setfill('0')
+							 << idx << " "
+							 << dec
+							 << setw(20) << setfill(' ') << scientific
+							 << jd << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << jdt << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << delta << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << iDelta << endl << flush;
+		}
+
+		cout << endl;
 		year = 1970; month = 1; dom = 1;
 		double djm0,djm;
 		int not_ok = eraCal2jd(year,month,dom,&djm0,&djm);
-		if(globalPrintFlag) {
-		cout << "erfa jd:   " << djm0+djm << endl << flush;
-		}
+		// if(globalPrintFlag) {
+		cout << "1970 erfa jd:   " << djm0+djm << endl << flush;
+		// }
+
+		year = 2000; month = 1; dom = 1;
+		not_ok = eraCal2jd(year,month,dom,&djm0,&djm);
+		// if(globalPrintFlag) {
+		cout << "2000 erfa jd:   " << djm0+djm << endl << flush;
+		// }
+
 	}
 
 
@@ -714,12 +808,12 @@ void STARE_test() {
 		double scale = dl/10.0;
 		for( lon = lon_mn-dl; lon <= lon_mn+dl; lon += scale ) {
 			for( lat = lat_mn-dl; lat <= lat_mn+dl; lat += scale ) {
-//		for( lon = 0.0; lon <= 360.0; lon += 0.1 ) {
-//			for( lat = -90.0; lat <= 90.0; lat += 0.1 ) {
-//		for( lon = 0.0; lon <= 360.0; lon += 1 ) {
-//			for( lat = -90.0; lat <= 90.0; lat += 1 ) {
-//		for( lon = 0.0; lon <= 20.0; lon += 0.1 ) {
-//			for( lat = -40.0; lat <= -20.0; lat += 0.1 ) {
+				//		for( lon = 0.0; lon <= 360.0; lon += 0.1 ) {
+				//			for( lat = -90.0; lat <= 90.0; lat += 0.1 ) {
+				//		for( lon = 0.0; lon <= 360.0; lon += 1 ) {
+				//			for( lat = -90.0; lat <= 90.0; lat += 1 ) {
+				//		for( lon = 0.0; lon <= 20.0; lon += 0.1 ) {
+				//			for( lat = -40.0; lat <= -20.0; lat += 0.1 ) {
 				LatLonDegrees64 latlon0(lat,lon);
 				// LatLonDegrees64 latlon0(-45.0,135.0);
 				// LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
@@ -763,7 +857,7 @@ void STARE_test() {
 		STARE indices for coordinates such as:  0˚, 0˚
 		                                0˚, 180˚
 		                                -90˚, -180˚ (or 360˚)
-		                                */
+		 */
 		double lat, lon, level;
 		STARE_ArrayIndexSpatialValue id;
 
@@ -782,7 +876,7 @@ void STARE_test() {
 	}
 
 	if(true) {
-	/*
+		/*
 	All with level = 8.
 
 	#starting STARE_test
@@ -800,16 +894,16 @@ void STARE_test() {
 	lat,lon,id:  -90  360 0x1fbff9ff807819e8
 
 	#success STARE_test OK
-	*/
+		 */
 		double lat, lon, level;
 		STARE_ArrayIndexSpatialValue id;
 		stringstream ss;
 #define SS_LATLONID(lat,lon,id) \
 		ss.clear(); ss.str(string()); \
 		ss << "lat,lon,id: " \
-				<< setw(4) << setfill(' ') << dec << lat << " " \
-				<< setw(4) << setfill(' ') << dec << lon << " " \
-				<< "0x" << setw(16) << setfill('0') << hex << id << dec;
+		<< setw(4) << setfill(' ') << dec << lat << " " \
+		<< setw(4) << setfill(' ') << dec << lon << " " \
+		<< "0x" << setw(16) << setfill('0') << hex << id << dec;
 		lat = 0.0; lon = -90.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x28fe71a91bda2428,id);
 		lat = 0.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
 		lat = 0.0; lon = 0.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level);   SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
@@ -946,9 +1040,9 @@ void STARE_test() {
 			// points.push_back(LatLonDegrees64(0,10));
 
 			float64 delta = 10.0;
-//			float64 delta = 1.0;
-//			for(float64 lat = 20; lat < 45; lat += delta ) {
-//				for(float64 lon = -120; lon < -80; lon += delta ) {
+			//			float64 delta = 1.0;
+			//			for(float64 lat = 20; lat < 45; lat += delta ) {
+			//				for(float64 lon = -120; lon < -80; lon += delta ) {
 			int k=11; // iFuse fail (12 points)
 			// int k=10; // iFuse success
 			for(float64 lat = 20; lat < 45 && k >= 0; lat += delta ) {
@@ -974,11 +1068,11 @@ void STARE_test() {
 
 	}
 
-//	{
-//		STARE_ArrayIndexSpatialValue spatialStareId = 0;
-//		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);
-//		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
-//	}
+	//	{
+	//		STARE_ArrayIndexSpatialValue spatialStareId = 0;
+	//		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);
+	//		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
+	//	}
 
 
 	if(false) {
@@ -1081,7 +1175,7 @@ void STARE_test() {
 		}
 	}
 
-// #define DIAG
+	// #define DIAG
 #ifndef DIAG
 #define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
@@ -1154,10 +1248,10 @@ void STARE_test() {
 			SIVOUT(i,expanded_values[i]);
 		}
 #endif
-// #undef DIAGOUT2
-// #undef SIVOUT
-// #define DIAGOUT2(out,expr)
-// #undef DIAG
+		// #undef DIAGOUT2
+		// #undef SIVOUT
+		// #define DIAGOUT2(out,expr)
+		// #undef DIAG
 	}
 
 	if(true) {
@@ -1200,7 +1294,7 @@ void STARE_test() {
 		test im :  [[0, 1, 2]]
 		test lat:  [ 14.25543832 -22.58410062   0.8929126 ]
 		test lon:  [64.21872912 70.08873515 67.653253  ]
-		*/
+		 */
 		STARE index;
 		// STARE_ArrayIndexSpatialValue sid = 0x4c0000000000003;
 		STARE_ArrayIndexSpatialValue sid = 0x4c000000000001b;
@@ -1354,8 +1448,8 @@ void STARE_test() {
 		if(true) {
 			// Motivated by confusing EmbeddedLevelNameEncoding internal format with the SciDB format.
 			DIAG1(cout << "ExpandInterval tests" << endl << flush;)
-			// STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution)
-			STARE_SpatialIntervals interval;
+					// STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution)
+					STARE_SpatialIntervals interval;
 			interval.push_back(0x2324000000000005);
 			interval.push_back(0x2327ffffffffffff);
 			STARE_ArrayIndexSpatialValues values = expandInterval(interval);
