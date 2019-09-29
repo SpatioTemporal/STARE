@@ -269,10 +269,10 @@ void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution) 
         idt = datetime[i]%1000;
         stare.tIndex.set_millisecond(idt);
         indices_out[i] = stare.getArrayIndexTemporalValue();
+        /*
         double jd = stare.toJulianDayUTC();
         double delta = jd - 2440587.5;
         double iDelta = delta*86400.0;
-        /*
         cout
 		<< setprecision(16)
 		<< dec << i << " dt,jd,delta,iDelta "
@@ -299,7 +299,7 @@ void to_utc_approximate(int64_t *indices, int len, int64_t *datetime_out) {
   for (int i=0; i<len; i++) {
     stare.setArrayIndexTemporalValue(indices[i]);
     double jd = stare.toJulianDayUTC();
-    double jdt = stare.toJulianDayTAI();
+    // double jdt = stare.toJulianDayTAI();
     double delta = jd-jd19700101_erfa;
     int64_t iDelta = int64_t(delta*86400000.0+0.5); // m-sec now. since that's what numpy defaults to it seems
     /*
@@ -325,7 +325,7 @@ void to_utc_approximate(int64_t *indices, int len, int64_t *datetime_out) {
 }
 
 void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12) {
-	STARE_ArrayIndexTemporalValues tivs1(indices1,indices1+len1), tivs2(indices2,indices2+len2);
+  // STARE_ArrayIndexTemporalValues tivs1(indices1,indices1+len1), tivs2(indices2,indices2+len2);
 	int k=0;
 	for(int i=0; i<len1; ++i) {
 		for(int j=0; j<len2; ++j) {
