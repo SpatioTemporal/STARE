@@ -647,7 +647,7 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, 
     return getArrayIndexTemporalValue();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC_tm(struct tm& tm, int& resolution, int& type) {
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
     return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
@@ -656,7 +656,7 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC_tm(struct tm& tm, int& resolut
 STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
     struct tm tm;                       // time_t as seconds since UNIX epoch
     gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
-    return ValueFromUTC_tm(tm, resolution, type);
+    return ValueFromUTC(tm, resolution, type);
 }
 
 Datetime STARE::UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue) {
