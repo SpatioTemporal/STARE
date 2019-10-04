@@ -143,6 +143,9 @@ uint64 EmbeddedLevelNameEncoding::maskOffLevelBit() const {
 }
 
 uint64 EmbeddedLevelNameEncoding::getIdTerminator_NoDepthBit() const {
+  /*
+    Level bit corresponds to the first bit from the left that defines where location infobits start in the legacy htm.
+   */
 	return getIdTerminator_NoDepthBit(
 			this->maskOffLevelAndLevelBit(),
 			this->levelById(this->id));
@@ -192,15 +195,15 @@ uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 ter
 
 int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) const {
 
-	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
+	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5. (6 bits)
 	uint64 level         = leftId & levelMask;
 
 	// TODO Repent the sin of redundant code.
 	int64 leftId_scidb = id_NoLevelBit;
-	leftId_scidb = leftId_scidb >> 1;
+	leftId_scidb = leftId_scidb >> 1; // This is the critical kluge to account for SciDB's array index def'n.
 	// Add the level bits back in.
 	leftId_scidb = leftId_scidb & ~levelMaskSciDB; // Note this covers bits 0-4.
-	leftId_scidb = leftId_scidb | level;
+	leftId_scidb = leftId_scidb | (level & levelMaskSciDB);
 
 	return leftId_scidb;
 
