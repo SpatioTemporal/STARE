@@ -55,6 +55,24 @@ lon0 = np.array([ 0,1,1,0], dtype=np.double)
 lats0,lons0,triang0,hull0 = make_hull(lat0,lon0,resolution0,ntri0)
 print('hull0: ',len(hull0))
 
+
+idx  = ps.from_latlon(np.array([1.25],dtype=np.double),np.array([1.25],dtype=np.double),10)
+nbrs = ps.to_neighbors(idx)
+
+latn,lonn,latcn,loncn = ps.to_vertices_latlon(idx)
+lons1,lats1,intmat1 = triangulate1(latn,lonn)
+triang1 = tri.Triangulation(lons1,lats1,intmat1)
+
+lata,lona,latca,lonca = ps.to_vertices_latlon(nbrs)
+lons2,lats2,intmat2 = triangulate1(lata,lona)
+triang2 = tri.Triangulation(lons2,lats2,intmat2)
+
+# idx1  = ps.from_latlon(np.array([1.5],dtype=np.double),np.array([0.5],dtype=np.double),10)
+cover = ps.to_circular_cover(1.5,0.5,0.25,13)
+latco,lonco,latcco,loncco = ps.to_vertices_latlon(cover)
+lons3,lats3,intmat3 = triangulate1(latco,lonco)
+triang3 = tri.Triangulation(lons3,lats3,intmat3)
+
 # Set up the projection and transformation
 proj = ccrs.PlateCarree()
 # proj = ccrs.Robinson()
@@ -69,4 +87,7 @@ ax.set_global()
 ax.coastlines()
 
 plot1(lon0,lat0,lons0,lats0,triang0,c0='r',c1='b',transf=transf)
+plot1(None,None,lons2,lats2,triang2,c0='r',c1='y',transf=transf)
+plot1(None,None,lons1,lats1,triang1,c0='c',c1='r',transf=transf)
+plot1(None,None,lons3,lats3,triang3,c0='c',c1='g',transf=transf)
 plt.show()

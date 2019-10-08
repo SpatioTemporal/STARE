@@ -158,6 +158,37 @@ void _expand_intervals(int64_t* indices, int len, int resolution, int64_t* range
 	result_size[0] = result.size();
 }
 
+void _to_neighbors(int64_t* indices, int len, int64_t* range_indices, int len_ri) {
+	STARE_ArrayIndexSpatialValues sivs(indices, indices+len);
+	STARE_ArrayIndexSpatialValues neighbors;
+	if(len_ri < 12*len) {
+	  cout << dec
+	       << "pystare _neighbors return array size = " << len_ri
+	       << " too small, need 3*len = " << 3*len
+	       << endl << flush;
+	}
+	for(int i = 0; i < len; ++i )  {
+	  STARE_ArrayIndexSpatialValues n = stare.NeighborsOfValue(indices[i]);
+	  neighbors.insert( neighbors.end(), n.begin(), n.end() );
+	}
+	for(int i = 0; i < len_ri; ++i ) {
+	  range_indices[i] = neighbors[i];
+	}
+}
+
+void _to_circular_cover(double lat, double lon, double radius, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+  STARE_SpatialIntervals result = stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution);
+	if(len_ri < result.size()) {
+		cout << dec;
+		cout << "_to_circular_cover-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
+		cout << "_to_circular_cover-warning: result size        = " << result.size() << "." << endl << flush;
+	}
+	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
+		range_indices[i] = result[i];
+	}
+	result_size[0] = result.size();
+}
+
 void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int len_ri) {
 	STARE_SpatialIntervals si(indices, indices+len);
 	SpatialRange r(si);

@@ -437,6 +437,17 @@
 %pythoncode %{
 import numpy
 
+def to_neighbors(indices):
+    out_length = 12*len(indices)
+    len_ri = 0
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    _to_neighbors(indices,range_indices)
+    endarg = 0
+    while ( endarg < out_length ) and (range_indices[endarg] > 0 ) :
+        endarg = endarg + 1
+    range_indices = range_indices[:endarg]
+    return range_indices
+
 def to_compressed_range(indices):
     out_length = len(indices)
     range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
@@ -469,6 +480,14 @@ def to_hull_range_from_latlon(lat,lon,resolution,range_size_limit=1000):
     range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
     result_size = numpy.full([1],-1,dtype=numpy.int64)
     _to_hull_range_from_latlon(lat,lon,resolution,range_indices,result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+
+def to_circular_cover(lat,lon,radius,resolution,range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    result_size = numpy.full([1],-1,dtype=numpy.int64)
+    _to_circular_cover(lat,lon,radius,resolution,range_indices,result_size)
     range_indices = range_indices[:result_size[0]]
     return range_indices
     
