@@ -184,7 +184,9 @@ void EmbeddedLevelNameEncoding_test() {
 	    IDOUT(cout,"sivt_term ",sivt_term);
 	    IDOUT(cout,"siv2      ",siv2);
 	    IDOUT(cout,"siv2_term ",siv2_term);
+#ifdef DIAG
 	    cout << endl << flush;
+#endif
 	    // IDOUT(cout,"lj id ",lj.getId());
 #undef IDOUT
 

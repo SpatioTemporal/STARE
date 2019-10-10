@@ -541,6 +541,42 @@ def intersect(indices1, indices2, multiresolution=True):
     endarg = numpy.argmax(intersected < 0)
     intersected = intersected[:endarg]
     return intersected
+
+def shiftarg_lon(lon):
+    "If lon is outside +/-180, then correct back."
+    if(lon>180):
+        return ((lon + 180.0) % 360.0)-180.0
+    else:
+        return lon
+
+def spatial_resolution(km):
+    return 10-np.log2(km/10)
+
+def triangulate(lats,lons):
+    "Help prepare data for matplotlib.tri.Triangulate."
+    intmat=[]
+    npts=int(len(lats)/3)
+    k=0
+    for i in range(npts):
+        intmat.append([k,k+1,k+2])
+        k=k+3
+    for i in range(len(lons)):
+        lons[i] = shiftarg_lon(lons[i])
+    # print('triangulating1 done.')      
+    return lons,lats,intmat 
+
+def triangulate_indices(indices):
+    """
+    Prepare data for matplotlib.tri.Triangulate.
+
+    lons,lats,intmat = triangulate_indices(indices)
+    triang = tri.Triangulation(lons,lats,intmat)
+    plt.triplot(triang,'r-',transform=transform,lw=1,markersize=3)
+    """
+    latv,lonv,latc,lonc = to_vertices_latlon(indices)
+    lons,lats,intmat = triangulate(latv,lonv)
+    return lons,lats,intmat
+
 %}   
    
 %include "PySTARE.h"

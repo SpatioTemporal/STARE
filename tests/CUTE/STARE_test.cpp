@@ -1248,6 +1248,23 @@ void STARE_test() {
 			SIVOUT(i,expanded_values[i]);
 		}
 #endif
+
+		intervals.clear();
+		intervals.push_back(0x0000000000000008);
+		expanded_values = expandIntervals(intervals,6);
+                ASSERT_EQUAL(0x0000000000000006,expanded_values[0]);
+
+		intervals.clear();
+		intervals.push_back(0x0000000000000008);
+		expanded_values = expandIntervals(intervals,9);
+                ASSERT_EQUAL(0x0000000000000009,expanded_values[0]);
+                ASSERT_EQUAL(0x0000020000000009,expanded_values[1]);
+                ASSERT_EQUAL(0x0000040000000009,expanded_values[2]);
+                ASSERT_EQUAL(0x0000060000000009,expanded_values[3]);
+
+                SIVSOUT(cout,"intervals ",intervals);
+                SIVSOUT(cout,"expanded  ",expanded_values)
+
 		// #undef DIAGOUT2
 		// #undef SIVOUT
 		// #define DIAGOUT2(out,expr)

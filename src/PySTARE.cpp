@@ -253,7 +253,7 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 }
 
 void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
-	cout << "lens: " << len1 << " " << len2 << " " << leni << endl << flush;
+  // cout << "lens: " << len1 << " " << len2 << " " << leni << endl << flush;
 	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
 	// cout << 100 << endl << flush;
 

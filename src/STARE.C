@@ -727,11 +727,13 @@ uint64 spatialLevelMask() {
 
 STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
 	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-	DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
-	STARE_ArrayIndexSpatialValue siv0 = interval[0];
+        DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
+	STARE_ArrayIndexSpatialValue siv_orig = interval[0];
+	STARE_ArrayIndexSpatialValue siv0 = siv_orig;
 	EmbeddedLevelNameEncoding leftJustified;
 	DIAGOUT1(cout << dec << 220 << endl << flush;)
-	uint64 return_resolution = siv0 & leftJustified.levelMaskSciDB;
+        uint64 input_resolution  = siv0 & leftJustified.levelMaskSciDB;
+	uint64 return_resolution = input_resolution; // To start with.
 	DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	if( force_resolution > -1 ) {
 		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
@@ -745,7 +747,12 @@ STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, in
 	if( interval.size() > 1 ) {
 		siv_term = interval[1];
 	} else {
-		siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+	  if( return_resolution != input_resolution ) { // TODO Maybe clean up this logic later.
+	    EmbeddedLevelNameEncoding lj; lj.setIdFromSciDBLeftJustifiedFormat(siv_orig);
+	    siv_term = lj.getSciDBTerminatorLeftJustifiedFormat(); // From siv_orig.
+	  } else {
+	    siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat(); // From siv0.
+	  }
 	}
 	DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
 	DIAGOUT1(cout << endl << dec << 240 << endl << flush;)
@@ -779,7 +786,7 @@ STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, in
 }
 
 /**
- * TODO Fix expandIntervals...
+ * Expand intervals found in intervals into spatial ids.
  */
 STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
 	STARE_ArrayIndexSpatialValues expanded_values;
@@ -799,7 +806,7 @@ STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, 
 			// cout << dec << 120 << endl << flush;
 			siv1 = intervals[i];
 			// cout << dec << 120 << " " << i << " " << setw(16) << setfill('0') << hex << siv1 << dec << endl << flush;
-			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) {
+			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) { // Check for a terminator.
 				// cout << dec << 121 << " " << i << endl << flush;
 				interval.push_back(siv1);
 				++i;
