@@ -48,10 +48,11 @@ struct htmPolyCorner {
 
 /**
    htmInterface class.
+
    The SpatialInterface class contains all methods to interface the
    HTM index with external applications.
 
-   // TODO Consider renaming htmInterface to SpatialInterface
+   // TODO Consider renaming htmInterface to SpatialInterface, but maybe "htm" is a good indicator that we're working at a low level with this interface.
 
 */
 

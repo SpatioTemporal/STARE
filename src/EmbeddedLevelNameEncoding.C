@@ -9,6 +9,7 @@
 #include <string>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
@@ -142,6 +143,9 @@ uint64 EmbeddedLevelNameEncoding::maskOffLevelBit() const {
 }
 
 uint64 EmbeddedLevelNameEncoding::getIdTerminator_NoDepthBit() const {
+  /*
+    Level bit corresponds to the first bit from the left that defines where location infobits start in the legacy htm.
+   */
 	return getIdTerminator_NoDepthBit(
 			this->maskOffLevelAndLevelBit(),
 			this->levelById(this->id));
@@ -191,15 +195,15 @@ uint64 EmbeddedLevelNameEncoding::idFromTerminatorAndLevel_NoDepthBit(uint64 ter
 
 int64 EmbeddedLevelNameEncoding::getSciDBLeftJustifiedFormat(uint64 leftId) const {
 
-	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5.
+	uint64 id_NoLevelBit = leftId & stripLevelBitMask; // Note this covers bits 0-5. (6 bits)
 	uint64 level         = leftId & levelMask;
 
 	// TODO Repent the sin of redundant code.
 	int64 leftId_scidb = id_NoLevelBit;
-	leftId_scidb = leftId_scidb >> 1;
+	leftId_scidb = leftId_scidb >> 1; // This is the critical kluge to account for SciDB's array index def'n.
 	// Add the level bits back in.
 	leftId_scidb = leftId_scidb & ~levelMaskSciDB; // Note this covers bits 0-4.
-	leftId_scidb = leftId_scidb | level;
+	leftId_scidb = leftId_scidb | (level & levelMaskSciDB);
 
 	return leftId_scidb;
 
@@ -390,6 +394,14 @@ void EmbeddedLevelNameEncoding::increment_LevelToMaskDelta(uint32 level,uint64 &
 //	one_at_level = one_at_level >> 2;
 }
 
+void EmbeddedLevelNameEncoding::SciDBincrement_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const {
+	increment_LevelToMaskDelta(level,one_mask_to_level,one_at_level);
+	one_mask_to_level = one_mask_to_level >> 1;
+	one_at_level = one_at_level >> 1;
+
+//	one_at_level = one_at_level >> 2;
+}
+
 uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int n) const {
 	/// TODO Error checking of overflow not trustworthy here.
 	using namespace std;
@@ -444,6 +456,7 @@ uint64 EmbeddedLevelNameEncoding::increment(uint64 lowerBound, uint32 level, int
 
 	// Check for overflow. Not a completely accurate check.
 	if( (successor & TopBit) == TopBit ) {
+
 #ifdef DIAG
 		cout << "n:              " << setw(23) << dec << n << endl << flush;
 		cout << "lowerBound:     " << setw(23) << hex << lowerBound << endl << flush;

@@ -1700,5 +1700,88 @@ void TemporalIndex_test() {
 
 	}
 
+	if(false) {
+		cout << endl << "Print some resolution information." << endl << flush;
+		STARE index;
+
+		for( int i=0; i<64; ++i) {
+			int resolution = i;
+			double days = index.tIndex.daysAtResolution(resolution);
+			cout << "temp res level,days: " << resolution << " " << days << " hours = " << days*24.0 << endl << flush;
+		}
+/*
+		Print some resolution information.
+		temp res level,days: 0 9.56826e+07 hours = 2.29638e+09
+		temp res level,days: 1 4.78413e+07 hours = 1.14819e+09
+		temp res level,days: 2 2.39206e+07 hours = 5.74095e+08
+		temp res level,days: 3 1.19603e+07 hours = 2.87048e+08
+		temp res level,days: 4 5.98016e+06 hours = 1.43524e+08
+		temp res level,days: 5 2.99008e+06 hours = 7.17619e+07
+		temp res level,days: 6 1.49504e+06 hours = 3.5881e+07
+		temp res level,days: 7 747520 hours = 1.79405e+07
+		temp res level,days: 8 373760 hours = 8.97024e+06
+		temp res level,days: 9 186880 hours = 4.48512e+06
+		temp res level,days: 10 93440 hours = 2.24256e+06
+		temp res level,days: 11 46720 hours = 1.12128e+06
+		temp res level,days: 12 23360 hours = 560640
+		temp res level,days: 13 11680 hours = 280320
+		temp res level,days: 14 5840 hours = 140160
+		temp res level,days: 15 2920 hours = 70080
+		temp res level,days: 16 1460 hours = 35040
+		temp res level,days: 17 730 hours = 17520
+		temp res level,days: 18 365 hours = 8760
+		temp res level,days: 19 224 hours = 5376
+		temp res level,days: 20 112 hours = 2688
+		temp res level,days: 21 56 hours = 1344
+		temp res level,days: 22 28 hours = 672
+		temp res level,days: 23 14 hours = 336
+		temp res level,days: 24 7 hours = 168
+		temp res level,days: 25 4 hours = 96
+		temp res level,days: 26 2 hours = 48
+		temp res level,days: 27 1 hours = 24
+		temp res level,days: 28 0.666667 hours = 16
+		temp res level,days: 29 0.333333 hours = 8
+		temp res level,days: 30 0.166667 hours = 4
+		temp res level,days: 31 0.0833333 hours = 2
+		temp res level,days: 32 0.0416667 hours = 1
+		temp res level,days: 33 0.0222222 hours = 0.533333
+		temp res level,days: 34 0.0111111 hours = 0.266667
+		temp res level,days: 35 0.00555556 hours = 0.133333
+		temp res level,days: 36 0.00277778 hours = 0.0666667
+		temp res level,days: 37 0.00138889 hours = 0.0333333
+		temp res level,days: 38 0.000694444 hours = 0.0166667
+		temp res level,days: 39 0.00037037 hours = 0.00888889
+		temp res level,days: 40 0.000185185 hours = 0.00444444
+		temp res level,days: 41 9.25926e-05 hours = 0.00222222
+		temp res level,days: 42 4.62963e-05 hours = 0.00111111
+		temp res level,days: 43 2.31481e-05 hours = 0.000555556
+		temp res level,days: 44 1.15741e-05 hours = 0.000277778
+		temp res level,days: 45 5.92593e-06 hours = 0.000142222
+		temp res level,days: 46 2.96296e-06 hours = 7.11111e-05
+		temp res level,days: 47 1.48148e-06 hours = 3.55556e-05
+		temp res level,days: 48 7.40741e-07 hours = 1.77778e-05
+		temp res level,days: 49 3.7037e-07 hours = 8.88889e-06
+		temp res level,days: 50 1.85185e-07 hours = 4.44444e-06
+		temp res level,days: 51 9.25926e-08 hours = 2.22222e-06
+		temp res level,days: 52 4.62963e-08 hours = 1.11111e-06
+		temp res level,days: 53 2.31481e-08 hours = 5.55556e-07
+		temp res level,days: 54 1.15741e-08 hours = 2.77778e-07
+		temp res level,days: 55 0 hours = 0
+		temp res level,days: 56 0 hours = 0
+		temp res level,days: 57 0 hours = 0
+		temp res level,days: 58 0 hours = 0
+		temp res level,days: 59 0 hours = 0
+		temp res level,days: 60 0 hours = 0
+		temp res level,days: 61 0 hours = 0
+		temp res level,days: 62 0 hours = 0
+		temp res level,days: 63 0 hours = 0
+		*/
+	}
+
+//	if( true ) {
+//
+//
+//	}
+
 	// FAIL();
 }

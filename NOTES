@@ -1,5 +1,41 @@
 
-* 2019-09-X Version 0.8.0
+* 2019-09-22 Version 0.8.1
+
+Made change to STARE.h not STARE.h.in in 0.8.0 that
+broke compilation and hid problem with STARE::ValueFromSpatialVector.
+
+* 2019-09-21 Version 0.8.0
+
+Many improvements to pystare.
+- Vertices & Centroids
+- ConvexHull
+- SpatialRange interval lists
+- Expand intervals into spatial id values
+- Intersection
+- Visualization examples
+
+Some use is made of the STARE spatial index as a way to convey location information,
+however there is some difficulty going back and forth to SpatialVectors. Note
+that vertices and edges are not the easiest points to determine.
+
+There was a bug in expandIntervals due to the confusing nature of
+EmbeddedLevelNameEncoding with its native and SciDB formats.
+
+Added a number of tests using Constraint.
+
+Improved intersection behavior by injecting dependency on varlen, i.e.
+interior vs. boundary calculation. Setting varlen to false tends to 
+force calculation all the way down to leaf, whereas varlen true
+stops on reaching a fully enclosed trixel, leading to the multi-resolution
+partitioning.
+
+Corrected bug in SetPolyCorner of ConvexHull calculation. 2-corner list would
+throw out co-linear third point without checking if it extended the side
+or not.
+
+Changed HtmRangeMultiLevel::RangeFromIntersection to eliminate iteration over
+the range in favor of using the SkipList's findMAX. Also eliminated superfluous
+iteration after intersection is found.
 
 Added SpatialRange to use SkipList to generate intersections. Note the intersect
 doesn't use find or search, so it's not clear we're getting the benefit of the SkipLists.

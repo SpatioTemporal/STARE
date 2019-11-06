@@ -524,6 +524,9 @@ public:
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
+
+	void           toJulianUTC ( double& utc1, double& utc2 ) const;
+
 	void           toJulianTAI ( double& d1, double& d2) const;
 	TemporalIndex& fromJulianTAI( double  d1, double  d2);
 

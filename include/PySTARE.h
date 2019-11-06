@@ -35,14 +35,28 @@ void to_latlon(int64_t* indices, int len, double* lat, double* lon);
 void to_latlonlevel(int64_t* indices, int len, double* lat, double* lon, int* levels);
 void to_level(int64_t* indices, int len,  int* levels);
 void to_triangle(int64_t* indices, int len);
+// Broken or dangerous. void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2, int64_t* centroid);
+void _to_vertices_latlon(int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2 );
 void to_area(int64_t* indices, int len, double* areas);
 
+void _to_neighbors(int64_t* indices, int len, int64_t* range_indices, int len_ri);
+void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int len_ri);
+void _to_hull_range   (int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
+void _expand_intervals(int64_t* indices, int len, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
+
+void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_lon, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
+void _to_circular_cover(double lat, double lon, double radius, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
 void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators );
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
+void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
+void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12);
 
 // Temporal
-void from_utc(int64_t *datetime, int len, int64_t *indices, int resolution);
+void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution);
+void to_utc_approximate(int64_t* indices, int len, int64_t* datetime_out);
+void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* cmp, int len12);
+
 //void to_utc(int64_t* indices, int len, double* julian_day);
 //void from_tai(double* julian_day, int len, int64_t indices);
 //void to_tai(int64_t* indices, int len, double* julian_day);

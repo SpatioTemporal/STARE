@@ -12,6 +12,16 @@
 
 #include "SpatialInterface.h"
 
+#ifndef DIAG
+#define DIAG1(expr)
+#define DIAGOUT2(out,expr)
+#define DIAGOUTDELTA(out,a,b)
+#else
+#define DIAG1(expr) expr;
+#define DIAGOUT2(out,expr) out << expr;
+#define DIAGOUTDELTA(out,a,b) {SpatialVector delta_ = a-b; cout << delta_.length() << " ";}
+#endif
+
 void STARE_test() {
 
 	SpatialVector
@@ -613,6 +623,162 @@ void STARE_test() {
 		ASSERT(cmpTemporalAtResolution3(id0,id1,1.5));
 	}
 
+	if(false) {
+		// Analyze transformations supporting datetime interface and pystare.
+		// Turns out we were passing ms into pystare, not seconds, so the
+		// problem was mis-calling the datetime call in the STARE interface.
+
+		// index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(10).set_type(2);
+		cout << endl << "1970-01-01 Direct set." << endl << flush;
+		index.tIndex.fromUTC(1970, 1, 1, 0, 0, 0, 0);
+		// if(globalPrintFlag) {
+		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+		// cout << "tI: utcjd: " << index.tIndex. ;
+		// }
+
+		int year,month,dom,hr,min,sec,msec;
+		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+		// if(globalPrintFlag) {
+		cout << "tI: utc: "
+				<< year << " "
+				<< month << " "
+				<< dom << " "
+				<< hr << " "
+				<< min << " "
+				<< sec << " "
+				<< msec
+				<< endl << flush;
+		cout << setprecision(16);
+		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+		// }
+		time_t datetime = 0;
+		int resolution = 10;
+		int tValType       = 2;
+		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+		// if(globalPrintFlag) {
+		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
+		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+		// cout << "tI: utcjd: " << index.tIndex. ;
+		// }
+
+		index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+		// if(globalPrintFlag) {
+		cout << "tI: utc: "
+				<< year << " "
+				<< month << " "
+				<< dom << " "
+				<< hr << " "
+				<< min << " "
+				<< sec << " "
+				<< msec
+				<< endl << flush;
+		cout << setprecision(16);
+		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+		// }
+
+		{
+			cout << endl << "2000-01-01 Direct set." << endl << flush;
+			index.tIndex.fromUTC(2000, 1, 1, 0, 0, 0, 0);
+			// if(globalPrintFlag) {
+			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+			cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+			// cout << "tI: utcjd: " << index.tIndex. ;
+			// }
+
+			int year,month,dom,hr,min,sec,msec;
+			index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+			// if(globalPrintFlag) {
+			cout << "tI: utc: "
+					<< year << " "
+					<< month << " "
+					<< dom << " "
+					<< hr << " "
+					<< min << " "
+					<< sec << " "
+					<< msec
+					<< endl << flush;
+			cout << setprecision(16);
+			cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+			// }
+			time_t datetime = (30*365+7)*86400;
+			int resolution = 10;
+			int tValType       = 2;
+			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+			// if(globalPrintFlag) {
+			cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
+			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
+			cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
+			// cout << "tI: utcjd: " << index.tIndex. ;
+			// }
+
+			index.tIndex.toUTC(year,month,dom,hr,min,sec,msec);
+			// if(globalPrintFlag) {
+			cout << "tI: utc: "
+					<< year << " "
+					<< month << " "
+					<< dom << " "
+					<< hr << " "
+					<< min << " "
+					<< sec << " "
+					<< msec
+					<< endl << flush;
+			cout << setprecision(16);
+			cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
+			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
+			// }
+		}
+
+		{
+			cout << endl << "PySTARE debugging" << endl << flush;
+			STARE stare;
+			int resolution = 10;
+			int type = 2;
+			time_t datetime = (30*365+7)*86400;
+			// int64_t datetime = (30*365+7)*86400;
+			STARE_ArrayIndexTemporalValue idx = stare.ValueFromUTC(datetime, resolution, type);
+			stare.setArrayIndexTemporalValue(idx);
+			double jd19700101_erfa = 2440587.5;
+			double jd = stare.toJulianDayUTC();
+			double jdt = stare.toJulianDayTAI();
+			double delta = jd-jd19700101_erfa;
+			int64_t iDelta = delta*86400.0; // sec now.
+
+			cout << setprecision(16)
+							 << " jd,jdt,delta,iDelta "
+							 << hex << setw(16) << setfill('0')
+							 << idx << " "
+							 << dec
+							 << setw(20) << setfill(' ') << scientific
+							 << jd << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << jdt << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << delta << " "
+							 << setw(20) << setfill(' ') << scientific
+							 << iDelta << endl << flush;
+		}
+
+		cout << endl;
+		year = 1970; month = 1; dom = 1;
+		double djm0,djm;
+		int not_ok = eraCal2jd(year,month,dom,&djm0,&djm);
+		// if(globalPrintFlag) {
+		cout << "1970 erfa jd:   " << djm0+djm << endl << flush;
+		// }
+
+		year = 2000; month = 1; dom = 1;
+		not_ok = eraCal2jd(year,month,dom,&djm0,&djm);
+		// if(globalPrintFlag) {
+		cout << "2000 erfa jd:   " << djm0+djm << endl << flush;
+		// }
+
+	}
+
 
 	/*
 	 * Review the question the question about the sign of the spatial index.
@@ -642,12 +808,12 @@ void STARE_test() {
 		double scale = dl/10.0;
 		for( lon = lon_mn-dl; lon <= lon_mn+dl; lon += scale ) {
 			for( lat = lat_mn-dl; lat <= lat_mn+dl; lat += scale ) {
-//		for( lon = 0.0; lon <= 360.0; lon += 0.1 ) {
-//			for( lat = -90.0; lat <= 90.0; lat += 0.1 ) {
-//		for( lon = 0.0; lon <= 360.0; lon += 1 ) {
-//			for( lat = -90.0; lat <= 90.0; lat += 1 ) {
-//		for( lon = 0.0; lon <= 20.0; lon += 0.1 ) {
-//			for( lat = -40.0; lat <= -20.0; lat += 0.1 ) {
+				//		for( lon = 0.0; lon <= 360.0; lon += 0.1 ) {
+				//			for( lat = -90.0; lat <= 90.0; lat += 0.1 ) {
+				//		for( lon = 0.0; lon <= 360.0; lon += 1 ) {
+				//			for( lat = -90.0; lat <= 90.0; lat += 1 ) {
+				//		for( lon = 0.0; lon <= 20.0; lon += 0.1 ) {
+				//			for( lat = -40.0; lat <= -20.0; lat += 0.1 ) {
 				LatLonDegrees64 latlon0(lat,lon);
 				// LatLonDegrees64 latlon0(-45.0,135.0);
 				// LatLon latlon0 = {.lat = 45.0, .lon = 45.0 };
@@ -691,7 +857,7 @@ void STARE_test() {
 		STARE indices for coordinates such as:  0˚, 0˚
 		                                0˚, 180˚
 		                                -90˚, -180˚ (or 360˚)
-		                                */
+		 */
 		double lat, lon, level;
 		STARE_ArrayIndexSpatialValue id;
 
@@ -710,7 +876,7 @@ void STARE_test() {
 	}
 
 	if(true) {
-	/*
+		/*
 	All with level = 8.
 
 	#starting STARE_test
@@ -728,16 +894,16 @@ void STARE_test() {
 	lat,lon,id:  -90  360 0x1fbff9ff807819e8
 
 	#success STARE_test OK
-	*/
+		 */
 		double lat, lon, level;
 		STARE_ArrayIndexSpatialValue id;
 		stringstream ss;
 #define SS_LATLONID(lat,lon,id) \
 		ss.clear(); ss.str(string()); \
 		ss << "lat,lon,id: " \
-				<< setw(4) << setfill(' ') << dec << lat << " " \
-				<< setw(4) << setfill(' ') << dec << lon << " " \
-				<< "0x" << setw(16) << setfill('0') << hex << id << dec;
+		<< setw(4) << setfill(' ') << dec << lat << " " \
+		<< setw(4) << setfill(' ') << dec << lon << " " \
+		<< "0x" << setw(16) << setfill('0') << hex << id << dec;
 		lat = 0.0; lon = -90.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x28fe71a91bda2428,id);
 		lat = 0.0; lon = 360.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level); SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
 		lat = 0.0; lon = 0.0; level = 8; id = index.ValueFromLatLonDegrees(lat, lon, level);   SS_LATLONID(lat,lon,id); ASSERT_EQUALM(ss.str().c_str(),0x3d7e69d09dbc4248,id);
@@ -874,9 +1040,9 @@ void STARE_test() {
 			// points.push_back(LatLonDegrees64(0,10));
 
 			float64 delta = 10.0;
-//			float64 delta = 1.0;
-//			for(float64 lat = 20; lat < 45; lat += delta ) {
-//				for(float64 lon = -120; lon < -80; lon += delta ) {
+			//			float64 delta = 1.0;
+			//			for(float64 lat = 20; lat < 45; lat += delta ) {
+			//				for(float64 lon = -120; lon < -80; lon += delta ) {
 			int k=11; // iFuse fail (12 points)
 			// int k=10; // iFuse success
 			for(float64 lat = 20; lat < 45 && k >= 0; lat += delta ) {
@@ -902,11 +1068,11 @@ void STARE_test() {
 
 	}
 
-//	{
-//		STARE_ArrayIndexSpatialValue spatialStareId = 0;
-//		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);
-//		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
-//	}
+	//	{
+	//		STARE_ArrayIndexSpatialValue spatialStareId = 0;
+	//		LatLonDegrees64 latlon0 = index.LatLonDegreesFromValue(spatialStareId);
+	//		cout << " idx=0, latlon0: " << latlon0.lat << " " << latlon0.lon << endl << flush;
+	//	}
 
 
 	if(false) {
@@ -1009,13 +1175,21 @@ void STARE_test() {
 		}
 	}
 
+	// #define DIAG
+#ifndef DIAG
+#define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
-// #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SIVSOUT(p,m,v)
+#else
+#define DIAGOUT2(p,m) p << m;
+#define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
+#define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
+#endif
 	if(true) {
-		// cout << "expandIntervals 10" << endl << flush;
+		DIAGOUT2(cout,"expandIntervals 10" << endl << flush;);
 		EmbeddedLevelNameEncoding leftJustified;
 		uint64 one_mask_to_level, one_at_level;
-		leftJustified.increment_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
+		leftJustified.SciDBincrement_LevelToMaskDelta(8,one_mask_to_level, one_at_level);
 
 		// cout << "expandIntervals 20" << endl << flush;
 
@@ -1030,13 +1204,16 @@ void STARE_test() {
 		// cout << "expandIntervals 30" << endl << flush;
 
 		STARE_ArrayIndexSpatialValues expanded_values = expandIntervals(intervals,8);
+		SIVSOUT(cout,"0 intervals ",intervals);
+		SIVSOUT(cout,"0 expanded_values ",expanded_values);
 		ASSERT_EQUAL((siv0 & ~one_mask_to_level) | 8,expanded_values[0]);
 
 		// cout << "expandIntervals 40" << endl << flush;
 
 		intervals.push_back(0x2000000000000008);
 		expanded_values = expandIntervals(intervals,8);
-
+		SIVSOUT(cout,"1 intervals ",intervals);
+		SIVSOUT(cout,"1 expanded_values ",expanded_values);
 		ASSERT_EQUAL(intervals[1],expanded_values[0]);
 
 		siv0 = 0x00000000000000008;
@@ -1049,8 +1226,9 @@ void STARE_test() {
 		STARE_ArrayIndexSpatialValue expected6_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
 
 		expanded_values = expandIntervals(intervals,8);
-
-		ASSERT_EQUAL(0x0000300000000008,expanded_values[3]);
+		SIVSOUT(cout,"2 intervals ",intervals);
+		SIVSOUT(cout,"2 expanded_values ",expanded_values);
+		ASSERT_EQUAL(0x0000300000000008,expanded_values[6]);
 
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(expanded_values[6]);
 		SIVOUT("6's     ",leftJustified.getSciDBLeftJustifiedFormat());
@@ -1070,7 +1248,232 @@ void STARE_test() {
 			SIVOUT(i,expanded_values[i]);
 		}
 #endif
-#undef SIVOUT
+
+		intervals.clear();
+		intervals.push_back(0x0000000000000008);
+		expanded_values = expandIntervals(intervals,6);
+                ASSERT_EQUAL(0x0000000000000006,expanded_values[0]);
+
+		intervals.clear();
+		intervals.push_back(0x0000000000000008);
+		expanded_values = expandIntervals(intervals,9);
+                ASSERT_EQUAL(0x0000000000000009,expanded_values[0]);
+                ASSERT_EQUAL(0x0000020000000009,expanded_values[1]);
+                ASSERT_EQUAL(0x0000040000000009,expanded_values[2]);
+                ASSERT_EQUAL(0x0000060000000009,expanded_values[3]);
+
+                SIVSOUT(cout,"intervals ",intervals);
+                SIVSOUT(cout,"expanded  ",expanded_values)
+
+		// #undef DIAGOUT2
+		// #undef SIVOUT
+		// #define DIAGOUT2(out,expr)
+		// #undef DIAG
+	}
+
+	if(true) {
+		EmbeddedLevelNameEncoding lj;
+		STARE index;
+		SpatialVector x(1,1,0); x.normalize();
+		STARE_ArrayIndexSpatialValue siv = index.ValueFromSpatialVector(x);
+		SpatialVector v = index.SpatialVectorFromValue(siv); v.normalize();
+		// cout << "v: " << v << endl << flush;
+		ASSERT_EQUALDM("x-to-siv",x,v,1.0e-8);
+
+		siv = 0x0001000000000008;
+		v = index.SpatialVectorFromValue(siv); v.normalize(); // Note, wipes out resolution info.
+		STARE_ArrayIndexSpatialValue siv1 = index.ValueFromSpatialVector(v);
+		// cout << "iv: " << hex << siv << " " << hex << siv1 << endl << flush;
+		ASSERT_EQUALM("iv-to-v-roundtrip",siv,(siv1 & ~lj.levelMaskSciDB) | 8);
+	}
+
+	if(true) {
+		STARE index;
+		SpatialVector v(1,1,1); v.normalize();
+		STARE_ArrayIndexSpatialValue sid = index.ValueFromSpatialVector(v);
+		SpatialVector vr = index.SpatialVectorFromValue(sid);
+		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
+#ifdef DIAG
+		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
+		cout << "sidr 0x" << setw(16) << setfill('0') << hex << sidr << dec << endl << flush;
+		cout << "v  " << v << endl << flush;
+		cout << "vr " << vr << endl << flush;
+		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
+	}
+
+	if(true) {
+		/*
+		i,id  :  3 ['0x4c0000000000003']
+		test id:    ['0x4c0000000000003']
+		test ll :  [(14.255438319990454, 64.21872912284311), (-22.58410062366997, 70.08873514750778), (0.8929126045078797, 67.65325299601919)]
+		test im :  [[0, 1, 2]]
+		test lat:  [ 14.25543832 -22.58410062   0.8929126 ]
+		test lon:  [64.21872912 70.08873515 67.653253  ]
+		 */
+		STARE index;
+		// STARE_ArrayIndexSpatialValue sid = 0x4c0000000000003;
+		STARE_ArrayIndexSpatialValue sid = 0x4c000000000001b;
+		STARE_ArrayIndexSpatialValue sidtmp;
+		SpatialVector v_sid  = index.SpatialVectorFromValue(sid);
+		LatLonDegrees64 v_ll = index.LatLonDegreesFromValue(sid);
+		float64 v_lat,v_lon;
+		v_sid.getLatLonDegrees(v_lat, v_lon);
+
+#ifdef DIAG
+		cout << "v_sid " << v_sid << endl << flush;
+		cout << "v_sid ll " << v_lat << " " << v_lon << endl << flush;
+		cout << "v idx ll " << v_ll.lat << " " << v_ll.lon << endl << flush;
+		cout << "sid 0x" << setw(16) << setfill('0') << hex << sid << dec << endl << flush;
+		cout << endl << flush;
+#endif
+
+		ASSERT_EQUAL(v_lat,v_ll.lat);
+		ASSERT_EQUAL(v_lon,v_ll.lon);
+
+		Triangle tr = index.TriangleFromValue(sid);
+
+#ifdef DIAG
+		cout << "Triangle " << endl << flush;
+		for( int i=0; i<3; ++i) {
+			float64 lt,ln;
+			tr.vertices[i].getLatLonDegrees(lt,ln);
+			cout << setprecision(16);
+			cout << i << " i,v  " << tr.vertices[i]  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+
+		cout << "index.ValueFromSpatialVector triangle" << endl << flush;
+		for( int i=0; i<3; ++i) {
+			sidtmp = index.ValueFromSpatialVector(tr.vertices[i],27);
+			SpatialVector vtmp = index.SpatialVectorFromValue(sidtmp);
+			float64 lt,ln;
+			vtmp.getLatLonDegrees(lt,ln);
+			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+#endif
+
+		SpatialVector vecs[3] = {
+				SpatialVector( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 ),
+				SpatialVector( 0.4619397725326853, 0.8446231986774957, 0.2705980391803436 ),
+				SpatialVector( 0.4619397591445266, 0.8446232068078616, 0.2705980366578833 )
+		};
+
+#ifdef DIAG
+		cout << "index... from Explicit vecs" << endl << flush;
+		for( int i=0; i<3; ++i) {
+			sidtmp = index.ValueFromSpatialVector(vecs[i]);
+			SpatialVector vtmp = index.SpatialVectorFromValue(sidtmp);
+			float64 lt,ln;
+			vtmp.getLatLonDegrees(lt,ln);
+			cout << i << " i,vt " << vtmp  << " -- " << lt << "," << ln << endl << flush;
+		}
+		cout << endl << flush;
+
+		for( int i=0; i<3; ++i) {
+			float64 lat, lon;
+			SpatialVector vtmp = tr.vertices[i];
+			vtmp.getLatLonDegrees(lat,lon);
+			// tr.vertices[i].getLatLonDegrees(lat,lon);
+			sidtmp = index.ValueFromSpatialVector(vtmp,27);
+			// sidtmp = index.ValueFromSpatialVector(vtmp);
+			// sidtmp = index.ValueFromSpatialVector(tr.vertices[i]);
+			LatLonDegrees64 latlontmp = index.LatLonDegreesFromValue(sidtmp);
+			cout << i << " i,tr latlon " << lat << " " << lon << " -- "
+					<< latlontmp.lat << " " << latlontmp.lon
+					<< " -- "
+					<< "0x" << setw(16) << setfill('0') << hex << sidtmp << dec
+					<< endl << flush;
+		}
+		cout << endl << flush;
+#endif
+
+
+		DIAGOUT2(cout,setprecision(16) << "tr.v[1] " << tr.vertices[1] << endl << flush;);
+		SpatialVector v = tr.vertices[1];
+		sid = index.ValueFromSpatialVector(v);
+		SpatialVector vr = index.SpatialVectorFromValue(sid);
+		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
+		float64 lat,lon;
+		LatLonDegrees64 ll = index.LatLonDegreesFromValue(sid);
+		LatLonDegrees64 llr = index.LatLonDegreesFromValue(sidr);
+#ifdef DIAG
+		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec
+				<< " - " << ll.lat << " " << ll.lon
+				<< endl << flush;
+		cout << "sidr 0x" << setw(16) << setfill('0') << hex << sidr << dec
+				<< " - " << llr.lat << " " << llr.lon
+				<< endl << flush;
+		v.getLatLonDegrees(lat, lon);
+		cout << setprecision(16);
+		cout << "tr.v[1] " << tr.vertices[1] << endl << flush;
+		cout << "v       " << v
+				<< " - " << lat << " " << lon
+				<< endl << flush;
+		vr.getLatLonDegrees(lat, lon);
+		cout << "vr      " << vr
+				<< " - " << lat << " " << lon
+				<< endl << flush;
+		cout << endl << flush;
+#endif
+		ASSERT_EQUAL(sid,sidr);
+		ASSERT_EQUALDM("v-to-vr",v,vr,1.0e-8);
+
+	}
+
+	if(true) {
+		DIAGOUT2(cout,endl << "------" << endl << endl << flush;);
+		STARE index;
+		int resolution = 27;
+		SpatialIndex sIndex = index.getIndex(resolution);
+		for( int i = 0; i < 11; ++i ) {
+			SpatialVector v0 ( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 );
+			// SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-16);
+			SpatialVector delta = SpatialVector(0.0,0.0,(1-i*0.1)*1.0e-15);
+			// v0 = v0 + SpatialVector(0.0,0.0,0.9e-8);
+			v0 = v0 - delta;
+			v0.normalize();
+			// SpatialVector v0 ( 1, 0, 0); // Works for this one.
+			STARE_ArrayIndexSpatialValue siv0 = index.ValueFromSpatialVector(v0,resolution);
+			BitShiftNameEncoding       rightJustified(sIndex.idByPoint(v0));
+#ifdef DIAG
+			cout << i << " i,delta " << delta << endl << flush;
+			cout << "sI idbp 0x" << setw(16) << setfill('0') << hex << sIndex.idByPoint(v0) << dec << endl << flush;
+			cout << "rj name   "<< rightJustified.getName() << endl << flush;
+#endif
+
+			EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
+			EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution, true); // True means keep all bits
+			STARE_ArrayIndexSpatialValue siv = leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+			SpatialVector v_siv0 = index.SpatialVectorFromValue(siv0);
+			SpatialVector v_siv = index.SpatialVectorFromValue(siv);
+#ifdef DIAG
+			cout << "siv0  " << setw(16) << setfill('0') << hex << siv0 << endl << flush;
+			cout << "siv   " << setw(16) << setfill('0') << hex << siv << endl << flush;
+			cout << setprecision(16);
+			cout << "v0     " << v0 << endl << flush;
+			cout << "v_siv0 " << v_siv0 << endl << flush;
+			cout << "v_siv  " << v_siv << endl << flush;
+			cout << endl << "--" << endl << endl << flush;
+#endif
+			ASSERT_EQUALDM("v0-to-siv0",v0,v_siv0,1.0e-8);
+			ASSERT_EQUALDM("v0-to-siv",v0,v_siv,1.0e-8);
+		}
+
+		if(true) {
+			// Motivated by confusing EmbeddedLevelNameEncoding internal format with the SciDB format.
+			DIAG1(cout << "ExpandInterval tests" << endl << flush;)
+					// STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution)
+					STARE_SpatialIntervals interval;
+			interval.push_back(0x2324000000000005);
+			interval.push_back(0x2327ffffffffffff);
+			STARE_ArrayIndexSpatialValues values = expandInterval(interval);
+			DIAG1(for(int i = 0; i < values.size(); ++i ) { cout << dec << i << " i,v 0x" << setw(16) << setfill('0') << hex << values[i] << endl << flush << dec; })
+			ASSERT_EQUAL(0x2324000000000005,values[0]);
+			ASSERT_EQUAL(0x2326000000000005,values[1]);
+		}
 	}
 
 	// FAIL();

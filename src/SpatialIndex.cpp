@@ -15,6 +15,7 @@
 //#		Jul 25, 2002 : Gyorgy Fekete -- Added pointById()
 //#
 
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
@@ -1314,6 +1315,15 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
 	workspace[jw++] = q8;
 }
 
+#ifndef DIAG
+#define DIAG1(expr)
+#define DIAGOUT2(out,expr)
+#define DIAGOUTDELTA(out,a,b)
+#else
+#define DIAG1(expr) expr;
+#define DIAGOUT2(out,expr) out << expr;
+#define DIAGOUTDELTA(out,a,b) {SpatialVector delta_ = a-b; cout << delta_.length() << " ";}
+#endif
 
 //////////////////IDBYPOINT////////////////////////////////////////////////
 /** Find a leaf node where a vector points to
@@ -1334,6 +1344,59 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	uint64 index;
 	uint64 ID;
 
+	bool verbose = false;
+	bool nudge = false;
+
+	/**/
+	// start with the 8 root triangles, find the one which v points to
+	for(index=1; index <=8; index++) {
+		if(isInsideBarycentric(v,V(0),V(1),V(2),verbose)) break;
+	}
+	DIAGOUT2(cout,"0 preamble i: " << index << endl << flush;);
+	nudge = index == 9;
+
+	// loop through matching child until leaves are reached
+	while(ICHILD(0)!=0) {
+		uint64 oldindex = index;
+		for(size_t i = 0; i < 4; i++) {
+			index = nodes_[oldindex].childID_[i];
+			if(isInsideBarycentric(v,V(0),V(1),V(2),verbose)) break;
+		}
+	}
+	DIAGOUT2(cout,"1 preamble i: " << index << endl << flush;);
+	int index_barycentric = index;
+	/**/
+
+	// if(index == 9) {
+
+	/* THE OLD WAY
+	 * TODO Why keep the legacy point-finding behavior? Right thing to do would be to examine where barycentric and old way differ.
+	 */
+
+	SpatialVector dc;
+
+	float64 dcs[8];
+	for(index=1; index <=8; index++) {
+		dc = V(0)+V(1)+V(2); dc.normalize(); dc = dc - v;
+		dcs[index-1] = dc.length();
+		DIAGOUT2(cout,dec << index << " index,dc " << setprecision(16) << dcs[index-1] << endl << flush;);
+	}
+
+	int     index_dcs_sort[8];
+	index_dcs_sort[0]=0;
+
+	for(int i = 1; i < 8; ++i) {
+		int icmp = 0;
+		while( icmp < i && (dcs[i] >= dcs[index_dcs_sort[icmp]]) ) {++icmp; }
+		if( icmp <= i) {
+			for( int j=i+1; j>=icmp; --j ) {
+				index_dcs_sort[j]=index_dcs_sort[j-1];
+			}
+		}
+		index_dcs_sort[icmp] = i;
+	}
+	DIAG1(for(int i=0;i<8;++i) {DIAGOUT2(cout,i << " i,sort,dcs " << index_dcs_sort[i] << " " << dcs[index_dcs_sort[i]] << endl << flush;);});
+
 	// start with the 8 root triangles, find the one which v points to
 	for(index=1; index <=8; index++) {
 		if( (V(0) ^ V(1)) * v < -gEpsilon) continue;
@@ -1341,17 +1404,98 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 		if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
 		break;
 	}
-	// loop through matching child until leaves are reached
-	while(ICHILD(0)!=0) {
-		uint64 oldindex = index;
-		for(size_t i = 0; i < 4; i++) {
-			index = nodes_[oldindex].childID_[i];
+
+	if(nudge) {
+		// if(false) {
+		float64 epsilon = 1.0e-13; // TODO inject this dependency, expose as environment variable
+		// float64 epsilon = 1.0e-17; // TODO inject this dependency, expose as environment variable
+		SpatialVector ctr = V(0)+V(1)+V(2); ctr.normalize();
+		v = (1-epsilon)*v + epsilon*ctr; v.normalize();
+		for(index=1; index <=8; index++) {
 			if( (V(0) ^ V(1)) * v < -gEpsilon) continue;
 			if( (V(1) ^ V(2)) * v < -gEpsilon) continue;
 			if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
 			break;
 		}
 	}
+
+	DIAGOUT2(cout,dec << "index " << index << endl << flush;);
+	float64 dc_start, dc_end;
+	float64 dc_improvement = 2.0;
+	int attempt = 0;
+	int index_tried = index;
+	int index_last_found = index;
+	int itry = 0;
+	do {
+		++attempt;
+		if(attempt == 9) {
+			stringstream ss;
+			float64 lat,lon;
+			v.getLatLonDegrees(lat, lon);
+			ss << setprecision(16);
+			ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 1. No convergence."
+					<< " point = " << v
+					<< " index_barycentric = " << index_barycentric
+					<< " index_last_found = " << index_last_found
+					<< " latlon = " <<  lat << "," << lon
+					<< " nudge " << ( nudge ? "true" : "false" )
+					<< " dc_improvement = " << dc_improvement
+					<< " dc_start = " << dc_start
+					<< " dc_end = " << dc_end
+					<< endl << flush;
+			throw SpatialFailure(ss.str().c_str());
+		}
+		if(attempt>1) {
+			index = index_dcs_sort[itry]+1;
+			if( index == index_tried ) {
+				++itry;
+				if(itry == 8) {
+					stringstream ss;
+					float64 lat,lon;
+					v.getLatLonDegrees(lat, lon);
+					ss << setprecision(16);
+					ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 2. No convergence."
+							<< " point = " << v
+							<< " index_barycentric = " << index_barycentric
+							<< " index_last_found = " << index_last_found
+							<< " latlon = " <<  lat << "," << lon
+							<< " nudge " << ( nudge ? "true" : "false" )
+							<< " dc_improvement = " << dc_improvement
+							<< " dc_start = " << dc_start
+							<< " dc_end = " << dc_end
+							<< endl << flush;
+					throw SpatialFailure(ss.str().c_str());
+				}
+				index = index_dcs_sort[itry]+1;
+			}
+			++itry;
+			index_tried = index;
+		}
+		dc_start = dcs[index-1];
+		DIAG1(cout << attempt << " trying " << index << endl << flush;);
+		// loop through matching child until leaves are reached
+		int k = 1;
+		while(ICHILD(0)!=0) {
+			uint64 oldindex = index;
+			for(size_t i = 0; i < 4; i++) {
+				index = nodes_[oldindex].childID_[i];
+				if( (V(0) ^ V(1)) * v < -gEpsilon) continue;
+				if( (V(1) ^ V(2)) * v < -gEpsilon) continue;
+				if( (V(2) ^ V(0)) * v < -gEpsilon) continue;
+				break;
+			}
+			dc = V(0)+V(1)+V(2); dc.normalize(); dc = dc - v;
+			DIAG1(cout << dec << k++ << " k,dc " << setprecision(16) << dc.length() << " i: " << index << endl << flush;);
+		}
+		dc = V(0)+V(1)+V(2); dc.normalize(); dc = dc - v;
+		dc_end = dc.length();
+		dc_improvement = dc_end/dc_start;
+		DIAG1(cout << "dc start, end, ratio: " << dc_start << " " << dc_end << " " << dc_improvement << endl << flush;);
+		index_last_found = index;
+	} while ( dc_improvement > 0.125 && dc_end > 0.25 && !nudge );
+	// }
+	/**/
+
 	// what if we haven't gotten to build level?
 	// cout << "idbp: 100 " << endl << flush;
 	// return if we have reached maxlevel
@@ -1386,9 +1530,18 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	// cout << "idbp: 300 maxlevel_-buildlevel_ = " << level << endl << flush;
 
 	// TODO make this whole routine less ad-hoc
+	SpatialVector delta;
+	DIAGOUT2(cout,endl << flush);
 	if(level>0) {
 		int level0 = buildlevel_;
 		while(level--) {
+			DIAGOUT2(cout,setprecision(16) << dec;);
+			// cout << level << " level,v... " << v << " " << v0 << " " << v1 << " " << v2 << endl << flush;
+			DIAGOUT2(cout,level << " level,d0,d1,d2 ";);
+			DIAGOUTDELTA(cout,v,v0);
+			DIAGOUTDELTA(cout,v,v1);
+			DIAGOUTDELTA(cout,v,v2);
+			DIAGOUT2(cout,endl << flush;);
 			int subTriangleIndex = subTriangleIndexByPoint(v,v0,v1,v2);
 			// cout << "idbp: 350 level = " << level << ", level0 = " << level0++ << ", subTriangleIndex = " << subTriangleIndex << ", name = " << name;
 			name[len++] = '0'+char(subTriangleIndex);
@@ -1400,6 +1553,13 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 			throw SpatialFailure("SpatialIndex::idByPoint::LevelTooLow len < 2");
 		}
 	}
+
+	DIAGOUT2(cout,level << " level,d0,d1,d2 ";);
+	DIAGOUTDELTA(cout,v,v0);
+	DIAGOUTDELTA(cout,v,v1);
+	DIAGOUTDELTA(cout,v,v2);
+	DIAGOUT2(cout,endl << flush << level << " level,v... " << v << " " << v0 << " " << v1 << " " << v2 << endl << flush;);
+
 	name[len] = '\0';
 
 	// cout << "idbp: 400 name = '" << name << "', len = " << len << endl << flush;
@@ -1422,6 +1582,10 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	return ID;
 }
 
+#undef DIAG
+#undef DIAG1
+#undef DIAGOUT2
+#undef DIAGOUTDELTA
 
 uint64 SpatialIndex::indexAtNodeIndex(uint64 nodeIndex) {
 	return nodes_[nodeIndex].index_;

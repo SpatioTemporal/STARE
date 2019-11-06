@@ -16,6 +16,12 @@
 #include <iostream>
 #include <algorithm>
 
+#ifndef DIAG
+#define DIAGOUT1(a)
+#else
+#define DIAGOUT1(a) a
+#endif
+
 /**
  * @brief Version function with C linkage to aid in finding the library with autoconf
  * @return The library's version. Points to static storage.
@@ -130,6 +136,34 @@ STARE_ArrayIndexSpatialValue STARE::ValueFromLatLonDegrees(
 	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
 }
 
+STARE_ArrayIndexSpatialValue STARE::ValueFromSpatialVector(SpatialVector v, int resolution) {
+	uint64 htmID;
+	SpatialVector vtry(v);
+	int k = 3;
+	while(k>0) {
+		try {
+			--k;
+			htmID = sIndex.idByPoint(vtry);
+		} catch( SpatialException e ) {
+			cerr << e.what();
+			if( k > 0 ) {
+				cerr << " " << k << " Trying again... " << endl << flush;
+				vtry = vtry + 1.0e-10*SpatialVector(1,0,0); vtry.normalize();
+			} else {
+				cerr << endl << flush;
+				stringstream ss; ss << setprecision(16);
+				ss << "STARE::ValueFromSpatialVector can't find vector v= " << v << endl;
+				throw SpatialFailure(ss.str().c_str());
+			}
+
+		}
+	}
+	BitShiftNameEncoding       rightJustified(htmID);
+	EmbeddedLevelNameEncoding  leftJustified(rightJustified.leftJustifiedId());
+	EmbeddedLevelNameEncoding  leftJustifiedWithResolution = leftJustified.atLevel(resolution >= 0 ? resolution : leftJustified.getLevel(), true); // True means keep all bits
+	return leftJustifiedWithResolution.getSciDBLeftJustifiedFormat();
+}
+
 /**
  * Extract the resolution information from the spatial array index value. Since this
  * does not use the sIndex, it doesn't really need to be a method of this class.
@@ -157,6 +191,7 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	// cout << "sid: " << spatialStareId << endl << flush;
 
 	uint64 htmID = htmIDFromValue(spatialStareId);
+	// cout << "lldfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
@@ -165,10 +200,12 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	float64 lat=-999, lon=-999;
 	v.getLatLonDegrees(lat, lon);
 
-	// cout << "sid-latlon: " << lat << ", " << lon << endl << flush;
+	// cout << "0 sid-latlon: " << lat << ", " << lon << endl << flush;
 
 	// LatLonDegrees64 latlon = {.lat = lat, .lon = lon };
 	LatLonDegrees64 latlon(lat, lon); //  = {.lat = lat, .lon = lon };
+
+	// cout << "1 sid-latlon: " << latlon.lat << ", " << latlon.lon << endl << flush;
 
 	// return latlon;
 	return LatLonDegrees64(lat, lon);
@@ -182,7 +219,9 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 }
 
 SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
-	uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	// uint64 htmID = htmIDFromValue(spatialStareId,STARE_HARDWIRED_RESOLUTION_LEVEL_MAX);  // Max resolution
+	uint64 htmID = htmIDFromValue(spatialStareId);  // Max resolution
+	// cout << "svfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 	SpatialVector v;
 	/// This returns the center of the triangle (at index.search_level). Need to extract the position information.
 	sIndex.pointByHtmId(v, htmID);
@@ -236,6 +275,17 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	return {.centroid=vc, .vertices=vertices};
 }
 
+STARE_ArrayIndexSpatialValues STARE::toVertices(STARE_ArrayIndexSpatialValues spatialStareIds) {
+	STARE_ArrayIndexSpatialValues spatialValues;
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		Triangle tr = TriangleFromValue(spatialStareIds[i]);
+		for(int j=0; j<3; ++j) {
+			spatialValues.push_back(ValueFromSpatialVector(tr.vertices[j]));
+		}
+	}
+	return spatialValues;
+}
+
 /**
  * Return the area associated with the index value based on the embedded resolution level, by default.
  * The calculation may be coerced to another resolution level, e.g. search_level.
@@ -264,6 +314,8 @@ float64 STARE::AreaFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int re
 	}
 	return sIndexes[resolutionLevel].areaByHtmId(htmID);
 }
+
+/// TODO STARE::InfoFromValue // Get all the info from a volume, so we only translate between forms once.
 
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId) {
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
@@ -463,7 +515,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 
 	// cout << dec << "a2000" << endl << flush;
 
-	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // TODO FIX interiorp = false is broken
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // Compress result
 
 	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
@@ -471,7 +523,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
 		cover.push_back(lo);
 		uint64 hi;
-		if( htmRangeVector[i].lo != htmRangeVector[i].lo ) {
+		if( htmRangeVector[i].lo != htmRangeVector[i].hi ) {
 			hi = sTerminator(ValueFromHtmID(htmRangeVector[i].hi));
 			cover.push_back(hi);
 		}
@@ -481,6 +533,14 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
+}
+
+STARE_SpatialIntervals STARE::ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level) {
+	LatLonDegrees64ValueVector latlon;
+	for( STARE_ArrayIndexSpatialValues::iterator i=points.begin(); i != points.end(); ++i) {
+		latlon.push_back(LatLonDegreesFromValue(*i));
+	}
+	return ConvexHull(latlon,force_resolution_level);
 }
 
 /*
@@ -495,6 +555,8 @@ SpatialIndex STARE::getIndex(int resolutionLevel) {
 
 /**
  * Return the legacy htmID value from the spatialStareId.
+ *
+ * NOTE THIS IGNORES EMBEDDED RESOLUTION
  *
  * Note the htmID precision level needn't have a resolution interpretation, but is more purely geometric.
  * This is important when calling into the legacy htm foundation and why it's kept private.
@@ -513,6 +575,7 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	uint64 htmID = rightJustified.getId();
 	return htmID;
 }
+
 /**
  * Return the spatialStareId from the legacy htmID.
  *
@@ -584,7 +647,7 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, 
     return getArrayIndexTemporalValue();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {        
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
     return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
@@ -593,7 +656,7 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution
 STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
     struct tm tm;                       // time_t as seconds since UNIX epoch
     gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
-    return ValueFromUTC(tm, resolution, type);    
+    return ValueFromUTC(tm, resolution, type);
 }
 
 Datetime STARE::UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue) {
@@ -664,42 +727,66 @@ uint64 spatialLevelMask() {
 
 STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
 	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-	// cout << dec << 200 << endl << flush;
-	STARE_ArrayIndexSpatialValue siv0 = interval[0];
+        DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
+	STARE_ArrayIndexSpatialValue siv_orig = interval[0];
+	STARE_ArrayIndexSpatialValue siv0 = siv_orig;
 	EmbeddedLevelNameEncoding leftJustified;
-	// cout << dec << 220 << endl << flush;
-	uint64 return_resolution = siv0 & leftJustified.levelMaskSciDB;
-	// cout << dec << 225 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	DIAGOUT1(cout << dec << 220 << endl << flush;)
+        uint64 input_resolution  = siv0 & leftJustified.levelMaskSciDB;
+	uint64 return_resolution = input_resolution; // To start with.
+	DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	if( force_resolution > -1 ) {
 		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
 		return_resolution = force_resolution;
 	}
-	// cout << dec << 230 << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;
+	DIAGOUT1(cout << dec << 229 << " f & resolution: " << dec << force_resolution << " " << return_resolution << endl << flush;)
+	DIAGOUT1(cout << dec << 230 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
 	// cout << dec << 235 << endl << flush;
 	STARE_ArrayIndexSpatialValue siv_term;
 	if( interval.size() > 1 ) {
 		siv_term = interval[1];
 	} else {
-		siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
+	  if( return_resolution != input_resolution ) { // TODO Maybe clean up this logic later.
+	    EmbeddedLevelNameEncoding lj; lj.setIdFromSciDBLeftJustifiedFormat(siv_orig);
+	    siv_term = lj.getSciDBTerminatorLeftJustifiedFormat(); // From siv_orig.
+	  } else {
+	    siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat(); // From siv0.
+	  }
 	}
-	// cout << dec << 240 << endl << flush;
+	DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << endl << dec << 240 << endl << flush;)
 	uint64 one_mask_to_resolution, one_at_resolution;
-	leftJustified.increment_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
-	// cout << dec << 245 << endl << flush;
+	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+	// cout << dec << 242 << endl << flush;
+
+	uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB));
+
+	DIAGOUT1(cout << endl;)
+	uint64 one = 1;
+	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
+	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << delta << " " << dec << (delta/one_at_resolution) << endl << flush;)
+
 	// Give as much rope as needed.
+	DIAGOUT1(cout << dec << 246 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 	siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << endl << flush;)
+	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << one_at_resolution << dec << endl << endl << flush;)
 	STARE_ArrayIndexSpatialValues expanded_interval;
 	while( siv0 < siv_term ) {
+		DIAGOUT1(cout << dec << 249 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
 		expanded_interval.push_back(siv0);
 		siv0 += one_at_resolution;
 	}
-	// cout << dec << 250 << endl << flush;
+	DIAGOUT1(cout << dec << 250 << endl << endl << flush;)
 	return expanded_interval;
 }
 
 /**
- *
+ * Expand intervals found in intervals into spatial ids.
  */
 STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
 	STARE_ArrayIndexSpatialValues expanded_values;
@@ -719,7 +806,7 @@ STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, 
 			// cout << dec << 120 << endl << flush;
 			siv1 = intervals[i];
 			// cout << dec << 120 << " " << i << " " << setw(16) << setfill('0') << hex << siv1 << dec << endl << flush;
-			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) {
+			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) { // Check for a terminator.
 				// cout << dec << 121 << " " << i << endl << flush;
 				interval.push_back(siv1);
 				++i;

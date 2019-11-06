@@ -115,6 +115,8 @@ const float64 gPi   = 3.1415926535897932385E0 ;
 const float64 gPio2 = 3.1415926535897932385E0/2.0 ;
 const float64 gPr = gPi/180.0; 
 const float64 piDiv180 = gPr;
+
+// TODO Set these by environment variable or other property list.
 // const float64 gEpsilon = 1.0E-15;
 // const float64 gEpsilon = 1.0E-16;
 // const float64 gEpsilon = 1.0E-17;

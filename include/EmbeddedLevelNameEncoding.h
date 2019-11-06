@@ -102,7 +102,12 @@ public:
 
 	EmbeddedLevelNameEncoding clearDeeperThanLevel(uint64 level);
 
+	void SciDBincrement_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const;
 	void increment_LevelToMaskDelta(uint32 level,uint64 &one_mask_to_level,uint64 &one_at_level) const;
+
+	/*
+	 * increment and decrement work on the internal bit format, not the SciDB format.
+	 */
 	uint64 increment(uint64 lowerBound, uint32 level, int steps = 1) const;
 	uint64 decrement(uint64 lowerBound, uint32 level, int steps = 1) const;
 

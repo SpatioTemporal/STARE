@@ -117,7 +117,7 @@ void SpatialInterface_test() {
 
 		if( true ) {
 
-			cout << endl << "----" << endl << endl << endl << flush;
+			// cout << endl << "----" << endl << endl << endl << flush;
 
 			// Try a grid...
 			int nLat = 11,nLon = 11, nLatLon=nLat*nLon;
@@ -150,16 +150,16 @@ void SpatialInterface_test() {
 			for( int i=0; i<nLon; ++i ) {
 				for( int j=0; j<nLat; ++j ) {
 					htm->setPolyCorner(vs[k]);
-					cout << k << " k, hpc size " << htm->polyCorners_.size() << endl << flush;
+					// cout << k << " k, hpc size " << htm->polyCorners_.size() << endl << flush;
 					float64 lat_,lon_; vs[k].getLatLonDegrees(lat_,lon_);
-					cout << k << " k, try "
-							<< lat_ << " " << lon_	<< endl << flush;
+					// cout << k << " k, try "
+					// << lat_ << " " << lon_	<< endl << flush;
 					for(int l=0; l<htm->polyCorners_.size(); ++l) {
 						htm->polyCorners_[l].c_.getLatLonDegrees(lat_,lon_);
-						cout << l << " l, hpc "
-								<< lat_ << " " << lon_	<< endl << flush;
+						// cout << l << " l, hpc "
+						//		<< lat_ << " " << lon_	<< endl << flush;
 					}
-					cout << "-----" << endl << flush;
+					// cout << "-----" << endl << flush;
 					++k;
 					// if(k>5) exit(1);
 				}
