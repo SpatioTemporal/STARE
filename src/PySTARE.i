@@ -274,14 +274,120 @@
 
 %pythoncode %{
 import numpy
-def intersect(indices1, indices2):
-    out_length = 2*max(len(indices1),len(indices2))
-    intersected = numpy.zeros([out_length], dtype=numpy.int64)
-    leni = 0
-    _intersect(indices1, indices2, intersected)
-    intersected = intersected.trim_zeros()
-    return intersected
 
+
+def to_compressed_range(indices):
+    out_length = len(indices)
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    len_ri = 0
+    _to_compressed_range(indices,range_indices)
+    endarg = 0
+    while (endarg < out_length) and (range_indices[endarg] > 0):
+      endarg = endarg + 1
+    # endarg = numpy.argmax(range_indices < 0)
+    range_indices = range_indices[:endarg]
+    return range_indices
+    
+def expand_intervals(intervals,resolution,result_size_limit=1000):
+	result      = numpy.full([result_size_limit],-1,dtype=numpy.int64)
+	result_size = numpy.full([1],-1,dtype=numpy.int64)
+	_expand_intervals(intervals,resolution,result,result_size)
+	result = result[:result_size[0]]
+	return result
+    
+def to_hull_range(indices,resolution,range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
+    result_size = numpy.full([1],-1,dtype=numpy.int64)
+    _to_hull_range(indices,resolution,range_indices,result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+    
+def to_hull_range_from_latlon(lat, lon, resolution, range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length], -1, dtype=numpy.int64)
+    result_size = numpy.full([1], -1, dtype=numpy.int64)
+    _to_hull_range_from_latlon(lat, lon, resolution, range_indices, result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+    
+def to_vertices_latlon(indices):
+	out_length = len(indices)
+	lats = numpy.zeros([4*out_length],dtype=numpy.double)
+	lons = numpy.zeros([4*out_length],dtype=numpy.double)
+	# _to_vertices_latlon(indices,lats,lons,0)
+	lats,lons = _to_vertices_latlon(indices)
+	latsv = numpy.zeros([3*out_length],dtype=numpy.double)
+	lonsv = numpy.zeros([3*out_length],dtype=numpy.double)
+	latc  = numpy.zeros([out_length],dtype=numpy.double)
+	lonc  = numpy.zeros([out_length],dtype=numpy.double)
+	
+	k=0; l=0
+	for i in range(out_length):
+		latsv[l]   = lats[ k   ]
+		lonsv[l]   = lons[ k   ]
+		
+		latsv[l+1] = lats[ k+1 ]
+		lonsv[l+1] = lons[ k+1 ]
+				
+		latsv[l+2] = lats[ k+2 ]
+		lonsv[l+2] = lons[ k+2 ]
+				
+		latc [i]   = lats[ k+3 ]
+		lonc [i]   = lons[ k+3 ]
+		k = k + 4; l = l + 3
+	return latsv,lonsv,latc,lonc
+    
+def cmp_spatial(indices1, indices2):
+	out_length = len(indices1)*len(indices2)
+	cmp = numpy.zeros([out_length],dtype=numpy.int64)
+	_cmp_spatial(indices1,indices2,cmp)
+	return cmp    
+
+def intersect(indices1, indices2, multiresolution=True):
+    out_length = 2*max(len(indices1),len(indices2))
+    intersected = numpy.full([out_length],-1,dtype=numpy.int64)
+    leni = 0
+    if(multiresolution):
+      _intersect_multiresolution(indices1, indices2, intersected)
+    else:
+      _intersect(indices1, indices2, intersected)
+    endarg = numpy.argmax(intersected < 0)
+    intersected = intersected[:endarg]
+    return intersected
+    
+    
+# Shapely integration
+import shapely 
+
+def from_shapely(geom, level):
+    if geom.geom_type == 'Point':
+        return from_point(geom, level)
+    if geom.geom_type == 'Polygon':
+        return from_polygon(geom)
+
+def from_point(point, level):
+    lat = point.x
+    lon = point.y
+    return from_latlon([lat], [lon], level)
+
+def from_polygon(polyon, level):
+    pass
+
+# Geopandas integration
+import geopandas
+    
+def from_geopandas(gdf, level):
+    # Test if all geometries are Points
+    if min(gdf.geom_type == 'Point') == 0:
+        print('not all geometries are points')
+        return 1
+    else:
+        lat = gdf.geometry.x
+        lon = gdf.geometry.y
+        return from_latlon(lat, lon, level)
+        
+    
 %}   
    
 %include "PySTARE.h"
