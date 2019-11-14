@@ -1,4 +1,8 @@
 
+* 2019-09-23 Version 0.8.2
+
+Replacing math.h with cmath seems to help builds on CentOS 7 and later gcc.
+
 * 2019-09-22 Version 0.8.1
 
 Made change to STARE.h not STARE.h.in in 0.8.0 that

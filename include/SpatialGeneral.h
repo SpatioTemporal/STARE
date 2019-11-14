@@ -47,7 +47,8 @@
  TODO Explore using uint64 instead of uint32...
  */
 
-#include <math.h>
+//#include <math.h>
+#include <cmath>
 //#include <stdio.h>
 //#include <iostream>
 #include <vector>
