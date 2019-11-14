@@ -437,6 +437,12 @@
 %pythoncode %{
 import numpy
 
+class PyStareError(Exception):
+    pass
+
+class PyStareArrayBoundsExceeded(Exception):
+    pass
+
 def to_neighbors(indices):
     out_length = 12*len(indices)
     len_ri = 0
