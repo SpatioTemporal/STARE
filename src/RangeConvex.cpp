@@ -479,7 +479,7 @@ RangeConvex::simplify0() {
 //
 //	}
 
-	int iFuse = 12;
+	uint64 iFuse = 256*1024*1024*1024;
 	while( currentCorner ) {
 
 #ifdef DIAG

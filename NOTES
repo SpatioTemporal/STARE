@@ -1,4 +1,9 @@
 
+* 2019-11-14 Version 0.9.1
+
+Diagnostic "iFuse" loop counter set to low value of 12 during testing of "infinite" looping in RangeConvex::simplify0. This
+guaranteed that large enough sets of points sent to ConvexHull would overstep this loop limit, which would then exit 1 the app.
+
 * 2019-11-14 Version 0.9.0
 
 Many improvements, most to pystare.
