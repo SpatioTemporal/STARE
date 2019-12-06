@@ -19,3 +19,7 @@ target_include_directories  ( lookupSpatial PUBLIC /usr/include )
 add_executable              ( lookupTemporal lookupTemporal.cpp )
 target_link_libraries       ( lookupTemporal STARE )
 target_include_directories  ( lookupTemporal PUBLIC /usr/include )
+
+add_executable              ( lookupPolygon lookupPolygon.cpp )
+target_link_libraries       ( lookupPolygon STARE )
+target_include_directories  ( lookupPolygon PUBLIC /usr/include )

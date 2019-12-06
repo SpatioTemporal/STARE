@@ -34,7 +34,6 @@ void from_latlon(double* lat, int len_lat,  double * lon, int len_lon, int64_t* 
 void to_latlon(int64_t* indices, int len, double* lat, double* lon);
 void to_latlonlevel(int64_t* indices, int len, double* lat, double* lon, int* levels);
 void to_level(int64_t* indices, int len,  int* levels);
-void to_triangle(int64_t* indices, int len);
 // Broken or dangerous. void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertices1, int64_t* vertices2, int64_t* centroid);
 void _to_vertices_latlon(int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2 );
 void to_area(int64_t* indices, int len, double* areas);
