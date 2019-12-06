@@ -11,7 +11,7 @@
 #define INCLUDE_GENERAL_H_
 
 #include <cstdint>
-#include <math.h>
+#include <cmath>
 
 int firstBitDifferenceFromLeft(int64_t i0, int64_t i1);
 

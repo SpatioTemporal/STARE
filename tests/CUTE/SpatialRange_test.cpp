@@ -251,9 +251,10 @@ void SpatialRange_test () {
 	}
 
 	if(false) {
-		// From PySTARE.cpp
+		// From PySTARE.cpp for testing some odd behavior.
 		// void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
-		int len1 = 3, len2 = 3, leni = 3;
+	  const int len1 = 3, len2 = 3;
+	  int leni = 3;
 		int64_t
 		indices1[len1] = {0,0,0},
 		// indices2[len2] = {0,0,0},
@@ -266,7 +267,7 @@ void SpatialRange_test () {
 		SpatialRange r1(si1), r2(si2);
 		SpatialRange *ri = r1 & r2;
 		STARE_SpatialIntervals result = ri->toSpatialIntervals();
-		leni = result.size();
+		leni = result.size(); // result.size() should be less than the output-length input above (leni).
 		for(int i=0; i<leni; ++i) {
 			intersection[i] = result[i];
 		}

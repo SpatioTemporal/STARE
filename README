@@ -20,7 +20,7 @@ INSTALL
   Please see the INSTALL file for more information. CMake is the preferred build method.
   
 PySTARE
-  A fledgling Python 3 interface is available. See INSTALL and src/PySTARE.cpp for more information.
+  A Python 3 interface is available. See INSTALL and src/PySTARE.cpp for more information.
 
 
 ###########################################################################

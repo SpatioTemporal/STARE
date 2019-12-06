@@ -1,4 +1,25 @@
 
+* 2019-11-14 Version 0.9.1
+
+Diagnostic "iFuse" loop counter set to low value of 12 during testing of "infinite" looping in RangeConvex::simplify0. This
+guaranteed that large enough sets of points sent to ConvexHull would overstep this loop limit, which would then exit 1 the app.
+
+* 2019-11-14 Version 0.9.0
+
+Many improvements, most to pystare.
+
+In pystare...
+- Circular covers
+- Support for matplotlib.tri.Triangulate
+- A toe in the water of exceptions
+
+In the library...
+- Subtle bug corrected in terminator construction
+
+* 2019-09-23 Version 0.8.2
+
+Replacing math.h with cmath seems to help builds on CentOS 7 and later gcc.
+
 * 2019-09-22 Version 0.8.1
 
 Made change to STARE.h not STARE.h.in in 0.8.0 that

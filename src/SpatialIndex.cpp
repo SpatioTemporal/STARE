@@ -32,7 +32,7 @@
 #endif
 
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 // ===========================================================================
 //
 // Macro definitions for readability

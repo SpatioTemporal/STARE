@@ -25,7 +25,7 @@
 /Makefile-Linux
 /Makefile
 /build
-/build1
+/build1-*
 build-1
 /lookup
 /lookupInteractive
