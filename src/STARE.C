@@ -489,10 +489,12 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
  * Unfortunately, it erroneously returns a few spatial IDs from the interior as well.
  *
  */
-STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level) {
+STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int force_resolution_level) {
 
 	STARE_SpatialIntervals cover;
 	int hullSteps = points.size();
+   
+
 	htmInterface *htm;
 	// cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
 	if( force_resolution_level > -1 ) {
@@ -514,9 +516,9 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points,int f
 	}
 
 	// cout << dec << "a2000" << endl << flush;
-
-	HTMRangeValueVector htmRangeVector = htm->convexHull(points,hullSteps,true); // Compress result
-
+    
+	HTMRangeValueVector htmRangeVector = htm->convexHull(points, hullSteps, true); // Compress result
+    
 	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {

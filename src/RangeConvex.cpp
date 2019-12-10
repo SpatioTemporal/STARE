@@ -199,16 +199,14 @@ RangeConvex::add(SpatialConstraint & c)
 // zero-constraints are half-spheres, defined by a single normalized
 // vector v, pointing in the direction of that half-sphere.
 //
-// Two zero-constraints intersect at
+// Two zero-constraints intersect at the vector cross product 
+// of their two defining vectors.
+//    i1= + crossprod(v1, v2)
+//    i2= - crossprod(v1, v2)  
 //
-//    i    =  +- v  x v
-//     1,2        1    2
-//
-// the vector cross product of their two defining vectors.
-//
-// The two vectors i1,2 are tested against every other constraint in
-// the convex if they lie within their half-spheres. Those
-// intersections i which lie within every other constraint, are stored
+// The two vectors i1, i2 are tested against every other constraint in
+// the convex if they lie within their half-spheres. 
+// Those intersections i which lie within every other constraint, are stored
 // into corners_.
 //
 // Constraints that do not have a single corner on them, are dropped.
@@ -537,17 +535,14 @@ RangeConvex::simplify0() {
 				break;
 			}
 		}
-
 		// TODO When c can't be found in both cc1 and cc2, this routine fails spinning.
 		// TODO There's no way back to zero.
 
-
-		if(--iFuse == 0) {
+        if(--iFuse == 0) {
 #ifdef DIAG
 			cout << endl;
 #endif
 			cout << "rc::s0 3699 iFuse exit " << endl << flush;
-
 			exit(1);
 		}
 	}
@@ -622,7 +617,6 @@ RangeConvex::simplify() {
 #ifdef DIAG
   cout << "rc::s" << endl << flush;
 #endif
-
   if(sign_ == zERO) {
     simplify0();	// treat zERO convexes separately
     return;
@@ -632,6 +626,7 @@ RangeConvex::simplify() {
   size_t clen;
   bool redundancy = true;
 
+    
   while(redundancy) {
     redundancy = false;
     clen = constraints_.size();

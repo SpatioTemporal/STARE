@@ -85,7 +85,7 @@
   $3 = (int64_t*) array_data((PyArrayObject*)out);
 }
 
-/* maps ONE int64_t input vector one ONE int to ONE int64_t output vector */
+/* maps ONE int64_t input vector to ONE int64_t output vector */
 /* We use this to create a STARE array ... to_hull_range */
 %typemap(in, numinputs=1)
   (int64_t* in_array, int length, int resolution, int64_t* out_array, int len_out, int* result_size)
@@ -466,30 +466,30 @@ def to_compressed_range(indices):
     range_indices = range_indices[:endarg]
     return range_indices
     
-def expand_intervals(intervals,resolution,result_size_limit=1000):
+def expand_intervals(intervals, resolution, result_size_limit=1000):
 	result      = numpy.full([result_size_limit],-1,dtype=numpy.int64)
 	result_size = numpy.full([1],-1,dtype=numpy.int64)
 	_expand_intervals(intervals,resolution,result,result_size)
 	result = result[:result_size[0]]
 	return result
     
-def to_hull_range(indices,resolution,range_size_limit=1000):
+def to_hull_range(indices, resolution, range_size_limit=1000):
     out_length = range_size_limit
-    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
-    result_size = numpy.full([1],-1,dtype=numpy.int64)
-    _to_hull_range(indices,resolution,range_indices,result_size)
-    range_indices = range_indices[:result_size[0]]
-    return range_indices
-    
-def to_hull_range_from_latlon(lat,lon,resolution,range_size_limit=1000):
-    out_length = range_size_limit
-    range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
-    result_size = numpy.full([1],-1,dtype=numpy.int64)
-    _to_hull_range_from_latlon(lat,lon,resolution,range_indices,result_size)
+    range_indices = numpy.full([out_length], -1, dtype=numpy.int64)
+    result_size = numpy.full([1], -1, dtype=numpy.int64)
+    _to_hull_range(indices, resolution, range_indices,result_size)
     range_indices = range_indices[:result_size[0]]
     return range_indices
 
-def to_circular_cover(lat,lon,radius,resolution,range_size_limit=1000):
+def to_hull_range_from_latlon(lat, lon, resolution, range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length], -1, dtype=numpy.int64)
+    result_size = numpy.full([1], -1, dtype=numpy.int64)
+    _to_hull_range_from_latlon(lat, lon, resolution, range_indices, result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+
+def to_circular_cover(lat, lon, radius, resolution, range_size_limit=1000):
     out_length = range_size_limit
     range_indices = numpy.full([out_length],-1,dtype=numpy.int64)
     result_size = numpy.full([1],-1,dtype=numpy.int64)
@@ -502,13 +502,14 @@ def to_vertices_latlon(indices):
 	lats = numpy.zeros([4*out_length],dtype=numpy.double)
 	lons = numpy.zeros([4*out_length],dtype=numpy.double)
 	# _to_vertices_latlon(indices,lats,lons,0)
-	lats,lons = _to_vertices_latlon(indices)
+	lats, lons = _to_vertices_latlon(indices)
 	latsv = numpy.zeros([3*out_length],dtype=numpy.double)
 	lonsv = numpy.zeros([3*out_length],dtype=numpy.double)
-	latc  = numpy.zeros([out_length],dtype=numpy.double)
-	lonc  = numpy.zeros([out_length],dtype=numpy.double)
+	lat_center = numpy.zeros([out_length],dtype=numpy.double)
+	lon_center = numpy.zeros([out_length],dtype=numpy.double)
 	
-	k=0; l=0
+	k=0
+	l=0
 	for i in range(out_length):
 		latsv[l]   = lats[ k   ]
 		lonsv[l]   = lons[ k   ]
@@ -519,10 +520,11 @@ def to_vertices_latlon(indices):
 		latsv[l+2] = lats[ k+2 ]
 		lonsv[l+2] = lons[ k+2 ]
 				
-		latc [i]   = lats[ k+3 ]
-		lonc [i]   = lons[ k+3 ]
-		k = k + 4; l = l + 3
-	return latsv,lonsv,latc,lonc
+		lat_center [i]   = lats[ k+3 ]
+		lon_center [i]   = lons[ k+3 ]
+		k = k + 4
+		l = l + 3
+	return latsv,lonsv,lat_center,lon_center
     
 def cmp_spatial(indices1, indices2):
 	out_length = len(indices1)*len(indices2)
@@ -537,8 +539,8 @@ def cmp_temporal(indices1, indices2):
 	return cmp   
 	
 def intersect(indices1, indices2, multiresolution=True):
-    out_length = 2*max(len(indices1),len(indices2))
-    intersected = numpy.full([out_length],-1,dtype=numpy.int64)
+    out_length = 2*max(len(indices1), len(indices2))
+    intersected = numpy.full([out_length], -1, dtype=numpy.int64)
     leni = 0
     if(multiresolution):
       _intersect_multiresolution(indices1, indices2, intersected)
@@ -555,6 +557,13 @@ def shiftarg_lon(lon):
     else:
         return lon
 
+def shiftarg_lat(lat):
+    "If lat is outside +/-90, then correct back."
+    if(lat>90):
+        return ((lat + 90.0) % 180.0)-90.0
+    else:
+        return lat
+        
 def spatial_resolution(km):
     return 10-np.log2(km/10)
 
@@ -572,16 +581,86 @@ def triangulate(lats,lons):
     return lons,lats,intmat 
 
 def triangulate_indices(indices):
-    """
-    Prepare data for matplotlib.tri.Triangulate.
+    """ Prepare data for matplotlib.tri.Triangulate."""
 
     lons,lats,intmat = triangulate_indices(indices)
     triang = tri.Triangulation(lons,lats,intmat)
     plt.triplot(triang,'r-',transform=transform,lw=1,markersize=3)
-    """
-    latv,lonv,latc,lonc = to_vertices_latlon(indices)
+    latv,lonv,lat_center,lon_center = to_vertices_latlon(indices)
     lons,lats,intmat = triangulate(latv,lonv)
     return lons,lats,intmat
+
+
+# Shapely integration 
+
+import shapely.geometry
+
+def from_shapely(geom, resolution):
+    if geom.geom_type == 'Point':
+        return from_point(geom, resolution)
+    if geom.geom_type == 'Polygon':
+        return from_polygon(geom)
+
+def from_point(point, resolution):
+    lat = point.y
+    lon = point.x
+    index_value = from_latlon([lat], [lon], resolution)
+    return index_value
+
+def from_polygon(polygon, resolution=-1, range_size_limit=1000):
+    latlon = polygon.exterior.coords.xy
+    lon = latlon[0]
+    lat = latlon[1]
+    range_indices = to_hull_range_from_latlon(lat, lon, resolution, range_size_limit)
+    return range_indices
+    
+def from_multipolygon(multipolygon, resolution=-1, range_size_limit=1000):
+    range_indices = []
+    for polygon in multipolygon.geoms:
+        range_indices += list(from_polygon(polygon, resolution, range_size_limit))
+    return range_indices
+    
+# Geopandas integration
+import geopandas
+    
+def from_geopandas(gdf, resolution=-1, range_size_limit=1000):
+    # Test if all geometries are Points or Polygons
+    if set(gdf.geom_type) == {'Point'}:
+        lat = gdf.geometry.y
+        lon = gdf.geometry.x
+        return from_latlon(lat, lon, resolution)
+    if not set(gdf.geom_type) - {'Polygon', 'MultiPolygon'}:
+        index_values = []
+        for polygon in gdf.geometry:
+            if polygon.type == 'Polygon':
+                index_values.append(from_polygon(polygon, resolution, range_size_limit))
+            else:
+                index_values.append(from_multipolygon(polygon, resolution, range_size_limit))
+        return index_values        
+    else:
+        print('inhomogenous geometry types')
+        return 1
+
+def to_trixels_series(series):
+    trixels_series = []
+    for index_values in series:
+        trixels = to_trixels(index_values)
+        trixels = shapely.geometry.MultiPolygon(trixels)
+        trixels_series.append(trixels)
+    return trixels_series
+    
+def to_trixels(indices):
+    latv, lonv = _to_vertices_latlon(indices)
+    for i in range(len(latv)):
+        latv[i] = shiftarg_lat(latv[i])
+        lonv[i] = shiftarg_lon(lonv[i])
+    i = 0    
+    trixels = []
+    while i < len(latv):
+        geom = shapely.geometry.Polygon([[lonv[i], latv[i]], [lonv[i+1], latv[i+1]], [lonv[i+2], latv[i+2]]])
+        trixels.append(geom)
+        i += 4
+    return trixels
 
 %}   
    

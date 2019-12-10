@@ -40,13 +40,6 @@ void to_level(int64_t* indices, int len, int* levels) {
     }
 }
 
-void to_triangle(int64_t* indices, int len) {
-    for (int i=0; i<len; i++) {             
-        stare.TriangleFromValue(indices[i]);
-        //TBD
-    }
-}
-
 /*
  * Broken or dangerous
  *
@@ -220,9 +213,11 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 
 	LatLonDegrees64ValueVector points;
 	for(int i=0; i<len_lat; ++i) {
-		points.push_back(LatLonDegrees64(lat[i],lon[i]));
+		points.push_back(LatLonDegrees64(lat[i], lon[i]));
 	}
+	
 	STARE_SpatialIntervals result = stare.ConvexHull(points, resolution);
+    
 	if(len_ri < result.size()) {
 		cout << dec;
 		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;

@@ -26,15 +26,15 @@ void usage(char *name) {
 			<< "  " << " -h, --help                                      : print this help"                                    << std::endl
 			<< "  " << " -v, --verbose                                   : verbose: print all"                                 << std::endl
 			<< "  " << " -q, --quiet                                     : don't chat, just give back index"                   << std::endl
-			//<< "  " << " -x, --hex                                       : print node id in hexadecimal (default: off)"        << std::endl
-            //<< "  " << " -i, --integer                                   : print node id as an integer (default: on)"          << std::endl
-            //<< "  " << " -s, --symbol                                    : print node id as a string symbol (default: off)"    << std::endl
+			<< "  " << " -x, --hex                                       : print node id in hexadecimal (default: off)"        << std::endl
+            << "  " << " -i, --integer                                   : print node id as an integer (default: on)"          << std::endl
+            << "  " << " -s, --symbol                                    : print node id as a string symbol (default: off)"    << std::endl
             << "  " << " -a, --area                                      : print area of node (default: off)"                  << std::endl
             << "  " << " -c, --corner                                    : print node corners (default: off)"                  << std::endl
 			<< "  " << " -r, --resolution=RESOLUTION                     : Resolution of index to return (Default: 23)"        << std::endl
 			<< "  " << " -l, --latlon lat lon                            : specify latitude longitude of point to look up"     << std::endl
-			//<< "  " << " -m, --xyz x y z                                 : specify cartesian coordinate of point to look up"   << std::endl
-			//<< "  " << " -n, --radenc ra dec                             : specify J2000 coordinate of point to look up"       << std::endl
+			<< "  " << " -m, --xyz x y z                                 : specify cartesian coordinate of point to look up"   << std::endl
+			<< "  " << " -n, --radenc ra dec                             : specify J2000 coordinate of point to look up"       << std::endl
 			<< std::endl;
 	exit(0);
 };
