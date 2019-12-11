@@ -35,3 +35,5 @@ build-1
 # now that STARE.h is a generated file, don't including it in git
 /include/STARE.h
 
+*.pyc
+\#*#
