@@ -182,6 +182,11 @@ void _to_circular_cover(double lat, double lon, double radius, int resolution, i
 	result_size[0] = result.size();
 }
 
+StareResult _to_circular_cover1(double lat, double lon, double radius, int resolution) {
+  StareResult result; result.add_intervals(stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution));
+  return result;
+}
+
 void _to_compressed_range(int64_t* indices, int len, int64_t* range_indices, int len_ri) {
 	STARE_SpatialIntervals si(indices, indices+len);
 	SpatialRange r(si);
@@ -376,4 +381,72 @@ void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int
 			++k;
 		}
 	}
+}
+
+StareResult::~StareResult() {}
+int  StareResult::get_size() {
+  switch( sCase ) {
+  case ArrayIndexSpatialValues : return get_size_as_values();
+  case SpatialIntervals        : return get_size_as_intervals();
+  }
+  return -1; // Maybe throw something instead.
+}
+int  StareResult::get_size_as_values() {
+  if( sCase == SpatialIntervals ) {
+    convert();
+  }
+  return sisvs.size();
+}
+int  StareResult::get_size_as_intervals() {
+  if( sCase == ArrayIndexSpatialValues ) {
+    convert();
+  }
+  return sis.size();
+}
+void StareResult::copy             (int64_t* indices, int len) {
+  switch( sCase ) {
+  case ArrayIndexSpatialValues :
+    copy_as_values(indices,len);
+    ; break;
+  case SpatialIntervals :
+    copy_as_intervals(indices,len);
+    ; break;
+  }
+}
+void StareResult::copy_as_values   (int64_t* indices, int len) {
+  switch( sCase ) {
+  case SpatialIntervals :
+    convert();
+    ; break;
+  }
+  for(int i = 0; i < min(len,(int)sisvs.size()); ++i) {
+    indices[i] = sisvs[i];
+  }
+}
+void StareResult::copy_as_intervals(int64_t* indices, int len) {
+  switch( sCase ) {
+  case ArrayIndexSpatialValues :
+    convert();
+    ; break;
+  }
+  for(int i = 0; i < min(len,(int)sis.size()); ++i) {
+    indices[i] = sis[i];
+  }
+}
+void StareResult::convert() {
+  if( converted ) {
+    return;
+  }
+  switch( sCase ) {
+  case ArrayIndexSpatialValues :
+    {
+      SpatialRange r(sisvs);
+      sis = r.toSpatialIntervals();
+    }
+    break;
+  case SpatialIntervals :
+    sisvs = expandIntervals(sis);
+    break;
+  }
+  converted = true;
 }

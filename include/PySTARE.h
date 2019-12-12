@@ -18,10 +18,8 @@
  *  deleteSTARE(p);
  */
 
-
 #ifndef INCLUDE_PYSTARE_H_
 #define INCLUDE_PYSTARE_H_
-
 
 #include <stdio.h>
 #include "STARE.h"
@@ -45,6 +43,7 @@ void _expand_intervals(int64_t* indices, int len, int resolution, int64_t* range
 
 void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_lon, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
 void _to_circular_cover(double lat, double lon, double radius, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs);
+
 void from_intervals(int64_t* intervals, int len, int64_t* indices_starts, int64_t* indices_terminators );
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni);
@@ -60,6 +59,30 @@ void _cmp_temporal(int64_t* indices1, int len1, int64_t* indices2, int len2, int
 //void to_utc(int64_t* indices, int len, double* julian_day);
 //void from_tai(double* julian_day, int len, int64_t indices);
 //void to_tai(int64_t* indices, int len, double* julian_day);
+
+
+enum StareResultCase { SpatialIntervals, ArrayIndexSpatialValues };
+
+class StareResult {
+ public:
+  StareResult() {};
+  void add_intervals(STARE_SpatialIntervals sis) { this->sis = sis; this->sCase = SpatialIntervals; }
+  void add_indexValues(STARE_ArrayIndexSpatialValues sisvs) { this->sisvs = sisvs; this->sCase = ArrayIndexSpatialValues; }
+  virtual ~StareResult();
+  int                           get_size();
+  int                           get_size_as_values();
+  int                           get_size_as_intervals();
+  void                          copy             (int64_t* indices, int len);
+  void                          copy_as_values   (int64_t* indices, int len);
+  void                          copy_as_intervals(int64_t* indices, int len);
+  void                          convert();
+  bool                          converted = false;
+  STARE_SpatialIntervals        sis;
+  STARE_ArrayIndexSpatialValues sisvs;
+  StareResultCase               sCase;
+};
+
+StareResult _to_circular_cover1(double lat, double lon, double radius, int resolution);
 
 #endif
 
