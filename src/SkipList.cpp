@@ -104,7 +104,7 @@ void SkipList::insert(const Key searchKey, const Value value)
 		}
 		// make new element [NEW *******]
 		myLength++;
-		element = new SkipListElement(newLevel, searchKey, value);
+		element = new SkipListElement(newLevel, searchKey, value); // TODO Any corresponding delete?
 		for (i=0; i<= newLevel; i++ ) { // scan all levels
 			// set next pointer of new element
 			element->setElement(i, update.getElement(i)->getElement(i));

@@ -421,11 +421,11 @@ void checkBitShiftNameEncoding0() {
 	ASSERT_EQUALM("Test bareID 12682 -> x318a vs. 4490 -> x118a",4490,htm->bareId());
 
 	char tmp_buf[256];
-	strcpy(tmp_buf,htm->getName());
+	strcpy(tmp_buf,htm->getName().c_str());
 	strcat(tmp_buf, " ");
 	htm->setName("N012023");
-	strcat(tmp_buf,htm->getName());
-	ASSERT_EQUALM("Char[] construction test","N012022 N012023",tmp_buf);
+	strcat(tmp_buf,htm->getName().c_str());
+	ASSERT_EQUALM("Char[] construction test1","N012022 N012023",tmp_buf);
 }
 
 /**
@@ -559,7 +559,7 @@ void testRangeIterator() {
 	int k=0;
 	char expected[80], found[80];
 	while (iter.hasNext()) {
-		strcpy(expected,htmR->encoding->nameById(keys[k++]));
+	  strcpy(expected,htmR->encoding->nameById(keys[k++]).c_str());
 		strcpy(found,iter.nextSymbolic(buffer));
 		//		cout << "k=" << k-1
 		//				<< " ( " << expected << " vs. " << found << " )"
@@ -855,7 +855,7 @@ void testEmbeddedLevelNameEncoding() {
 		n1->setName("N0123");
 		//		cout << "'" << n0->greatestCommonName(*n1) << "'" << endl << flush;
 		//		cout << "'" << "N0123" << "'" << endl << flush;
-		string expected = "N0123", found=n0->greatestCommonName(*n1);
+		string expected = "'N0123'", found="'"+n0->greatestCommonName(*n1)+"'";
 		ASSERT_EQUALM("greatest common name N01230 and N0123",expected,found);
 		n1->setName("N02230");
 		expected = "N0"; found=n0->greatestCommonName(*n1);
@@ -4064,8 +4064,11 @@ void HstmRangeAddZeroBug() {
 	EmbeddedLevelNameEncoding lj;
 	// cout << "lj.nameById(0) = " << lj.nameById(0) << endl << flush;
 	char tmp_buf[256];
-	strcpy(tmp_buf,lj.nameById(0));
-	ASSERT_EQUALM("Extending left justified to handle S0 == 0","S0",tmp_buf);
+	tmp_buf[0]=0;
+	strcat(tmp_buf,"'");
+	strcat(tmp_buf,lj.nameById(0).c_str());
+	strcat(tmp_buf,"'");
+	ASSERT_EQUALM("Extending left justified to handle S0 == 0","'S0'",tmp_buf);
 }
 
 /* https://github.com/michaelleerilee/STARE/issues/22

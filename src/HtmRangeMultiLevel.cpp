@@ -600,7 +600,10 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	Key l, h;
 	bool done = false;
 //	cout << "8000-1000-while" << endl << flush;
-	while(((l = my_los->getkey()) >= 0) && (not done) ){
+// 2019-1212 ORIG	while(((l = my_los->getkey()) >= 0) && (not done) ){
+	while( (not done) ){
+	  l = my_los->getkey();
+	  if( l < 0 ) break;
 		h = my_his->getkey();
 		uint32 l_level = encoding->levelById(l);
 
@@ -612,6 +615,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 //		hexOut("lh  ",l,h);
 //#undef hexOut
 		if ( h < lo1 ) {
+		  // Case NOT-YET-THERE.
 //			cout << "Don't know what's above h. Iterate." << endl << flush;
 //			errorCount++; if(errorCount>errorCountMax) {
 //				cout << "HRML::Iterate::errorCount" << endl << flush;
@@ -1684,9 +1688,9 @@ std::ostream& operator<<(std::ostream& os, const HtmRangeMultiLevel& range) {
 	while((lo = range.my_los->getkey()) >= 0){
 		hi = range.my_his->getkey();
 		if (range.symbolicOutput){
-			strcpy(tmp_buf,range.encoding->nameById(lo));
+		  strcpy(tmp_buf,range.encoding->nameById(lo).c_str());
 			strcat(tmp_buf," ");
-			strcat(tmp_buf,range.encoding->nameById(hi));
+			strcat(tmp_buf,range.encoding->nameById(hi).c_str());
 			os << tmp_buf;
 		} else {
 #ifdef _WIN32
@@ -1807,7 +1811,7 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 	while((lo = my_los->getkey()) >= 0){
 		hi = my_his->getkey();
 		if (symbolic){
-			strcpy(tmp_buf,encoding->nameById(lo));
+		  strcpy(tmp_buf,encoding->nameById(lo).c_str());
 			strcat(tmp_buf," ");
 			encoding->setId(lo);
 			uint64 level = encoding->getLevel();
@@ -1816,9 +1820,9 @@ void HtmRangeMultiLevel::print(std::ostream& os, bool symbolic)
 			if( termp == 63 ) { // Found a terminator. Rightmost 6 are for the level.
 				// uint64 hi_ = (hi & (~63)) + 27; // 27 is currently the maximum level, could use level here...
 				uint64 hi_ = (hi & (~63)) + level; // 27 is currently the maximum level, could use level here...
-				strcat(tmp_buf,encoding->nameById(hi_));
+				strcat(tmp_buf,encoding->nameById(hi_).c_str());
 			} else {
-				strcat(tmp_buf,encoding->nameById(hi));
+			  strcat(tmp_buf,encoding->nameById(hi).c_str());
 			}
 		} else {
 #ifdef _WIN32
@@ -1866,7 +1870,7 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 		hi = my_his->getkey();
 		if (what != BOTH) {
 			if (symbolic){
-				strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi));
+			  strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi).c_str());
 			} else {
 #ifdef _WIN32
 				sprintf(tmp_buf, "%I64d", what == LOWS ? lo : hi);
@@ -1876,9 +1880,9 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 			}
 		} else {
 			if (symbolic){
-				strcpy(tmp_buf,encoding->nameById(lo));
+			  strcpy(tmp_buf,encoding->nameById(lo).c_str());
 				strcat(tmp_buf,"..");
-				strcat(tmp_buf,encoding->nameById(hi));
+				strcat(tmp_buf,encoding->nameById(hi).c_str());
 			} else {
 				sprintf(tmp_buf, "%llu..%llu", lo, hi);
 			}

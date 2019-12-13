@@ -4,12 +4,13 @@
  *  Created on: Jan 29, 2016
  *      Author: mrilee
  */
+using namespace std;
 
-#include "EmbeddedLevelNameEncoding.h"
-#include <string>
+#include <string.h>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "EmbeddedLevelNameEncoding.h"
 
 EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
@@ -22,7 +23,8 @@ EmbeddedLevelNameEncoding::~EmbeddedLevelNameEncoding() {}
  * @param id
  * @return
  */
-char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
+// char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
+string EmbeddedLevelNameEncoding::nameById(uint64 id) {
 #ifdef DIAG
 	if(id == 0) {
 		// Throw an exception?
@@ -32,7 +34,8 @@ char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 #endif
 
 	int nameSize = levelById(id)+3; ///< levelById is local to the encoding
-	char *returnedName = new char[nameSize];
+	// char *returnedName = new char[nameSize];
+	string returnedName(nameSize,' ');
 	if(id & NorthSouthBit) {
 		returnedName[0] = 'N';
 	} else {
@@ -42,21 +45,26 @@ char* EmbeddedLevelNameEncoding::nameById(uint64 id) {
 		int c = '0' + (int) ((id >> (62 - 2*i)) & (uint32) 3);
 		returnedName[i] = (char) c;
 	}
-	returnedName[nameSize-1] = 0; // End string
+	// returnedName[nameSize-1] = 0; // End string
+	// ORIG MLR 2019-1212 return returnedName;
+	returnedName.erase(nameSize-1,string::npos);
 	return returnedName;
 }
 
-uint64 EmbeddedLevelNameEncoding::idByName(const char* name) {
+// uint64 EmbeddedLevelNameEncoding::idByName(const char* name) {
+uint64 EmbeddedLevelNameEncoding::idByName(string  name) {
 	uint64 out=0,i;
 	size_t siz =0;
 
-	if(name == 0)              // null pointer-name
-		throw SpatialFailure("EmbeddedLevelNameEncoding:idByName-NullPointerName");
+	//	if(name == 0)              // null pointer-name
+	if(name.empty())
+		throw SpatialFailure("EmbeddedLevelNameEncoding:idByName-name-empty");
 //		return 0;
 	if(name[0] != 'N' && name[0] != 'S')  // invalid name
 		throw SpatialFailure("EmbeddedLevelNameEncoding:idByName-InvalidName");
 
-	siz = strlen(name);
+	// siz = strlen(name);
+	siz = name.length();
 
 	// at least size-2 required, don't exceed max
 	if(siz < 2)

@@ -39,7 +39,8 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
 		uint64 a = leftJustified.getId(), b = a;
 		auto i1 = (i0+1);
-		if( i1 <= intervals.end() ) {
+		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
+		if( i1 != intervals.end() ) {
 			if(terminatorp(*i1)) {
 				leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
 				b = leftJustified.getId();

@@ -31,7 +31,7 @@ char * HtmRangeMultiLevelIterator::nextSymbolic(char *buffer)
   if (key <= 0) {
     buffer[0] = '\0';
   } else {
-	  strcpy(buffer,range->encoding->nameById(key));
+    strcpy(buffer,range->encoding->nameById(key).c_str());
   }
   return buffer;
 }

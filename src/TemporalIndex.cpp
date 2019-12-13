@@ -703,7 +703,7 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 		}
 	}
 	// Find the number of milliseconds in the fractional year.
-	double d0_1, d0_2;
+	double d0_1=0, d0_2=0;
 	int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	double delta = ((d1-d0_1)+(d2-d0_2))*86400000.0;
 //	cout << "a200 " << setw(24) << setprecision(20) << delta << flush;
