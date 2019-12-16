@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <string>
 #include <map>
+#include <memory>
 
 #include <ctime>
 #include <cmath>
@@ -55,128 +56,129 @@ public:
 
 		// TODO DANGER This bit is not really set. It's used to set the sign of the index.
 		bitFields.push_back(
-				new BitField("BeforeAfterStartBit",
+				    // new BitField("BeforeAfterStartBit",
+				    make_shared<BitField>("BeforeAfterStartBit",
 						1, // maxValue
 						1, // width
 						offset_base, // address/offset // in: 64; set to: 63 out: 63
 						-2,   // scale -- really need N/A here
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
-				new BitField("year",
+				    make_shared<BitField>("year",
 						pow(2,19)-1, // maxValue
 						19, // width
 						offset_base,
 						(13ll*28+1)*24*3600*1000,
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("month",
+				    make_shared<BitField>("month",
 						13, //maxValue // TODO Repent: 13 months with 4 weeks each, and a 14th with one day... Or maybe you just use 12...
 						4, // width
 						offset_base,
 						28ll*24*3600*1000,
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("week",
+				make_shared<BitField>("week",
 						3, // maxValue
 						2, // width
 						offset_base,
 						7ll*24*3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("day",
+				make_shared<BitField>("day",
 						6, // maxValue
 						3, // width
 						offset_base,
 						24*3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("hour",
+				make_shared<BitField>("hour",
 						23, // maxValue
 						5, // width
 						offset_base,
 						3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("minute",
+				make_shared<BitField>("minute",
 						59, // maxValue
 						6, // width
 						offset_base,
 						60*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("second",
+				make_shared<BitField>("second",
 						59, // maxValue
 						6, // width
 						offset_base,
 						1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		pos_FinestResolutionLevel = fieldId;
 		bitFields.push_back(
-				new BitField("millisecond",
+				make_shared<BitField>("millisecond",
 						999, // maxValue
 						10, // width
 						offset_base,
 						1, // time unit
 						fieldId++ // the actual low, should equal zero
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("resolution",
+				make_shared<BitField>("resolution",
 						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
 						pow(2,6)-1, // maxValue
 						6, // width
 						offset_base,
 						-1, // time unit, not applicable
 						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("type",
+				make_shared<BitField>("type",
 						3, // maxValue
 						2, // width
 						offset_base,
 						-1, // time unit, not applicable
 						fieldId++ // N/A
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 
 		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.

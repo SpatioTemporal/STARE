@@ -524,6 +524,10 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation r
   for(int i = 0; i < 6; i++)
     vertices_[i].set( v[i][0], v[i][1], v[i][2]);
 
+  // for(int i=0; i<6; ++i) {
+  //   delete [] v[i];
+  // }
+
   // create the first 8 nodes - index 1 through 8
   index_ = 1;
   newNode(1,5,2,8,0);  // S0 = numericIdName 8 -- Note this is BitShifted HTM encoding

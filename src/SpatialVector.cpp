@@ -403,6 +403,7 @@ SpatialVector::show() const
   printf(" %11.8f %11.8f %11.8f \n",x_,y_,z_);
 }
 
+/** Copy to a string. Don't forget to clean up if you use. **/
 const char*
 SpatialVector::toString()
 {
@@ -412,6 +413,7 @@ SpatialVector::toString()
 	return buffer;
 }
 
+/** Copy to an array. Don't forget to clean up if you use. **/
 float64*
 SpatialVector::toArray()
 {

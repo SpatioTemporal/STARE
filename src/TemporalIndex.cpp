@@ -16,10 +16,16 @@ BitField::~BitField() {}
 TemporalWordFormat::~TemporalWordFormat() {}
 
 TemporalIndex::~TemporalIndex() {
-	// TODO Auto-generated destructor stub
+  // TODO Auto-generated destructor stub
+  // for(auto it = begin(data.bitFields); it != end(data.bitFields); ++ it) {
+  //   delete (*it);
+  // }
+  // while( !data.bitFields.empty() ) {
+  //   BitField *b = data.bitFields.back();
+  //   delete b;
+  //   data.bitFields.pop_back();
+  // }
 }
-
-
 
 // #define OUTPUT(field) cout << name_##field << " " << field << " " << bitWidth_##field << " " << mask_##field << endl << flush;
 #define OUTPUT(field) cout \

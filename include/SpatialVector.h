@@ -114,8 +114,10 @@ public:
   /// Write vector to a stream
   void write(std::ostream &) const;
 
+  /// Write vector to a new string. Delete when done.
   const char* toString();
 
+  /// Write vector to a new array. Delete when done.
   float64* toArray();
 
   /// Comparison
