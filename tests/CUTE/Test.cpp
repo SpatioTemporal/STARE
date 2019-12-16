@@ -221,9 +221,9 @@ void pointById(){
 	float64 y = -0.61093299962057024;
 	float64 z = -0.61093299962057024;
 	double tolerance = 1.0e-14;
-	cout << 100 << endl << flush;
+	// cout << 100 << endl << flush;
 	int id_ = htm_->lookupID(x,y,z);
-	cout << 200 << " " << hex << id_ << dec << endl << flush;
+	// cout << 200 << " " << hex << id_ << dec << endl << flush;
 	SpatialVector v_;
 	//	htm_->pointById(v_,id_);
 	htm_->pointByHtmId(v_,id_);
@@ -237,12 +237,12 @@ void pointById(){
 	ASSERT_EQUALDM("SpatialVectors: ",SpatialVector(x,y,z),v_,tolerance);
 	// cout << dec << 400 << hex << endl << flush;
 
-	cout << dec;
+	// cout << dec;
 	delete htm_;
 }
 
 void idByPoint1() {
-  cout << 100 << flush << endl;
+  // cout << 100 << flush << endl;
 	int level          = 8;
 	int saveLevel      = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
@@ -254,30 +254,29 @@ void idByPoint1() {
 	float64 y = -0.61093276908191108;
 	float64 z = -0.61093276908191108;
 	int id_ = htm_->lookupID(x,y,z); // htm id?
-	cout << "id_ " << hex << id_ << dec << " " << id_ << endl << flush;
+	// cout << "id_ " << hex << id_ << dec << " " << id_ << endl << flush;
 	const SpatialIndex index = htm_->index();
-	cout << "index leaves: " << dec << index.leafCount() << endl << flush;
+	// cout << "index leaves: " << dec << index.leafCount() << endl << flush;
 	// #x2ffb
 	// stored leaves (* 8 (expt 4 5))   8192
 	// total leaves  (* 8 (expt 4 8)) 524288
 	SpatialVector v = SpatialVector(x,y,z);
 	int idTest = index.idByPoint(v); // htm id? is int enough?
-	cout << "idT " << hex << idTest << dec << endl << flush;
+	// cout << "idT " << hex << idTest << dec << endl << flush;
 	ASSERT_EQUALM("idByPoint1",id_,idTest); // Compare the two htm-ids.
-	cout << 200 << hex << idTest << dec << " " << idTest << endl << flush;
+	// cout << 200 << hex << idTest << dec << " " << idTest << endl << flush;
 	SpatialVector u;
 	index.pointByHtmId(u, idTest); // Get the u from the htm-id.
-	/**/
+	/*
 	cout << setprecision(17);
 	cout << "v     = " << v << endl << flush;
 	cout << "u     = " << u << endl << flush;
-	cout << "|v-u| = " << (v-u).length() << endl << flush;
-	/**/
-	cout << 300 << endl << flush;
+	cout << "|v-u| = " << (v-u).length() << endl << flush; 
+	cout << 300 << endl << flush;*/
 	ASSERT_EQUALDM("Inverse check.",v,u,1.0e-16);
 	// The following is incorrect and may segfault!
 	// index.pointById(u, idTest);
-	cout << 999 << endl;
+	// cout << 999 << endl;
 	delete htm_;
 }
 

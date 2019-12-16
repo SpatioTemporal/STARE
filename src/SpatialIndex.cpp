@@ -234,7 +234,7 @@ void partitionTriangle(
 		       SpatialVector &v2,
 		       uint64        subTriangleIndex) {
 
-  cout << "." << endl << flush;
+  // cout << "." << endl << flush;
   
   SpatialVector w0 = v1 + v2; w0.normalize();
   SpatialVector w1 = v0 + v2; w1.normalize();
@@ -616,7 +616,7 @@ SpatialIndex::nodeVertex(
 			 //			 ,bool verbose
 			 ) const {
 
-  cout << "nodeVertex-100" << " ni64 0x" << setw(16) << setfill('0') << hex << nodeId64 << dec <<  endl << flush;
+  // cout << "nodeVertex-100" << " ni64 0x" << setw(16) << setfill('0') << hex << nodeId64 << dec <<  endl << flush;
 
   //	cout << "buildlevel,maxlevel: " << buildlevel_ << ", " << maxlevel_ << " " << flush;
   if(buildlevel_ == maxlevel_) {
@@ -640,14 +640,14 @@ SpatialIndex::nodeVertex(
   uint64 sid = (nodeId64 - IOFFSET) >> ((maxlevel_ - buildlevel_)*2);
   uint64 nodeId32 = (uint64)( sid );
 
-  cout << "NOTE: building vertices..." << endl;
+  // cout << "NOTE: building vertices..." << endl;
 
   // TODO What stored leaf are we in?  We should cut the extra off of id to get idx.
   // cout << "v0 " << flush;
   // cout << endl << flush;
   // cout << " buildlevel, maxlevel: " << buildlevel_ << ", " << maxlevel_ << endl << flush;
-  cout << " nodeId32, IOFFSET " << hex << nodeId32 << dec << " " << IOFFSET << endl << flush;
-  cout << " nodeId64, IOFFSET " << hex << nodeId64 << dec << endl << flush;
+  // cout << " nodeId32, IOFFSET " << hex << nodeId32 << dec << " " << IOFFSET << endl << flush;
+  // cout << " nodeId64, IOFFSET " << hex << nodeId64 << dec << endl << flush;
   v0 = vertices_[nodes_[nodeId32+IOFFSET].v_[0]];
   // cout << "v1 " << flush;
   v1 = vertices_[nodes_[nodeId32+IOFFSET].v_[1]];
@@ -655,7 +655,7 @@ SpatialIndex::nodeVertex(
   v2 = vertices_[nodes_[nodeId32+IOFFSET].v_[2]];
   // cout << " done " << endl;
 
-  cout << "nv-200" << endl;
+  // cout << "nv-200" << endl;
 
   // loop through additional levels,
   // pick the correct triangle accordingly, storing the
@@ -665,7 +665,7 @@ SpatialIndex::nodeVertex(
     uint64 j = ( (nodeId64 - IOFFSET) >> ((maxlevel_ - i)*2) ) & 3;
     partitionTriangle(v0,v1,v2,j);
   }
-  cout << "nv-999" << endl;
+  // cout << "nv-999" << endl;
 
 }
 
@@ -843,7 +843,7 @@ SpatialIndex::vMax(size_t *nodes, size_t *vertices) {
     numberOfFaces *= 4;
   leaves_ = numberOfFaces;
   //  dbg
-  cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
+  // cout << "vMax: leaves_, storedleaves_ " << leaves_ << " " << storedleaves_ << endl << flush;
 }
 
 /////////////SORTINDEX////////////////////////////////////
@@ -1074,13 +1074,13 @@ SpatialIndex::pointByHtmId(SpatialVector &vec, uint64 htmId) const {
   // LAST WORKING ORIG  this->pointById(vec,NodeID64FromHtmId(htmId));
 
 
-  cout << 1000
-       << " htmId 0x" << setw(16) << setfill('0') << hex << htmId << dec << endl << flush;
+  // cout << 1000
+  //      << " htmId 0x" << setw(16) << setfill('0') << hex << htmId << dec << endl << flush;
   int64 id64 = NodeID64FromHtmId(htmId);
-  cout << 1100
-       << " id64  0x" << setw(16) << setfill('0') << hex << id64 << dec << endl << flush;
+  // cout << 1100
+  //     << " id64  0x" << setw(16) << setfill('0') << hex << id64 << dec << endl << flush;
   this->pointById(vec,id64);
-  cout << 1200 << endl << flush;
+  // cout << 1200 << endl << flush;
 }
 
 void
@@ -1114,9 +1114,9 @@ SpatialIndex::pointById(SpatialVector &vec, uint64 nodeId64) const {
   SpatialVector v0, v1, v2; //
   // TODO nodeVertex is expecting something like a leafId
   // TODO nodeVertex might not account for an offset.
-  cout << 2000 << endl << flush;
+  // cout << 2000 << endl << flush;
   this->nodeVertex(nodeId64, v0, v1, v2);
-  cout << 2100 << endl << flush;	
+  // cout << 2100 << endl << flush;	
   //    cerr << "---------- Point by id: " << name << endl;
   //	v0.show(); v1.show(); v2.show();
   center_x = v0.x_ + v1.x_ + v2.x_;
@@ -1535,22 +1535,22 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
   //
   size_t len = name.length();
   // size_t len = strlen(name);
-  cout << "idbp: 180 name = '" << name << "', len = " << len << endl << flush;
+  // cout << "idbp: 180 name = '" << name << "', len = " << len << endl << flush;
   //
   SpatialVector v0 = V(0);
   SpatialVector v1 = V(1);
   SpatialVector v2 = V(2);
 
-   cout << "idbp: 200 " << endl << flush;
+  /*  cout << "idbp: 200 " << endl << flush;
    cout << "idbp: 201 ml_ = " << maxlevel_ << endl << flush;
    cout << "idbp: 202 bl_ = " << buildlevel_ << endl << flush;
-   cout << "idbp: 203 m-b = " << (int)maxlevel_ - (int)buildlevel_ << endl << flush;
+   cout << "idbp: 203 m-b = " << (int)maxlevel_ - (int)buildlevel_ << endl << flush; */
 
   // BitShifted
   // size_t level = maxlevel_ - buildlevel_;
   int level = maxlevel_ - buildlevel_;
 
-  cout << "idbp: 300 level = maxlevel_-buildlevel_ = " << level << endl << flush;
+  // cout << "idbp: 300 level = maxlevel_-buildlevel_ = " << level << endl << flush;
 
   // TODO make this whole routine less ad-hoc
   SpatialVector delta;
@@ -1569,7 +1569,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
       // cout << "idbp: 350 level = " << level << ", level0 = " << level0++ << ", subTriangleIndex = " << subTriangleIndex << ", name = " << name;
       // ORIG MLR 2019-1215 name[len++] = '0'+char(subTriangleIndex);
       name = name + (char)('0'+char(subTriangleIndex));
-      cout << ", name'= " << name << endl << flush;
+      // cout << ", name = '" << name << "'" << endl << flush;
     }
   } else {
     len = len + level;
@@ -1588,7 +1588,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
   // ORIG MLR 2019-1215 name[len] = '\0';
   // if(name.length() > 1+len) { name.erase(len,std::string::npos); }
 
-  cout << "idbp: 400 name = '" << name << "', len = " << len << ", name.length=" << name.length() << endl << flush;
+  // cout << "idbp: 400 name = '" << name << "', len = " << len << ", name.length=" << name.length() << endl << flush;
 
   ID = idByName(name); // TODO Didn't we just calculate the bits above?
 
