@@ -408,7 +408,8 @@ SpatialVector::show() const
 }
 
 /** Copy to a string. Don't forget to clean up if you use. **/
-const char*
+// const char*
+std::string
 SpatialVector::toString()
 {
 	char *buffer = new char[40];
