@@ -407,7 +407,8 @@ htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool 
 	for(size_t i = 0; i < steps; i++) {
 		// cout << " " << i << flush;
 		// cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
-		float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
+		// float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
+	  vector<float64> x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
 		// cout << endl << flush;

@@ -217,8 +217,10 @@ LINKAGE ostream& operator<<(ostream& os, const uint64 &ui64);
 // struct LatLon   {float64 lat, lon;};
 
 unsigned long lg2(unsigned long v);
-float64* xyzFromLatLonRadians(float64 lat,float64 lon);
-float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
+// float64* xyzFromLatLonRadians(float64 lat,float64 lon);
+// float64* xyzFromLatLonDegrees(float64 lat,float64 lon);
+std::vector<float64> xyzFromLatLonRadians(float64 lat,float64 lon);
+std::vector<float64> xyzFromLatLonDegrees(float64 lat,float64 lon);
 
 struct LatLonDegrees64 {
 	float64 lat, lon;
