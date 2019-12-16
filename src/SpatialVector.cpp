@@ -39,7 +39,11 @@ SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
 /////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Strengthen the following input type.
 SpatialVector::SpatialVector(float64 *x) :
-	x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
+  x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
+}
+/////////////CONSTRUCTOR//////////////////////////////////
+SpatialVector::SpatialVector(std::vector<float64> v) :
+  x_(v[0]), y_(v[1]), z_(v[2]), ra_(0), dec_(0), okRaDec_(false) {
 }
 /////////////CONSTRUCTOR//////////////////////////////////
 //
@@ -414,14 +418,17 @@ SpatialVector::toString()
 }
 
 /** Copy to an array. Don't forget to clean up if you use. **/
-float64*
+// float64*
+std::vector<float64>
 SpatialVector::toArray()
 {
-	float64 *buffer = new float64[3];
-	buffer[0] = x_;
-	buffer[1] = y_;
-	buffer[2] = z_;
-	return buffer;
+  // float64 *buffer = new float64[3];
+  // buffer[0] = x_;
+  // buffer[1] = y_;
+  // buffer[2] = z_;
+  
+  std::vector<float64> buffer { x_, y_, z_ };
+  return buffer;
 
 }
 

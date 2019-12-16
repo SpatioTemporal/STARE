@@ -18,6 +18,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 #include "SpatialIndex.h"
 
@@ -513,7 +514,8 @@ SpatialIndex::SpatialIndex(size_t maxlevel, size_t buildlevel, SpatialRotation r
   SpatialVector body_yhat = rot.rotated_from(yhat);
   SpatialVector body_zhat = rot.rotated_from(zhat);
 
-  float64 *v[6];
+  // float64 *v[6];
+  std::vector<float64> v[6];
   v[0]=       body_zhat.toArray();
   v[1]=       body_xhat.toArray();
   v[2]=       body_yhat.toArray();

@@ -19,8 +19,9 @@
 
 //#include <math.h>
 #include <cmath>
-#include <stdio.h>
 #include <iostream>
+#include <vector>
+#include <stdio.h>
 #include <SpatialGeneral.h>
 
 //########################################################################
@@ -42,6 +43,7 @@ public:
 		float64 y,
 		float64 z);
   SpatialVector(float64 *x);
+  SpatialVector(std::vector<float64> v);
 
   /// Constructor from ra/dec, this is always normed to 1
   SpatialVector(float64 ra,
@@ -118,7 +120,8 @@ public:
   const char* toString();
 
   /// Write vector to a new array. Delete when done.
-  float64* toArray();
+  // float64* toArray();
+  std::vector<float64> toArray();
 
   /// Comparison
   int operator ==(const SpatialVector & ) const;
