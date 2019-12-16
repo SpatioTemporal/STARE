@@ -123,17 +123,20 @@ public:
   /** Lookup a node name from ra,dec
       Given a certain RA,DEC and index depth return its HTM NodeName.
   */
-  const char * lookupName(float64 ra, float64 dec) ;
+  // const char * lookupName(float64 ra, float64 dec) ;
+  const std::string lookupName(float64 ra, float64 dec) ;
 
   /** Lookup a node name from x,y,z.
       Given a certain cartesian vector x,y,z and index depth return its 
       HTM NodeName.
   */
-  const char * lookupName(float64 x, float64 y, float64 z) ;
+  // const char * lookupName(float64 x, float64 y, float64 z) ;
+  const std::string lookupName(float64 x, float64 y, float64 z) ;
 
   /** Lookup a node name from a node ID.
   */
-  const char * lookupName(uint64 ID) ;
+  // const char * lookupName(uint64 ID) ;
+  const std::string lookupName(uint64 ID) ;
 
   /** Lookup a node name using a string command.
       The string in the input may have one of the following forms:
@@ -145,7 +148,8 @@ public:
       The string will be evaluated depending on how many items it has.
       SpatialInterfaceError is thrown if the string is unexpected.
   */
-  const char * lookupNameCmd(char *);
+  // const char * lookupNameCmd(char *);
+  const std::string lookupNameCmd(char *);
 
   /** Request all triangles in a circular region.
       Given are the center coordinate and radius in arcminutes.
@@ -278,7 +282,8 @@ private:
     HTMDOMAIN
   };
 
-  char name_[HTMNAMEMAX];
+// char name_[HTMNAMEMAX];
+  std::string name_;
 
   SpatialIndex *index_;
   HTMRangeValueVector range_;

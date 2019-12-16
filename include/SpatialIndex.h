@@ -17,6 +17,8 @@
 //#	    Sept 9, 2002 : Gyorgy Fekete -- added setMaxlevel()
 //#
 
+// using namespace std;
+
 #include <cmath>
 #include <stdio.h>
 #include <string.h>
@@ -105,7 +107,8 @@ public:
 void printNode(int nodeIndex) const;
 
   /// NodeName conversion to integer ID (but which one?)
-  static uint64 idByName(const char *);
+  // static uint64 idByName(const char *);
+  static uint64 idByName(const std::string);
 
   /// Legacy code
   /** uint64 int32 conversion to a string (name of database).
@@ -117,7 +120,9 @@ void printNode(int nodeIndex) const;
       there are 8 nodes, and we get the names from numbers 8 through
       15 giving S0,S1,S2,S3,N0,N1,N2,N3.  The order is always
       ascending starting from S0000.. to N3333...  */
-  static char * nameById(uint64 ID, char * name = 0);
+  // static char * nameById(uint64 ID, char * name = 0);
+  // static std::string nameById(uint64 ID, std::string name = "");
+  static std::string nameById(uint64 ID);
 
   /** Return leaf number in bitlist for a certain ID.  Since the ID
       here means the number computed from the name, this is simply
@@ -136,34 +141,23 @@ void printNode(int nodeIndex) const;
       nameById(n + leafCount()).
       TODO Note that bitlists no longer exist.
       */
-  char * nameByLeafNumber(uint64 n, char * name = 0) const;
+  std::string nameByLeafNumber(uint64 n) const;
+// char * nameByLeafNumber(uint64 n, char * name = 0) const;
 
   /** Find the vector to the centroid of a triangle represented by the htmID
-   *
-   * Note this is the inverse of idByPoint.
-   *
-   * */
+   * Note this is the inverse of idByPoint. */
   void pointByHtmId(SpatialVector & vector, uint64 htmID) const;
 
-  /** Return the vertices associated with the triangle of htmID
-   *
-   */
+  /** Return the vertices associated with the triangle of htmID */
   void nodeVertexByHtmId(SpatialVector &v1, SpatialVector &v2, SpatialVector &v3, uint64 htmId) const;
 
-  /** Return the area associated with an htmId.
-   *
-   */
+  /** Return the area associated with an htmId. */
   float64 areaByHtmId(uint64 htmId) const;
 
-  /**
-   * Return a leafID, i.e. a NodeID64 from an HtmId.
-   */
+  /** Return a leafID, i.e. a NodeID64 from an HtmId. */
   uint64 NodeID64FromHtmId(uint64 htmId) const;
 
-
-  /** Find the vector to the centroid of a triangle represented by the nodeID64.
-   *
-   * */
+  /** Find the vector to the centroid of a triangle represented by the nodeID64. */
   void pointById(SpatialVector & vector, uint64 nodeID64) const;
 
   /** Find the neighbors across the edges of the triangles htmId */
@@ -192,11 +186,13 @@ void printNode(int nodeIndex) const;
 
   /// find a node by giving a vector. 
   /**@return The ID of the node is returned. */
-  char* nameByPoint(SpatialVector & vector, char* s=NULL) const;
+  // char* nameByPoint(SpatialVector & vector, char* s=NULL) const;
+  std::string nameByPoint(SpatialVector & vector) const;
 
   /// find a node by giving a ra,dec in degrees.
-  char* nameByPoint(const float64 & ra, const float64 & dec, 
-		    char* s=NULL) const;
+  // char* nameByPoint(const float64 & ra, const float64 & dec, 
+  //		    char* s=NULL) const;
+  std::string nameByPoint(const float64 & ra, const float64 & dec) const;
 
   /// return number of leaf nodes
   uint64 leafCount() const;

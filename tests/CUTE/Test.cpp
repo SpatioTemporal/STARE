@@ -33,15 +33,17 @@ void lookupID() {
 	int id_ = htm_ ->lookupID(x,y,z);
 	ASSERT_EQUALM("id from lookupID(x,y,z)",id_,3070);
 
-	char name_[1024];
-	htm_->index().nameById(id_,name_);
+	// char name_[1024];
+	string name_;
+	name_ = htm_->index().nameById(id_);
+
+	// htm_->index().nameById(id_,name_);
 	//cout << "name_: '" << name_ << "'" << endl << flush;
-	ASSERT_EQUALM("checking nameByID",name_,"S33332");
+	ASSERT_EQUALM("checking nameByID","'"+name_+"'","'S33332'");
+	
 }
 
 // TODO I just noticed there is an issue in dealing with parsing the IDs via nameByID -- I don't think they are interpreting the depth correctly. The index is constructed with a depth.  What happens if you give it an HTM string or ID that is associated with another depth?
-
-
 
 void lookupOnTwoSaveLevels() {
 
@@ -63,8 +65,10 @@ void lookupOnTwoSaveLevels() {
 
 }
 
-#define ASSERT_EQUALM_NAMEBYID_0(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
-#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+// #define ASSERT_EQUALM_NAMEBYID_0(msg,expected,index,id,name){char *n; n=index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_0(msg,expected,index,id,name){name=index.nameById(id); ASSERT_EQUALM(msg,expected,name);}
+// #define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){index.nameById(id,name); ASSERT_EQUALM(msg,expected,name);}
+#define ASSERT_EQUALM_NAMEBYID_(msg,expected,index,id,name){name = index.nameById(id); ASSERT_EQUALM(msg,expected,name);}
 #define INDEX_(name){htm[levelOfName(name)]->index();}
 #define PRINT_ID(msg,htm,name) {	SpatialIndex index = htm[levelOfName(name)]->index(); cout << msg << " indexLevel: " << index.getMaxlevel() << " id: " << flush; cout << index.idByName(name) << " name: " << name << " nameLevel: " << levelOfName(name); SpatialVector v; index.pointById(v,index.idByName(name)); cout << " v: " << v << endl << flush;}
 
@@ -82,7 +86,8 @@ void lookupOnMultipleLevels() {
 
 	SpatialIndex index0_, index1_;
 	int id0, id1;
-	char name0[1024], name1[1024];
+	// char name0[1024], name1[1024];
+	string name0, name1;
 
 	int level          = 3;
 	// int saveLevel      = 2;
@@ -145,9 +150,9 @@ void lookupOnMultipleLevels() {
 		cout << endl << flush;
 	}
 	 */
-	char cTmp[1024];
-	ASSERT_EQUALM("id0 to name to index1's id1",id0,index1_.idByName(index0_.nameById(id0,cTmp)));
-	ASSERT_EQUALM("id1 to name to index0's id0",id1,index0_.idByName(index1_.nameById(id1,cTmp)));
+	// char cTmp[1024];
+	ASSERT_EQUALM("id0 to name to index1's id1",id0,index1_.idByName(index0_.nameById(id0)));
+	ASSERT_EQUALM("id1 to name to index0's id0",id1,index0_.idByName(index1_.nameById(id1)));
 }
 
 void idReallyDeep() {
@@ -176,9 +181,11 @@ void idReallyDeep() {
 	}
 	htmInterface *htm = new htmInterface(level,5);
 	SpatialIndex index = htm->index();
-	char foundName[1024]; for(int i=0;i<1024;i++)foundName[i] = 0;
+	// char foundName[1024]; for(int i=0;i<1024;i++)foundName[i] = 0;
+	string foundName;
 	try {
-		index.nameById(htmID,foundName);
+	  // index.nameById(htmID,foundName);
+	  foundName = index.nameById(htmID);
 	} catch (const SpatialException & e) {
 		cout << "Exception " << e.what() << " n: " << foundName << endl << flush;
 	}
@@ -188,7 +195,7 @@ void idReallyDeep() {
 		cout << " htmID " << htmID << endl << flush;
 
 	}
-	ASSERT_EQUALM("level:    ",level,levelOfName(foundName));
+	ASSERT_EQUALM("level:    ",level,levelOfName(foundName.c_str()));
 	ASSERT_EQUALM("fName:    ",expected,foundName);
 	ASSERT_EQUALM("htmID^-1: ",index.idByName(foundName),htmID);
 
@@ -214,57 +221,64 @@ void pointById(){
 	float64 y = -0.61093299962057024;
 	float64 z = -0.61093299962057024;
 	double tolerance = 1.0e-14;
+	cout << 100 << endl << flush;
 	int id_ = htm_->lookupID(x,y,z);
+	cout << 200 << " " << hex << id_ << dec << endl << flush;
 	SpatialVector v_;
 	//	htm_->pointById(v_,id_);
 	htm_->pointByHtmId(v_,id_);
 	//	ASSERT_EQUALM("SpatialVectors x: ",0,2.0*(v_.x()-x)/abs(v_.x()+x));
 	//	componentCheck(z);
+	// cout << dec << 300 << hex << endl << flush;
 
-	cout << hex;
+	// cout << hex;
 	ASSERT_LESSM("SpatialVectors x: ",abs(x-v_.x()),tolerance);
+	// cout << dec << 350 << hex << endl << flush;
 	ASSERT_EQUALDM("SpatialVectors: ",SpatialVector(x,y,z),v_,tolerance);
+	// cout << dec << 400 << hex << endl << flush;
+
 	cout << dec;
+	delete htm_;
 }
 
 void idByPoint1() {
+  cout << 100 << flush << endl;
 	int level          = 8;
 	int saveLevel      = 5;
 	htmInterface *htm_ = new htmInterface(level,saveLevel);
 	/* Original point, a little off triangle center at level 8.
 	float64 x =  0.50350942389316267;
 	float64 y = -0.61093299962057024;
-	float64 z = -0.61093299962057024;
-	*/
+	float64 z = -0.61093299962057024; */
 	float64 x =  0.50350998334076424;
 	float64 y = -0.61093276908191108;
 	float64 z = -0.61093276908191108;
-	int id_ = htm_->lookupID(x,y,z);
-
-	//	cout << "id_ " << id_ << endl << flush;
-
+	int id_ = htm_->lookupID(x,y,z); // htm id?
+	cout << "id_ " << hex << id_ << dec << " " << id_ << endl << flush;
 	const SpatialIndex index = htm_->index();
-
+	cout << "index leaves: " << dec << index.leafCount() << endl << flush;
+	// #x2ffb
+	// stored leaves (* 8 (expt 4 5))   8192
+	// total leaves  (* 8 (expt 4 8)) 524288
 	SpatialVector v = SpatialVector(x,y,z);
-	int idTest = index.idByPoint(v);
-
-	//	cout << "idT " << idTest << endl << flush;
-
-	ASSERT_EQUALM("idByPoint1",id_,idTest);
-
+	int idTest = index.idByPoint(v); // htm id? is int enough?
+	cout << "idT " << hex << idTest << dec << endl << flush;
+	ASSERT_EQUALM("idByPoint1",id_,idTest); // Compare the two htm-ids.
+	cout << 200 << hex << idTest << dec << " " << idTest << endl << flush;
 	SpatialVector u;
-	index.pointByHtmId(u, idTest);
-	/*
+	index.pointByHtmId(u, idTest); // Get the u from the htm-id.
+	/**/
 	cout << setprecision(17);
 	cout << "v     = " << v << endl << flush;
 	cout << "u     = " << u << endl << flush;
 	cout << "|v-u| = " << (v-u).length() << endl << flush;
-	*/
+	/**/
+	cout << 300 << endl << flush;
 	ASSERT_EQUALDM("Inverse check.",v,u,1.0e-16);
-
 	// The following is incorrect and may segfault!
 	// index.pointById(u, idTest);
-
+	cout << 999 << endl;
+	delete htm_;
 }
 
 /**
@@ -290,6 +304,7 @@ void idByName() {
 	uint64 nodeIndex = index1.nodeIndexFromId(htmID);
 	uint64 nodeIndexExpected = 4491 + 9; // for N012023
 	ASSERT_EQUALM("nodeIndex(12683) == 4491+IOFFSET == 4500?",nodeIndexExpected,nodeIndex);
+	delete htm_;
 }
 
 void testNodeVertexAtLevelZero() {
@@ -366,6 +381,8 @@ void testNodeVertexAtLevelZero() {
 		ASSERT_EQUAL(0,(v2+z).length());
 		ASSERT_EQUAL(0,(v3-x).length());
 	}
+
+	delete htm_;
 
 //	ASSERT_EQUAL(1,2);
 //	FAIL();
@@ -3196,7 +3213,7 @@ void testHstmEqualp() {
 }
 
 void testIndexBug() {
-	uint32 level       = 4;
+	uint32 level    = 4;
 	int idLevel     = 23;
 	int maxLevel    = 5; // aka buildLevel
 
@@ -4122,11 +4139,11 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(precisionTest));
 	s.push_back(CUTE(lookupID));
 	s.push_back(CUTE(pointById));
+	s.push_back(CUTE(idByName));
 	s.push_back(CUTE(idByPoint1));
 	s.push_back(CUTE(lookupOnTwoSaveLevels));
 	s.push_back(CUTE(lookupOnMultipleLevels));
 	s.push_back(CUTE(idReallyDeep));
-	s.push_back(CUTE(idByName));
 
 	s.push_back(CUTE(checkBitShiftNameEncoding0));
 	s.push_back(CUTE(testRangeContains));

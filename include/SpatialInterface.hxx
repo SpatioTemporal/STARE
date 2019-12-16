@@ -32,28 +32,29 @@ uint64 htmInterface::lookupID(float64 x, float64 y, float64 z) const {
 }
 
 inline
-uint64 htmInterface::lookupID(char *nm) const {
-  return index_->idByName(nm);
-}
+uint64 htmInterface::lookupID(char *nm) const { return index_->idByName(nm); }
 
 inline
-const char * htmInterface::lookupName(float64 ra, float64 dec) {
-  index_->nameByPoint(ra,dec,name_);
-  return name_;
-}
-
-
+// const char *
+const std::string
+htmInterface::lookupName(float64 ra, float64 dec) {
+  // index_->nameByPoint(ra,dec,name_);
+  name_ = index_->nameByPoint(ra,dec);
+  return name_; }
 
 inline
-const char * htmInterface::lookupName(float64 x, float64 y, float64 z) {
+// const char * htmInterface::lookupName(float64 x, float64 y, float64 z) {
+const std::string htmInterface::lookupName(float64 x, float64 y, float64 z) {
   SpatialVector v(x,y,z);
-  index_->nameByPoint(v,name_);
+  // index_->nameByPoint(v,name_);
+  name_ = index_->nameByPoint(v);
   return name_;
 }
 
 inline
-const char * htmInterface::lookupName(uint64 id) {
-  index_->nameById(id,name_);
+// const char * htmInterface::lookupName(uint64 id) {
+const std::string htmInterface::lookupName(uint64 id) {
+  name_ = index_->nameById(id);
   return name_;
 }
 
