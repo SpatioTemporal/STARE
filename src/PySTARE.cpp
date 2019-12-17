@@ -250,6 +250,7 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 	// SpatialRange *ri = r1 & r2;
 	SpatialRange *ri = sr_intersect(r1,r2,false);
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
+	delete ri;
 	STARE_ArrayIndexSpatialValues result = expandIntervals(result_intervals);
 	leni = result.size();
 	for(int i=0; i<leni; ++i) {
@@ -278,10 +279,11 @@ void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, 
 	SpatialRange r1(si1), r2(si2);
 	// cout << 200 << endl << flush;
 	// SpatialRange *ri = r1 & r2;
-	SpatialRange *ri = sr_intersect(r1,r2,true);
-	// SpatialRange *ri = sr_intersect(r1,r2,false);
+	// SpatialRange ri = sr_intersect(r1,r2,true);
+	SpatialRange *ri = sr_intersect(r1,r2,false);
 	// cout << 300 << endl << flush;
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
+	delete ri;
 	STARE_ArrayIndexSpatialValues result = expandIntervals(result_intervals);
 	// cout << 400 << endl << flush;
 	leni = result.size();

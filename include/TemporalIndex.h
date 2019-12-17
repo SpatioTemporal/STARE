@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <string>
 #include <map>
+#include <memory>
 
 #include <ctime>
 #include <cmath>
@@ -55,128 +56,129 @@ public:
 
 		// TODO DANGER This bit is not really set. It's used to set the sign of the index.
 		bitFields.push_back(
-				new BitField("BeforeAfterStartBit",
+				    // new BitField("BeforeAfterStartBit",
+				    make_shared<BitField>("BeforeAfterStartBit",
 						1, // maxValue
 						1, // width
 						offset_base, // address/offset // in: 64; set to: 63 out: 63
 						-2,   // scale -- really need N/A here
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
-				new BitField("year",
+				    make_shared<BitField>("year",
 						pow(2,19)-1, // maxValue
 						19, // width
 						offset_base,
 						(13ll*28+1)*24*3600*1000,
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("month",
+				    make_shared<BitField>("month",
 						13, //maxValue // TODO Repent: 13 months with 4 weeks each, and a 14th with one day... Or maybe you just use 12...
 						4, // width
 						offset_base,
 						28ll*24*3600*1000,
 						fieldId++
-				)
+							 )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("week",
+				make_shared<BitField>("week",
 						3, // maxValue
 						2, // width
 						offset_base,
 						7ll*24*3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("day",
+				make_shared<BitField>("day",
 						6, // maxValue
 						3, // width
 						offset_base,
 						24*3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("hour",
+				make_shared<BitField>("hour",
 						23, // maxValue
 						5, // width
 						offset_base,
 						3600*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("minute",
+				make_shared<BitField>("minute",
 						59, // maxValue
 						6, // width
 						offset_base,
 						60*1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("second",
+				make_shared<BitField>("second",
 						59, // maxValue
 						6, // width
 						offset_base,
 						1000,
 						fieldId++
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		pos_FinestResolutionLevel = fieldId;
 		bitFields.push_back(
-				new BitField("millisecond",
+				make_shared<BitField>("millisecond",
 						999, // maxValue
 						10, // width
 						offset_base,
 						1, // time unit
 						fieldId++ // the actual low, should equal zero
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("resolution",
+				make_shared<BitField>("resolution",
 						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
 						pow(2,6)-1, // maxValue
 						6, // width
 						offset_base,
 						-1, // time unit, not applicable
 						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				new BitField("type",
+				make_shared<BitField>("type",
 						3, // maxValue
 						2, // width
 						offset_base,
 						-1, // time unit, not applicable
 						fieldId++ // N/A
-				)
+						     )
 		);
-		bitFieldMap.insert(pair<string,BitField*>(bitFields.back()->getName(),bitFields.back()));
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 
 		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
@@ -692,7 +694,8 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
-inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+// inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
 	}
@@ -701,12 +704,11 @@ inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 
 	int64_t	ab = a.toInt64Milliseconds() + b.toInt64Milliseconds();
 
-	TemporalIndex* c = new TemporalIndex;
-
-	c->fromInt64Milliseconds(ab);
-	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
-
-	return *c;
+	// TemporalIndex* c = new TemporalIndex;
+	TemporalIndex c;
+	c.fromInt64Milliseconds(ab);
+	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return c;
 }
 
 inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
@@ -729,7 +731,8 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
-inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+// inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
 	}
@@ -744,10 +747,11 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 //	FMT1(bd1,bd2);
 //	FMT1(cd1,cd2);
 //#undef FMT1
-	TemporalIndex* c = new TemporalIndex;
-	c->fromJulianTAI(cd1, cd2);
-	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
-	return *c;
+	// TemporalIndex* c = new TemporalIndex;
+	TemporalIndex c;
+	c.fromJulianTAI(cd1, cd2);
+	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return c;
 }
 
 inline double diff_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
@@ -794,8 +798,8 @@ inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { ret
 inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >  0; }
 inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <= 0; }
 inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >= 0; }
-inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
-inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
+inline TemporalIndex operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+inline TemporalIndex operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
 
 inline std::ostream& operator<<(std::ostream& os, TemporalIndex tIndex) {
 	os << tIndex.toStringJulianTAI();

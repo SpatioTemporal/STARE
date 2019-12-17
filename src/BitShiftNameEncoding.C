@@ -16,10 +16,12 @@ BitShiftNameEncoding::~BitShiftNameEncoding() {
 	// TODO Auto-generated destructor stub
 }
 
-char* BitShiftNameEncoding::nameById(uint64 id) {
+// char* BitShiftNameEncoding::nameById(uint64 id) {
+string BitShiftNameEncoding::nameById(uint64 id) {
 
-	char *name = new char[32];
-
+  // char *name = new char[32];
+  string name(32,' ');
+  
 	uint32 size=0, i;
 	int c; // a spare character;
 
@@ -55,25 +57,32 @@ char* BitShiftNameEncoding::nameById(uint64 id) {
 	} else {
 		name[0] = 'S';
 	}
-	name[size] = 0; // end string
+	// name[size] = 0; // end string
+	name.erase(size,string::npos);
 
+	// ORIG 2019-1212 MLR return name;
+	// string ret(name);
+	// delete name;
+	// return ret;
 	return name;
-	//	  return 0;
 }
 
-uint64 BitShiftNameEncoding::idByName(const char* name) {
+// uint64 BitShiftNameEncoding::idByName(const char* name) {
+uint64 BitShiftNameEncoding::idByName(string name) {
 
 	uint64 out=0, i;
 	size_t siz = 0;
 
-	if(name == 0)              // null pointer-name
+	//	if(name == 0)              // null pointer-name
+	if(name.empty())              // null pointer-name	
 		throw SpatialFailure("BitShiftName:idByName-NullPointerName");
 //		return 0;
 	if(name[0] != 'N' && name[0] != 'S')  // invalid name
 		throw SpatialFailure("BitShiftName:idByName-InvalidName");
 //		return 0;
 
-	siz = strlen(name);       // determine string length
+	// siz = strlen(name);       // determine string length
+	siz = name.length();       // determine string length
 	// at least size-2 required, don't exceed max
 	if(siz < 2)
 		throw SpatialFailure("BitShiftName:idByName-NameTooSmall");

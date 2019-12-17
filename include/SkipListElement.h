@@ -68,6 +68,6 @@ public:
   long myLevel; // level of element
   Key myKey; // key of element
   Value myValue; // value of element
-  SkipListElement* myNext[SKIPLIST_MAXLEVEL]; // pointers to next elements
+  SkipListElement* myNext[SKIPLIST_MAXLEVEL]; // pointers to next elements // TODO How to finalize?
 };
 #endif // _SkipListElement_H

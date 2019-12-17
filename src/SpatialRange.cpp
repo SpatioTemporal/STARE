@@ -39,7 +39,8 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
 		uint64 a = leftJustified.getId(), b = a;
 		auto i1 = (i0+1);
-		if( i1 <= intervals.end() ) {
+		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
+		if( i1 != intervals.end() ) {
 			if(terminatorp(*i1)) {
 				leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
 				b = leftJustified.getId();
@@ -109,7 +110,8 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
 /*
  * Odd. The following does not seem to work if we just return the SpatialRange itself. Some of the pointers seem to be either corrupted or eliminated.
  */
-SpatialRange *sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
+// SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
+SpatialRange* sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 // #define DIAG
 #ifdef DIAG
@@ -132,6 +134,8 @@ SpatialRange *sr_intersect(const SpatialRange&a, const SpatialRange& b, bool com
 	cout << "sr-r-r-my_los " << hex << sr->range->range->my_los << endl << flush;
 #endif
 	return sr;
+
+//	return SpatialRange(range);
 }
 
 

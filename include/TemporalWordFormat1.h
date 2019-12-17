@@ -11,13 +11,17 @@
 #define INCLUDE_TEMPORALWORDFORMAT1_H_
 
 #include "BitField.h"
+#include <memory>
 
 namespace std {
 
 class TemporalWordFormat1 {
 public:
-	vector<BitField*>     bitFields;   // Construct order... Verify object identity?
-	map<string,BitField*> bitFieldMap; // Holds the data, can we have the same obj as previous?
+  vector<shared_ptr<BitField> >     bitFields;   // Construct order... Verify object identity?
+  map<string,shared_ptr<BitField> > bitFieldMap; // Holds the data, can we have the same obj as previous?
+
+  // vector<BitField*>     bitFields;   // Construct order... Verify object identity?
+  // map<string,BitField*> bitFieldMap; // Holds the data, can we have the same obj as previous?
 
 	// It is assumed that pos_FinestResolutionLevel < pos_CoarsestResolutionLevel
 	int64_t pos_CoarsestResolutionLevel = -1;
@@ -43,7 +47,7 @@ public:
 
 		bool first = true;
 		int i = 0;
-		for(vector<BitField*>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
+		for(vector<shared_ptr<BitField>>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
 			if(first) {
 				cout << "    " << (*it)->toStringHeader() << endl << flush;
 				first = false;
@@ -57,12 +61,12 @@ public:
 	}
 
 	void setFieldMaxId(int64_t fieldMaxId) {
-		for(vector<BitField*>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
+		for(vector<shared_ptr<BitField>>::const_iterator it = bitFields.begin(); it != bitFields.end(); ++it) {
 			(*it)->setMaxFieldId(fieldMaxId);
 		}
 	}
 
-	BitField* get(string name) const {
+	shared_ptr<BitField> get(string name) const {
 		// cout << "x100 '" << endl << flush;
 		// << bitFieldMap.at(name).getName() << "'" << endl << flush;
 		return bitFieldMap.at(name);
@@ -78,7 +82,7 @@ public:
 	void setZero() {
 		// Note we save type here.
 		int64_t type = bitFieldMap.at("type")->getValue();
-		for(map<string,BitField*>::iterator it = bitFieldMap.begin(); it != bitFieldMap.end(); ++it) {
+		for(map<string,shared_ptr<BitField>>::iterator it = bitFieldMap.begin(); it != bitFieldMap.end(); ++it) {
 			(*it).second->setValue(0);
 		}
 		bitFieldMap.at("type")->setValue(type);
@@ -92,7 +96,7 @@ public:
 		return bitFieldMap.at(levelName)->getFieldId();
 	}
 
-	BitField* getBitFieldAtId(int64_t id) const {
+	shared_ptr<BitField> getBitFieldAtId(int64_t id) const {
 		return bitFieldMap.at(bitFields[id]->getName());
 	}
 

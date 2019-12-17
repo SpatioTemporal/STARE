@@ -113,23 +113,25 @@ void SpatialRange_test () {
 		SISOUT("sis1",sis1);
 
 		// cout << 100 << endl << flush;
-		SpatialRange *deltaRange;
+		SpatialRange* deltaRange;
 		try {
 			// cout << 110 << endl << flush;
 			deltaRange = range0 & range1;
 			// deltaRange = sr_intersect(range0, range1);
 			// cout << 120 << endl << flush;
+			// cout << 121 << endl << flush;
 		} catch ( SpatialException e ) {
-			// cout << 130 << endl << flush;
-			cout << e.what() << endl << flush;
-			// cout << 140 << endl << flush;
+		  // cout << 130 << endl << flush;
+		  cout << e.what() << endl << flush;
+		  // cout << 140 << endl << flush;
 		}
+		// cout << 122 << endl << flush;
 
 #ifdef DIAG
-		cout << 199 << endl << flush;
-		cout << 1991 << " dR.r            " << hex << (deltaRange->range) << dec << endl << flush;
-		cout << 1991 << " dR.r->r         " << hex << (deltaRange->range->range) << dec << endl << flush;
-		cout << 1991 << " dR.r->r->my_los " << hex << (deltaRange->range->range->my_los) << dec << endl << flush;
+		// cout << 199 << endl << flush;
+		// cout << 1991 << " dR.r            " << hex << (deltaRange->range) << dec << endl << flush;
+		// cout << 1991 << " dR.r->r         " << hex << (deltaRange->range->range) << dec << endl << flush;
+		// cout << 1991 << " dR.r->r->my_los " << hex << (deltaRange->range->range->my_los) << dec << endl << flush;
 #endif
 		if(!deltaRange->range->range) { cout << "Error deltaRange is null!" << endl << flush; }
 		// cout << 200 << " dR nR = " << deltaRange->range->range->nranges() << endl << flush;
@@ -140,6 +142,8 @@ void SpatialRange_test () {
 
 		ASSERT_EQUAL(sis1[0],deltaSis[0]);
 		ASSERT_EQUAL(sis0[1],deltaSis[1]);
+
+		delete deltaRange;
 
 #undef SIVOUT
 #undef SISOUT
@@ -186,7 +190,7 @@ void SpatialRange_test () {
 		SISOUT("sis1",sis1);
 
 		// cout << 100 << endl << flush;
-		SpatialRange *deltaRange;
+		SpatialRange* deltaRange;
 		try {
 			// cout << 110 << endl << flush;
 			deltaRange = range0 & range1;
@@ -214,6 +218,8 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(2,deltaSis.size());
 		ASSERT_EQUAL(sis1[0],deltaSis[0]);
 		ASSERT_EQUAL(sis0[1],deltaSis[1]);
+
+		delete deltaRange;
 	}
 
 	// TODO Write many more tests & consider edge cases.
@@ -224,6 +230,7 @@ void SpatialRange_test () {
 		STARE_SpatialIntervals sis2(siv2,siv2+2);
 		SpatialRange r1(sis1), r2(sis2);
 		SpatialRange *ri = r1 & r2;
+		// SpatialRange *ri = r1 & r2;
 		// SpatialRange *ri = sr_intersect(r1, r2);
 
 		STARE_SpatialIntervals result = ri->toSpatialIntervals();
@@ -238,11 +245,12 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(0x00003fffffffffff,result[1]);
 		ASSERT_EQUAL(0x0000400000000007,result[2]);
 		ASSERT_EQUAL(0x0000600000000008,result[3]);
-
 		delete ri;
+		
 		ri = sr_intersect(r1, r2, true); // Run a compression pass on the range.
 		result.clear();
 		result = ri->toSpatialIntervals();
+		delete ri;
 		ASSERT_EQUAL(4,result.size());
 		ASSERT_EQUAL(0x0000300000000008,result[0]);
 		ASSERT_EQUAL(0x00003fffffffffff,result[1]);

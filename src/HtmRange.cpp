@@ -917,7 +917,9 @@ int HtmRange::stats(int desiredSize)
 namespace HtmRange_NameSpace {
 
 std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
-	char tmp_buf[256];
+#ifdef _WIN32
+  char tmp_buf[256];
+#endif
 	Key lo, hi;
 	// os << "Start Range " << endl;
 	// Preamble TODO change from symbolicOutput boolean to enumerated type.
@@ -933,11 +935,16 @@ std::ostream& operator<<(std::ostream& os, const HtmRange& range) {
 	while((lo = range.my_los->getkey()) > 0){
 		hi = range.my_his->getkey();
 		if (range.symbolicOutput){
-            os << endl;
-			strcpy(tmp_buf,range.encoding->nameById(lo));
-			strcat(tmp_buf," ");
-			strcat(tmp_buf,range.encoding->nameById(hi));
-			os << tmp_buf;
+		  os << endl;
+		  os << range.encoding->nameById(lo)
+		     << " "
+		     << range.encoding->nameById(hi);
+		  
+		  //strcpy(tmp_buf,range.encoding->nameById(lo));
+		  //strcat(tmp_buf," ");
+		  //strcat(tmp_buf,range.encoding->nameById(hi));
+		  //os << tmp_buf;
+			
 		} else {
 #ifdef _WIN32
 			sprintf(tmp_buf, "%I64d %I64d ", lo, hi);
@@ -1182,7 +1189,8 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 		hi = my_his->getkey();
 		if (what != BOTH) {
 			if (symbolic){
-				strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi));
+			  // strcpy(tmp_buf,encoding->nameById(what == LOWS ? lo : hi));
+				os << encoding->nameById(what == LOWS ? lo : hi);
 			} else {
 #ifdef _WIN32
 				sprintf(tmp_buf, "%I64d", what == LOWS ? lo : hi);
@@ -1192,9 +1200,13 @@ void HtmRange::print(int what, std::ostream& os, bool symbolic)
 			}
 		} else {
 			if (symbolic){
-				strcpy(tmp_buf,encoding->nameById(lo));
-				strcat(tmp_buf,"..");
-				strcat(tmp_buf,encoding->nameById(hi));
+			  os
+			    << encoding->nameById(lo)
+			    << ".."
+			    << encoding->nameById(hi);
+				//strcpy(tmp_buf,encoding->nameById(lo));
+				//strcat(tmp_buf,"..");
+				//strcat(tmp_buf,encoding->nameById(hi));
 			} else {
 				sprintf(tmp_buf, "%llu..%llu", lo, hi);
 			}

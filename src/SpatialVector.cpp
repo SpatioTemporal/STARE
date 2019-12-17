@@ -39,7 +39,11 @@ SpatialVector::SpatialVector(float64 x, float64 y, float64 z) :
 /////////////CONSTRUCTOR//////////////////////////////////
 /// TODO Strengthen the following input type.
 SpatialVector::SpatialVector(float64 *x) :
-	x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
+  x_(x[0]), y_(x[1]), z_(x[2]), ra_(0), dec_(0), okRaDec_(false) {
+}
+/////////////CONSTRUCTOR//////////////////////////////////
+SpatialVector::SpatialVector(std::vector<float64> v) :
+  x_(v[0]), y_(v[1]), z_(v[2]), ra_(0), dec_(0), okRaDec_(false) {
 }
 /////////////CONSTRUCTOR//////////////////////////////////
 //
@@ -98,7 +102,8 @@ SpatialVector::setLatLonDegrees(const float64 &lat, const float64 &lon)
 	latDegrees_ = lat;
 	lonDegrees_ = lon;
 	latlon_     = true;
-	float64 *x = xyzFromLatLonDegrees(lat,lon);
+	// float64 *x = xyzFromLatLonDegrees(lat,lon);
+	std::vector<float64> x = xyzFromLatLonDegrees(lat,lon);
 	x_ = x[0];
 	y_ = x[1];
 	z_ = x[2];
@@ -403,7 +408,9 @@ SpatialVector::show() const
   printf(" %11.8f %11.8f %11.8f \n",x_,y_,z_);
 }
 
-const char*
+/** Copy to a string. Don't forget to clean up if you use. **/
+// const char*
+std::string
 SpatialVector::toString()
 {
 	char *buffer = new char[40];
@@ -412,14 +419,18 @@ SpatialVector::toString()
 	return buffer;
 }
 
-float64*
+/** Copy to an array. Don't forget to clean up if you use. **/
+// float64*
+std::vector<float64>
 SpatialVector::toArray()
 {
-	float64 *buffer = new float64[3];
-	buffer[0] = x_;
-	buffer[1] = y_;
-	buffer[2] = z_;
-	return buffer;
+  // float64 *buffer = new float64[3];
+  // buffer[0] = x_;
+  // buffer[1] = y_;
+  // buffer[2] = z_;
+  
+  std::vector<float64> buffer { x_, y_, z_ };
+  return buffer;
 
 }
 

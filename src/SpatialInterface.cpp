@@ -84,7 +84,8 @@ uint64 htmInterface::lookupIDCmd(char *str) {
 
 }
 
-const char * htmInterface::lookupNameCmd(char *str) {
+// const char * htmInterface::lookupNameCmd(char *str) {
+const string htmInterface::lookupNameCmd(char *str) {
 
 	cmd_ = str;
 	if(t_ != NULL)delete t_;
@@ -95,7 +96,8 @@ const char * htmInterface::lookupNameCmd(char *str) {
 
 	if(code == ID) {
 		uint64 id = getInt64();
-		index_->nameById(id, name_);
+		// index_->nameById(id, name_);
+		name_=index_->nameById(id);
 	} else {
 		getDepth();
 
@@ -103,10 +105,12 @@ const char * htmInterface::lookupNameCmd(char *str) {
 			throw SpatialInterfaceError("htmInterface:lookupNameCmd: Expect vector in Command. ", cmd_.data());
 
 		if( code == J2000 )
-			index_->nameByPoint(v[0], v[1], name_);
+		  // index_->nameByPoint(v[0], v[1], name_);
+		  name_ =	index_->nameByPoint(v[0], v[1]);
 		else {
 			SpatialVector tv(v[0], v[1], v[2]);
-			index_->nameByPoint(tv, name_);
+			// index_->nameByPoint(tv, name_);
+			name_ = index_->nameByPoint(tv);
 		}
 	}
 	return name_;
@@ -403,7 +407,8 @@ htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool 
 	for(size_t i = 0; i < steps; i++) {
 		// cout << " " << i << flush;
 		// cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
-		float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
+		// float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
+	  vector<float64> x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
 		// cout << endl << flush;

@@ -65,10 +65,14 @@ SpatialIndex::idByLeafNumber(uint64 n) const{
 
 //////////////////NAMEBYLEAFNUMBER////////////////////////////////////////
 //
-inline char *
-SpatialIndex::nameByLeafNumber(uint64 n, char * name) const{
-  return nameById(idByLeafNumber(n), name);
+// inline char *
+inline std::string
+SpatialIndex::nameByLeafNumber(uint64 n) const{
+  return nameById(idByLeafNumber(n));
 }
+// SpatialIndex::nameByLeafNumber(uint64 n, char * name) const{
+//   return nameById(idByLeafNumber(n), name);
+// }
 
 //////////////////IDBYPOINT////////////////////////////////////////////////
 // Find a leaf node where a ra/dec points to
@@ -91,20 +95,26 @@ SpatialIndex::idByLatLon(const float64 &lat, const float64 &lon) const {
 // Find a leaf node where a ra/dec points to, return its name
 //
 
-inline char*
-SpatialIndex::nameByPoint(const float64 & ra, const float64 & dec, 
-			  char* name) const {
-  return nameById(idByPoint(ra,dec), name);
+inline std::string
+SpatialIndex::nameByPoint(const float64 & ra, const float64 & dec) const {
+  return nameById(idByPoint(ra,dec));
 }
 
 //////////////////NAMEBYPOINT//////////////////////////////////////////////
 // Find a leaf node where v points to, return its name
 //
 
-inline char*
-SpatialIndex::nameByPoint(SpatialVector & vector, char* name) const {
-  return nameById(idByPoint(vector),name);
+// inline char*
+// SpatialIndex::nameByPoint(SpatialVector & vector, char* name) const {
+//   return nameById(idByPoint(vector),name);
+// }
+
+inline std::string
+SpatialIndex::nameByPoint(SpatialVector & vector) const {
+  return nameById(idByPoint(vector));
 }
+
+
 ////////////////////// setMaxlevel /////////////////////////
 inline void
 SpatialIndex::setMaxlevel(size_t level) {

@@ -7,6 +7,7 @@
 
 #include "Test.h"
 #include "SpatialVector.h"
+#include <vector>
 
 #define EXPAND_ASSERT_EQUALDM(str,v0,v1,tol) cout << str << " v0( " << v0 << " ) vs. v1( " << v1 << " ) " << tol << endl
 
@@ -16,7 +17,7 @@ void SpatialVector_test() {
 	SpatialVector v(1,2,3);
 
 	float64 a[] = {1,2,3};
-	float64* b  = v.toArray();
+	std::vector<float64> b  = v.toArray();
 
 	stringstream ss;
 

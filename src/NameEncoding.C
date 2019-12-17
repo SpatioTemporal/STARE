@@ -5,6 +5,8 @@
  *      Author: mrilee
  */
 
+using namespace std;
+
 #include "NameEncoding.h"
 
 //NameEncoding::NameEncoding() {

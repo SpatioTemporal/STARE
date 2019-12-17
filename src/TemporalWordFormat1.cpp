@@ -15,6 +15,9 @@ TemporalWordFormat1::TemporalWordFormat1() {
 }
 
 TemporalWordFormat1::~TemporalWordFormat1() {
+  // for(auto it = begin(bitFields); it != end(bitFields); ++ it) {
+  //   delete (*it);
+  // }
 }
 
 }

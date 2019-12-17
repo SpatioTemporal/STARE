@@ -406,7 +406,8 @@ main(int argc, char *argv[]) {
 						uint64 id1 = stareIndex.ValueFromLatLonDegrees(ra, dec, depth);
 						if(hex)    cout << std::setw(18) << id1;
 						uint64 htmId1 = stareIndex.htmIDFromValue(id1);
-						char idname1[128]; stareIndex.getIndex(depth).nameById(htmId1, idname1);
+						// char idname1[128]; stareIndex.getIndex(depth).nameById(htmId1, idname1);
+						std::string idname1 = stareIndex.getIndex(depth).nameById(htmId1);
 						if(symbol) cout << " "  << idname1;
 					}
 					cout << std::dec;

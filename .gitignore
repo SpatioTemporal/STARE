@@ -1,5 +1,5 @@
 # git ignores...
-
+.#*
 *.o
 **~
 # Eclipse/CDT Cevelop configuration

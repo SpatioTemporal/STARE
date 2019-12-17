@@ -5,17 +5,22 @@
  *      Author: mrilee
  */
 
+#include <vector>
 #include "SpatialGeneral.h"
 
-float64* xyzFromLatLonRadians(float64 lat,float64 lon) {
-	float64 *ret = new float64[3];
-	ret[0] = cos(lat)*cos(lon);
-	ret[1] = cos(lat)*sin(lon);
-	ret[2] = sin(lat);
-	return ret;
+// float64* xyzFromLatLonRadians(float64 lat,float64 lon) {
+std::vector<float64> xyzFromLatLonRadians(float64 lat,float64 lon) {
+	// float64 *ret = new float64[3];
+	// ret[0] = cos(lat)*cos(lon);
+	// ret[1] = cos(lat)*sin(lon);
+	// ret[2] = sin(lat);
+	// return ret;
+  std::vector<float64> ret { cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat) };
+  return ret;
 }
 
-float64* xyzFromLatLonDegrees(float64 lat,float64 lon) {
+// float64* xyzFromLatLonDegrees(float64 lat,float64 lon) {
+std::vector<float64> xyzFromLatLonDegrees(float64 lat,float64 lon) {
 //	float64 piDiv180 = 4*atan(1.0)/180.;
 	return xyzFromLatLonRadians(lat*piDiv180,lon*piDiv180);
 }

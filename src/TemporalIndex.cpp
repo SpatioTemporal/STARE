@@ -16,10 +16,16 @@ BitField::~BitField() {}
 TemporalWordFormat::~TemporalWordFormat() {}
 
 TemporalIndex::~TemporalIndex() {
-	// TODO Auto-generated destructor stub
+  // TODO Auto-generated destructor stub
+  // for(auto it = begin(data.bitFields); it != end(data.bitFields); ++ it) {
+  //   delete (*it);
+  // }
+  // while( !data.bitFields.empty() ) {
+  //   BitField *b = data.bitFields.back();
+  //   delete b;
+  //   data.bitFields.pop_back();
+  // }
 }
-
-
 
 // #define OUTPUT(field) cout << name_##field << " " << field << " " << bitWidth_##field << " " << mask_##field << endl << flush;
 #define OUTPUT(field) cout \
@@ -703,7 +709,7 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 		}
 	}
 	// Find the number of milliseconds in the fractional year.
-	double d0_1, d0_2;
+	double d0_1=0, d0_2=0;
 	int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
 	double delta = ((d1-d0_1)+(d2-d0_2))*86400000.0;
 //	cout << "a200 " << setw(24) << setprecision(20) << delta << flush;
