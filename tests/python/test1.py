@@ -26,6 +26,13 @@ class test0(unittest.TestCase):
             self.assertEqual(i[1],cover[i[0]])
         return
 
+    def test_ng1(self):
+        a = [4114022797720682508, 4505997421712506892, 4505997834029367308, 4505997868389105676, 4505998418144919564]
+        b = [4528191461944221900, 4505997456072245260]
+        for i in range(1,10000):        
+            ps.intersect(a, b)
+        self.assertTrue(True)
+
 if __name__ == '__main__':
 
     unittest.main()

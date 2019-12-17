@@ -694,7 +694,8 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
-inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+// inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
+inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
 	}
@@ -703,12 +704,11 @@ inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 
 	int64_t	ab = a.toInt64Milliseconds() + b.toInt64Milliseconds();
 
-	TemporalIndex* c = new TemporalIndex;
-
-	c->fromInt64Milliseconds(ab);
-	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
-
-	return *c;
+	// TemporalIndex* c = new TemporalIndex;
+	TemporalIndex c;
+	c.fromInt64Milliseconds(ab);
+	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return c;
 }
 
 inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
@@ -731,7 +731,8 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
-inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+// inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
+inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:add(a,b):TypeMismatch");
 	}
@@ -746,10 +747,11 @@ inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 //	FMT1(bd1,bd2);
 //	FMT1(cd1,cd2);
 //#undef FMT1
-	TemporalIndex* c = new TemporalIndex;
-	c->fromJulianTAI(cd1, cd2);
-	c->set_resolution(min(a.get_resolution(),b.get_resolution()));
-	return *c;
+	// TemporalIndex* c = new TemporalIndex;
+	TemporalIndex c;
+	c.fromJulianTAI(cd1, cd2);
+	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	return c;
 }
 
 inline double diff_JulianTAIDays(const TemporalIndex& a, const TemporalIndex& b) {
@@ -796,8 +798,8 @@ inline bool operator< (const TemporalIndex& lhs, const TemporalIndex& rhs) { ret
 inline bool operator> (const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >  0; }
 inline bool operator<=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) <= 0; }
 inline bool operator>=(const TemporalIndex& lhs, const TemporalIndex& rhs) { return cmpJ(lhs,rhs) >= 0; }
-inline TemporalIndex& operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
-inline TemporalIndex& operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
+inline TemporalIndex operator+ (const TemporalIndex& a, const TemporalIndex& b) { return addJ(a,b); }
+inline TemporalIndex operator| (const TemporalIndex& a, const TemporalIndex& b) { return add(a,b); }
 
 inline std::ostream& operator<<(std::ostream& os, TemporalIndex tIndex) {
 	os << tIndex.toStringJulianTAI();
