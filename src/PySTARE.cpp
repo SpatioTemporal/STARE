@@ -1,7 +1,7 @@
 /*
  * PySTARE.cpp
  *
- *  Created on: Jun 13, 2019
+ c*  Created on: Jun 13, 2019
  *      Author: mrilee
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
@@ -183,7 +183,8 @@ void _to_circular_cover(double lat, double lon, double radius, int resolution, i
 }
 
 StareResult _to_circular_cover1(double lat, double lon, double radius, int resolution) {
-  StareResult result; result.add_intervals(stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution));
+  StareResult result; 
+  result.add_intervals(stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution));
   return result;
 }
 
@@ -256,15 +257,14 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 	}
 }
 
-void _intersects(int64_t* indices1, int len1, int64_t* indices2, int len2, bool intersects) {
-	STARE_ArrayIndexSpatialValues sivs1(indices1, indices1+len1), sivs2(indices2, indices2+len2);
-	intersects = true;    
-	for(int i=0; i<len1; ++i) {
-		for(int j=0; j<len2; ++j) {			
-			if (cmpSpatial(indices1[i], indices2[j]) != 0) {
-                intersects = true;
+void _intersects(int64_t* indices1, int len1, int64_t* indices2, int len2, int* intersects) {        
+    for(int i=0; i<len2; ++i) {        
+        intersects[i] = 0;
+        for(int j=0; j<len1; ++j) {
+            if (cmpSpatial(indices2[i], indices1[j]) != 0) {
+                intersects[i] = 1;                
                 break;
-            }
+            }            
         }
     }
 }
@@ -297,7 +297,7 @@ void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int6
 	int k=0;
 	for(int i=0; i<len1; ++i) {
 		for(int j=0; j<len2; ++j) {
-			cmp[k] = cmpSpatial(indices1[i],indices2[j]); // i.e. [i*len2+j]
+			cmp[k] = cmpSpatial(indices1[i], indices2[j]); // i.e. [i*len2+j]
 			++k;
 		}
 	}
