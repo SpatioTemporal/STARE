@@ -126,10 +126,9 @@ Arguments parseArguments(int argc, char *argv[]) {
 
 STARE stare;
 
-int
-main(int argc, char *argv[]) {
-  Arguments arguments = parseArguments(argc, argv);        
-  STARE_ArrayIndexSpatialValue indexValue;
+int main(int argc, char *argv[]) {
+    Arguments arguments = parseArguments(argc, argv);        
+    STARE_ArrayIndexSpatialValue indexValue;
     
   // Getting index Value
   if (arguments.latlon) {

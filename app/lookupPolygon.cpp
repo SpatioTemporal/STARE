@@ -102,7 +102,7 @@ STARE stare;
 
 int main(int argc, char *argv[]) {
   Arguments arguments = parseArguments(argc, argv);        
-    
+
   // Getting index Value
   STARE_SpatialIntervals indexValues;
   indexValues = stare.ConvexHull(arguments.cornerVector, arguments.resolution);
