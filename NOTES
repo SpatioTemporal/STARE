@@ -1,4 +1,6 @@
 
+* 2019-12-xx Version 0.10.x
+
 * 2019-11-14 Version 0.9.1
 
 Diagnostic "iFuse" loop counter set to low value of 12 during testing of "infinite" looping in RangeConvex::simplify0. This

@@ -86,9 +86,9 @@ SpatialIndex::idByPoint(const float64 & ra, const float64 & dec) const {
 
 inline uint64
 SpatialIndex::idByLatLon(const float64 &lat, const float64 &lon) const {
-	SpatialVector v;
-	v.setLatLonDegrees(lat,lon);
-	return idByPoint(v);
+  SpatialVector v;
+  v.setLatLonDegrees(lat,lon);
+  return idByPoint(v);
 }
 
 //////////////////NAMEBYPOINT//////////////////////////////////////////////
