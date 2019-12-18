@@ -1,5 +1,8 @@
 
-* 2019-12-xx Version 0.10.x
+* 2019-12-xx Version 0.10.0
+
+- Shapely and Geopandas support.
+- Valgrind analysis and leak patching.
 
 * 2019-11-14 Version 0.9.1
 
