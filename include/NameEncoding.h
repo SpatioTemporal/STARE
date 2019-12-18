@@ -51,7 +51,7 @@ public:
   // virtual const char* getEncodingType() const = 0;
   virtual string getEncodingType() const = 0;
 
-  const uint32 getLevel() const { return levelById(id); }
+  uint32 getLevel() const { return levelById(id); }
 
   bool valid() {
     if(id!=0) {return id == idByName(getName());
