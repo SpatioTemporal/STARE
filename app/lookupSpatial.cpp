@@ -126,7 +126,7 @@ Arguments parseArguments(int argc, char *argv[]) {
 
 STARE stare;
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     Arguments arguments = parseArguments(argc, argv);        
     STARE_ArrayIndexSpatialValue indexValue;
     
