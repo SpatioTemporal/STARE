@@ -335,7 +335,7 @@ STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialSta
  *   0 otherwise.
  *
  */
-int cmpSpatial(STARE_ArrayIndexTemporalValue a_, STARE_ArrayIndexTemporalValue b_) {
+int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_) {
 
 	EmbeddedLevelNameEncoding a_elne0,a_elne1,b_elne0,b_elne1;
 

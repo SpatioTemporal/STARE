@@ -75,6 +75,8 @@ if(BUILD_TESTING)
 endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
+
 
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
