@@ -47,6 +47,7 @@ def make_hull(lat0,lon0,resolution0,ntri0):
     return lats0,lons0,triang0,hull0
 
 resolution = 5
+# resolution = 4
 
 resolution0 = resolution; ntri0 = 1000
 lat0 = np.array([ 10, 5, 60,70], dtype=np.double)
@@ -62,7 +63,8 @@ print('hull1: ',len(hull1))
 
 if True:
     intersected = np.full([1000],-1,dtype=np.int64)
-    intersected = ps.intersect(hull0,hull1,multiresolution=False)
+    # intersected = ps.intersect(hull0,hull1,multiresolution=False)
+    intersected = ps.intersect(hull0,hull1,multiresolution=True)
     # intersected = ps.intersect(hull0,hull1,multiresolution=True)
     # print('hull0: ',[hex(i) for i in hull0])
     # print('hull1: ',[hex(i) for i in hull1])

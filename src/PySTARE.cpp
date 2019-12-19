@@ -263,7 +263,7 @@ void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, 
 	// cout << 200 << endl << flush;
 	// SpatialRange *ri = r1 & r2;
 	// SpatialRange ri = sr_intersect(r1,r2,true);
-	SpatialRange *ri = sr_intersect(r1,r2,false);
+	SpatialRange *ri = sr_intersect(r1,r2,true); // Should be true here, was false.
 	// cout << 300 << endl << flush;
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
 	delete ri;
