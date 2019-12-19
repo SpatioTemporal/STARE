@@ -1,13 +1,20 @@
 
-* 2019-12-xx Version 0.10.0
+* 2019-12-18 Version 0.10.1
+
+- Bugfix. PySTARE.i _intersect_multiresolution broken during
+  analysis. Unit test and fix added.
+
+* 2019-12-18 Version 0.10.0
 
 - Shapely and Geopandas support.
 - Valgrind analysis and leak patching.
 
 * 2019-11-14 Version 0.9.1
 
-Diagnostic "iFuse" loop counter set to low value of 12 during testing of "infinite" looping in RangeConvex::simplify0. This
-guaranteed that large enough sets of points sent to ConvexHull would overstep this loop limit, which would then exit 1 the app.
+Diagnostic "iFuse" loop counter set to low value of 12 during testing
+of "infinite" looping in RangeConvex::simplify0. This guaranteed that
+large enough sets of points sent to ConvexHull would overstep this
+loop limit, which would then exit 1 the app.
 
 * 2019-11-14 Version 0.9.0
 
