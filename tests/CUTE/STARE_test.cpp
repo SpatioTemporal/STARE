@@ -1547,6 +1547,22 @@ void STARE_test() {
 
 	}
 
+	// Didn't handle level = 0 in STARE::htmIDFromValue properly.
+	if(false) {
+	  LatLonDegrees64 latlon0(45.0,45.0);
+	  int level = 0;
+	  STARE_ArrayIndexSpatialValue aIndex  = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,level);
+	  cout << "aIndex:  " << hex << aIndex << dec << endl;
+
+	  EmbeddedLevelNameEncoding lj;
+	  lj.setIdFromSciDBLeftJustifiedFormat(aIndex);
+	  BitShiftNameEncoding rj(lj.rightJustifiedId());
+	  uint64 htmID = rj.getId();
+	  cout << "a100 " << hex << htmID << dec << endl << flush;
+
+	  Triangle tr = index.TriangleFromValue(aIndex);
+	  
+	}
 	// FAIL();
 }
 
