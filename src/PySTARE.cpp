@@ -69,7 +69,7 @@ void to_vertices(int64_t* indices, int len, int64_t* vertices0, int64_t* vertice
  * len of the output arrays is 4 times the input array lenght (len).
  */
 void _to_vertices_latlon(int64_t* indices, int len, double* triangle_info_lats, int dmy1, double* triangle_info_lons, int dmy2 ) {
-	double lat, lon;
+	double lat = 0, lon = 0;
 	int k=0;
     for (int i=0; i<len; i++) {
         Triangle tr = stare.TriangleFromValue(indices[i]);
@@ -276,7 +276,7 @@ void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, 
 	// cout << 200 << endl << flush;
 	// SpatialRange *ri = r1 & r2;
 	// SpatialRange ri = sr_intersect(r1,r2,true);
-	SpatialRange *ri = sr_intersect(r1,r2,false);
+	SpatialRange *ri = sr_intersect(r1,r2,true); // Should be true here, was false.
 	// cout << 300 << endl << flush;
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
 	delete ri;

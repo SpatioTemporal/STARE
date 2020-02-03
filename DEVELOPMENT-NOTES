@@ -1,4 +1,16 @@
 
+* 2019-1217-1615-10-EST
+
+DartConfiguration.tcl in cmake-build directory has options concerning the build.
+
+In particular for valgrind there is a
+ValgrindCommandOptions: --track-origins=yes
+
+but maybe I should use instead...
+MemoryCheckCommandOptions:  --track-origins=yes
+
+Note: https://stackoverflow.com/questions/52730994/how-to-pass-arguments-to-memcheck-with-ctest
+
 * 2019-0811-1815-DST
 
 Which classes use or depend on SpatialIndex? We need to be concerned about default SpatialIndexes showing up.

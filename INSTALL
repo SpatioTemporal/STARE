@@ -48,10 +48,39 @@ mkdir build; cd build
 cmake -DCMAKE_INSTALL_PREFIX=< install_path > .. 
 make install
 
+# Optimization flags may be set via an environment variable OPTFLAGS or via
+# the cmake invocation as
+cmake -DOPTFLAGS="-O2"
+# Note the default is set to "-O3".
+
+###########################################################################
+#
+# Testing - Simple
+#
 # To run tests, after making the library as above, try the following
 # in the build directory.
 
 make test
+
+###########################################################################
+#
+# Testing - ctest
+#
+# CMake provides a useful framework for testing.
+#
+# To run tests, after making the library as above, try the following
+# in the build directory.
+
+ctest
+
+# For performing Valgrind-based memory tests, rerun cmake and test as follows.
+cmake -DOPTFLAGS="-O0" ../STARE
+make
+ctest -T memcheck
+# which will produce a number of logs and analyses of the memory integrity.
+
+
+
 
 ###########################################################################
 #

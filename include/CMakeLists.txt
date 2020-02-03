@@ -93,6 +93,7 @@ install(FILES STARE.h
   SpatialRotation.h
   TemporalGeneral.h
   TemporalIndex.h
+  TemporalIndex1.h
   TemporalWordFormat1.h	
   VarCmp.h
   VarStr.h

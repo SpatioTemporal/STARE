@@ -146,11 +146,13 @@ public:
 	
 
 };
-int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b);
+
+// int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b) {}
+int cmpSpatial(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
+
 bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2);
 bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days);
 
-// int cmpSpatial(STARE_ArrayIndexTemporalValue a, STARE_ArrayIndexTemporalValue b) {}
 
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId);
 

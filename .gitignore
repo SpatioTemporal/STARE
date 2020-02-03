@@ -37,3 +37,4 @@ build-1
 
 *.pyc
 \#*#
+/Testing/

@@ -350,7 +350,7 @@ main(int argc, char *argv[]) {
 					cout << " 0x";
 					PRINTID_HEX(id);
 				}
-				if(symbol)  printf(" %s",htm->lookupName(id));
+				if(symbol)  printf(" %s",htm->lookupName(id).c_str());
 			}
 
 			if(STARE_flag) {

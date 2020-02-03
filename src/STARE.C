@@ -230,6 +230,15 @@ SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatial
 
 Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int resolutionLevel) {
 	// Users are going to expect the default resolution level to be that embedded in the sStareId.
+
+  // EmbeddedLevelNameEncoding elne0;
+  // elne0.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+  // elne0 = elne0.clearDeeperThanLevel(elne0.getLevel());
+  // STARE_ArrayIndexSpatialValue spatialStareId_ = elne0.getSciDBLeftJustifiedFormat();
+
+  // std::cout << 149 << " " << std::hex << spatialStareId  << std::dec << std::endl;
+  // std::cout << 150 << " " << std::hex << spatialStareId_ << std::dec << std::endl;
+
 	uint64 htmID = -1;
 	if( resolutionLevel < 0 ) {
 		// Use the level embedded in the index value.
@@ -239,6 +248,7 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 		// Use the coerced level, which may be set to the search_level.
 		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
 	}
+	// std::cout << 199 << " " << std::hex << htmID << std::dec << std::endl;
 
 	SpatialVector vc,v1,v2,v3;
 
@@ -266,8 +276,11 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	sIndexes[resolutionLevel].nodeVertexByHtmId(v1, v2, v3, htmID);
 	100*/
 
+	// std::cout << 217 << " " << std::dec << resolutionLevel << std::endl;
 	SpatialIndex si = getIndex(resolutionLevel);
+	// std::cout << 218 << " " << std::hex << htmID << std::dec << std::endl;
 	si.pointByHtmId(vc,htmID);
+	// std::cout << 219 << std::endl;
 	si.nodeVertexByHtmId(v1, v2, v3, htmID);
 	// std::cout << 220 << std::endl;
 	Vertices vertices; vertices.push_back(v1); vertices.push_back(v2); vertices.push_back(v3);
@@ -335,7 +348,7 @@ STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialSta
  *   0 otherwise.
  *
  */
-int cmpSpatial(STARE_ArrayIndexTemporalValue a_, STARE_ArrayIndexTemporalValue b_) {
+int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_) {
 
 	EmbeddedLevelNameEncoding a_elne0,a_elne1,b_elne0,b_elne1;
 
@@ -568,7 +581,7 @@ uint64 STARE::htmIDFromValue(STARE_ArrayIndexSpatialValue spatialStareId, int fo
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
 	/// Workaround for a "feature." Coerce the level to the search_level of our sIndex. "true" keeps all of the location bits.
 	int search_level = this->search_level;  /// The default search level (for this sIndex) is usually 27. It can be coerced, say, to the resolution level of the spatial STARE index.
-	if( force_resolution_level > 0 ) {
+	if( force_resolution_level >= 0 ) { // mlr 2020-0123
 		search_level = force_resolution_level;
 	}
 	// EmbeddedLevelNameEncoding leftJustifiedPositionOnly = leftJustifiedWithResolution.atLevel(this->search_level,true);

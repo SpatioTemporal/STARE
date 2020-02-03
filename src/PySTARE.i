@@ -594,11 +594,14 @@ def triangulate(lats,lons):
     return lons,lats,intmat 
 
 def triangulate_indices(indices):
-    """ Prepare data for matplotlib.tri.Triangulate."""
-
-    lons,lats,intmat = triangulate_indices(indices)
-    triang = tri.Triangulation(lons,lats,intmat)
-    plt.triplot(triang,'r-',transform=transform,lw=1,markersize=3)
+    """
+    Prepare data for matplotlib.tri.Triangulate.
+    
+    Usage: 
+     lons,lats,intmat = triangulate_indices(indices)
+     triang = tri.Triangulation(lons,lats,intmat)
+     plt.triplot(triang,'r-',transform=transform,lw=1,markersize=3)    
+    """
     latv,lonv,lat_center,lon_center = to_vertices_latlon(indices)
     lons,lats,intmat = triangulate(latv,lonv)
     return lons,lats,intmat

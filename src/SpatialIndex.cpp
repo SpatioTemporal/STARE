@@ -1367,8 +1367,8 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
  */
 uint64
 SpatialIndex::idByPoint(SpatialVector & v) const {
-  uint64 index;
-  uint64 ID;
+  uint64 index = 0;
+  uint64 ID = 0;
 
   bool verbose = false;
   bool nudge = false;
@@ -1408,7 +1408,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
     DIAGOUT2(cout,dec << index << " index,dc " << setprecision(16) << dcs[index-1] << endl << flush;);
   }
 
-  int     index_dcs_sort[8];
+  int     index_dcs_sort[8] = { 0 };
   index_dcs_sort[0]=0;
 
   for(int i = 1; i < 8; ++i) {
@@ -1446,7 +1446,8 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
   }
 
   DIAGOUT2(cout,dec << "index " << index << endl << flush;);
-  float64 dc_start, dc_end;
+  float64 dc_start = -999;
+  float64 dc_end   = -999;
   float64 dc_improvement = 2.0;
   int attempt = 0;
   int index_tried = index;
@@ -1456,7 +1457,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
     ++attempt;
     if(attempt == 9) {
       stringstream ss;
-      float64 lat,lon;
+      float64 lat=0,lon=0;
       v.getLatLonDegrees(lat, lon);
       ss << setprecision(16);
       ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 1. No convergence."
@@ -1477,7 +1478,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
 	++itry;
 	if(itry == 8) {
 	  stringstream ss;
-	  float64 lat,lon;
+	  float64 lat=0,lon=0;
 	  v.getLatLonDegrees(lat, lon);
 	  ss << setprecision(16);
 	  ss << "SpatialIndex::idByPoint(sv): Lost Point Failure 2. No convergence."

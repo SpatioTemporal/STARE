@@ -26,7 +26,8 @@
 
 #include "erfa.h"
 
-#define TAG(X) cout << dec << X << hex << endl << flush;
+// #define TAG(X) cout << dec << X << hex << endl << flush;
+// #define TAG(X) {}
 
 using namespace std;
 // namespace std {
