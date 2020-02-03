@@ -240,15 +240,11 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 }
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
-	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
-    // intersection[0] = 69;
-    cout << "1" << endl << flush;
+	STARE_SpatialIntervals si1(indices1, indices1+len1);
+    STARE_SpatialIntervals si2(indices2, indices2+len2);
 	SpatialRange r1(si1);   
-    cout << "2" << endl << flush;
     SpatialRange r2(si2);
-    cout << "3" << endl << flush;
-	// SpatialRange *ri = r1 & r2;
-	SpatialRange *ri = sr_intersect(r1,r2,false);
+	SpatialRange *ri = sr_intersect(r1, r2, false);
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
 	delete ri;
 	STARE_ArrayIndexSpatialValues result = expandIntervals(result_intervals);
@@ -258,7 +254,7 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 	}
 }
 
-void _intersects(int64_t* indices1, int len1, int64_t* indices2, int len2, int* intersects) {        
+void intersects(int64_t* indices1, int len1, int64_t* indices2, int len2, int* intersects) {        
     for(int i=0; i<len2; ++i) {        
         intersects[i] = 0;
         for(int j=0; j<len1; ++j) {
