@@ -24,6 +24,10 @@ HstmRange::~HstmRange() {
 
 /**
  * Add a range to this set of ranges.
+ *
+ * Removes the "level bit" aka "depth bit," which is a bit at the top used as a validity check. This is a deprecated feature not needed for a left-justified index value.
+ * It does this by calling EmbeddedLevelNameEncoding's maskOffLevelBit.
+ *
  * @param a_ a Key (int64)
  * @param b_ a Key (int64)
  */
