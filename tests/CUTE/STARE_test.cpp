@@ -1587,8 +1587,8 @@ void STARE_test() {
 		// cout << "resest1: " <<index.cmpSpatialResolutionEstimate(0x2326000000000005,0x2327000000000005) << endl << flush;
 		// cout << "resest2: " <<index.cmpSpatialResolutionEstimateI(0x2326000000000005,0x2327000000000005) << endl << flush;
 
-		ASSERT_EQUAL(1,index.cmpSpatialResolutionEstimate(aIndex0,aIndex1));
-		ASSERT_EQUAL(5,index.cmpSpatialResolutionEstimate(0x2326000000000005,0x2327000000000005));
+		ASSERT_EQUAL(1,index.cmpSpatialResolutionEstimateI(aIndex0,aIndex1));
+		ASSERT_EQUAL(5,index.cmpSpatialResolutionEstimateI(0x2326000000000005,0x2327000000000005));
 	}
 
 	if(true) {
@@ -1596,6 +1596,59 @@ void STARE_test() {
 		// cout << "res:    " << index.levelFromLengthMeterScaleFromEdge(10.0e3) << endl << flush;
 		ASSERT_EQUAL(9772,int(index.lengthMeterScaleFromEdgeFromLevel(10)));
 		ASSERT_EQUAL(10,int(0.5+index.levelFromLengthMeterScaleFromEdge(10.0e3)));
+	}
+
+	if(true) {
+		double delta = 0.001;
+		double lat = 0,lon = 0;
+		int lvl = 27;
+		EmbeddedLevelNameEncoding lj;
+		STARE_ArrayIndexSpatialValues spatialStareIds;
+
+
+
+		uint64 source[10] = {
+				0x3d7e69d09dbc425b
+				,0x3d7e69d7057d10fb
+				,0x3d7e69d312f1ca1b
+				,0x3d7e69d32945f71b
+				,0x3d7e69da6914455b
+				,0x3d7e69c7c92cde7b
+				,0x3d7e112622b49e5b
+				,0x3d7e115866c6b81b
+				,0x3d7e17a8c067401b
+				,0x3d7e1ab50be8303b
+		};
+
+		uint64 result[10] = {
+				0x3d7e69d09dbc4250
+				,0x3d7e69d7057d10f0
+				,0x3d7e69d312f1ca0f
+				,0x3d7e69d32945f70e
+				,0x3d7e69da6914454d
+				,0x3d7e69c7c92cde6c
+				,0x3d7e112622b49e4b
+				,0x3d7e115866c6b80a
+				,0x3d7e17a8c0674009
+				,0x3d7e1ab50be83028
+		};
+
+		for( int i=0; i < 10; ++i ) {
+			spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
+			lat += 0; lon += delta; delta += delta;
+		}
+		STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
+
+		for( int i = 0; i < 10; ++i ) {
+			if(false) {
+				cout << i << " "
+						<< hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
+						<< " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
+						<< endl << flush;
+			}
+			ASSERT_EQUAL(source[i],spatialStareIds[i]);
+			ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
+		}
 	}
 
 	// FAIL();

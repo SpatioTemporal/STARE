@@ -300,6 +300,32 @@ STARE_ArrayIndexSpatialValues STARE::toVertices(STARE_ArrayIndexSpatialValues sp
 }
 
 /**
+ * Adapt the resolution of the values in a vector of spatial index values to the proximity of the
+ * other index values in the vector.
+ */
+STARE_ArrayIndexSpatialValues STARE::adaptSpatialResolutionEstimates(STARE_ArrayIndexSpatialValues spatialStareIds) {
+	STARE_ArrayIndexSpatialValues spatialValues;
+	EmbeddedLevelNameEncoding lj;
+	int lvl_maxes[spatialStareIds.size()];
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		lvl_maxes[i] = 0;
+	}
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		for(int j=i+1; j<spatialStareIds.size(); ++j) {
+			int lvl = cmpSpatialResolutionEstimateI(spatialStareIds[i],spatialStareIds[j]);
+			if( lvl > lvl_maxes[i] ) {
+				lvl_maxes[i] = lvl;
+			}
+			if( lvl > lvl_maxes[j] ) {
+				lvl_maxes[j] = lvl;
+			}
+		}
+		spatialValues.push_back( (spatialStareIds[i] & ~lj.levelMaskSciDB) | lvl_maxes[i] );
+	}
+	return spatialValues;
+}
+
+/**
  * Return the area associated with the index value based on the embedded resolution level, by default.
  * The calculation may be coerced to another resolution level, e.g. search_level.
  *
