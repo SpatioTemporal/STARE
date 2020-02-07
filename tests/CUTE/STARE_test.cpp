@@ -1549,8 +1549,8 @@ void STARE_test() {
 
 	// Didn't handle level = 0 in STARE::htmIDFromValue properly.
 	if(false) {
-	  LatLonDegrees64 latlon0(45.0,45.0);
-	  int level = 0;
+		LatLonDegrees64 latlon0(45.0,45.0);
+		int level = 0;
 	  STARE_ArrayIndexSpatialValue aIndex  = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,level);
 	  cout << "aIndex:  " << hex << aIndex << dec << endl;
 
@@ -1563,6 +1563,34 @@ void STARE_test() {
 	  Triangle tr = index.TriangleFromValue(aIndex);
 	  
 	}
+
+	if(true) {
+		double cm = 0.01/6378.0e3; // cm/km
+		double tolerance = 5*cm;
+		int level = 27;
+		STARE_ArrayIndexSpatialValue aIndex0 = index.ValueFromLatLonDegrees(  0.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex1 = index.ValueFromLatLonDegrees( 45.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex2 = index.ValueFromLatLonDegrees(-45.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex3 = index.ValueFromLatLonDegrees(-45.0,180.0,level);
+
+		ASSERT_LESS(abs(0.5*sqrt(2)-index.cmpSpatialDistanceCosine(aIndex0,aIndex1)),tolerance);
+		ASSERT_LESS(abs(0.5*sqrt(2)-index.cmpSpatialDistanceCosine(aIndex0,aIndex2)),tolerance);
+		ASSERT_LESS(abs(0.0-index.cmpSpatialDistanceCosine(aIndex1,aIndex2)),tolerance);
+		ASSERT_LESS(abs(-1.0-index.cmpSpatialDistanceCosine(aIndex1,aIndex3)),tolerance);
+
+		ASSERT_LESS(abs(acos(0.5*sqrt(2))-index.cmpSpatialDistanceRadians(aIndex0,aIndex1)),tolerance);
+		ASSERT_LESS(abs(acos(0.5*sqrt(2))-index.cmpSpatialDistanceRadians(aIndex0,aIndex2)),tolerance);
+		ASSERT_LESS(abs(acos(0.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex2)),tolerance);
+		ASSERT_LESS(abs(acos(-1.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex3)),tolerance);
+	}
+
+	if(true) {
+		// cout << "length: " << index.lengthMeterScaleFromEdgeFromLevel(10) << endl << flush;
+		// cout << "res:    " << index.levelFromLengthMeterScaleFromEdge(10.0e3) << endl << flush;
+		ASSERT_EQUAL(9772,int(index.lengthMeterScaleFromEdgeFromLevel(10)));
+		ASSERT_EQUAL(10,int(0.5+index.levelFromLengthMeterScaleFromEdge(10.0e3)));
+	}
+
 	// FAIL();
 }
 

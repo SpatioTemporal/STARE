@@ -90,7 +90,11 @@ public:
 	float64 lengthMeterScaleFromEdgeFromLevel(int level){
 		return 6371.0e3*gPio2*pow(2.0,-level);
 	}
-
+	double levelFromLengthMeterScaleFromEdge(float64 lengthMeter){
+		return log2((6371.0e3*gPio2)/lengthMeter);
+		// return 6371.0e3*gPio2*pow(2.0,-level);
+	}
+	
 	// uint32 tResolutionLevel() const;
 
 // private:
@@ -136,7 +140,9 @@ public:
 	TemporalIndex& setArrayIndexTemporalValue(STARE_ArrayIndexTemporalValue temporalValue);
 
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
-    
+
+	double cmpSpatialDistanceCosine(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);	    
+	double cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);	    
 	
     STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
     STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
@@ -152,7 +158,6 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
 
 bool cmpTemporalAtResolution2(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2);
 bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayIndexTemporalValue tv2, double days);
-
 
 STARE_ArrayIndexSpatialValue sTerminator(STARE_ArrayIndexSpatialValue spatialStareId);
 

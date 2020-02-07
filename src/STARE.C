@@ -706,6 +706,15 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 	return cmp_JulianTAIDays3(a,b,days);
 }
 
+double STARE::cmpSpatialDistanceCosine(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return SpatialVectorFromValue(a)*SpatialVectorFromValue(b);
+}
+double STARE::cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return acos(SpatialVectorFromValue(a)*SpatialVectorFromValue(b));
+}
+
+
+
 bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	// TODO Figure out how to avoid unneeded reformatting.
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
