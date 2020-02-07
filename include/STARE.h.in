@@ -142,7 +142,9 @@ public:
 	bool cmpTemporalAtResolution(STARE_ArrayIndexTemporalValue temporalValue);
 
 	double cmpSpatialDistanceCosine(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);	    
-	double cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);	    
+	double cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
+	double cmpSpatialResolutionEstimate(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
+	int cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
 	
     STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
     STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);

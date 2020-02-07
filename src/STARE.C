@@ -712,8 +712,13 @@ double STARE::cmpSpatialDistanceCosine(STARE_ArrayIndexSpatialValue a, STARE_Arr
 double STARE::cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
 	return acos(SpatialVectorFromValue(a)*SpatialVectorFromValue(b));
 }
-
-
+double STARE::cmpSpatialResolutionEstimate(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	double deltaL_meters = 6371.0e3*cmpSpatialDistanceRadians(a,b);
+	return levelFromLengthMeterScaleFromEdge(deltaL_meters);
+}
+int STARE::cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return int(cmpSpatialResolutionEstimate(a,b)+0.5);
+}
 
 bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	// TODO Figure out how to avoid unneeded reformatting.

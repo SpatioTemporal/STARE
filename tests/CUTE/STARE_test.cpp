@@ -1582,6 +1582,13 @@ void STARE_test() {
 		ASSERT_LESS(abs(acos(0.5*sqrt(2))-index.cmpSpatialDistanceRadians(aIndex0,aIndex2)),tolerance);
 		ASSERT_LESS(abs(acos(0.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex2)),tolerance);
 		ASSERT_LESS(abs(acos(-1.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex3)),tolerance);
+
+		// cout << "resest0: " << index.cmpSpatialResolutionEstimate(aIndex0,aIndex1) << endl << flush;
+		// cout << "resest1: " <<index.cmpSpatialResolutionEstimate(0x2326000000000005,0x2327000000000005) << endl << flush;
+		// cout << "resest2: " <<index.cmpSpatialResolutionEstimateI(0x2326000000000005,0x2327000000000005) << endl << flush;
+
+		ASSERT_EQUAL(1,index.cmpSpatialResolutionEstimate(aIndex0,aIndex1));
+		ASSERT_EQUAL(5,index.cmpSpatialResolutionEstimate(0x2326000000000005,0x2327000000000005));
 	}
 
 	if(true) {
