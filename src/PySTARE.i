@@ -480,7 +480,11 @@ def to_hull_range(indices, resolution, range_size_limit=1000):
     _to_hull_range(indices, resolution, range_indices,result_size)
     range_indices = range_indices[:result_size[0]]
     return range_indices
+<<<<<<< Updated upstream
 
+=======
+    
+>>>>>>> Stashed changes
 def to_hull_range_from_latlon(lat, lon, resolution, range_size_limit=1000):
     out_length = range_size_limit
     range_indices = numpy.full([out_length], -1, dtype=numpy.int64)
@@ -557,6 +561,7 @@ def intersect(indices1, indices2, multiresolution=True):
     intersected = intersected[:endarg]
     return intersected
 
+<<<<<<< Updated upstream
 def shiftarg_lon(lon):
     "If lon is outside +/-180, then correct back."
     if(lon>180):
