@@ -168,6 +168,7 @@ void SpatialInterface_test() {
 			delete htm;
             
 		}
+		
 		if(true) {
             htmInterface *htm;
             int resolution_level = 16;
@@ -180,7 +181,7 @@ void SpatialInterface_test() {
             cornerVector.push_back(LatLonDegrees64(4.0003, 0.0003));
             cornerVector.push_back(LatLonDegrees64(4.0003, 0.0008));           
             int hullSteps = cornerVector.size();          
-            htm->convexHull(arguments.cornerVector, hullSteps, true);
+            htm->convexHull(cornerVector, hullSteps, true);
             
         }
 	}
