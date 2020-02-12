@@ -355,12 +355,13 @@
   $result = (PyObject*)out$argnum;
 }
 
-# %typemap(argout) 
-# (double* in_array1, int length1, double* in_array2, int length2, int resolution, int64_t* out_array1, int out_length1, int64_t* out_array2, int out_length2)
-# {
-#   $result = (PyObject*)out$argnum;
-# }
-
+/*
+ %typemap(argout) 
+ (double* in_array1, int length1, double* in_array2, int length2, int resolution, int64_t* out_array1, int out_length1, int64_t* out_array2, int out_length2)
+ {
+   $result = (PyObject*)out$argnum;
+ }
+*/
 
 /* Applying the typemaps */
 

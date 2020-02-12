@@ -30,6 +30,12 @@ public:
 	STARE_SpatialIntervals toSpatialIntervals();
 	int getNextSpatialInterval(STARE_SpatialIntervals &interval);
 
+	bool contains(STARE_ArrayIndexSpatialValue siv) {
+		EmbeddedLevelNameEncoding leftJustified;
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+		return range->range->isIn(leftJustified.maskOffLevelBit());
+	}
+
 	HstmRange *range;
 
 	/////////// private: Maybe? ////////////

@@ -282,6 +282,35 @@ void SpatialRange_test () {
 		// }
 	}
 
+	if(true) {
+		STARE_ArrayIndexSpatialValue siv1[2] = { 0x0000000000000008, 0x000067ffffffffff };
+		STARE_SpatialIntervals sis1(siv1,siv1+2);
+		SpatialRange r1(sis1);
+
+		if(false) {
+			STARE_ArrayIndexSpatialValue siv = 0x0000300000000008;
+			cout << "100: " << r1.contains(siv) << endl << flush;
+
+			siv = 0x0000700000000008;
+			cout << "101: " << r1.contains(siv) << endl << flush;
+
+			siv = 0x0000000000000008;
+			cout << "102: " << r1.contains(siv) << endl << flush;
+
+			siv = 0x000067ffffffffff;
+			cout << "103: " << r1.contains(siv) << endl << flush;
+
+			siv = 0x0000000000000007;
+			cout << "104: " << r1.contains(siv) << endl << flush;
+		}
+
+		ASSERT_EQUAL(1,r1.contains(0x0000300000000008));
+		ASSERT_EQUAL(0,r1.contains(0x0000700000000008));
+		ASSERT_EQUAL(1,r1.contains(0x0000000000000008));
+		ASSERT_EQUAL(1,r1.contains(0x000067ffffffffff));
+		ASSERT_EQUAL(0,r1.contains(0x0000000000000007));
+	}
+
 #undef SIVOUT
 #undef SISOUT
 #undef DIAG
