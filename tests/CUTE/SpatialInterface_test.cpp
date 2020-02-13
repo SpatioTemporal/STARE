@@ -166,7 +166,23 @@ void SpatialInterface_test() {
 			}
 
 			delete htm;
-
+            
 		}
+		
+		if(true) {
+            htmInterface *htm;
+            int resolution_level = 16;
+            htm = new htmInterface(index.getIndex(resolution_level).getMaxlevel(),
+                                   index.getIndex(resolution_level).getBuildLevel(),
+                                   index.getIndex(resolution_level).getRotation());
+            LatLonDegrees64ValueVector cornerVector;
+            cornerVector.push_back(LatLonDegrees64(4.0003, 0.0017));
+            cornerVector.push_back(LatLonDegrees64(4.0003, 0.0011));
+            cornerVector.push_back(LatLonDegrees64(4.0003, 0.0003));
+            cornerVector.push_back(LatLonDegrees64(4.0003, 0.0008));           
+            int hullSteps = cornerVector.size();          
+            htm->convexHull(cornerVector, hullSteps, true);
+            
+        }
 	}
 }

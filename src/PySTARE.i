@@ -33,6 +33,9 @@
   $3 = (int64_t*) array_data((PyArrayObject*)out);
 }
 
+
+
+
 %typemap(in, numinputs=1)
   (double* in_array, int length, int64_t* out_array)
    (PyObject* out=NULL)
@@ -270,8 +273,9 @@
   $result = (PyObject*)out$argnum;
 }
 
+
 %typemap(argout)
-  (int64_t* in_array, int length, int* out_array)
+  (int64_t* in_array, int length, int* out_array)  
 {
   $result = (PyObject*)out$argnum;
 }
@@ -374,12 +378,13 @@
 }
 
 %apply (int64_t * INPLACE_ARRAY1, int DIM1) {
-    (int64_t* intersection, int leni),
+    (int64_t* intersection, int leni),    
     (int64_t* range_indices, int len_ri),
     (int64_t* result_size, int len_rs),
     (int64_t* out_array, int out_length),
     (int64_t* cmp, int len12)
 }
+
 
 %apply (double * INPLACE_ARRAY1, int DIM1) {
 	(double* triangle_info_lats, int dmy1),
@@ -396,7 +401,8 @@
 }
 
 %apply (int64_t* in_array, int length, int* out_array) {
-  (int64_t* indices, int len,  int* levels)
+  (int64_t* indices, int len,  int* levels), 
+  (int64_t* indices2, int len2,  int* intersects)
 }
 
 %apply (int64_t* in_array, int length, int64_t* out_array) {
@@ -499,7 +505,7 @@ def to_hull_range_from_latlon(lat, lon, resolution, range_size_limit=1000):
 #     return range_indices
 
 def to_circular_cover(lat, lon, radius, resolution):
-    result = _to_circular_cover1(lat,lon,radius,resolution)
+    result = _to_circular_cover1(lat, lon, radius, resolution)
     out_length = result.get_size_as_intervals()
     range_indices = numpy.zeros([out_length],dtype=numpy.int64)
     result.copy_as_intervals(range_indices);

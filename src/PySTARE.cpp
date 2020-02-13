@@ -1,7 +1,7 @@
 /*
  * PySTARE.cpp
  *
- *  Created on: Jun 13, 2019
+ c*  Created on: Jun 13, 2019
  *      Author: mrilee
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
@@ -183,7 +183,8 @@ void _to_circular_cover(double lat, double lon, double radius, int resolution, i
 }
 
 StareResult _to_circular_cover1(double lat, double lon, double radius, int resolution) {
-  StareResult result; result.add_intervals(stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution));
+  StareResult result; 
+  result.add_intervals(stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution));
   return result;
 }
 
@@ -239,11 +240,11 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 }
 
 void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
-	STARE_SpatialIntervals si1(indices1, indices1+len1), si2(indices2, indices2+len2);
-    // intersection[0] = 69;
-	SpatialRange r1(si1), r2(si2);
-	// SpatialRange *ri = r1 & r2;
-	SpatialRange *ri = sr_intersect(r1,r2,false);
+	STARE_SpatialIntervals si1(indices1, indices1+len1);
+    STARE_SpatialIntervals si2(indices2, indices2+len2);
+	SpatialRange r1(si1);   
+    SpatialRange r2(si2);
+	SpatialRange *ri = sr_intersect(r1, r2, false);
 	STARE_SpatialIntervals result_intervals = ri->toSpatialIntervals();
 	delete ri;
 	STARE_ArrayIndexSpatialValues result = expandIntervals(result_intervals);
@@ -251,6 +252,18 @@ void _intersect(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_
 	for(int i=0; i<leni; ++i) {
 		intersection[i] = result[i];
 	}
+}
+
+void intersects(int64_t* indices1, int len1, int64_t* indices2, int len2, int* intersects) {        
+    for(int i=0; i<len2; ++i) {        
+        intersects[i] = 0;
+        for(int j=0; j<len1; ++j) {
+            if (cmpSpatial(indices2[i], indices1[j]) != 0) {
+                intersects[i] = 1;                
+                break;
+            }            
+        }
+    }
 }
 
 void _intersect_multiresolution(int64_t* indices1, int len1, int64_t* indices2, int len2, int64_t* intersection, int leni) {
@@ -282,7 +295,7 @@ void _cmp_spatial(int64_t* indices1, int len1, int64_t* indices2, int len2, int6
 	int k=0;
 	for(int i=0; i<len1; ++i) {
 		for(int j=0; j<len2; ++j) {
-			cmp[k] = cmpSpatial(indices1[i],indices2[j]); // i.e. [i*len2+j]
+			cmp[k] = cmpSpatial(indices1[i], indices2[j]); // i.e. [i*len2+j]
 			++k;
 		}
 	}
