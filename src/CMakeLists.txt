@@ -38,32 +38,5 @@ set (
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
-# NB: If this code needs a certain version of SWIG, add that number to
-# the 'find_package()' call as a second argument. jhrg 8/27/19
-find_package(SWIG)
-
-# SWIG integration of PySTARE
-
-# Adding the two 'POLICY' clauses protects older versions of CMake
-# from policies they don;t know about. jhrg 8/27/19
-if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
-	# UseSWIG_TARGET_NAME_PREFERENCE
-	#cmake_minimum_required(VERSION 3.13 FATAL ERROR)
-	cmake_policy( SET CMP0078 NEW )
-	cmake_policy( SET CMP0086 NEW )
-    
-    # set_target_properties( PySTARE PROPERTIES PREFIX "" )
-    #? set target properties(PySTARE PROPERTIES LIBRARY OUTPUT DIRECTORY ${PROJECT BINARY DIR}/..) 
-    # target_link_libraries( PySTAREA "/usr/lib64/liberfa.so" )
-    
-    # SWIG
-    find_package(SWIG REQUIRED)
-    include(${SWIG_USE_FILE})
-    find_package(PythonLibs)
-    include_directories(${PYTHON_INCLUDE_DIRS})
-    
-    # set_property(SOURCE mymod.i PROPERTY CPLUSPLUS ON)
-	
-endif()
 
 install(TARGETS STARE DESTINATION lib)
