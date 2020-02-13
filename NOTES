@@ -1,4 +1,11 @@
 
+* 2020-02-13 Version 0.11.1
+
+htmInterface::convexHull failed for a case involving several colinear points.
+ConvexHull did not correctly determine and eliminate internal points, sending
+bad (colinear) segments to simplify0. Relaxing the tolerance (tol2) in
+SpatialInterface::setPolyCorner and RangeConvex::simplify0 may help.  
+
 * 2020-02-07 Version 0.11
 
 - STARE::adaptSpatialResolutionEstimates

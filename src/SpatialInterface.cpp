@@ -397,23 +397,31 @@ const HTMRangeValueVector &
 htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool interiorp ) {
 	hull_interiorp_ = interiorp;
 	polyCorners_.clear();
-	// cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
-	// cout << endl;
+#ifdef DIAG
+	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
+	cout << endl;
+#endif
 	if (steps == (uint64) -1) {
 		steps = latlon.size();
 	} else {
 		steps = min(steps,latlon.size());
 	}
 	for(size_t i = 0; i < steps; i++) {
-		// cout << " " << i << flush;
-		// cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
+#ifdef DIAG
+		cout << " " << i << flush;
+		cout << " ( " << latlon[i].lat << " " << latlon[i].lon << ")";
+#endif
 		// float64 *x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
-	  vector<float64> x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
+		vector<float64> x = xyzFromLatLonDegrees(latlon[i].lat,latlon[i].lon);
 		SpatialVector v(x[0],x[1],x[2]);
 		setPolyCorner(v);
-		// cout << endl << flush;
+#ifdef DIAG
+		cout << endl << flush;
+#endif
 	}
-	// cout << endl << flush << 2100 << endl << flush;
+#ifdef DIAG
+	cout << endl << flush << 2100 << endl << flush;
+#endif
 	return doHull();
 }
 
@@ -446,16 +454,22 @@ htmInterface::convexHullCmd( char *str ) {
 const HTMRangeValueVector &
 htmInterface::doHull() {
 
-//	cout << 3000
-//			<< " pCorners-size="
-//			<< polyCorners_.size()
-//			<< endl << flush;
+#ifdef DIAG
+	cout << 3000
+			<< " pCorners-size="
+			<< polyCorners_.size()
+			<< endl << flush;
+#endif
+
 	if(polyCorners_.size() < 3) {
 //		cout << 3001
 //				<< endl << flush;
 		throw SpatialInterfaceError("htmInterface:convexHull: empty hull: points on one line");
 //		cout << 3002 << endl << flush;
 	}
+#ifdef DIAG
+	cout << 3003 << endl << flush;
+#endif
 
 	SpatialVector v;
 
@@ -471,13 +485,17 @@ htmInterface::doHull() {
 	// passing through the 2 corners. Since we are in counterclockwise order,
 	// the vector product of the two successive corners just gives the correct
 	// constraint.
-//	cout << 3100 << endl << flush;
+#ifdef DIAG
+	cout << 3100 << endl << flush;
+#endif
 	size_t i, len = polyCorners_.size();
 	for(i = 0; i < len; i++) {
 		v = polyCorners_[i].c_ ^ polyCorners_[ i == len-1 ? 0 : i + 1].c_;
+// #define DIAG
 #ifdef DIAG
 		DIAG_OUT << "doHull:: " << v << " " << i << "," << i+1 << endl;
 #endif
+// #undef DIAG
 		v.normalize();
 		SpatialConstraint c(v,0);
 		cvx.add(c); // [ed:RangeConvex::add]
@@ -487,7 +505,9 @@ htmInterface::doHull() {
 	//	dom.convexes_[0].boundingCircle_.write(cout);
 	//	dom.write(cout);
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	// cout << 3999 << endl << flush;
+#ifdef DIAG
+	cout << 3999 << endl << flush;
+#endif
 
 	return domain(dom);
 }
@@ -507,7 +527,8 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 //	cout << " spc: v " << v.x() << " " << v.y() << " " << v.z() << " " ;
 
 	float64 tol = 1.0e-8; // The smaller this parameter, the more mistakes it will make.
-	float64 tol2 = tol*tol;
+	// float64 tol2 = tol*tol;
+	float64 tol2 = tol*0.01;
 
 	size_t i,len = polyCorners_.size();
 	// test for already existing points
@@ -707,6 +728,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			// DIAG_OUT << "setPolyCorner: still living" << endl;
 		}
 	}
+// #define DIAG
 #ifdef DIAG
 	DIAG_OUT << "QL: Polygon: now " << polyCorners_.size() << endl;
 	for(i = 0; i < polyCorners_.size(); i++) {
@@ -719,6 +741,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		<< endl;
 	}
 #endif
+// #undef DIAG
 }
 
 
@@ -727,8 +750,10 @@ const HTMRangeValueVector &
 htmInterface::domain( SpatialDomain & domain ) {
 	HtmRange htmRange;
 
-//	cout << 4000 << endl << flush;
-//	cout << 4001 << " hull_interiorp_ " << hull_interiorp_ << endl << flush;
+#ifdef DIAG
+	cout << 4000 << endl << flush;
+	cout << 4001 << " hull_interiorp_ " << hull_interiorp_ << endl << flush;
+#endif
 
 	Key gapsize;
 	//  SpatialIndex idx(20, 5);
@@ -738,23 +763,35 @@ htmInterface::domain( SpatialDomain & domain ) {
 	// domain.intersect(index_, &htmRange, true);
 	domain.intersect(index_, &htmRange, hull_interiorp_);
 
-//	cout << 4100 << endl << flush;
+#ifdef DIAG
+	cout << 4100 << endl << flush;
+#endif
 
 //	gapsize = htmRange.bestgap(MAX_RANGES);
 //	htmRange.defrag(gapsize);
 
-//	cout << 4200 << endl << flush;
+#ifdef DIAG
+	cout << 4200 << endl << flush;
+#endif
 	htmRange.defrag();
 	// DONT FORGET to: get best gap and defrag  htmRange.defrag(bestgap);
 
-//	cout << 4300 << endl << flush;
+#ifdef DIAG
+	cout << 4300 << endl << flush;
+#endif
 	// Construct the valuevector...
 	fillValueVec( htmRange, range_);
-//	cout << 4997 << endl << flush;
+#ifdef DIAG
+	cout << 4997 << endl << flush;
+#endif
 	htmRange.reset();
-//	cout << 4998 << endl << flush;
+#ifdef DIAG
+	cout << 4998 << endl << flush;
+#endif
 	htmRange.purge();
-//	cout << 4999 << endl << flush;
+#ifdef DIAG
+	cout << 4999 << endl << flush;
+#endif
 	return range_;
 }
 
