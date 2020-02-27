@@ -4217,6 +4217,7 @@ void runSuite(int argc, char const *argv[]){
 
 	s.push_back(CUTE(EmbeddedLevelNameEncoding_test));
 	s.push_back(CUTE(STARE_test));
+	s.push_back(CUTE(STARE_Covers_test));
 
 	//	s.push_back(CUTE(testRange));
 

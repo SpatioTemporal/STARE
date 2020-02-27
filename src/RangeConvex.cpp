@@ -3,8 +3,10 @@
 //# # Date: October 23, 1998 # # Copyright (C) 2000 Peter Z. Kunszt,
 //Alex S. Szalay, Aniruddha R. Thakar # The Johns Hopkins University #
 //# Modification History: # # Oct 18, 2001 : Dennis C. Dinge --
-//Replaced ValVec with std::vector # 
+//Replaced ValVec with std::vector #
+
 //#define DIAGNOSE
+//#define DIAG
 
 
 #include "SpatialGeneral.h"
@@ -581,12 +583,38 @@ RangeConvex::simplify0() {
 		}
 	}
 #ifdef DIAG
-	cout << "rc::s0 4000" << endl << flush;
+	cout << "rc::s0 4000, removeConstr size " << removeConstr.size() << endl << flush;
+	cout << "rc::s0 4001, constraints_ size " << constraints_.size() << endl << flush;
 #endif
 
 	// Remove all redundant constraints
-	for ( i = 0; i < removeConstr.size(); i++)
-		constraints_.erase(constraints_.end()-removeConstr[i]-1);
+	std::vector<SpatialConstraint>::iterator constraints_end = constraints_.end();
+	for ( i = 0; i < removeConstr.size(); i++) {
+	// for ( int i = removeConstr.size()-1; i >= 0; --i ) {
+#ifdef DIAG
+		cout << "rc::s0 4002, i: " << i << endl << flush;
+		cout << "rc::s0 4003, constraints_ size " << constraints_.size() << endl << flush;
+		// cout << "rc::s0 4004, constraints_ end  " << constraints_.end() << endl << flush;
+		cout << "rc::s0 4005, removing          " << removeConstr[i] << endl << flush;
+		cout << "rc::s0 4006, removing item         " << ((long long int)(constraints_.end()-removeConstr[i]-1-constraints_.begin())) << endl << flush;
+		cout << "rc::s0 4006, removing item (fixed) " << ((long long int)(constraints_end-removeConstr[i]-1-constraints_.begin())) << endl << flush;
+#endif
+		// Huh?
+		// constraints_.erase(constraints_.end()-removeConstr[i]-1);
+
+		constraints_.erase(constraints_end-removeConstr[i]-1);
+
+		// Huh? In the above we said the i'th would be removed and now we're removing the (N-i)'th?
+
+		// constraints_.erase(constraints_.begin()+removeConstr[i]);
+
+#ifdef DIAG
+		cout << "rc::s0 4009, constraints_ size " << constraints_.size() << endl << flush;
+#endif
+	}
+#ifdef DIAG
+	cout << "rc::s0 4010, constraints_ size " << constraints_.size() << endl << flush;
+#endif
 
 	// Now calculate the bounding circle for the convex.
 	// We take it as the bounding circle of the triangle with
@@ -657,6 +685,9 @@ RangeConvex::simplify() {
 #endif
 // #undef DIAG
   if(sign_ == zERO) {
+#ifdef DIAG
+	  cout << "rc::s0, call it." << endl << flush;
+#endif
     simplify0();	// treat zERO convexes separately
 #ifdef DIAG
     cout << "rc::s s0, now return." << endl << flush;
@@ -752,6 +783,7 @@ RangeConvex::simplify() {
   else if (sign_ == pOS)
     boundingCircle_ = constraints_[0];
 
+// #undef DIAG
 }
 
 /////////////TESTCONSTRAINTS//////////////////////////////

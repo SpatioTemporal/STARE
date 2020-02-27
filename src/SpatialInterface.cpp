@@ -27,6 +27,12 @@
 #define DIAG_OUT cout
 // #define DIAG_OUT cerr
 
+#ifndef DIAG
+#define DIAGOUT1(a)
+#else
+#define DIAGOUT1(a) a
+#endif
+
 #ifdef SpatialSGI
 extern long long atoll (const char *str);
 #endif
@@ -49,11 +55,11 @@ htmInterface::htmInterface(size_t searchlevel, size_t buildlevel, SpatialRotatio
 
 ///////////DESTRUCTOR////////////////////////
 htmInterface::~htmInterface() {
-	// cout << dec << 10000 << endl << flush;
+	DIAGOUT1(cout << dec << 10000 << endl << flush;)
 	delete index_;
-	// cout << dec << 10001 << endl << flush;
+	DIAGOUT1(cout << dec << 10001 << endl << flush;)
 	if(t_ != NULL) delete t_;
-	// cout << dec << 10002 << endl << flush;
+	DIAGOUT1(cout << dec << 10002 << endl << flush;)
 }
 
 ///////////LOOKUP METHODS////////////////////
@@ -397,6 +403,7 @@ const HTMRangeValueVector &
 htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool interiorp ) {
 	hull_interiorp_ = interiorp;
 	polyCorners_.clear();
+// #define DIAG
 #ifdef DIAG
 	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
 	cout << endl;
@@ -423,6 +430,7 @@ htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool 
 	cout << endl << flush << 2100 << endl << flush;
 #endif
 	return doHull();
+// #undef DIAG
 }
 
 const HTMRangeValueVector &
@@ -453,14 +461,13 @@ htmInterface::convexHullCmd( char *str ) {
 
 const HTMRangeValueVector &
 htmInterface::doHull() {
-
+// #define DIAG
 #ifdef DIAG
 	cout << 3000
 			<< " pCorners-size="
 			<< polyCorners_.size()
 			<< endl << flush;
 #endif
-
 	if(polyCorners_.size() < 3) {
 //		cout << 3001
 //				<< endl << flush;
@@ -470,17 +477,13 @@ htmInterface::doHull() {
 #ifdef DIAG
 	cout << 3003 << endl << flush;
 #endif
-
 	SpatialVector v;
-
 	RangeConvex cvx;
-
 	const SpatialIndex index = this->index();
 	SpatialDomain dom(&index); // mlr -- should domain have its own index?
 //	dom.setOlevel(index.getMaxlevel()); // SpatialDomain should have an index! // TODO Weird
 //	cout << 3005 << "index.getMaxlevel()=" << index.getMaxlevel() << endl << flush;
 	// Note:  index.getMaxlevel is getLeafLevel
-
 	// The constraint we have for each side is a 0-constraint (great circle)
 	// passing through the 2 corners. Since we are in counterclockwise order,
 	// the vector product of the two successive corners just gives the correct
@@ -501,15 +504,31 @@ htmInterface::doHull() {
 		cvx.add(c); // [ed:RangeConvex::add]
 	}
 	dom.add(cvx);
-	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	//	dom.convexes_[0].boundingCircle_.write(cout);
-	//	dom.write(cout);
-	//%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	//	dom.convexes_[0].boundingCircle_.write(cout); dom.write(cout);
 #ifdef DIAG
 	cout << 3999 << endl << flush;
 #endif
-
 	return domain(dom);
+
+//	HtmRange hr_;
+//	cout << 39990 << endl << flush;
+//	dom.intersect(&index,&hr_,hull_interiorp_);
+//	cout << 39991 << endl << flush;
+//	hr_.defrag();
+//	cout << 39992 << endl << flush;
+//	fillValueVec(hr_,range_);
+//	cout << 39993 << endl << flush;
+//	// const HTMRangeValueVector &hrv_ = toValueVec(hr_);
+//	// fillValueVec(hr_,hrv_);
+//	// hr_.reset();
+//	// cout << 39994 << endl << flush;
+//	// hr_.purge();
+//	cout << 39995 << endl << flush;
+//	return range_;
+//	// return hrv_;
+//	// return toValueVec(hr_);
+
+// #undef DIAG
 }
 
 //*******************************
@@ -523,19 +542,15 @@ htmInterface::doHull() {
 // numbers - update poly list.
 void 
 htmInterface::setPolyCorner(SpatialVector &v) {
-
 //	cout << " spc: v " << v.x() << " " << v.y() << " " << v.z() << " " ;
-
 	float64 tol = 1.0e-8; // The smaller this parameter, the more mistakes it will make.
 	// float64 tol2 = tol*tol;
 	float64 tol2 = tol*0.01;
-
 	size_t i,len = polyCorners_.size();
 	// test for already existing points
 	for(i = 0; i < len; i++)
 		if(equal_within_tolerance(v, polyCorners_[i].c_, tol2)) return;
 	    // if(v == polyCorners_[i].c_)return;
-
 	if(len < 2) {
 		// just append first two points.
 		// dcd: need two steps here: the resize adds one element to end of polyCorners
@@ -543,7 +558,6 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		// in the second step len = polyCorners_.size();
 		polyCorners_.resize(polyCorners_.size() + 1);
 		len = polyCorners_.size();
-
 		polyCorners_[len-1].c_ = v;
 	} else if (len == 2) {
 		// first polygon: triangle. set correct orientation.
@@ -561,7 +575,6 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 			SpatialVector vb = v ^ polyCorners_[1].c_;
 			float64 dot_ab_av = ab*av;
 			float64 dot_ab_vb = ab*vb;
-
 			if( dot_ab_av*dot_ab_vb < 0 ) {
 				// v is not in the middle
 				if( dot_ab_av > 0 ) {
@@ -585,7 +598,6 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 		// if it is outside, and outside the previous side, // MLR???
 		// set the replace_ flag to true(this corner will be dropped)
 		// (be careful on the edges - that's the trackoutside flag)
-
 		bool polyTrackOutside = false;
 		for(i = 0 ; i < len; i++) {
 			polyCorners_[i].replace_ = false;
@@ -749,7 +761,7 @@ htmInterface::setPolyCorner(SpatialVector &v) {
 const HTMRangeValueVector & 
 htmInterface::domain( SpatialDomain & domain ) {
 	HtmRange htmRange;
-
+// #define DIAG
 #ifdef DIAG
 	cout << 4000 << endl << flush;
 	cout << 4001 << " hull_interiorp_ " << hull_interiorp_ << endl << flush;
@@ -792,7 +804,12 @@ htmInterface::domain( SpatialDomain & domain ) {
 #ifdef DIAG
 	cout << 4999 << endl << flush;
 #endif
+//	 polyCorners_.clear();
+//#ifdef DIAG
+//	cout << 49990 << endl << flush;
+//#endif
 	return range_;
+// #undef DIAG
 }
 
 
@@ -859,4 +876,15 @@ void htmInterface::fillValueVec(HtmRange &hr, HTMRangeValueVector &vec)
 	while(hr.getNext( (Key &) ran.lo, (Key &) ran.hi)){
 		vec.push_back(ran);
 	}	
+}
+
+HTMRangeValueVector htmInterface::toValueVec(HtmRange &hr)
+{
+	HTMRangeValueVector vec;
+	htmRange ran;
+	hr.reset();
+	while(hr.getNext( (Key &) ran.lo, (Key &) ran.hi)){
+		vec.push_back(ran);
+	}
+	return vec;
 }

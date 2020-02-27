@@ -62,6 +62,9 @@ STARE::STARE() {
 	}*/
 }
 
+/**
+ *
+ */
 STARE::STARE( int search_level, int build_level ) {
 	defaultConfiguration();
 	this->search_level = search_level;
@@ -535,30 +538,30 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int 
    
 
 	htmInterface *htm;
-	// cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	DIAGOUT1(cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;)
 	if( force_resolution_level > -1 ) {
-		// cout << dec << 1100 << endl << flush;
+		DIAGOUT1(cout << dec << 1100 << endl << flush;)
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(force_resolution_level).getMaxlevel(),
 				this->getIndex(force_resolution_level).getBuildLevel(),
 				this->getIndex(force_resolution_level).getRotation());
-		// cout << dec << 1101 << endl << flush;
+		DIAGOUT1(cout << dec << 1101 << endl << flush;)
 	} else {
-		// cout << dec << 1200 << endl << flush;
+		DIAGOUT1(cout << dec << 1200 << endl << flush;)
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(8).getMaxlevel(),
 				this->getIndex(8).getBuildLevel(),
 				this->getIndex(8).getRotation());
-		// cout << dec << 1201 << endl << flush;
+		DIAGOUT1(cout << dec << 1201 << endl << flush;)
 	}
 
-	// cout << dec << "a2000" << endl << flush;
+	DIAGOUT1(cout << dec << "a2000" << endl << flush;)
     
 	HTMRangeValueVector htmRangeVector = htm->convexHull(points, hullSteps, true); // Compress result
     
-	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
+	DIAGOUT1(cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;)
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
@@ -570,7 +573,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int 
 		}
 	}
 
-	// cout << dec << "a4000" << endl << flush;
+	DIAGOUT1(cout << dec << "a4000" << endl << flush;)
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
@@ -782,7 +785,7 @@ uint64 spatialLevelMask() {
 
 STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
 	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-        DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
+    DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
 	STARE_ArrayIndexSpatialValue siv_orig = interval[0];
 	STARE_ArrayIndexSpatialValue siv0 = siv_orig;
 	EmbeddedLevelNameEncoding leftJustified;
