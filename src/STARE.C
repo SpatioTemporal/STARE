@@ -62,6 +62,9 @@ STARE::STARE() {
 	}*/
 }
 
+/**
+ *
+ */
 STARE::STARE( int search_level, int build_level ) {
 	defaultConfiguration();
 	this->search_level = search_level;
@@ -300,6 +303,32 @@ STARE_ArrayIndexSpatialValues STARE::toVertices(STARE_ArrayIndexSpatialValues sp
 }
 
 /**
+ * Adapt the resolution of the values in a vector of spatial index values to the proximity of the
+ * other index values in the vector.
+ */
+STARE_ArrayIndexSpatialValues STARE::adaptSpatialResolutionEstimates(STARE_ArrayIndexSpatialValues spatialStareIds) {
+	STARE_ArrayIndexSpatialValues spatialValues;
+	EmbeddedLevelNameEncoding lj;
+	int lvl_maxes[spatialStareIds.size()];
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		lvl_maxes[i] = 0;
+	}
+	for(int i=0; i<spatialStareIds.size(); ++i) {
+		for(int j=i+1; j<spatialStareIds.size(); ++j) {
+			int lvl = cmpSpatialResolutionEstimateI(spatialStareIds[i],spatialStareIds[j]);
+			if( lvl > lvl_maxes[i] ) {
+				lvl_maxes[i] = lvl;
+			}
+			if( lvl > lvl_maxes[j] ) {
+				lvl_maxes[j] = lvl;
+			}
+		}
+		spatialValues.push_back( (spatialStareIds[i] & ~lj.levelMaskSciDB) | lvl_maxes[i] );
+	}
+	return spatialValues;
+}
+
+/**
  * Return the area associated with the index value based on the embedded resolution level, by default.
  * The calculation may be coerced to another resolution level, e.g. search_level.
  *
@@ -509,30 +538,30 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int 
    
 
 	htmInterface *htm;
-	// cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;
+	DIAGOUT1(cout << dec << 1000 << " hullSteps: " << hullSteps << endl << flush;)
 	if( force_resolution_level > -1 ) {
-		// cout << dec << 1100 << endl << flush;
+		DIAGOUT1(cout << dec << 1100 << endl << flush;)
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(force_resolution_level).getMaxlevel(),
 				this->getIndex(force_resolution_level).getBuildLevel(),
 				this->getIndex(force_resolution_level).getRotation());
-		// cout << dec << 1101 << endl << flush;
+		DIAGOUT1(cout << dec << 1101 << endl << flush;)
 	} else {
-		// cout << dec << 1200 << endl << flush;
+		DIAGOUT1(cout << dec << 1200 << endl << flush;)
 		// htm = htmInterface(&index_);
 		htm = new htmInterface(
 				this->getIndex(8).getMaxlevel(),
 				this->getIndex(8).getBuildLevel(),
 				this->getIndex(8).getRotation());
-		// cout << dec << 1201 << endl << flush;
+		DIAGOUT1(cout << dec << 1201 << endl << flush;)
 	}
 
-	// cout << dec << "a2000" << endl << flush;
+	DIAGOUT1(cout << dec << "a2000" << endl << flush;)
     
 	HTMRangeValueVector htmRangeVector = htm->convexHull(points, hullSteps, true); // Compress result
     
-	// cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;
+	DIAGOUT1(cout << dec << "a3000 hrv.size: " << htmRangeVector.size() << endl << flush;)
 
 	for(int i=0; i < htmRangeVector.size(); ++i) {
 		uint64 lo = ValueFromHtmID(htmRangeVector[i].lo); // TODO Should this be a function?
@@ -544,7 +573,7 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int 
 		}
 	}
 
-	// cout << dec << "a4000" << endl << flush;
+	DIAGOUT1(cout << dec << "a4000" << endl << flush;)
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
@@ -706,6 +735,20 @@ bool cmpTemporalAtResolution3(STARE_ArrayIndexTemporalValue tv1, STARE_ArrayInde
 	return cmp_JulianTAIDays3(a,b,days);
 }
 
+double STARE::cmpSpatialDistanceCosine(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return SpatialVectorFromValue(a)*SpatialVectorFromValue(b);
+}
+double STARE::cmpSpatialDistanceRadians(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return acos(SpatialVectorFromValue(a)*SpatialVectorFromValue(b));
+}
+double STARE::cmpSpatialResolutionEstimate(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	double deltaL_meters = 6371.0e3*cmpSpatialDistanceRadians(a,b);
+	return levelFromLengthMeterScaleFromEdge(deltaL_meters);
+}
+int STARE::cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
+	return int(cmpSpatialResolutionEstimate(a,b)+0.5);
+}
+
 bool terminatorp(STARE_ArrayIndexSpatialValue spatialStareId) {
 	// TODO Figure out how to avoid unneeded reformatting.
 	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
@@ -742,7 +785,7 @@ uint64 spatialLevelMask() {
 
 STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
 	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-        DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
+    DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
 	STARE_ArrayIndexSpatialValue siv_orig = interval[0];
 	STARE_ArrayIndexSpatialValue siv0 = siv_orig;
 	EmbeddedLevelNameEncoding leftJustified;

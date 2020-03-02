@@ -111,18 +111,21 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  * Odd. The following does not seem to work if we just return the SpatialRange itself. Some of the pointers seem to be either corrupted or eliminated.
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
-SpatialRange* sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
+SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
 	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 // #define DIAG
 #ifdef DIAG
-	KeyPair kp; range->reset(); range->getNext(kp);
+	KeyPair kp; 
+    range->reset(); 
+    range->getNext(kp);
 	cout << "sr_i range,r->r,nr " << range << " " << range->range << " " << range->range->nranges() << " : "
 			<< setw(16) << setfill('0') << hex << kp.lo << " "
 			<< setw(16) << setfill('0') << hex << kp.hi << " "
 			<< dec
 			<< endl << flush;
 	EmbeddedLevelNameEncoding leftJustified;
-	leftJustified.setId(kp.lo); cout << "kp.lo lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
+	leftJustified.setId(kp.lo); 
+    cout << "kp.lo lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
 	leftJustified.setId(kp.hi); cout << "kp.hi lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
 	cout << " r-r-my_los " << hex << range->range->my_los << endl << flush;
 	cout << dec;

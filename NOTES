@@ -1,4 +1,30 @@
 
+
+* 2020-02-27 Version 0.11.2
+
+htmInterface::convexHull failed for a case involving a moderate number of points. 
+RangeConvex::simplify0 removes the N-i constraint where N is the number of 
+constraints and i is identified earlier in the routine. The error was simplify0
+was using the current length of the constraint vector for N rendering the
+index values i invalid.
+
+Note: MLR: I do not understand the construction of the RangeConvex constraint
+list so that ruling out constraint(i) leads to the deletion of constraint(N-i-1). 
+
+* 2020-02-13 Version 0.11.1
+
+htmInterface::convexHull failed for a case involving several colinear points.
+ConvexHull did not correctly determine and eliminate internal points, sending
+bad (colinear) segments to simplify0. Relaxing the tolerance (tol2) in
+SpatialInterface::setPolyCorner and RangeConvex::simplify0 may help.  
+
+* 2020-02-07 Version 0.11
+
+- STARE::adaptSpatialResolutionEstimates
+- STARE::cmpSpatialResolutionEstimate and STARE::cmpSpatialResolutionEstimateI
+- STARE::cmpSpatialDistanceCosine
+- STARE::cmpSpatialDistanceRadians
+
 * 2020-02-05 Version 0.10.3
 
 Fixed: Q0 (root level) not handled correctly by STARE interface.
