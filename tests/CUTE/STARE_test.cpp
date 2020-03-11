@@ -37,9 +37,7 @@ LatLonDegrees64ValueVector makeCornerVector(void){
 	cornerVector.push_back(LatLonDegrees64(29.46833079682617, 63.55026085801117));
 	cornerVector.push_back(LatLonDegrees64(31.37950613049267, 61.69931440618083));
 	cornerVector.push_back(LatLonDegrees64(34.40410187431986, 60.80319339380745));
-
 	cornerVector.push_back(LatLonDegrees64(33.52883230237626, 60.96370039250601 ));
-
 	cornerVector.push_back(LatLonDegrees64(35.65007233330923, 61.21081709172574));
 	return cornerVector;
 }

@@ -58,7 +58,7 @@ if (SWIG_FOUND AND POLICY CMP0078 AND POLICY CMP0086)
 	  include_directories( ${INCLUDE_LIST} )
 	else()
 	  message("PYTHON_INCLUDE_DIRS not found. Guessing where to find python includes.")
-	  include_directories( "/usr/include/python3.7m" "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
+	  include_directories( "/usr/include/python3.7m" "/usr/include/python3.6m" "/usr/lib64/python3.7/site-packages/numpy/core/include"  )
   	endif()
 
     add_library(PySTAREA SHARED PySTARE.cpp)
