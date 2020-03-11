@@ -21,7 +21,9 @@ using namespace std;
 
 void STARE_Covers_test() {
 
-  int n = 119*2;
+  // cout << "sct: 000" << endl << flush;
+
+  int n = 120*2;
   double lons_lats[n] = {
 			   0.01389, 0.01056
 			   ,0.00278, 0.00278
@@ -144,6 +146,10 @@ void STARE_Covers_test() {
 			   ,0.00417, 0.00195
 			   ,0.01472, 0.00917 };
 
+  // 28..147
+
+  // cout << "sct: 010" << endl << flush;
+
   LatLonDegrees64ValueVector points;
   // int n_test = n;
   int n_test = 80;
@@ -152,9 +158,14 @@ void STARE_Covers_test() {
 	  double lat = lons_lats[i+1];
 	  points.push_back(LatLonDegrees64(lat,lon));
   }
+
+  // cout << "sct: 050" << endl << flush;
+
   	 STARE index;
   	 int   level = 16;
+	 //	 cout << "sct: 100" << endl << flush;
    	 STARE_SpatialIntervals cover = index.ConvexHull(points,level);
+	 //	 cout << "sct: 200" << endl << flush;
 
    	 // REGRESSION TEST - NOT YET VALIDATED
    	 long long int cover_[ 45 ] = {
