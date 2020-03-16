@@ -7,23 +7,16 @@
  *  Copyright (C) 2020 Rilee Systems Technologies LLC
  */
 
-
 #include <iostream>
 #include "Test.h"
 
 #include "SpatialInterface.h"
 
-
-
 using namespace std;
-
-
 
 void STARE_Covers_test() {
 
-  // cout << "sct: 000" << endl << flush;
-
-  int n = 120*2;
+  const int n = 120*2;
   double lons_lats[n] = {
 			   0.01389, 0.01056
 			   ,0.00278, 0.00278
@@ -222,8 +215,5 @@ void STARE_Covers_test() {
    		 ASSERT_EQUAL(cover_[i],cover[i]);
    	 }
    	 // cout << "};" << endl;
-
-
-
 	// FAIL();
 }

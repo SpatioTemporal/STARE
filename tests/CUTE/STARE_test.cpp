@@ -1199,11 +1199,11 @@ void STARE_test() {
 
 	// #define DIAG
 #ifndef DIAG
-#define DIAGOUT2(p,m)
+// defined above on line 17 #define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
 #define SIVSOUT(p,m,v)
 #else
-#define DIAGOUT2(p,m) p << m;
+// #define DIAGOUT2(p,m) p << m;
 #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
 #define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
 #endif

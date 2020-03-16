@@ -4,13 +4,14 @@
  *  Created on: Jan 29, 2016
  *      Author: mrilee
  */
-using namespace std;
 
 #include <string.h>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include "EmbeddedLevelNameEncoding.h"
+
+using namespace std;
 
 EmbeddedLevelNameEncoding::EmbeddedLevelNameEncoding() {}
 
