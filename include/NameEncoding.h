@@ -8,11 +8,11 @@
 #ifndef INCLUDE_NAMEENCODING_H_
 #define INCLUDE_NAMEENCODING_H_
 
-using namespace std;
-
 #include <string>
 #include <stddef.h>
 #include <SpatialGeneral.h>
+
+using namespace std;
 
 class NameEncoding {
 public:

@@ -168,9 +168,11 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(
 		range2->reset(); // Sigh. Reset and loop from the beginning. TODO Avoid restarting loop. There must be a faster way.
 		/* Try to skip past by using SkipList functions. */
 		// TODO do something like range2->findMAX...
+#if 0
 		Key   loKey = range2->my_los->findMAX(testRange1.lo);
 		Value hiKey = range2->my_los->search(loKey,true);
 		Value vhi = range2->my_his->search(hiKey,true);
+#endif
 		/**/
 		uint64 indexp2 = range2->getNext(lo2,hi2); // TODO Implement a find or search for inserting.
 		bool intersects = false, past_chance;

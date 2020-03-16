@@ -151,7 +151,7 @@ TemporalIndex& TemporalIndex::fromNativeYear(double year) {
 string TemporalIndex::toStringJulianTAI() {
 	double d1, d2; 
     this->toJulianTAI(d1, d2);
-	int not_ok, iy, im, id, year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
+	int not_ok, /* iy, im, id,*/  year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
 	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
 	hour        = ihmsf[0];
 	minute      = ihmsf[1];
@@ -182,16 +182,17 @@ string TemporalIndex::toStringJulianTAI() {
 }
 
 void TemporalIndex::toFormattedJulianTAI(
-		int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
-		) {
-	double d1,d2; 
+        int &year, int &month, int &day, int &hour, int &minute, int &second, int &ms
+) {
+    double d1, d2;
     this->toJulianTAI(d1, d2);
-	int ihmsf[4];
-	int not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day, ihmsf );
-	hour        = ihmsf[0];
-	minute      = ihmsf[1];
-	second      = ihmsf[2];
-	ms          = ihmsf[3];
+    int ihmsf[4];
+    int not_ok = eraD2dtf(TimeStandard, 3, d1, d2, &year, &month, &day, ihmsf);
+
+    hour = ihmsf[0];
+    minute = ihmsf[1];
+    second = ihmsf[2];
+    ms = ihmsf[3];
 }
 
 TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
@@ -448,7 +449,9 @@ int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) const {
 }
 
 int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
-	int offsetTop = bitOffsetCoarsest();
+#if 0
+    int offsetTop = bitOffsetCoarsest();
+#endif
 	int offsetResolution = bitOffsetResolution(resolution);
 	// int iBit = bitOffsetFinest();
 	int iPos = data.pos_FinestResolutionLevel;
@@ -554,12 +557,13 @@ int64_t millisecondsInYear(int64_t CE, int64_t year) {
 	//
 	double d1_eoy, d2_eoy;
 	// Get the beginning of next year
-	int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d1_eoy, &d2_eoy);
+    int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d1_eoy, &d2_eoy);
+
 	// Back off a bit
 	--d1_eoy;	++d2_eoy;	// d2_eoy -= 1.0 / 86400000.0;
 
 	double d1_boy, d2_boy;
-	int not_ok_2 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d1_boy, &d2_boy);
+    int not_ok_2 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d1_boy, &d2_boy);
 
 	double delta = (d1_eoy+d2_eoy) - (d1_boy+d2_boy);
 	// return (int64_t)(delta*86400000.0);
@@ -571,7 +575,9 @@ TemporalIndex& TemporalIndex::setEOY( int64_t CE, int64_t year ) {
 	if( CE < 1 ) { _year = 1 - _year; }
 	// Get the beginning of next year
 	double d0_1, d0_2;
-	int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
+    int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
 	// Go back a millisecond.
 	--d0_1;	++d0_2;	d0_2 -= 1.0 / 86400000.0;
 	this->fromJulianTAI(d0_1, d0_2);
@@ -669,7 +675,9 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	_year  = this->get_year();
 	if( _babit < 1 ) { _year = - _year; } // Note, for ERFA (IAU SOFA) Year 0 is valid.
 	double d0_1, d0_2;
-	int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
+    int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
 	int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
 	double  days         = ((double) milliseconds) / 86400000.0;
 	d1 = d0_1; d2 = d0_2 + days;
@@ -710,7 +718,9 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 	}
 	// Find the number of milliseconds in the fractional year.
 	double d0_1=0, d0_2=0;
-	int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
+    int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
 	double delta = ((d1-d0_1)+(d2-d0_2))*86400000.0;
 //	cout << "a200 " << setw(24) << setprecision(20) << delta << flush;
 	// int64_t milliseconds = (int64_t) delta;
@@ -745,7 +755,9 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 	if( CE < 1 ) { _year = 1 - _year; }
 	// Get the beginning of the year
 	double d0_1, d0_2;
-	int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
+    int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+
 //	// Get the current date
 //	int64_t milliseconds = toInt64MillisecondsFractionOfYear();
 	double d1, d2;
@@ -768,8 +780,11 @@ int64_t TemporalIndex::toInt64Milliseconds() const {
 //	}
 	return sum;
 }
+
 TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
-	int64_t sum = 0, total_left = milliseconds, CE = -1, year;
+
+    int64_t /*sum = 0,*/ total_left = milliseconds, CE = -1, year;
+
 
 	int i = data.pos_CoarsestResolutionLevel;
 	if( total_left < data.getBitFieldAtId(i)->getScale() ) {
@@ -813,8 +828,10 @@ TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
 int64_t TemporalIndex::millisecondsAtResolution(const int64_t resolution) const {
 
 	TemporalIndex tmpIndex;
+#if 0
 	int64_t bitPosition;
-	int64_t offsetTop = bitOffsetCoarsest();
+    int64_t offsetTop = bitOffsetCoarsest();
+#endif
 	int64_t offsetResolution = bitOffsetResolution(resolution);
 	int64_t offsetBottom = bitOffsetFinest();
 	int     iBit = offsetBottom;

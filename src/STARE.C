@@ -420,7 +420,9 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_)
  */
 STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
-	int resolution_level; // for the match
+#if 0
+    int resolution_level; // for the match
+#endif
 	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
@@ -453,8 +455,10 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	SpatialDomain d; d.add(rc);
 	// std::cout << 300 << std::endl;
 	HtmRange r; r.purge();
-	bool varlen_false = false;
-	bool overlap = d.intersect(&index,&r,&varlen_false);
+#if 0
+    bool varlen_false = false;
+    bool overlap = d.intersect(&index,&r,&varlen_false);
+#endif
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
 	r.reset(); // Move the skip-list iterator back to the beginning.
@@ -502,11 +506,12 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	RangeConvex rc; rc.add(c);
 	SpatialDomain d; d.add(rc);
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
-
+#if 0
 	// TODO The following pattern repeats...
 	// bool varlen_false = false;
 	bool varlen_false = true;
-	bool overlap = d.intersect(&index,&r,&varlen_false);
+    bool overlap = d.intersect(&index,&r,&varlen_false);
+#endif
 	r.reset();
 
 	STARE_SpatialIntervals intervals;
@@ -820,10 +825,10 @@ STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, in
 	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
 	// cout << dec << 242 << endl << flush;
 
-	uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB));
+    DIAGOUT1(uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB)));
 
 	DIAGOUT1(cout << endl;)
-	uint64 one = 1;
+    DIAGOUT1(uint64 one = 1);
 	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
 	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
 	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
