@@ -449,9 +449,7 @@ int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) const {
 }
 
 int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
-#if 0
-    int offsetTop = bitOffsetCoarsest();
-#endif
+    // Note: int offsetTop = bitOffsetCoarsest(); // If needed.
 	int offsetResolution = bitOffsetResolution(resolution);
 	// int iBit = bitOffsetFinest();
 	int iPos = data.pos_FinestResolutionLevel;
@@ -828,10 +826,12 @@ TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
 int64_t TemporalIndex::millisecondsAtResolution(const int64_t resolution) const {
 
 	TemporalIndex tmpIndex;
-#if 0
+	/*
+	 * If needed...
 	int64_t bitPosition;
     int64_t offsetTop = bitOffsetCoarsest();
-#endif
+	*/
+
 	int64_t offsetResolution = bitOffsetResolution(resolution);
 	int64_t offsetBottom = bitOffsetFinest();
 	int     iBit = offsetBottom;

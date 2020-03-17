@@ -170,7 +170,10 @@ void _to_neighbors(int64_t* indices, int len, int64_t* range_indices, int len_ri
 }
 
 void _to_circular_cover(double lat, double lon, double radius, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+
   STARE_SpatialIntervals result = stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution);
+  // cout << "result: size: " << result.size() << endl << flush;
+
 	if(len_ri < result.size()) {
 		cout << dec;
 		cout << "_to_circular_cover-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
