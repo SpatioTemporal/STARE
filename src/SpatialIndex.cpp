@@ -1215,8 +1215,10 @@ SpatialIndex::NeighborsAcrossVerticesFromEdges(
   SpatialVector v1, v2, v3, m12, m23, m13;
   SpatialVector q0, q1, q2, q3, q4, q5, q6, q7, q8;
 #if 0
+  // The following looks like it's for diagnostics. (MLR 2020-0316)
   uint64 nodeId = nodeIndexFromId(htmId);
 #endif
+
   // See NeighborsAcrossEdgesFromHtmId.
   int jw = 0;
   v1  = workspace[jw++];
@@ -1503,9 +1505,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
     dc_start = dcs[index-1];
     DIAG1(cout << attempt << " trying " << index << endl << flush;);
     // loop through matching child until leaves are reached
-#if 0
-    int k = 1;
-#endif
+    DIAG1(int k = 1;);
     while(ICHILD(0)!=0) {
       uint64 oldindex = index;
       for(size_t i = 0; i < 4; i++) {
@@ -1567,9 +1567,7 @@ SpatialIndex::idByPoint(SpatialVector & v) const {
   SpatialVector delta;
   DIAGOUT2(cout,endl << flush);
   if(level>0) {
-#if 0
-      int level0 = buildlevel_;
-#endif
+	// Note: int level0 = buildlevel_;
     while(level--) {
       DIAGOUT2(cout,setprecision(16) << dec;);
       // cout << level << " level,v... " << v << " " << v0 << " " << v1 << " " << v2 << endl << flush;

@@ -421,7 +421,7 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_)
 STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
 #if 0
-    int resolution_level; // for the match
+    int resolution_level; // for the match, not used at present (MLR 2020-0316)
 #endif
 	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
@@ -455,10 +455,11 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	SpatialDomain d; d.add(rc);
 	// std::cout << 300 << std::endl;
 	HtmRange r; r.purge();
-#if 0
+// #if 0
+	// The following is the effective part of the routine.
     bool varlen_false = false;
     bool overlap = d.intersect(&index,&r,&varlen_false);
-#endif
+// #endif
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
 	r.reset(); // Move the skip-list iterator back to the beginning.
@@ -506,12 +507,13 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	RangeConvex rc; rc.add(c);
 	SpatialDomain d; d.add(rc);
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
-#if 0
+// #if 0
 	// TODO The following pattern repeats...
+	// The following is the effective part of the routine.
 	// bool varlen_false = false;
 	bool varlen_false = true;
     bool overlap = d.intersect(&index,&r,&varlen_false);
-#endif
+// #endif
 	r.reset();
 
 	STARE_SpatialIntervals intervals;
@@ -698,13 +700,13 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, 
     return getArrayIndexTemporalValue();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int resolution, int type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
     return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
 }    
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int resolution, int type) {
     struct tm tm;                       // time_t as seconds since UNIX epoch
     gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
     return ValueFromUTC(tm, resolution, type);

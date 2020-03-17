@@ -66,7 +66,10 @@ enum StareResultCase { SpatialIntervals, ArrayIndexSpatialValues };
 class StareResult {
  public:
   StareResult() {};
-  void add_intervals(STARE_SpatialIntervals sis) { this->sis = sis; this->sCase = SpatialIntervals; }
+  void add_intervals(STARE_SpatialIntervals sis) {
+	  this->sis = sis; this->sCase = SpatialIntervals;
+	  // cout << "StareResults: sis size: " << this->sis.size() << endl << flush;
+  }
   void add_indexValues(STARE_ArrayIndexSpatialValues sisvs) { this->sisvs = sisvs; this->sCase = ArrayIndexSpatialValues; }
   virtual ~StareResult();
   int                           get_size();

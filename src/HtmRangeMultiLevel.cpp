@@ -167,12 +167,14 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(
 		KeyPair testRange1 = HRML_AtLevelFromMultiLevel(force_htmIdLevel,lo1,hi1,this->encoding->levelMask);
 		range2->reset(); // Sigh. Reset and loop from the beginning. TODO Avoid restarting loop. There must be a faster way.
 		/* Try to skip past by using SkipList functions. */
-		// TODO do something like range2->findMAX...
-#if 0
+// #if 0
+		// TODO Consider adding unit test for this.
+		// Move the pointers in my_los and my_his, skipping to where we should check.
+		// The following work by side effect.
 		Key   loKey = range2->my_los->findMAX(testRange1.lo);
 		Value hiKey = range2->my_los->search(loKey,true);
 		Value vhi = range2->my_his->search(hiKey,true);
-#endif
+// #endif
 		/**/
 		uint64 indexp2 = range2->getNext(lo2,hi2); // TODO Implement a find or search for inserting.
 		bool intersects = false, past_chance;

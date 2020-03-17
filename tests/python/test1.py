@@ -25,6 +25,7 @@ class test0(unittest.TestCase):
         ,(  885, 4430691958372958222 )
         ,( 1180, 4430869121478950926 )]
         cover = ps.to_circular_cover(1.5,0.5,0.25,14)
+        # print('cover: ',cover)
         for i in list(expected):
             self.assertEqual(i[1],cover[i[0]])
         return
