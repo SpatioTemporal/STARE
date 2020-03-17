@@ -232,7 +232,9 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
 		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
 	}
-	int k=10;
+#if 0
+    int k=10;
+#endif
 	// cout << "thr ";
 	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
 		// if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
@@ -314,7 +316,13 @@ void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution) 
     int type = 2;
     for (int i=0; i<len; i++) {
     	int64_t idt = datetime[i]/1000;
-        indices_out[i] = stare.ValueFromUTC(idt, resolution, type);
+        indices_out[i] = stare.ValueFromUTC((time_t&)idt, resolution, type);
+#if 0
+        // These are the methods.
+        STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+        STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
+        STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int& resolution, int& type);
+#endif
         idt = datetime[i]%1000;
         stare.tIndex.set_millisecond(idt);
         indices_out[i] = stare.getArrayIndexTemporalValue();
