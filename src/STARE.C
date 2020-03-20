@@ -902,3 +902,115 @@ STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp) {
 	return interval;
 }
 
+#define CMP_MODE(x,y) ((x & y) == y)
+
+STARE_Stash::STARE_Stash(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_
+		,ios_base::openmode mode
+		,char stash_type_
+		) {
+	init(filename,size_of_record_,number_of_records_,mode,stash_type_);
+}
+
+void STARE_Stash::init(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_
+		,ios_base::openmode mode
+		,char stash_type_
+		) {
+	stashFile = new fstream(filename,mode);
+	if( CMP_MODE(mode,ios::out) ) {
+		current_mode      = ios::out; // TODO Consider non-binary at some point.
+		stash_type        = stash_type_;
+		size_of_record    = size_of_record_;
+		number_of_records = number_of_records_;
+		stashFile->write((char*) &stash_type,        sizeof(stash_type));
+		stashFile->write((char*) &size_of_record,    sizeof(size_of_record));
+		stashFile->write((char*) &number_of_records, sizeof(number_of_records));
+	} else if( CMP_MODE(mode,ios::in) ) {
+		current_mode      = ios::in;
+		stashFile->read((char*) &stash_type,        sizeof(stash_type));
+		stashFile->read((char*) &size_of_record,    sizeof(size_of_record));
+		stashFile->read((char*) &number_of_records, sizeof(number_of_records));
+		size_of_record_    = size_of_record;
+		number_of_records_ = number_of_records;
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash ios mode not understood");
+	}
+}
+
+STARE_Stash::~STARE_Stash() {
+	if( stashFile->is_open() ) {
+		stashFile->close();
+	}
+	delete stashFile;
+}
+
+/**
+ * Read or write one vector of SpatialIntervals, then close the file.
+ */
+STARE_Stash::STARE_Stash(
+	const string& filename
+	,STARE_SpatialIntervals& intervals
+	,ios_base::openmode mode
+	) {
+	int size_record = sizeof(STARE_ArrayIndexSpatialValue);
+	uint64 n_records;
+	if( CMP_MODE(mode,ios::out) ) {
+		n_records = intervals.size();
+	}
+	init(filename,size_record,n_records,mode,2); // TODO enum char?
+	if( CMP_MODE(mode,ios::out) ) {
+		stashFile->write(reinterpret_cast<char*>(&intervals[0]),size_record*n_records);
+	} else if( CMP_MODE(mode,ios::in) ) {
+		intervals.resize(n_records,0);
+		stashFile->read(reinterpret_cast<char*>(&intervals[0]),size_record*n_records);
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash Intervals ios mode not understood");
+	}
+	stashFile->close();
+}
+
+/**
+ * Read or write one vector of ArrayIndexSpatialValues, then close the file.
+
+STARE_Stash::STARE_Stash(
+	const string& filename
+	,STARE_ArrayIndexSpatialValues& values
+	,ios_base::openmode mode
+	) {
+	int n_records;
+	int size_record = sizeof(STARE_ArrayIndexSpatialValue);
+	if( CMP_MODE(mode,ios::out) ) {
+		n_records = values.size();
+	}
+	init(filename,size_record,n_records,mode,2); // TODO enum char?
+	if( CMP_MODE(mode,ios::out) ) {
+		stashFile->write(reinterpret_cast<char*>(&values[0]),size_record*n_records);
+	} else if( CMP_MODE(mode,ios::in) ) {
+		values.resize(n_records,0);
+		stashFile->read(reinterpret_cast<char*>(&values[0]),size_record*n_records);
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash spatial values ios mode not understood");
+	}
+	stashFile.close();
+}
+*/
+void stash_spatial(const string& filename, STARE_SpatialIntervals intervals) {
+
+}
+
+void fetch_spatial(const string& filename, STARE_SpatialIntervals& intervals) {
+
+}
+
+
+#undef CMP_MODE
+
+
