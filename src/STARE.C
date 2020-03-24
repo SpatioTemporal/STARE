@@ -455,12 +455,11 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	SpatialDomain d; d.add(rc);
 	// std::cout << 300 << std::endl;
 	HtmRange r; r.purge();
-// #if 0
+
 	// The following is the effective part of the routine.
-    bool varlen_false = false;
-    bool overlap = d.intersect(&index,&r,varlen_false);
-    // bool overlap = d.intersect(&index,&r,&varlen_false);
-// #endif
+
+    d.intersect(&index, &r, false /* varlen */);
+
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
 	r.reset(); // Move the skip-list iterator back to the beginning.
@@ -508,14 +507,11 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	RangeConvex rc; rc.add(c);
 	SpatialDomain d; d.add(rc);
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
-// #if 0
-	// TODO The following pattern repeats...
+
 	// The following is the effective part of the routine.
-	// bool varlen_false = false;
-	bool varlen_false = true;
-	bool overlap = d.intersect(&index,&r,varlen_false);
-	// bool overlap = d.intersect(&index,&r,&varlen_false);
-// #endif
+
+    d.intersect(&index, &r, true /* varlen */);
+
 	r.reset();
 
 	STARE_SpatialIntervals intervals;
