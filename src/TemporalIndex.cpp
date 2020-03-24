@@ -188,6 +188,8 @@ void TemporalIndex::toFormattedJulianTAI(
     this->toJulianTAI(d1, d2);
     int ihmsf[4];
     int not_ok = eraD2dtf(TimeStandard, 3, d1, d2, &year, &month, &day, ihmsf);
+    if (not_ok == 1)
+        throw SpatialException("In TemporalIndex::toFormattedJulianTAI, eraD2dtf(...) failure.");
 
     hour = ihmsf[0];
     minute = ihmsf[1];
@@ -556,12 +558,16 @@ int64_t millisecondsInYear(int64_t CE, int64_t year) {
 	double d1_eoy, d2_eoy;
 	// Get the beginning of next year
     int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d1_eoy, &d2_eoy);
+    if (not_ok_1 == 1)
+        throw SpatialException("In TemporalIndex.cpp:millisecondsInYear, eraDtf2d(...) failure.");
 
 	// Back off a bit
 	--d1_eoy;	++d2_eoy;	// d2_eoy -= 1.0 / 86400000.0;
 
 	double d1_boy, d2_boy;
     int not_ok_2 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d1_boy, &d2_boy);
+    if (not_ok_2 == 1)
+        throw SpatialException("In TemporalIndex.cpp:millisecondsInYear, eraDtf2d(...) failure.");
 
 	double delta = (d1_eoy+d2_eoy) - (d1_boy+d2_boy);
 	// return (int64_t)(delta*86400000.0);
@@ -575,6 +581,8 @@ TemporalIndex& TemporalIndex::setEOY( int64_t CE, int64_t year ) {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year+1, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+    if (not_ok_1 == 1)
+        throw SpatialException("In TemporalIndex::setEOY, eraDtf2d(...) failure.");
 
 	// Go back a millisecond.
 	--d0_1;	++d0_2;	d0_2 -= 1.0 / 86400000.0;
@@ -675,6 +683,8 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+    if (not_ok_1 == 1)
+        throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
 
 	int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
 	double  days         = ((double) milliseconds) / 86400000.0;
@@ -718,6 +728,8 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 	double d0_1=0, d0_2=0;
 
     int not_ok_1 = eraDtf2d( TimeStandard, iy, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+    if (not_ok_1 == 1)
+        throw SpatialException("In TemporalIndex::fromJulianTAI, eraD2dtf(...) failure.");
 
 	double delta = ((d1-d0_1)+(d2-d0_2))*86400000.0;
 //	cout << "a200 " << setw(24) << setprecision(20) << delta << flush;
@@ -755,6 +767,8 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+    if (not_ok_1 == 1)
+        throw SpatialException("In TemporalIndex::toInt64MillisecondsFractionOfYearJ, eraD2dtf(...) failure.");
 
 //	// Get the current date
 //	int64_t milliseconds = toInt64MillisecondsFractionOfYear();

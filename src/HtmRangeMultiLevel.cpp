@@ -173,7 +173,7 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(
 		// The following work by side effect.
 		Key   loKey = range2->my_los->findMAX(testRange1.lo);
 		Value hiKey = range2->my_los->search(loKey,true);
-		Value vhi = range2->my_his->search(hiKey,true);
+		/* Value vhi = */ range2->my_his->search(hiKey,true);
 // #endif
 		/**/
 		uint64 indexp2 = range2->getNext(lo2,hi2); // TODO Implement a find or search for inserting.
