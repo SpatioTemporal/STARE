@@ -496,6 +496,14 @@ def to_hull_range_from_latlon(lat, lon, resolution, range_size_limit=1000):
     range_indices = range_indices[:result_size[0]]
     return range_indices
 
+def to_box_cover_from_latlon(lat, lon, resolution, range_size_limit=1000):
+    out_length = range_size_limit
+    range_indices = numpy.full([out_length], -1, dtype=numpy.int64)
+    result_size = numpy.full([1], -1, dtype=numpy.int64)
+    _to_box_cover_from_latlon(lat, lon, resolution, range_indices, result_size)
+    range_indices = range_indices[:result_size[0]]
+    return range_indices
+
 # def to_circular_cover(lat, lon, radius, resolution, range_size_limit=1000):
 #     out_length = range_size_limit
 #     range_indices = numpy.full([out_length],-1,dtype=numpy.int64)

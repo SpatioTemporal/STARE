@@ -458,7 +458,8 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 // #if 0
 	// The following is the effective part of the routine.
     bool varlen_false = false;
-    bool overlap = d.intersect(&index,&r,&varlen_false);
+    bool overlap = d.intersect(&index,&r,varlen_false);
+    // bool overlap = d.intersect(&index,&r,&varlen_false);
 // #endif
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
@@ -512,7 +513,8 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	// The following is the effective part of the routine.
 	// bool varlen_false = false;
 	bool varlen_false = true;
-    bool overlap = d.intersect(&index,&r,&varlen_false);
+	bool overlap = d.intersect(&index,&r,varlen_false);
+	// bool overlap = d.intersect(&index,&r,&varlen_false);
 // #endif
 	r.reset();
 

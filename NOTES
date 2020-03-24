@@ -1,4 +1,9 @@
 
+* 2020-03-20 Version 0.13
+
+Added box_cover_from_latlon to PySTARE, also checked effect of correct varlen
+signature in convex hull routines.
+
 * 2020-03-19 Version 0.12
 
 Adding STARE_Stash for a basic persistence mechanism, writing to binary files.
