@@ -2,16 +2,16 @@
 set (
   STARE_SrcFiles
   ${STARE_SrcFiles}
-  BitShiftNameEncoding.C
-  EmbeddedLevelNameEncoding.C
+  BitShiftNameEncoding.cpp
+  EmbeddedLevelNameEncoding.cpp
   General.cpp
   HtmRange.cpp
   HtmRangeIterator.cpp
   HtmRangeMultiLevel.cpp
   HtmRangeMultiLevelIterator.cpp
   Htmio.cpp
-  HstmRange.C
-  NameEncoding.C
+  HstmRange.cpp
+  NameEncoding.cpp
   RangeConvex.cpp
   SkipList.cpp
   SkipListElement.cpp
@@ -19,17 +19,17 @@ set (
   SpatialDomain.cpp
   SpatialEdge.cpp
   SpatialException.cpp
-  SpatialGeneral.C
+  SpatialGeneral.cpp
   SpatialIndex.cpp
   SpatialInterface.cpp
-  SpatiallyAdaptiveDataCover.C
+  SpatiallyAdaptiveDataCover.cpp
   SpatialVector.cpp
-  SpatialRotation.C
-  STARE.C
+  SpatialRotation.cpp
+  STARE.cpp
   SpatialRange.cpp
   TemporalIndex.cpp
   TemporalWordFormat1.cpp
-  VarStr.C
+  VarStr.cpp
   ../external/erfa-single-file/erfa.c )
   
 # TODO Trouble with VarStr.hpp
