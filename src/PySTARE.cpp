@@ -170,7 +170,10 @@ void _to_neighbors(int64_t* indices, int len, int64_t* range_indices, int len_ri
 }
 
 void _to_circular_cover(double lat, double lon, double radius, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+
   STARE_SpatialIntervals result = stare.CoverCircleFromLatLonRadiusDegrees(lat,lon,radius,resolution);
+  // cout << "result: size: " << result.size() << endl << flush;
+
 	if(len_ri < result.size()) {
 		cout << dec;
 		cout << "_to_circular_cover-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
@@ -228,6 +231,33 @@ void _to_hull_range_from_latlon(double* lat, int len_lat, double* lon, int len_l
 		cout << dec;
 		cout << "_to_hull_range-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
 		cout << "_to_hull_range-warning: result size        = " << result.size() << "." << endl << flush;
+	}
+#if 0
+    int k=10;
+#endif
+	// cout << "thr ";
+	for(int i=0; i < (len_ri < result.size() ? len_ri : result.size()); ++i) {
+		// if(k-->0) {	cout << "0x" << setw(16) << setfill('0') << hex << result[i] << " "; }
+		range_indices[i] = result[i];
+	}
+	// cout << dec << endl << flush;
+	result_size[0] = result.size();
+}
+
+void _to_box_cover_from_latlon(double* lat, int len_lat, double* lon, int len_lon, int resolution, int64_t* range_indices, int len_ri, int64_t* result_size, int len_rs) {
+
+	LatLonDegrees64ValueVector points;
+	for(int i=0; i<len_lat; ++i) {
+		points.push_back(LatLonDegrees64(lat[i], lon[i]));
+	}
+
+	// STARE_SpatialIntervals result = stare.ConvexHull(points, resolution);
+	STARE_SpatialIntervals result = stare.CoverBoundingBoxFromLatLonDegrees(points, resolution);
+
+	if(len_ri < result.size()) {
+		cout << dec;
+		cout << "_to_box_cover_from_latlon-warning: range_indices.size = " << len_ri << " too small." << endl << flush;
+		cout << "_to_box_cover_from_latlon-warning: result size        = " << result.size() << "." << endl << flush;
 	}
 	int k=10;
 	// cout << "thr ";
@@ -311,7 +341,13 @@ void from_utc(int64_t *datetime, int len, int64_t *indices_out, int resolution) 
     int type = 2;
     for (int i=0; i<len; i++) {
     	int64_t idt = datetime[i]/1000;
-        indices_out[i] = stare.ValueFromUTC(idt, resolution, type);
+        indices_out[i] = stare.ValueFromUTC((time_t&)idt, resolution, type);
+#if 0
+        // These are the methods.
+        STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+        STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
+        STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int& resolution, int& type);
+#endif
         idt = datetime[i]%1000;
         stare.tIndex.set_millisecond(idt);
         indices_out[i] = stare.getArrayIndexTemporalValue();

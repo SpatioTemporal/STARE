@@ -420,7 +420,9 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_)
  */
 STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	LatLonDegrees64ValueVector corners, int force_resolution_level) {
-	int resolution_level; // for the match
+#if 0
+    int resolution_level; // for the match, not used at present (MLR 2020-0316)
+#endif
 	STARE_SpatialIntervals intervals;
 	SpatialIndex index;
 	if( corners.size() != 4) {
@@ -453,8 +455,11 @@ STARE_SpatialIntervals STARE::CoverBoundingBoxFromLatLonDegrees(
 	SpatialDomain d; d.add(rc);
 	// std::cout << 300 << std::endl;
 	HtmRange r; r.purge();
-	bool varlen_false = false;
-	bool overlap = d.intersect(&index,&r,&varlen_false);
+
+	// The following is the effective part of the routine.
+
+    d.intersect(&index, &r, false /* varlen */);
+
 	// bool overlap = d.intersect(idx, htmrange, varlen, hrInterior, hrBoundary);
 	r.defrag();
 	r.reset(); // Move the skip-list iterator back to the beginning.
@@ -503,10 +508,10 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 	SpatialDomain d; d.add(rc);
 	HtmRange r;	r.purge(); // TODO Review this use of legacy code
 
-	// TODO The following pattern repeats...
-	// bool varlen_false = false;
-	bool varlen_false = true;
-	bool overlap = d.intersect(&index,&r,&varlen_false);
+	// The following is the effective part of the routine.
+
+    d.intersect(&index, &r, true /* varlen */);
+
 	r.reset();
 
 	STARE_SpatialIntervals intervals;
@@ -693,13 +698,13 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, 
     return getArrayIndexTemporalValue();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int& resolution, int& type) {
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int resolution, int type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
     return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
 }    
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int& resolution, int& type) {        
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int resolution, int type) {
     struct tm tm;                       // time_t as seconds since UNIX epoch
     gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
     return ValueFromUTC(tm, resolution, type);
@@ -820,10 +825,10 @@ STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, in
 	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
 	// cout << dec << 242 << endl << flush;
 
-	uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB));
+    DIAGOUT1(uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB)));
 
 	DIAGOUT1(cout << endl;)
-	uint64 one = 1;
+    DIAGOUT1(uint64 one = 1);
 	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
 	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
 	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
@@ -894,4 +899,116 @@ STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp) {
 	interval.push_back(EmbeddedLevelNameEncoding(BitShiftNameEncoding(kp.hi).leftJustifiedId()).getSciDBTerminatorLeftJustifiedFormat());
 	return interval;
 }
+
+#define CMP_MODE(x,y) ((x & y) == y)
+
+STARE_Stash::STARE_Stash(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_
+		,ios_base::openmode mode
+		,char stash_type_
+		) {
+	init(filename,size_of_record_,number_of_records_,mode,stash_type_);
+}
+
+void STARE_Stash::init(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_
+		,ios_base::openmode mode
+		,char stash_type_
+		) {
+	stashFile = new fstream(filename,mode);
+	if( CMP_MODE(mode,ios::out) ) {
+		current_mode      = ios::out; // TODO Consider non-binary at some point.
+		stash_type        = stash_type_;
+		size_of_record    = size_of_record_;
+		number_of_records = number_of_records_;
+		stashFile->write((char*) &stash_type,        sizeof(stash_type));
+		stashFile->write((char*) &size_of_record,    sizeof(size_of_record));
+		stashFile->write((char*) &number_of_records, sizeof(number_of_records));
+	} else if( CMP_MODE(mode,ios::in) ) {
+		current_mode      = ios::in;
+		stashFile->read((char*) &stash_type,        sizeof(stash_type));
+		stashFile->read((char*) &size_of_record,    sizeof(size_of_record));
+		stashFile->read((char*) &number_of_records, sizeof(number_of_records));
+		size_of_record_    = size_of_record;
+		number_of_records_ = number_of_records;
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash ios mode not understood");
+	}
+}
+
+STARE_Stash::~STARE_Stash() {
+	if( stashFile->is_open() ) {
+		stashFile->close();
+	}
+	delete stashFile;
+}
+
+/**
+ * Read or write one vector of SpatialIntervals, then close the file.
+ */
+STARE_Stash::STARE_Stash(
+	const string& filename
+	,STARE_SpatialIntervals& intervals
+	,ios_base::openmode mode
+	) {
+	int size_record = sizeof(STARE_ArrayIndexSpatialValue);
+	uint64 n_records;
+	if( CMP_MODE(mode,ios::out) ) {
+		n_records = intervals.size();
+	}
+	init(filename,size_record,n_records,mode,2); // TODO enum char?
+	if( CMP_MODE(mode,ios::out) ) {
+		stashFile->write(reinterpret_cast<char*>(&intervals[0]),size_record*n_records);
+	} else if( CMP_MODE(mode,ios::in) ) {
+		intervals.resize(n_records,0);
+		stashFile->read(reinterpret_cast<char*>(&intervals[0]),size_record*n_records);
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash Intervals ios mode not understood");
+	}
+	stashFile->close();
+}
+
+/**
+ * Read or write one vector of ArrayIndexSpatialValues, then close the file.
+
+STARE_Stash::STARE_Stash(
+	const string& filename
+	,STARE_ArrayIndexSpatialValues& values
+	,ios_base::openmode mode
+	) {
+	int n_records;
+	int size_record = sizeof(STARE_ArrayIndexSpatialValue);
+	if( CMP_MODE(mode,ios::out) ) {
+		n_records = values.size();
+	}
+	init(filename,size_record,n_records,mode,2); // TODO enum char?
+	if( CMP_MODE(mode,ios::out) ) {
+		stashFile->write(reinterpret_cast<char*>(&values[0]),size_record*n_records);
+	} else if( CMP_MODE(mode,ios::in) ) {
+		values.resize(n_records,0);
+		stashFile->read(reinterpret_cast<char*>(&values[0]),size_record*n_records);
+	} else {
+			// TODO Come up with a STARE exception class.
+		throw SpatialException("STARE_Stash spatial values ios mode not understood");
+	}
+	stashFile.close();
+}
+*/
+void stash_spatial(const string& filename, STARE_SpatialIntervals intervals) {
+
+}
+
+void fetch_spatial(const string& filename, STARE_SpatialIntervals& intervals) {
+
+}
+
+
+#undef CMP_MODE
+
 

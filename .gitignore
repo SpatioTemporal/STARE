@@ -38,3 +38,6 @@ build-1
 *.pyc
 \#*#
 /Testing/
+/test.st
+/test1.st
+/test2.st

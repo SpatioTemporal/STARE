@@ -38,10 +38,14 @@ set (
 
 add_library( STARE STATIC ${STARE_SrcFiles} )
 
-# NB: If this code needs a certain version of SWIG, add that number to
-# the 'find_package()' call as a second argument. jhrg 8/27/19
-find_package(SWIG)
-
+#
+# Moved up so we can make python tests depend on building the python interface.
+# jhrg 3/20/20
+#
+#
+# Moved up so we can make python tests depend on building the python interface.
+# jhrg 3/20/20
+#
 # SWIG integration of PySTARE
 
 # Adding the two 'POLICY' clauses protects older versions of CMake

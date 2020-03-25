@@ -7,7 +7,6 @@
  *  Copyright (C) 2020 Rilee Systems Technologies LLC
  */
 
-
 #include <iostream>
 #include "Test.h"
 #include "SpatialInterface.h"
@@ -80,7 +79,7 @@ void STARE_Covers_test() {
     }
     
     // Testing assortment of shapes
-    if (true) {
+    if (false) {
         vector<string> file_paths = listDirectory("tests/CUTE/polygons/0/");
         for(auto const& file_path: file_paths) {
             LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
@@ -90,7 +89,7 @@ void STARE_Covers_test() {
     
     
     if (false) {        
-        LatLonDegrees64ValueVector cornerVector = readCSV("polygons/0/0.csv");    
+        LatLonDegrees64ValueVector cornerVector = readCSV("tests/CUTE/polygons/0/0.csv");    
         int n_test = 80;
         int level = 16;
         STARE_SpatialIntervals cover = stare.ConvexHull(cornerVector, level);
@@ -181,5 +180,6 @@ void STARE_Covers_test() {
 		ASSERT_EQUAL(indexValues[5016], 4071135865642942476);
 		ASSERT_EQUAL(indexValues[5225], 4165894663942701068);
 		ASSERT_EQUAL(indexValues[5434], 4166328008962998284);
-	}
+    }
+
 }
