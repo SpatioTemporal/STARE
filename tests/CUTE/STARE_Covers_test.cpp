@@ -10,56 +10,93 @@
 
 #include <iostream>
 #include "Test.h"
-
 #include "SpatialInterface.h"
+#include <dirent.h>
+
+using namespace std;                            
 
 
-
-using namespace std;
-
-
-double lons_lats1[] = {  0.01389, 0.01056 ,0.00278, 0.00278 ,0.01333, 0.01111 ,0.00333, 0.0025 ,0.01222, 0.00083 ,0.00472, 0.01084,
-                            0.00417, 0.01167 ,0.00972, 0.00028 ,0.00166, 0.00389 ,0.00333, 0.00278 ,0.00361, 0.00222 ,0.00055, 0.00806, 
-                            0.01056, 0.00028 ,0.01528, 0.00778 ,0.01416, 0.00333 ,0.00222, 0.00306 ,0.00472, 0.00167 ,0.00472, 0.00195, 
-                            0.00444, 0.01 ,0.01555, 0.00556 ,0.01416, 0.01028 ,0.01389, 0.0025 ,0.015, 0.00445 ,0.00278, 0.00306 ,
-                            0.01444, 0.00333 ,0.01528, 0.005 ,0.00194, 0.00889 ,0.01361, 0.0025, 0.01472, 0.00361 ,0.00139, 0.00389,
-                            0.00055, 0.00556 ,0.0025, 0.00917 ,0.00528, 0.00139 ,0.01583, 0.00583 ,0.00917, 0.00056 ,0.00833, 0.00056 ,0.0025, 0.00945,
-                            0.01056, 0.0 ,0.01305, 0.01111 ,0.01278, 0.00139 ,0.01111, 0.00056 ,0.01528, 0.00861 ,0.01528, 0.00445 ,
-                            0.01583, 0.00667 ,0.01139, 0.00056 ,0.00417, 0.01195 ,0.00917, 0.00028 ,0.00111, 0.00861 ,0.01361, 0.01084 , 
-                            0.00389, 0.01111 ,0.01472, 0.00417 ,0.01333, 0.00167 ,0.00333, 0.00972,0.00528, 0.00167 ,0.01611, 0.00667,
-                            0.00083, 0.00806,0.00194, 0.00917 ,0.00444, 0.00972 ,0.01444, 0.00945 ,0.00027, 0.00778,0.01389, 0.01028, 0.015, 0.00917,
-                            0.01416, 0.00306 ,0.00333, 0.00945 ,0.01278, 0.01167 ,0.01361, 0.01056 ,0.01472, 0.00945 ,0.00833, 0.00084 ,
-                            0.01278, 0.01222 ,0.00055, 0.005,0.00566, 0.00139,0.01444, 0.00972,0.00694, 0.00083,0.01278, 0.00111,0.00444, 0.01084,
-                            0.00083, 0.00472,0.01583, 0.00556 ,0.01305, 0.01167 ,0.01555, 0.00778,0.00389, 0.01167,0.00111, 0.00833,0.015, 0.00861,
-                            0.015, 0.00417,0.00583, 0.00111,0.00083, 0.005,0.00583, 0.00139,0.00472, 0.01,0.01611, 0.00583,0.01333, 0.00139,
-                            0.00166, 0.00889,0.00166, 0.00861,0.01416, 0.00972,0.00055, 0.00778,0.00166, 0.00333,0.01444, 0.00361,
-                            0.01555, 0.0075 ,0.00361, 0.0025,0.00972, 0.0,0.0, 0.0075,0.00083, 0.00833,0.00444, 0.01111,0.00027, 0.0075,
-                            0.01583, 0.0075,0.00222, 0.00333,0.01139, 0.00084,0.0, 0.00583,0.00027, 0.00583,0.01222, 0.00111,0.01361, 0.00167,
-                            0.00139, 0.00472,0.00417, 0.00222,0.00694, 0.00111,0.01333, 0.01084,0.01555, 0.005,0.01389, 0.00306,0.0125, 0.01222,
-                            0.00027, 0.00556,0.01111, 0.00028,0.00417, 0.00195,0.01472, 0.00917 };
-                            
-
-
-LatLonDegrees64ValueVector makeCornerVector(double lons_lats[]){
-	LatLonDegrees64ValueVector cornerVector;
-    for( int i = 0; i < sizeof(lons_lats); i +=2 ) {
-	  double lon = lons_lats[i];
-	  double lat = lons_lats[i+1];
-	  cornerVector.push_back(LatLonDegrees64(lat,lon));
+vector<string> listDirectory(const std::string& folder_name) {
+    vector<string> file_paths;
+    DIR* dirp = opendir(folder_name.c_str());
+    struct dirent * dp;
+    std::string file_path;
+    while ((dp = readdir(dirp)) != NULL) {
+        string file_name = dp->d_name;
+        if (file_name.find(".csv") != std::string::npos){
+            file_path = folder_name + "/" + file_name;
+            file_paths.push_back(file_path);
+        }
     }
-	return cornerVector;
+    closedir(dirp);
+    return file_paths;
 }
 
 
+LatLonDegrees64ValueVector readCSV(string file_path) {
+    LatLonDegrees64ValueVector cornerVector;
+    std::ifstream file(file_path);
+    std::string row;         
+    while (std::getline(file, row)) {  
+        float lon = stof(row.substr(0, row.find(",")));        
+        float lat = stof(row.substr(row.find(",")+1));
+        cornerVector.push_back(LatLonDegrees64(lat, lon));
+    }
+    file.close();    
+    return cornerVector;
+}
+
+
+STARE stare;
+
 void STARE_Covers_test() {
-    LatLonDegrees64ValueVector points = makeCornerVector(lons_lats1);    
-    int n_test = 80;
-    STARE index;
-    int   level = 16;
-    STARE_SpatialIntervals cover = index.ConvexHull(points, level);
     
-    // REGRESSION TEST - NOT YET VALIDATED
-   	 long long int cover_[ 45 ] = {
+    // Testing country polygons of the geopandas lowres_world dataset, version 0.4
+    if (true) {
+        vector<string> file_paths = listDirectory("tests/CUTE/polygons/world_04/");
+        for(auto const& file_path: file_paths) {
+            LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
+            stare.ConvexHull(cornerVector, 8);
+        }
+    }
+    
+    
+    // Testing country polygons of the geopandas lowres_world dataset, version 0.4
+    if (true) {
+        vector<string> file_paths = listDirectory("tests/CUTE/polygons/world_07/");
+        for(auto const& file_path: file_paths) {
+            LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
+            stare.ConvexHull(cornerVector, 8);
+        }
+    }
+    
+    // Testing shapes of caribbean outlines 
+    if (false) {
+        vector<string> file_paths = listDirectory("tests/CUTE/polygons/caribbean/");
+        for(auto const& file_path: file_paths) {
+            LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
+            stare.ConvexHull(cornerVector, 8);
+        }
+    }
+    
+    // Testing assortment of shapes
+    if (true) {
+        vector<string> file_paths = listDirectory("tests/CUTE/polygons/0/");
+        for(auto const& file_path: file_paths) {
+            LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
+            stare.ConvexHull(cornerVector, 8);
+        }
+    }
+    
+    
+    if (false) {        
+        LatLonDegrees64ValueVector cornerVector = readCSV("polygons/0/0.csv");    
+        int n_test = 80;
+        int level = 16;
+        STARE_SpatialIntervals cover = stare.ConvexHull(cornerVector, level);
+    
+        // REGRESSION TEST - NOT YET VALIDATED
+        long long int cover_[ 45 ] = {
    			  0x3d7e69d220000010
 			 ,0x3d7e69d228000010
 			 ,0x3d7e69d238000010
@@ -105,16 +142,44 @@ void STARE_Covers_test() {
 			 ,0x3d7e69d668000010
 			 ,0x3d7e69d670000010
 			 ,0x3d7e69d678000010
-   	 };
+        };
 
-   	 // cout << "long long int cover_[ " << cover.size() << " ] = {" << endl;
-   	 for( int i = 0; i < cover.size(); ++i ) {
-   		 // cout << ",0x" << hex << cover[i] << dec << endl;
-   		 ASSERT_EQUAL(cover_[i],cover[i]);
-   	 }
-   	 // cout << "};" << endl;
-
-
-
-	// FAIL();
+        for( int i = 0; i < cover.size(); ++i ) {
+            ASSERT_EQUAL(cover_[i],cover[i]);
+        }
+    }
+    
+    if (false) {	
+        LatLonDegrees64ValueVector cornerVector = readCSV("polygons/0/0.csv"); 
+		STARE_SpatialIntervals indexValues = stare.ConvexHull(cornerVector, 12);
+		
+        // A regression. Perhaps foolhardy.
+		ASSERT_EQUAL(indexValues[   0], 4063372763795030021);
+		ASSERT_EQUAL(indexValues[ 209], 4047214340913233929);
+		ASSERT_EQUAL(indexValues[ 418], 4048304506692173834);
+		ASSERT_EQUAL(indexValues[ 627], 4069240857352470538);
+		ASSERT_EQUAL(indexValues[ 836], 4047805878168977419);
+		ASSERT_EQUAL(indexValues[1045], 4062281498504462347);
+		ASSERT_EQUAL(indexValues[1254], 4071136552837709835);
+		ASSERT_EQUAL(indexValues[1463], 4037621170680365068);
+		ASSERT_EQUAL(indexValues[1672], 4037929652411432972);
+		ASSERT_EQUAL(indexValues[1881], 4046503437926400012);
+		ASSERT_EQUAL(indexValues[2090], 4047784506411712524);
+		ASSERT_EQUAL(indexValues[2299], 4048209742533754892);
+		ASSERT_EQUAL(indexValues[2508], 4049064166147751948);
+		ASSERT_EQUAL(indexValues[2717], 4050190581450670092);
+		ASSERT_EQUAL(indexValues[2926], 4050638220122128396);
+		ASSERT_EQUAL(indexValues[3135], 4051281090826993676);
+		ASSERT_EQUAL(indexValues[3344], 4051436980959969292);
+		ASSERT_EQUAL(indexValues[3553], 4062307233948499980);
+		ASSERT_EQUAL(indexValues[3762], 4062741541041471500);
+		ASSERT_EQUAL(indexValues[3971], 4063200552786329612);
+		ASSERT_EQUAL(indexValues[4180], 4066811658209591308);
+		ASSERT_EQUAL(indexValues[4389], 4068128048505946124);
+		ASSERT_EQUAL(indexValues[4598], 4068353207871471628);
+		ASSERT_EQUAL(indexValues[4807], 4070473512966422540);
+		ASSERT_EQUAL(indexValues[5016], 4071135865642942476);
+		ASSERT_EQUAL(indexValues[5225], 4165894663942701068);
+		ASSERT_EQUAL(indexValues[5434], 4166328008962998284);
+	}
 }
