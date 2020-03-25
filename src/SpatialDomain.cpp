@@ -89,6 +89,7 @@ SpatialDomain::intersect(HtmRange *htmrange, bool varlen, HtmRange *hrInterior, 
 {
 	size_t i;
 	bool ok = false;
+// #define DIAG
 #ifdef DIAG
 	cout << "sd::i: " << "1000" << endl << flush;
 #endif
@@ -106,6 +107,7 @@ SpatialDomain::intersect(HtmRange *htmrange, bool varlen, HtmRange *hrInterior, 
 #ifdef DIAG
 	cout << "sd::i: " << "1003" << endl << flush;
 #endif
+// #undef DIAG
 	return ok;
 }
 /////////////Write////////////////////////////////////////

@@ -66,6 +66,7 @@ public:
 	 * @param vec is only the lo-hi intervals extracted from \p hr
 	 */
 	void fillValueVec(HtmRange &hr, HTMRangeValueVector &vec);
+	HTMRangeValueVector toValueVec(HtmRange &hr);
 
   /** Constructor. The level is optional, defaulting to level 5. It
       can be changed with the changeDepth() memberfunction or it can

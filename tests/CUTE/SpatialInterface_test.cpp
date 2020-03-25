@@ -167,7 +167,9 @@ void SpatialInterface_test() {
 
 			delete htm;
             
+
 		}
+		
 		if(true) {
             htmInterface *htm;
             int resolution_level = 16;
@@ -180,8 +182,63 @@ void SpatialInterface_test() {
             cornerVector.push_back(LatLonDegrees64(4.0003, 0.0003));
             cornerVector.push_back(LatLonDegrees64(4.0003, 0.0008));           
             int hullSteps = cornerVector.size();          
-            htm->convexHull(cornerVector, hullSteps, true);
-            
+            HTMRangeValueVector r = htm->convexHull(cornerVector, hullSteps, true);
+            delete htm;
         }
+        
+		if(true) {
+            htmInterface *htm;
+            int resolution_level = 16;
+            htm = new htmInterface(index.getIndex(resolution_level).getMaxlevel(),
+                                   index.getIndex(resolution_level).getBuildLevel(),
+                                   index.getIndex(resolution_level).getRotation());
+            LatLonDegrees64ValueVector cornerVector;
+            cornerVector.push_back(LatLonDegrees64(4.0003,0.0017));
+            cornerVector.push_back(LatLonDegrees64(4.0003,0.0011));
+            cornerVector.push_back(LatLonDegrees64(4.0006,0.0011));
+            cornerVector.push_back(LatLonDegrees64(4.0006,0.0003));
+            cornerVector.push_back(LatLonDegrees64(4.0003,0.0003));
+            cornerVector.push_back(LatLonDegrees64(4.0003,0.0008));
+            cornerVector.push_back(LatLonDegrees64(4.0,   0.0008));
+            cornerVector.push_back(LatLonDegrees64(4.0,   0.0));
+            cornerVector.push_back(LatLonDegrees64(4.0003,0.0));
+            cornerVector.push_back(LatLonDegrees64(4.003, 0.0007));
+            int hullSteps = cornerVector.size();
+            HTMRangeValueVector r = htm->convexHull(cornerVector, hullSteps, true);
+
+            /*
+            0 i: r[i]: 3d6feb7250000010 4427015834929463312
+            1 i: r[i]: 3d6feb7320000010 4427015838419124240
+            2 i: r[i]: 3d6feb7338000010 4427015838821777424
+            3 i: r[i]: 3d6feb73a0000010 4427015840566607888
+            4 i: r[i]: 3d6feb73a8000010 4427015840700825616
+            5 i: r[i]: 3d6feb73b8000010 4427015840969261072
+            6 i: r[i]: 3d6feb73e0000010 4427015841640349712
+            cout << "----------" << endl << flush;
+            cout << "r size: " << r.size() << endl << flush;
+            */
+
+            uint64 expected_lo[7] = {
+            		0x3d6feb7250000010
+					,0x3d6feb7320000010
+					,0x3d6feb7338000010
+					,0x3d6feb73a0000010
+					,0x3d6feb73a8000010
+					,0x3d6feb73b8000010
+					,0x3d6feb73e0000010
+            };
+
+            for(int i = 0; i < r.size(); ++i ) {
+            	uint64 lo = index.ValueFromHtmID(r[i].lo);
+            	// uint64 hi = index.ValueFromHtmID(r[i].hi);
+            	// cout << i << " i: r[i]: " << hex << lo << " " << dec << lo << endl << flush;
+            	// cout << i << " i: r[i]: " << hex << hi << " " << dec << hi << endl << flush;
+				ASSERT_EQUAL(expected_lo[i],lo);
+            }
+            // cout << "----------" << endl << flush;
+            delete htm;
+            // exit(1);
+
+		}
 	}
 }

@@ -37,9 +37,7 @@ LatLonDegrees64ValueVector makeCornerVector(void){
 	cornerVector.push_back(LatLonDegrees64(29.46833079682617, 63.55026085801117));
 	cornerVector.push_back(LatLonDegrees64(31.37950613049267, 61.69931440618083));
 	cornerVector.push_back(LatLonDegrees64(34.40410187431986, 60.80319339380745));
-
 	cornerVector.push_back(LatLonDegrees64(33.52883230237626, 60.96370039250601 ));
-
 	cornerVector.push_back(LatLonDegrees64(35.65007233330923, 61.21081709172574));
 	return cornerVector;
 }
@@ -1545,6 +1543,110 @@ void STARE_test() {
 		ASSERT_EQUAL(indexValues[5225], 4165894663942701068);
 		ASSERT_EQUAL(indexValues[5434], 4166328008962998284);
 
+	}
+
+	// Didn't handle level = 0 in STARE::htmIDFromValue properly.
+	if(false) {
+		LatLonDegrees64 latlon0(45.0,45.0);
+		int level = 0;
+	  STARE_ArrayIndexSpatialValue aIndex  = index.ValueFromLatLonDegrees(latlon0.lat,latlon0.lon,level);
+	  cout << "aIndex:  " << hex << aIndex << dec << endl;
+
+	  EmbeddedLevelNameEncoding lj;
+	  lj.setIdFromSciDBLeftJustifiedFormat(aIndex);
+	  BitShiftNameEncoding rj(lj.rightJustifiedId());
+	  uint64 htmID = rj.getId();
+	  cout << "a100 " << hex << htmID << dec << endl << flush;
+
+	  Triangle tr = index.TriangleFromValue(aIndex);
+	  
+	}
+
+	if(true) {
+		double cm = 0.01/6378.0e3; // cm/km
+		double tolerance = 5*cm;
+		int level = 27;
+		STARE_ArrayIndexSpatialValue aIndex0 = index.ValueFromLatLonDegrees(  0.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex1 = index.ValueFromLatLonDegrees( 45.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex2 = index.ValueFromLatLonDegrees(-45.0,  0.0,level);
+		STARE_ArrayIndexSpatialValue aIndex3 = index.ValueFromLatLonDegrees(-45.0,180.0,level);
+
+		ASSERT_LESS(abs(0.5*sqrt(2)-index.cmpSpatialDistanceCosine(aIndex0,aIndex1)),tolerance);
+		ASSERT_LESS(abs(0.5*sqrt(2)-index.cmpSpatialDistanceCosine(aIndex0,aIndex2)),tolerance);
+		ASSERT_LESS(abs(0.0-index.cmpSpatialDistanceCosine(aIndex1,aIndex2)),tolerance);
+		ASSERT_LESS(abs(-1.0-index.cmpSpatialDistanceCosine(aIndex1,aIndex3)),tolerance);
+
+		ASSERT_LESS(abs(acos(0.5*sqrt(2))-index.cmpSpatialDistanceRadians(aIndex0,aIndex1)),tolerance);
+		ASSERT_LESS(abs(acos(0.5*sqrt(2))-index.cmpSpatialDistanceRadians(aIndex0,aIndex2)),tolerance);
+		ASSERT_LESS(abs(acos(0.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex2)),tolerance);
+		ASSERT_LESS(abs(acos(-1.0)-index.cmpSpatialDistanceRadians(aIndex1,aIndex3)),tolerance);
+
+		// cout << "resest0: " << index.cmpSpatialResolutionEstimate(aIndex0,aIndex1) << endl << flush;
+		// cout << "resest1: " <<index.cmpSpatialResolutionEstimate(0x2326000000000005,0x2327000000000005) << endl << flush;
+		// cout << "resest2: " <<index.cmpSpatialResolutionEstimateI(0x2326000000000005,0x2327000000000005) << endl << flush;
+
+		ASSERT_EQUAL(1,index.cmpSpatialResolutionEstimateI(aIndex0,aIndex1));
+		ASSERT_EQUAL(5,index.cmpSpatialResolutionEstimateI(0x2326000000000005,0x2327000000000005));
+	}
+
+	if(true) {
+		// cout << "length: " << index.lengthMeterScaleFromEdgeFromLevel(10) << endl << flush;
+		// cout << "res:    " << index.levelFromLengthMeterScaleFromEdge(10.0e3) << endl << flush;
+		ASSERT_EQUAL(9772,int(index.lengthMeterScaleFromEdgeFromLevel(10)));
+		ASSERT_EQUAL(10,int(0.5+index.levelFromLengthMeterScaleFromEdge(10.0e3)));
+	}
+
+	if(true) {
+		double delta = 0.001;
+		double lat = 0,lon = 0;
+		int lvl = 27;
+		EmbeddedLevelNameEncoding lj;
+		STARE_ArrayIndexSpatialValues spatialStareIds;
+
+
+
+		uint64 source[10] = {
+				0x3d7e69d09dbc425b
+				,0x3d7e69d7057d10fb
+				,0x3d7e69d312f1ca1b
+				,0x3d7e69d32945f71b
+				,0x3d7e69da6914455b
+				,0x3d7e69c7c92cde7b
+				,0x3d7e112622b49e5b
+				,0x3d7e115866c6b81b
+				,0x3d7e17a8c067401b
+				,0x3d7e1ab50be8303b
+		};
+
+		uint64 result[10] = {
+				0x3d7e69d09dbc4250
+				,0x3d7e69d7057d10f0
+				,0x3d7e69d312f1ca0f
+				,0x3d7e69d32945f70e
+				,0x3d7e69da6914454d
+				,0x3d7e69c7c92cde6c
+				,0x3d7e112622b49e4b
+				,0x3d7e115866c6b80a
+				,0x3d7e17a8c0674009
+				,0x3d7e1ab50be83028
+		};
+
+		for( int i=0; i < 10; ++i ) {
+			spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
+			lat += 0; lon += delta; delta += delta;
+		}
+		STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
+
+		for( int i = 0; i < 10; ++i ) {
+			if(false) {
+				cout << i << " "
+						<< hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
+						<< " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
+						<< endl << flush;
+			}
+			ASSERT_EQUAL(source[i],spatialStareIds[i]);
+			ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
+		}
 	}
 
 	// FAIL();
