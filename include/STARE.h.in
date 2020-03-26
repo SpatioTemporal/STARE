@@ -20,6 +20,7 @@
 #include "EmbeddedLevelNameEncoding.h"
 #include <map>
 #include <vector>
+#include <fstream>
 
 #include "TemporalIndex.h"
 #include "TemporalGeneral.h"
@@ -149,8 +150,8 @@ public:
 	STARE_ArrayIndexSpatialValues adaptSpatialResolutionEstimates(STARE_ArrayIndexSpatialValues spatialStareIds);
 	
     STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
-    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int& resolution, int& type);
-    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int& resolution, int& type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int resolution, int type);
     
     Datetime UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue);
 	
@@ -191,5 +192,49 @@ void STARE_Covers_test();
 extern "C" const char *STARE_version();
 
 // void STARE_Temporal_test();
+
+class STARE_Stash {
+	public:
+	STARE_Stash(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_	
+		,ios_base::openmode mode = ios_base::in | ios_base::binary
+		,char stash_type_ = 1
+		);
+	void init(
+		const string& filename
+		,int& size_of_record_
+		,uint64& number_of_records_	
+		,ios_base::openmode mode
+		,char stash_type_
+		);
+	STARE_Stash(
+		const string& filename
+		,STARE_SpatialIntervals& intervals
+		,ios_base::openmode mode = ios_base::in | ios_base::binary
+		);
+		
+		/*
+	STARE_Stash(
+		const string& filename
+		,STARE_ArrayIndexSpatialValues values
+		,ios_base::openmode mode = ios_base::in | ios_base::binary
+		);
+		*/
+		
+	virtual ~STARE_Stash();
+	char     stash_type;
+	int      size_of_record;
+	uint64   number_of_records;
+	ios_base::openmode current_mode; 
+	fstream *stashFile;
+	
+	void close() { stashFile->close(); };
+};
+
+void stash_spatial(const string& filename, STARE_SpatialIntervals intervals);
+void fetch_spatial(const string& filename, STARE_SpatialIntervals& intervals);
+
 
 #endif /* INCLUDE_STARE_H_ */

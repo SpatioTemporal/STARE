@@ -33,7 +33,7 @@ lg2(unsigned long v) {  // 64-bit value to find the log2 of
 	const unsigned long S[] = {1, 2, 4, 8, 16, 32};
 	int i;
 
-	register unsigned long r = 0; // result of log2(v) will go here
+	unsigned long r = 0; // result of log2(v) will go here
 	for (i = 5; i >= 0; i--) // unroll for speed...
 	{
 		if (v & b[i])

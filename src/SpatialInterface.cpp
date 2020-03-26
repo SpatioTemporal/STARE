@@ -767,7 +767,9 @@ htmInterface::domain( SpatialDomain & domain ) {
 	cout << 4001 << " hull_interiorp_ " << hull_interiorp_ << endl << flush;
 #endif
 
-	Key gapsize;
+	// TODO Fix gapsize usage.
+    // Key gapsize;
+
 	//  SpatialIndex idx(20, 5);
 	//  domain.setOlevel(20);
 

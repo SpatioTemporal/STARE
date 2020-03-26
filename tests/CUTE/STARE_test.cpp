@@ -7,6 +7,7 @@
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
 
+// #include <conio>
 #include <iostream>
 #include "Test.h"
 
@@ -1197,11 +1198,11 @@ void STARE_test() {
 
 	// #define DIAG
 #ifndef DIAG
-#define DIAGOUT2(p,m)
+// defined above on line 17 #define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
 #define SIVSOUT(p,m,v)
 #else
-#define DIAGOUT2(p,m) p << m;
+// #define DIAGOUT2(p,m) p << m;
 #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
 #define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
 #endif
@@ -1603,8 +1604,6 @@ void STARE_test() {
 		EmbeddedLevelNameEncoding lj;
 		STARE_ArrayIndexSpatialValues spatialStareIds;
 
-
-
 		uint64 source[10] = {
 				0x3d7e69d09dbc425b
 				,0x3d7e69d7057d10fb
@@ -1649,6 +1648,113 @@ void STARE_test() {
 		}
 	}
 
+	if(true) {
+		/* Stash test #1 */
+		uint64 source[10] = {
+				0x3d7e69d09dbc425b
+				,0x3d7e69d7057d10fb
+				,0x3d7e69d312f1ca1b
+				,0x3d7e69d32945f71b
+				,0x3d7e69da6914455b
+				,0x3d7e69c7c92cde7b
+				,0x3d7e112622b49e5b
+				,0x3d7e115866c6b81b
+				,0x3d7e17a8c067401b
+				,0x3d7e1ab50be8303b
+		};
+		STARE_ArrayIndexSpatialValues spatialStareIds;
+
+		for( int i=0; i < 10; ++i ) {
+			spatialStareIds.push_back(source[i]);
+		}
+
+		typedef struct stash_record {
+			uint64 id;
+		} stash_record;
+
+		stash_record record;
+
+		uint64 n_record    = spatialStareIds.size();
+		int size_record = sizeof(record);
+
+		// cout << "n_record,size_record: " << n_record << " " << size_record << endl << flush;
+
+		STARE_Stash ostash(
+				"test.st"
+				,size_record
+				,n_record
+				,ios::out | ios::binary
+				);
+		for( int i=0; i < n_record; ++i ) {
+			record.id = spatialStareIds[i];
+			ostash.stashFile->write(reinterpret_cast<char*>(&record),size_record);
+		}
+		ostash.close();
+
+		n_record    = -1;
+		size_record = -1;
+		record.id   = -1;
+		STARE_Stash istash(
+				"test.st"
+				,size_record
+				,n_record
+				,ios::in | ios::binary
+				);
+		stringstream ss;
+		for( int i=0; i < n_record; ++i ) {
+			// record.id = spatialStareIds[i];
+			istash.stashFile->read(reinterpret_cast<char*>(&record),size_record);
+//			cout << i << " i expected,found: " << source[i] << " - " << record.id << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),source[i],record.id);
+		}
+		istash.close();
+
+		/* Stash test #2 */
+		STARE_Stash ostash1(
+				"test1.st"
+				,spatialStareIds
+				,ios::out | ios::binary
+				);
+		STARE_ArrayIndexSpatialValues spatialStareIds1;
+		STARE_Stash istash1(
+				"test1.st"
+				,spatialStareIds1
+				,ios::in | ios::binary
+				);
+		for(int i=0; i<spatialStareIds1.size(); ++i) {
+			// cout << i << " i,source,ids1 " << spatialStareIds[i] << " " << spatialStareIds1[i] << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record1 i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),spatialStareIds[i],spatialStareIds1[i]);
+		}
+
+		/* Stash test #3 */
+		SpatialRange sr(spatialStareIds);
+		STARE_SpatialIntervals sis = sr.toSpatialIntervals();
+		STARE_Stash ostash2(
+				"test2.st"
+				,sis
+				,ios::out | ios::binary
+				);
+		STARE_ArrayIndexSpatialValues spatialStareIds2;
+		STARE_Stash istash2(
+				"test2.st"
+				,spatialStareIds2
+				,ios::in | ios::binary
+				);
+		SpatialRange sr2(spatialStareIds2);
+		for(int i=0; i<spatialStareIds2.size(); ++i) {
+			// cout << i << " i,source,ids1 " << spatialStareIds[i] << " " << spatialStareIds1[i] << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record2 ids i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),sis[i],spatialStareIds2[i]);
+		}
+
+		// TODO Operation that checks equality of two SpatialRanges.
+
+	}
 	// FAIL();
 }
 

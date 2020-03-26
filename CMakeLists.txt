@@ -18,6 +18,14 @@ set ( ERFA_DIR ${PROJECT_SOURCE_DIR}/external/erfa-single-file )
 
 message("\n------------ Running cmake for project STARE ------------\n")
 
+# NB: If this code needs a certain version of SWIG, add that number to
+# the 'find_package()' call as a second argument. jhrg 8/27/19
+#
+# Moved up so we can make python tests depend on building the python interface.
+# jhrg 3/20/20
+#
+find_package(SWIG)
+
 # Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
 if(EXISTS "${CUTE_INCLUDE_DIR}")
     message( " CUTE_INCLUDE_DIR: ${CUTE_INCLUDE_DIR}\n ")
@@ -72,10 +80,10 @@ if(BUILD_TESTING)
   message( "Adding tests...\n" )
   add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
 endif()
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
-
 
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
