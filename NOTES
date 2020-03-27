@@ -1,4 +1,8 @@
 
+* 2020-03-27 Version 0.14
+
+PySTARE removed.
+
 * 2020-03-20 Version 0.13
 
 Added box_cover_from_latlon to PySTARE, also checked effect of correct varlen
