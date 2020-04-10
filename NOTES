@@ -1,4 +1,12 @@
 
+* 2020-04-10 Version 0.14.1
+
+Add range in SpatialRange was implicitly destructing (a complex) SpatialRange
+input, leading to a double-freeing of certain objects. Fixed by changing
+signature to const&. We should look for other places where we pass complex
+objects that require such treatment. Perhaps I'm not getting value- or
+copy-semantics right.
+
 * 2020-03-27 Version 0.14
 
 PySTARE removed.

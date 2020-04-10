@@ -25,7 +25,7 @@ public:
 	virtual ~SpatialRange();
 
 	void addSpatialIntervals(STARE_SpatialIntervals intervals);
-	void addSpatialRange(SpatialRange r);
+	void addSpatialRange(const SpatialRange& r);
 
 	STARE_SpatialIntervals toSpatialIntervals();
 	int getNextSpatialInterval(STARE_SpatialIntervals &interval);

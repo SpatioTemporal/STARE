@@ -19,7 +19,9 @@ HstmRange::HstmRange(HtmRangeMultiLevel_NameSpace::HtmRangeMultiLevel *range){
 }
 
 HstmRange::~HstmRange() {
-	delete range;
+	if( range != NULL ) {
+		delete range;
+	}
 }
 
 /**

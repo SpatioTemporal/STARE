@@ -9,6 +9,39 @@
 
 #include "Test.h"
 
+class srange {
+public:
+	srange(){}
+	~srange(){}
+	SpatialRange range;
+
+	void add_range(const SpatialRange& sr) { range.addSpatialRange(sr); }
+	void add_intervals(STARE_SpatialIntervals sis) { range.addSpatialIntervals(sis); }
+	STARE_SpatialIntervals to_intervals() { return range.toSpatialIntervals(); }
+
+	SpatialRange test() {
+		SpatialRange r0;
+		r0.addSpatialIntervals(range.toSpatialIntervals());
+		SpatialRange r1;
+		r1.addSpatialRange(r0);
+		return r1;
+	}
+
+	srange intersect(const srange& other) {
+		// cout << "i000" << endl << flush;
+		// SpatialRange *r = range & other.range;
+		SpatialRange *r = sr_intersect(range,other.range);
+		// cout << "i100" << endl << flush;
+		srange res;
+		// cout << "i200" << endl << flush;
+		// res.range.tag = "intersect";
+		// cout << "i300" << endl << flush;
+		res.add_range(*r);
+		// cout << "i400" << endl << flush;
+		return res;
+	}
+};
+
 // #define DIAG
 
 void SpatialRange_test () {
@@ -309,6 +342,29 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(1,r1.contains(0x0000000000000008));
 		ASSERT_EQUAL(1,r1.contains(0x000067ffffffffff));
 		ASSERT_EQUAL(0,r1.contains(0x0000000000000007));
+	}
+
+	if(true) {
+		/*
+		STARE_SpatialIntervals sis[2] = { 0x0000000000000008, 0x000067ffffffffff };
+		srange sr;
+		sr.add_intervals(sis);
+		sr.test();
+		*/
+
+		STARE_ArrayIndexSpatialValue siv1[2] = { 0x0000000000000008, 0x000067ffffffffff };
+		STARE_ArrayIndexSpatialValue siv2[2] = { 0x000030000000000a, 0x0000907fffffffff };
+		STARE_SpatialIntervals sis1(siv1,siv1+2);
+		STARE_SpatialIntervals sis2(siv2,siv2+2);
+
+		srange *r1 = new srange();
+		srange *r2 = new srange();
+		r1->add_intervals(sis1);
+		r2->add_intervals(sis2);
+		srange r12 = r1->intersect(*r2);
+		delete r1;
+		delete r2;
+
 	}
 
 #undef SIVOUT
