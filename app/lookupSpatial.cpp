@@ -14,6 +14,7 @@
 
 
 void usage(char *name) {
+
   std::cout 
     << "STARE spatial index lookup. " << std::endl
     << "Usage: " << name << " [options] --resolution=RESOLUTION {--latlon lat lon | --xyz x y z | --radenc ra dec }" << std::endl

@@ -167,6 +167,7 @@ void SpatialInterface_test() {
 
 			delete htm;
             
+
 		}
 		
 		if(true) {
@@ -184,6 +185,7 @@ void SpatialInterface_test() {
             HTMRangeValueVector r = htm->convexHull(cornerVector, hullSteps, true);
             delete htm;
         }
+        
 		if(true) {
             htmInterface *htm;
             int resolution_level = 16;
@@ -236,6 +238,7 @@ void SpatialInterface_test() {
             // cout << "----------" << endl << flush;
             delete htm;
             // exit(1);
+
 		}
 	}
 }

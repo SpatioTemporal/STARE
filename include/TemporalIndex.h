@@ -342,11 +342,12 @@ public:
 //		int64_t ms;
 //		return ms;
 //	}
-
-//#define SHIFT_AND_MASK_RESOLUTION(field) \
-//		data.setValue(#field, \
-//				data.resolutionLevelConstraint \
-//				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
+#if 0
+#define SHIFT_AND_MASK_RESOLUTION(field) \
+		data.setValue(#field, \
+				data.resolutionLevelConstraint \
+				- (data.get(#field)->getMask() & (idx_ >> data.get(#field)->getOffset())) );
+#endif
 
 	/**
 	 * Set the TemporalIndex according to a scidb temporal index.
