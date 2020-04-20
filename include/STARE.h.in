@@ -148,6 +148,7 @@ public:
 	int cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b);
 	
 	STARE_ArrayIndexSpatialValues adaptSpatialResolutionEstimates(STARE_ArrayIndexSpatialValues spatialStareIds);
+    void adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValues &spatialStareIds);
 	
     STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
     STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int resolution, int type);
@@ -187,6 +188,7 @@ uint64 spatialLevelMask();
 
 void STARE_test();
 void STARE_Covers_test();
+void AdaptSpatialResolutionEstimates_test();    // Added jhrg 4/20/20
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19
 extern "C" const char *STARE_version();
