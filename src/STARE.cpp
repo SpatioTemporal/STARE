@@ -791,6 +791,9 @@ double STARE::cmpSpatialResolutionEstimate(STARE_ArrayIndexSpatialValue a, STARE
 	double deltaL_meters = 6371.0e3*cmpSpatialDistanceRadians(a,b);
 	return levelFromLengthMeterScaleFromEdge(deltaL_meters);
 }
+
+// FIXME: Clang-Tidy: Casting (double + 0.5) to integer leads to incorrect rounding;
+// FIXME: consider using lround (#include <cmath>) instead. jhrg 4/20/20
 int STARE::cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
 	return int(cmpSpatialResolutionEstimate(a,b)+0.5);
 }
