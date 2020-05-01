@@ -195,7 +195,16 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 
 	// cout << "sid: " << spatialStareId << endl << flush;
 
-	uint64 htmID = htmIDFromValue(spatialStareId);
+  uint64 htmID = -1;
+  if(terminatorp(spatialStareId)) {
+    // The long way...
+    // cout << "ping" << endl << flush;
+    uint64 geolocation_mask = ~spatialLevelMask();
+    htmID = htmIDFromValue((spatialStareId & geolocation_mask) + 27);
+    // htmID = htmIDFromValue(spatialStareId-4);
+  } else {
+    htmID = htmIDFromValue(spatialStareId);
+  }
 	// cout << "lldfv htmID " << setw(16) << setfill('0') << hex << htmID << dec << endl << flush;
 
 	SpatialVector v;
@@ -247,8 +256,16 @@ Triangle STARE::TriangleFromValue(STARE_ArrayIndexSpatialValue spatialStareId, i
 	uint64 htmID = -1;
 	if( resolutionLevel < 0 ) {
 		// Use the level embedded in the index value.
-		resolutionLevel = ResolutionLevelFromValue(spatialStareId);
-		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
+		// Prefer this... resolutionLevel = ResolutionLevelFromValue(spatialStareId);
+	  // But...
+	  EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+	  leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
+	  if( leftJustifiedWithResolution.terminatorp() ) {
+	    resolutionLevel = 27;
+	  } else {
+	    resolutionLevel = leftJustifiedWithResolution.getLevel();
+	  }
+	  htmID = htmIDFromValue(spatialStareId,resolutionLevel);
 	} else {
 		// Use the coerced level, which may be set to the search_level.
 		htmID = htmIDFromValue(spatialStareId,resolutionLevel);
