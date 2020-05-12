@@ -1,4 +1,9 @@
 
+* 2020-05-01 Version 0.14.2
+
+Extended domain of TriangleFromValue and LatLonDegreesFromValue to cover
+terminators. LatLons are calculated by converting to resolution level of 27.
+
 * 2020-04-10 Version 0.14.1
 
 Add range in SpatialRange was implicitly destructing (a complex) SpatialRange
