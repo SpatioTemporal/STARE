@@ -82,6 +82,8 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
 
 # Read the version number from a file.
 
+# Modified from 'file(STRING "VERSION" VERSION) so that the tar ball name
+# does not contain a trailing ';' jhrg 5/11/20
 file(READ "VERSION" ver)
 string(REGEX MATCH "^[.0-9]*" VERSION ${ver})
 # message(STATUS "ver = ${ver}")
