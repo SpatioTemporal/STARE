@@ -4219,6 +4219,9 @@ void runSuite(int argc, char const *argv[]){
 	s.push_back(CUTE(STARE_test));
 	s.push_back(CUTE(STARE_Covers_test));
 
+	// Added jhrg 4/20/20
+    s.push_back(CUTE(AdaptSpatialResolutionEstimates_test));
+
 	//	s.push_back(CUTE(testRange));
 
 	if(false) { // Lots of diagnostic output in the following.

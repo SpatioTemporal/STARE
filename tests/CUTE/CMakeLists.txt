@@ -3,6 +3,7 @@ set (
   TestSrcFiles
   Test.h 
   EmbeddedLevelNameEncoding_test.cpp
+  AdaptSpatialResolutionEstimates_test.cpp
   SpatialFailure_test.cpp
   SpatialIndex_test.cpp
   SpatialInterface_test.cpp

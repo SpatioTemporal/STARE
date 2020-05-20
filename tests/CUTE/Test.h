@@ -17,8 +17,6 @@
 
 #include "HstmIndex.h"
 
-// TODO #include the headers for the code you want to test
-//#include "SpatialGeneral.h"
 #include "SpatialException.h"
 #include "SpatialIndex.h"
 #include "TemporalIndex.h"

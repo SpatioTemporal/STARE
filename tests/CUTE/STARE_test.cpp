@@ -1597,56 +1597,58 @@ void STARE_test() {
 		ASSERT_EQUAL(10,int(0.5+index.levelFromLengthMeterScaleFromEdge(10.0e3)));
 	}
 
-	if(true) {
-		double delta = 0.001;
-		double lat = 0,lon = 0;
-		int lvl = 27;
-		EmbeddedLevelNameEncoding lj;
-		STARE_ArrayIndexSpatialValues spatialStareIds;
+	// I turned this test off an added a new, separate test for adaptSpatialResolutionEstimates()
+	// and the new adaptSpatialResolutionEstimatesInPlace(). jhrg 4/20/20
+    if(false) {
+        double delta = 0.001;
+        double lat = 0,lon = 0;
+        int lvl = 27;
+        EmbeddedLevelNameEncoding lj;
+        STARE_ArrayIndexSpatialValues spatialStareIds;
 
-		uint64 source[10] = {
-				0x3d7e69d09dbc425b
-				,0x3d7e69d7057d10fb
-				,0x3d7e69d312f1ca1b
-				,0x3d7e69d32945f71b
-				,0x3d7e69da6914455b
-				,0x3d7e69c7c92cde7b
-				,0x3d7e112622b49e5b
-				,0x3d7e115866c6b81b
-				,0x3d7e17a8c067401b
-				,0x3d7e1ab50be8303b
-		};
+        uint64 source[10] = {
+                0x3d7e69d09dbc425b
+                ,0x3d7e69d7057d10fb
+                ,0x3d7e69d312f1ca1b
+                ,0x3d7e69d32945f71b
+                ,0x3d7e69da6914455b
+                ,0x3d7e69c7c92cde7b
+                ,0x3d7e112622b49e5b
+                ,0x3d7e115866c6b81b
+                ,0x3d7e17a8c067401b
+                ,0x3d7e1ab50be8303b
+        };
 
-		uint64 result[10] = {
-				0x3d7e69d09dbc4250
-				,0x3d7e69d7057d10f0
-				,0x3d7e69d312f1ca0f
-				,0x3d7e69d32945f70e
-				,0x3d7e69da6914454d
-				,0x3d7e69c7c92cde6c
-				,0x3d7e112622b49e4b
-				,0x3d7e115866c6b80a
-				,0x3d7e17a8c0674009
-				,0x3d7e1ab50be83028
-		};
+        uint64 result[10] = {
+                0x3d7e69d09dbc4250
+                ,0x3d7e69d7057d10f0
+                ,0x3d7e69d312f1ca0f
+                ,0x3d7e69d32945f70e
+                ,0x3d7e69da6914454d
+                ,0x3d7e69c7c92cde6c
+                ,0x3d7e112622b49e4b
+                ,0x3d7e115866c6b80a
+                ,0x3d7e17a8c0674009
+                ,0x3d7e1ab50be83028
+        };
 
-		for( int i=0; i < 10; ++i ) {
-			spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
-			lat += 0; lon += delta; delta += delta;
-		}
-		STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
+        for( int i=0; i < 10; ++i ) {
+            spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
+            lat += 0; lon += delta; delta += delta;
+        }
+        STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
 
-		for( int i = 0; i < 10; ++i ) {
-			if(false) {
-				cout << i << " "
-						<< hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
-						<< " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
-						<< endl << flush;
-			}
-			ASSERT_EQUAL(source[i],spatialStareIds[i]);
-			ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
-		}
-	}
+        for( int i = 0; i < 10; ++i ) {
+            if(false) {
+                cout << i << " "
+                     << hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
+                     << " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
+                     << endl << flush;
+            }
+            ASSERT_EQUAL(source[i],spatialStareIds[i]);
+            ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
+        }
+    }
 
 	if(true) {
 		/* Stash test #1 */

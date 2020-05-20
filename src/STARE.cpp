@@ -184,14 +184,16 @@ uint32 STARE::ResolutionLevelFromValue(STARE_ArrayIndexSpatialValue spatialStare
  */
 LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
 
-/*	EmbeddedLevelNameEncoding leftJustifiedWithResolution;
+#if 0
+    EmbeddedLevelNameEncoding leftJustifiedWithResolution;
 	leftJustifiedWithResolution.setIdFromSciDBLeftJustifiedFormat(spatialStareId);
 
 	/// Workaround for a "feature." Coerce the level to the search_level of our sIndex. "true" keeps all of the location bits.
 	EmbeddedLevelNameEncoding leftJustifiedPositionOnly = leftJustifiedWithResolution.atLevel(this->search_level,true);
 
 	BitShiftNameEncoding rightJustified(leftJustifiedPositionOnly.rightJustifiedId());
-	uint64 htmID = rightJustified.getId();*/
+	uint64 htmID = rightJustified.getId();
+#endif
 
 	// cout << "sid: " << spatialStareId << endl << flush;
 
@@ -224,12 +226,13 @@ LatLonDegrees64 STARE::LatLonDegreesFromValue(STARE_ArrayIndexSpatialValue spati
 	// return latlon;
 	return LatLonDegrees64(lat, lon);
 
-/*	BitShiftNameEncoding rightJustified(hid);
+#if 0
+	BitShiftNameEncoding rightJustified(hid);
 	index.setMaxlevel(7); // A fairly high resolution
 	hid = index.idByPoint(v);
 	rightJustified.setId(hid);
-	EmbeddedLevelNameEncoding leftJustified(rightJustified.leftJustifiedId());*/
-
+	EmbeddedLevelNameEncoding leftJustified(rightJustified.leftJustifiedId());
+#endif
 }
 
 SpatialVector STARE::SpatialVectorFromValue(STARE_ArrayIndexSpatialValue spatialStareId) {
@@ -346,6 +349,42 @@ STARE_ArrayIndexSpatialValues STARE::adaptSpatialResolutionEstimates(STARE_Array
 	}
 	return spatialValues;
 }
+
+/**
+ * @brief Adapt the resolution of the spatial index values based on proximity.
+ *
+ * Scan the s-indices vector and set the 5 resolution bits based on the distance
+ * between any two of the s-indices. For any set of s-indices, the level is the
+ * maximum computed level.
+ * @note The complexity of this method is O(N(N-1)) where N is the length of the
+ * input vector.
+ *
+ * @param s_indices Reference to a STARE_ArrayIndexSpatialValues (vector of STARE indices)
+ * @return The maximum level found.
+ * @author James Gallagher <jgallagher@opendap.org>
+ */
+void STARE::adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValues &s_indices) {
+
+    EmbeddedLevelNameEncoding lj;
+
+    vector<int> lvl_maxes(s_indices.size(), 0);
+
+    for(int i=0; i < s_indices.size(); ++i) {
+        for(int j=i+1; j < s_indices.size(); ++j) {
+            int lvl = cmpSpatialResolutionEstimateI(s_indices[i], s_indices[j]);
+            if( lvl > lvl_maxes[i] ) {
+                lvl_maxes[i] = lvl;
+            }
+            if( lvl > lvl_maxes[j] ) {
+                lvl_maxes[j] = lvl;
+            }
+        }
+
+        s_indices[i] = (s_indices[i] & ~lj.levelMaskSciDB) | lvl_maxes[i];
+    }
+}
+
+
 
 /**
  * Return the area associated with the index value based on the embedded resolution level, by default.
@@ -769,6 +808,9 @@ double STARE::cmpSpatialResolutionEstimate(STARE_ArrayIndexSpatialValue a, STARE
 	double deltaL_meters = 6371.0e3*cmpSpatialDistanceRadians(a,b);
 	return levelFromLengthMeterScaleFromEdge(deltaL_meters);
 }
+
+// FIXME: Clang-Tidy: Casting (double + 0.5) to integer leads to incorrect rounding;
+// FIXME: consider using lround (#include <cmath>) instead. jhrg 4/20/20
 int STARE::cmpSpatialResolutionEstimateI(STARE_ArrayIndexSpatialValue a, STARE_ArrayIndexSpatialValue b) {
 	return int(cmpSpatialResolutionEstimate(a,b)+0.5);
 }
