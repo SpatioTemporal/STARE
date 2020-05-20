@@ -1,4 +1,9 @@
 
+* 2020-05-20 Version 0.14.3
+
+Small change to tests. Added in-place data-driven data resolution estimation
+& coercion for STARE spatial indexing. 
+
 * 2020-05-01 Version 0.14.2
 
 Extended domain of TriangleFromValue and LatLonDegreesFromValue to cover
