@@ -34,3 +34,5 @@ set_tests_properties( STARETests PROPERTIES
   PASS_REGULAR_EXPRESSION "#success;#starting"
   FAIL_REGULAR_EXPRESSION "#failure;#error"
 )
+
+file(COPY polygons DESTINATION .)
