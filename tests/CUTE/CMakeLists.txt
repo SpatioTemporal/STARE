@@ -15,6 +15,8 @@ set (
   TemporalIndex_test.cpp
   Test.cpp
   )
+  
+ set(ENV{STARE_SRC_HOME} "${CMAKE_SOURCE_DIR}" )
 
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -I${PROJECT_SOURCE_DIR}/include" )
 

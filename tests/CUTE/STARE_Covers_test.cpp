@@ -12,6 +12,8 @@
 #include "SpatialInterface.h"
 #include <dirent.h>
 
+#include <string>
+#include <cstdlib>
 
 using namespace std;                            
 
@@ -50,10 +52,20 @@ LatLonDegrees64ValueVector readCSV(string file_path) {
 STARE stare;
 
 void STARE_Covers_test() {
-    
+
+	string path_query    = "STARE_SRC_HOME";
+	string base_dir;
+	const char* query_result = getenv(path_query.c_str());
+	if( query_result ) {
+		base_dir = query_result;
+		base_dir = base_dir+"/";
+	} else {
+		base_dir = "";
+	}
+
     if (false) {        
         int n_test = 80;
-        LatLonDegrees64ValueVector points1 = readCSV("tests/CUTE/polygons/0/0.csv");    
+        LatLonDegrees64ValueVector points1 = readCSV(base_dir+"tests/CUTE/polygons/0/0.csv");
         //LatLonDegrees64ValueVector points1 = makeCornerVector1(lons_lats1,n_test);
       
         LatLonDegrees64ValueVector points;
@@ -80,7 +92,7 @@ void STARE_Covers_test() {
 
     // Testing country polygons of the geopandas lowres_world dataset, version 0.4
     if (true) {
-        vector<string> file_paths = listDirectory("tests/CUTE/polygons/world_04/");
+        vector<string> file_paths = listDirectory(base_dir+"tests/CUTE/polygons/world_04/");
         for(auto const& file_path: file_paths) {
             LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
             stare.ConvexHull(cornerVector, 8);
@@ -90,7 +102,7 @@ void STARE_Covers_test() {
     
     // Testing country polygons of the geopandas lowres_world dataset, version 0.4
     if (true) {
-        vector<string> file_paths = listDirectory("tests/CUTE/polygons/world_07/");
+        vector<string> file_paths = listDirectory(base_dir+"tests/CUTE/polygons/world_07/");
         for(auto const& file_path: file_paths) {
             LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
             stare.ConvexHull(cornerVector, 8);
@@ -99,7 +111,7 @@ void STARE_Covers_test() {
     
     // Testing shapes of caribbean outlines 
     if (false) {
-        vector<string> file_paths = listDirectory("tests/CUTE/polygons/caribbean/");
+        vector<string> file_paths = listDirectory(base_dir+"tests/CUTE/polygons/caribbean/");
         for(auto const& file_path: file_paths) {
             LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
             stare.ConvexHull(cornerVector, 8);
@@ -108,7 +120,7 @@ void STARE_Covers_test() {
     
     // Testing assortment of shapes
     if (false) {
-        vector<string> file_paths = listDirectory("tests/CUTE/polygons/0/");
+        vector<string> file_paths = listDirectory(base_dir+"tests/CUTE/polygons/0/");
         for(auto const& file_path: file_paths) {
             LatLonDegrees64ValueVector cornerVector = readCSV(file_path);
             stare.ConvexHull(cornerVector, 8);
@@ -117,7 +129,7 @@ void STARE_Covers_test() {
     
     
     if (false) {        
-        LatLonDegrees64ValueVector cornerVector = readCSV("tests/CUTE/polygons/0/0.csv");    
+        LatLonDegrees64ValueVector cornerVector = readCSV(base_dir+"tests/CUTE/polygons/0/0.csv");
         int n_test = 80;
         int level = 16;
         STARE_SpatialIntervals cover = stare.ConvexHull(cornerVector, level);
@@ -177,7 +189,7 @@ void STARE_Covers_test() {
     }
     
     if (false) {	
-        LatLonDegrees64ValueVector cornerVector = readCSV("polygons/0/0.csv"); 
+        LatLonDegrees64ValueVector cornerVector = readCSV(base_dir+"tests/polygons/0/0.csv");
 		STARE_SpatialIntervals indexValues = stare.ConvexHull(cornerVector, 12);
 		
         // A regression. Perhaps foolhardy.
