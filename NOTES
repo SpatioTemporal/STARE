@@ -1,4 +1,8 @@
 
+* 2020-05-22 Version 0.15.0
+
+Added a non-convex hull routine.
+
 * 2020-05-20 Version 0.14.3
 
 Small change to tests. Added in-place data-driven data resolution estimation

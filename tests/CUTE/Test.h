@@ -24,7 +24,7 @@
 #include "SpatialInterface.h"
 
 #include "SpatialRotation.h"
-
+#include "SpatialPolygon.h"
 #include "SpatiallyAdaptiveDataCover.h"
 
 #include "HtmRangeIterator.h"

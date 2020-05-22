@@ -229,6 +229,12 @@ void printNode(int nodeIndex) const;
   /// set the maximum depth of the layer
   void setMaxlevel(size_t level);
 
+  bool isInsideBarycentric(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2,
+		  bool verbose
+		  ) const;
+
 private:
 
   // STRUCTURES
@@ -281,12 +287,6 @@ private:
   bool isInside(
 		  const SpatialVector & v, const SpatialVector & v0,
 		  const SpatialVector & v1, const SpatialVector & v2
-		  ) const;
-
-  bool isInsideBarycentric(
-		  const SpatialVector & v, const SpatialVector & v0,
-		  const SpatialVector & v1, const SpatialVector & v2,
-		  bool verbose
 		  ) const;
 
   // VARIABLES

@@ -24,6 +24,7 @@ set (
   SpatialInterface.cpp
   SpatiallyAdaptiveDataCover.cpp
   SpatialVector.cpp
+  SpatialPolygon.cpp
   SpatialRotation.cpp
   STARE.cpp
   SpatialRange.cpp

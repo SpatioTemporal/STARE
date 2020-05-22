@@ -13,6 +13,7 @@
 #include "RangeConvex.h"
 #include "SpatialDomain.h"
 #include "SpatialInterface.h"
+#include "SpatialPolygon.h"
 #include <iostream>
 #include <algorithm>
 
@@ -591,7 +592,7 @@ STARE_SpatialIntervals STARE::CoverCircleFromLatLonRadiusDegrees(float64 latDegr
 /**
  * Returns a list of STARE spatial IDs on the hull about @param points.
  *
- * Unfortunately, it erroneously returns a few spatial IDs from the interior as well.
+ * Unfortunately, it erroneously returns a few spatial IDs from the interior as well. [2020-0521-Seems fixed.]
  *
  */
 STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int force_resolution_level) {
@@ -640,6 +641,176 @@ STARE_SpatialIntervals STARE::ConvexHull(LatLonDegrees64ValueVector points, int 
 
 	delete htm; // TODO Hopefully this will not also delete the index we passed in.
 	return cover;
+}
+
+STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, int force_resolution_level) {
+	// cout << "force_resolution_level: " << force_resolution_level << endl << flush;
+
+	// Assume points needs to be closed, i.e. last point is not redundant with first.
+	EmbeddedLevelNameEncoding lj;
+	// Integrate and optimize later.
+	// - Get a cover.
+	STARE_SpatialIntervals cover = ConvexHull(points,force_resolution_level);
+	// - Make the polygon
+	Vertices vs; vs.resize(points.size()+1);
+	for(int i=0; i<points.size(); ++i) {
+		SpatialVector v;
+		v.setLatLonDegrees(points[i].lat, points[i].lon);
+		vs[i] = v;
+	}
+	SpatialVector v;
+	v.setLatLonDegrees(points[0].lat, points[0].lon);
+	vs[points.size()] = v;
+	SpatialPolygon p(vs);
+	// - Loop over trixels, remove those outside the polygon.
+	STARE_SpatialIntervals cover1;
+	for( int i=0; i < cover.size(); ++i ) {
+		uint64 i0 = cover[i];
+		uint64 i1 = i < cover.size() ? cover[i+1] : cover[i];
+		int level = i0 & lj.levelMaskSciDB;
+		// cout << i << " i,level " << level << endl << flush;
+		// if( i > 200 ) {
+		// 	exit(1);
+		// }
+		uint64 one_mask_to_resolution, one_at_resolution;
+		lj.SciDBincrement_LevelToMaskDelta(i0 & lj.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+
+		if( !terminatorp(i1) ) {
+			Triangle tr = this->TriangleFromValue(i0, level);
+			int siv_count = p.intersect_triangle(tr);
+			// cout << hex << i0 << dec << " " << siv_count << endl << flush;
+			// First case -- eliminate those completely external.
+			if( siv_count >= 7 ) {
+				cover1.push_back(i0);
+			// } else if (siv_count == 0) {
+			} else if (siv_count > 0) {
+				// cout << 1000 << " level " << (i0 & lj.levelMaskSciDB) << endl << flush;
+				if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
+					// Our work is done.
+					cover1.push_back(i0);
+				} else {
+					// cout << " recurse 1 " << endl << flush;
+					for(uint64 j = 0; j < 4; ++j ) {
+						uint64 one_mask_to_resolution1, one_at_resolution1;
+						lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+						cover.push_back(1+i0+j*one_at_resolution1);
+					}
+				}
+			}
+			else {
+				bool hit = false;
+				int k = 0;
+				while((!hit) && (k<vs.size())) {
+					hit = this->sIndex.isInsideBarycentric(vs[k], tr.vertices[0], tr.vertices[1], tr.vertices[2], false);
+					++k;
+				}
+				if(hit) {
+					if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
+						// Our work is done.
+						cover1.push_back(i0);
+					} else {
+						// cout << " recurse 1 " << endl << flush;
+						for(uint64 j = 0; j < 4; ++j ) {
+							uint64 one_mask_to_resolution1, one_at_resolution1;
+							lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+							cover.push_back(1+i0+j*one_at_resolution1);
+						}
+					}
+				}
+			}
+//			else {
+//				SpatialPolygon tp(tr.vertices);
+//				int k = 0;
+//				bool hit = false;
+//				while((!hit) && (k<vs.size())) {
+//					hit = tp.intersection(vs[k]);
+//					++k;
+//				}
+//				if( hit ) {
+//					// cout << 1000 << " level " << (i0 & lj.levelMaskSciDB) << endl << flush;
+//					if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
+//						// Our work is done.
+//						cover1.push_back(i0);
+//					} else {
+//						// cout << " recurse 1 " << endl << flush;
+//						for(uint64 j = 0; j < 4; ++j ) {
+//							uint64 one_mask_to_resolution1, one_at_resolution1;
+//							lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+//							cover.push_back(1+i0+j*one_at_resolution1);
+//						}
+//					}
+//				}
+//			}
+		} else {
+			++i;
+			// Undoes compression
+			for( uint64 siv=i0; siv < i1; siv += one_at_resolution ) {
+				Triangle tr = this->TriangleFromValue(siv, level);
+				int siv_count = p.intersect_triangle(tr);
+				// cout << hex << siv << dec << " " << siv_count << " *" << endl << flush;
+				// First case -- eliminate those completely external.
+				if( siv_count >= 7 ) {
+					cover1.push_back(siv);
+				} else if ( siv_count > 0 ) {
+					// cout << 2000 << " level " << (siv & lj.levelMaskSciDB) << endl << flush;
+					if( (siv & lj.levelMaskSciDB) == force_resolution_level ) {
+						// Our work is done.
+						cover1.push_back(siv);
+					} else {
+						// cout << " recurse 2 " << endl << flush;
+						for(uint64 j = 0; j < 4; ++j ) {
+							uint64 one_mask_to_resolution1, one_at_resolution1;
+							lj.SciDBincrement_LevelToMaskDelta((siv & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+							cover.push_back(1+siv+j*one_at_resolution1);
+						}
+					}
+				}
+				else {
+					bool hit = false;
+					int k = 0;
+					while((!hit) && (k<vs.size())) {
+						hit = this->sIndex.isInsideBarycentric(vs[k], tr.vertices[0], tr.vertices[1], tr.vertices[2], false);
+						++k;
+					}
+
+					if( hit ) {
+						if( (siv & lj.levelMaskSciDB) == force_resolution_level ) {
+							// Our work is done.
+							cover1.push_back(siv);
+						} else {
+							for(uint64 j = 0; j < 4; ++j ) {
+								uint64 one_mask_to_resolution1, one_at_resolution1;
+								lj.SciDBincrement_LevelToMaskDelta((siv & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+								cover.push_back(1+siv+j*one_at_resolution1);
+							}
+						}
+					}
+				}
+//				else {
+//					SpatialPolygon tp(tr.vertices);
+//					int k = 0;
+//					bool hit = false;
+//					while((!hit) && (k<vs.size())) {
+//						hit = tp.intersection(vs[k]);
+//						++k;
+//					}
+//					if( hit ) {
+//						if( (siv & lj.levelMaskSciDB) == force_resolution_level ) {
+//							// Our work is done.
+//							cover1.push_back(siv);
+//						} else {
+//							for(uint64 j = 0; j < 4; ++j ) {
+//								uint64 one_mask_to_resolution1, one_at_resolution1;
+//								lj.SciDBincrement_LevelToMaskDelta((siv & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+//								cover.push_back(1+siv+j*one_at_resolution1);
+//							}
+//						}
+//					}
+//				}
+			}
+		}
+	}
+	return cover1;
 }
 
 STARE_SpatialIntervals STARE::ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level) {

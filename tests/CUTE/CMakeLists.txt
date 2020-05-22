@@ -7,6 +7,7 @@ set (
   SpatialFailure_test.cpp
   SpatialIndex_test.cpp
   SpatialInterface_test.cpp
+  SpatialPolygon_test.cpp
   SpatialRange_test.cpp
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
