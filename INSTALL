@@ -60,6 +60,12 @@ cmake -DOPTFLAGS="-O2"
 #
 # To run tests, after making the library as above, try the following
 # in the build directory.
+#
+# For tests to find the data files you  may need to set the following
+# environment variable to the TOPDIR as follows.
+#
+# export STARE_SRC_HOME=/Users/mrilee/git/STARE/
+#
 
 make test
 
