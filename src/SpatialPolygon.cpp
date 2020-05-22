@@ -70,7 +70,8 @@ bool SpatialPolygon::intersection(const SpatialVector& v ) {
 //			cout << "i:j,inter: " << j << " [" << intersection << "] " << endl << flush;
 			if( (intersection * left_gcs[j]) * (intersection * right_gcs[j]) > 0 ) {
 //				cout << "i: v.e: [" << v*edge_gcs[j] << "] " << endl << flush;
-				if( v * edge_gcs[j] > 0 ) {
+//				if( v * edge_gcs[j] > 0 ) { // Which way round the polygon?
+				if( v * edge_gcs[j] < 0 ) {
 					cross_count += 1;
 				} else {
 					cross_count -= 1;

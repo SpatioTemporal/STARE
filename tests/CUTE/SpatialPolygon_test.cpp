@@ -21,8 +21,8 @@ void SpatialPolygon_test() {
 	// cout << "nodes" << endl << flush;
 	Vertices nodes;
 	nodes.push_back(SpatialVector(1,0,0));
-	nodes.push_back(SpatialVector(0,1,0));
 	nodes.push_back(SpatialVector(0,0,1));
+	nodes.push_back(SpatialVector(0,1,0));
 	nodes.push_back(SpatialVector(1,0,0));
 
 	// cout << "x and normalize" << endl << flush;
@@ -36,7 +36,7 @@ void SpatialPolygon_test() {
 	ASSERT_EQUALM("011 in xyz",0,p.intersection(x));
 
 	x = SpatialVector(0.5,0.5,0.5); x.normalize();
-	// cout << x << " x & p intersection: " << p.intersection(x) << endl << flush;
+//	 cout << x << " x & p intersection: " << p.intersection(x) << endl << flush;
 	ASSERT_EQUALM("111 in xyz",1,p.intersection(x));
 
 	SpatialVector tr0 = SpatialVector(1,0,0); tr0.normalize();
