@@ -75,6 +75,7 @@ public:
 
 	STARE_SpatialIntervals ConvexHull(LatLonDegrees64ValueVector points,int force_resolution_level);
 	STARE_SpatialIntervals ConvexHull(STARE_ArrayIndexSpatialValues points,int force_resolution_level);
+	STARE_SpatialIntervals NonConvexHull(LatLonDegrees64ValueVector points, int force_resolution_level);
 
 	SpatialIndex getIndex() { return sIndex; }
 	SpatialIndex getIndex(int resolutionLevel);
@@ -188,6 +189,7 @@ uint64 spatialLevelMask();
 
 void STARE_test();
 void STARE_Covers_test();
+void STARE_Covers_Old_test();
 void AdaptSpatialResolutionEstimates_test();    // Added jhrg 4/20/20
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19
