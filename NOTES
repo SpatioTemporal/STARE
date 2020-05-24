@@ -1,7 +1,11 @@
 
-* 2020-05-22 Version 0.15.0, 0.15.1
+* 2020-05-22 Version 0.15.0, 0.15.1, 0.15.2
 
 Added a non-convex hull routine. Correction because of polygon parity needed more care.
+
+Fixed problems with non-convex hull. Removed dependence on convex hull.
+
+Found bug in index counting. Switched to older less precise point-in-triangle solve.
 
 * 2020-05-20 Version 0.14.3
 

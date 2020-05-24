@@ -650,7 +650,28 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 	EmbeddedLevelNameEncoding lj;
 	// Integrate and optimize later.
 	// - Get a cover.
-	STARE_SpatialIntervals cover = ConvexHull(points,force_resolution_level);
+	// STARE_SpatialIntervals cover = ConvexHull(points,force_resolution_level);
+
+	/* - Start with Earth.
+	Spatial ID 0x0000000000000000 0
+	Spatial ID 0x0800000000000000 576460752303423488
+	Spatial ID 0x1000000000000000 1152921504606846976
+	Spatial ID 0x1800000000000000 1729382256910270464
+	Spatial ID 0x2000000000000000 2305843009213693952
+	Spatial ID 0x2800000000000000 2882303761517117440
+	Spatial ID 0x3000000000000000 3458764513820540928
+	Spatial ID 0x3800000000000000 4035225266123964416
+	*/
+	STARE_SpatialIntervals cover;
+	cover.push_back( 0x0000000000000000 );
+	cover.push_back( 0x0800000000000000 );
+	cover.push_back( 0x1000000000000000 );
+	cover.push_back( 0x1800000000000000 );
+	cover.push_back( 0x2000000000000000 );
+	cover.push_back( 0x2800000000000000 );
+	cover.push_back( 0x3000000000000000 );
+	cover.push_back( 0x3800000000000000 );
+
 	// - Make the polygon
 	Vertices vs; vs.resize(points.size()+1);
 	for(int i=0; i<points.size(); ++i) {
@@ -664,9 +685,21 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 	SpatialPolygon p(vs);
 	// - Loop over trixels, remove those outside the polygon.
 	STARE_SpatialIntervals cover1;
-	for( int i=0; i < cover.size(); ++i ) {
+	int i = 0;
+	while( i < cover.size() ) {
+	// for( int i=0; i < cover.size(); ++i ) {
+//		cout << "i:     " << i << endl << flush;
+//		cout << "cs:    " << cover.size() << endl << flush;
 		uint64 i0 = cover[i];
-		uint64 i1 = i < cover.size() ? cover[i+1] : cover[i];
+//		cout << "i0:    " << hex << i0 << dec << endl << flush;
+
+		uint64 i1 = i < (cover.size()-1) ? cover[i+1] : cover[i];
+//		uint64 i1 = i0;
+//		if( i < (cover.size()-1) ) {
+//			i1 = cover[i+1];
+//		}
+//		cout << "i1:    " << hex << i1 << dec << endl << flush;
+
 		int level = i0 & lj.levelMaskSciDB;
 		// cout << i << " i,level " << level << endl << flush;
 		// if( i > 200 ) {
@@ -674,46 +707,65 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 		// }
 		uint64 one_mask_to_resolution, one_at_resolution;
 		lj.SciDBincrement_LevelToMaskDelta(i0 & lj.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+//		cout << "level: " << level << endl << flush;
 
+//		cout << "----" << endl << flush;
+//		for( int l = 0; l < cover.size(); ++l ) {
+//			cout << l << " " << hex << cover[l] << dec << endl << flush;
+//		}
+//		cout << "----" << endl << flush;
 		if( !terminatorp(i1) ) {
 			Triangle tr = this->TriangleFromValue(i0, level);
 			int siv_count = p.intersect_triangle(tr);
-			// cout << hex << i0 << dec << " " << siv_count << endl << flush;
+//			cout << hex << i0 << dec << " " << siv_count << endl << flush;
 			// First case -- eliminate those completely external.
 			if( siv_count >= 7 ) {
+//				cout << "sv >=7, done with " << hex << i0 << dec << endl << flush;
 				cover1.push_back(i0);
-			// } else if (siv_count == 0) {
 			} else if (siv_count > 0) {
 				// cout << 1000 << " level " << (i0 & lj.levelMaskSciDB) << endl << flush;
 				if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
 					// Our work is done.
+//					cout << "sv>0, done with " << hex << i0 << dec << endl;
 					cover1.push_back(i0);
 				} else {
-					// cout << " recurse 1 " << endl << flush;
+//					cout << " recurse 1 " << endl << flush;
 					for(uint64 j = 0; j < 4; ++j ) {
 						uint64 one_mask_to_resolution1, one_at_resolution1;
 						lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
 						cover.push_back(1+i0+j*one_at_resolution1);
 					}
 				}
-			}
-			else {
+			} else { // siv_count is zero
 				bool hit = false;
 				int k = 0;
 				while((!hit) && (k<vs.size())) {
-					hit = this->sIndex.isInsideBarycentric(vs[k], tr.vertices[0], tr.vertices[1], tr.vertices[2], false);
+					// hit = this->sIndex.isInsideBarycentric(vs[k], tr.vertices[0], tr.vertices[1], tr.vertices[2], false);
+					hit = this->sIndex.isInside(vs[k], tr.vertices[0], tr.vertices[1], tr.vertices[2]);
+//					cout << "hit: "
+//							<< k << " "
+//							<< "[ " << vs[k] << " ] "
+//							<< "[ " << tr.vertices[0] << " ] "
+//							<< "[ " << tr.vertices[1] << " ] "
+//							<< "[ " << tr.vertices[2] << " ] "
+//							<< " h = " << hit
+//							<< endl << flush;
 					++k;
 				}
 				if(hit) {
 					if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
 						// Our work is done.
+//						cout << "sv=0, done with " << hex << i0 << dec << endl;
 						cover1.push_back(i0);
 					} else {
-						// cout << " recurse 1 " << endl << flush;
+//						cout << " recurse 1 on " << hex << i0 << dec << endl << flush;
 						for(uint64 j = 0; j < 4; ++j ) {
 							uint64 one_mask_to_resolution1, one_at_resolution1;
 							lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
-							cover.push_back(1+i0+j*one_at_resolution1);
+//							cout << "       delta  " << hex << one_at_resolution1 << dec << endl << flush;
+							uint64 child = 1+i0+j*one_at_resolution1;
+//							cout << " recurse   on " << hex << child << dec << endl << flush;
+							cover.push_back(child);
 						}
 					}
 				}
@@ -742,6 +794,7 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 //				}
 //			}
 		} else {
+			throw SpatialFailure("STARE:: non-convex hull case with terminators not implemented");
 			++i;
 			// Undoes compression
 			for( uint64 siv=i0; siv < i1; siv += one_at_resolution ) {
@@ -809,6 +862,7 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 //				}
 			}
 		}
+		++i;
 	}
 	return cover1;
 }
