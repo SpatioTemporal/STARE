@@ -218,12 +218,12 @@ void
 RangeConvex::simplify0() {
 
 	// return; // Broken?
-// #define DIAG
+#define DIAG
 #ifdef DIAG
 	cout << "rc::s0" << endl << flush;
 	cout << "rc::s0 constraints_.size(): " << constraints_.size() << endl << flush;
 #endif
-
+#undef DIAG
 	size_t i,j,k;
 	SpatialVector vi1, vi2;
 	typedef std::vector<size_t> ValueVectorSzt;
@@ -345,8 +345,9 @@ RangeConvex::simplify0() {
 
 			for(k = 0; k < constraints_.size(); k++) {
 				if(k == i || k == j) continue;
+#define DIAG
 #ifdef DIAG
-				cout << k << " k0: " << " v12ok: " << vi1ok << " " << vi2ok << endl << flush;
+				// cout << k << " k0: " << " v12ok: " << vi1ok << " " << vi2ok << endl << flush;
 				cout.precision(16);
 				cout << k << " k: " << i << "," << j << " ij,v1,v2: "
 						<< vi1 * constraints_[k].a_ << " "
@@ -354,18 +355,22 @@ RangeConvex::simplify0() {
 						<< " c_[k].a_: " << constraints_[k].a_
 						<< " ------ ";
 #endif
-				if(vi1ok && vi1 * constraints_[k].a_ <= 0.0) vi1ok = false;
-				if(vi2ok && vi2 * constraints_[k].a_ <= 0.0) vi2ok = false;
-#ifdef DIAG
-				cout << " v12ok: " << vi1ok << " " << vi2ok << endl << flush;
-#endif
-
+				if(vi1ok && ((vi1 * constraints_[k].a_) <= 0.0)) vi1ok = false;
+				if(vi2ok && ((vi2 * constraints_[k].a_) <= 0.0)) vi2ok = false;
 				// if(vi1ok && vi1 * constraints_[k].a_ <= tol2) vi1ok = false;
 				// if(vi2ok && vi2 * constraints_[k].a_ <= tol2) vi2ok = false;
+#ifdef DIAG
+				cout << " v12ok: " << vi1ok << " " << vi2ok << endl << flush;
+				if(!vi1ok && !vi2ok) cout << "breaking" << endl << flush;
+#endif
+#undef DIAG
 				if(!vi1ok && !vi2ok) break;
 			}
-
+#define DIAG
 			if(vi1ok) { // vi1 is in all k != i
+#ifdef DIAG
+				cout << "vi1ok saving vi1" << endl << flush;
+#endif
 				corner.push_back(vi1);
 				cornerConstr1.push_back(i);
 				cornerConstr2.push_back(j);
@@ -373,11 +378,15 @@ RangeConvex::simplify0() {
 			}
 
 			if(vi2ok) { // vi2 is in all k += i
+#ifdef DIAG
+				cout << "vi2ok saving vi2" << endl << flush;
+#endif
 				corner.push_back(vi2);
 				cornerConstr1.push_back(i);
 				cornerConstr2.push_back(j);
 				ruledout = false;
 			}
+#undef DIAG
 #ifdef DIAG
 			cout << i << " i,ruledout: " << ruledout << endl << flush;
 #endif
@@ -407,7 +416,7 @@ RangeConvex::simplify0() {
 	// start at any corner. so take the first.
 
 	corners_.clear();
-
+#define DIAG
 #ifdef DIAG
 	cout << "rc::s0 2005" << endl << flush;
 	cout << "rc::s0 2006 corner size " << corner.size() << endl << flush;
@@ -438,6 +447,7 @@ RangeConvex::simplify0() {
 #ifdef DIAG
 		cout << "rc::s0 2030 k = " << k << endl << flush;
 #endif
+#undef DIAG
 
 		if(cornerConstr1[k] == i) {
 			vi1 = corner[k];
@@ -648,7 +658,7 @@ RangeConvex::simplify0() {
 	}
 #endif
 
-// #undef DIAG
+#undef DIAG
 	// exit(1);
 
 }
@@ -677,7 +687,7 @@ RangeConvex::simplify0() {
 
 void
 RangeConvex::simplify() {
-// #define DIAG
+#define DIAG
 #ifdef DIAG
 	cout << "rc::s" << endl << flush;
 	  cout << "rc::s sign_ " << sign_ << endl << flush;
@@ -783,7 +793,7 @@ RangeConvex::simplify() {
   else if (sign_ == pOS)
     boundingCircle_ = constraints_[0];
 
-// #undef DIAG
+#undef DIAG
 }
 
 /////////////TESTCONSTRAINTS//////////////////////////////
@@ -825,7 +835,7 @@ RangeConvex::intersect(const SpatialIndex * idx,
 		HtmRange *hrInterior,
 		HtmRange *hrBoundary ) {
 
-// #define DIAG
+#define DIAG
 #ifdef DIAG
 	cout << "rc::i sign_: " << sign_ << endl << flush;
 #endif
@@ -859,7 +869,7 @@ RangeConvex::intersect(const SpatialIndex * idx,
 #ifdef DIAG
 	cout << "rc::i " << 3000 << endl << flush;
 #endif
-// #undef DIAG
+#undef DIAG
 }
 
 ////////////SAVETRIXEL

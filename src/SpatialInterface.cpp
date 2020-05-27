@@ -403,7 +403,7 @@ const HTMRangeValueVector &
 htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool interiorp ) {
 	hull_interiorp_ = interiorp;
 	polyCorners_.clear();
-// #define DIAG
+#define DIAG
 #ifdef DIAG
 	cout << " ch " << 2000 << " latlon-size=" << latlon.size() << flush ;
 	cout << endl;
@@ -430,7 +430,7 @@ htmInterface::convexHull( LatLonDegrees64ValueVector latlon, size_t steps, bool 
 	cout << endl << flush << 2100 << endl << flush;
 #endif
 	return doHull();
-// #undef DIAG
+#undef DIAG
 }
 
 const HTMRangeValueVector &

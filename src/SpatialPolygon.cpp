@@ -38,6 +38,13 @@ void SpatialPolygon::initialize() {
 		right_gcs.push_back(right_gc);
 	}
 
+	ray_dest = SpatialVector(0,0,0);
+	for( int j = 0; j < ns; ++j ) {
+		ray_dest = ray_dest + nodes[j];
+	}
+	ray_dest.normalize(); // Maybe check the validity of ray_dest.
+	ray_dest = -1.0*ray_dest; // Be cute.
+
 	bool ok = false;
 	int j = 0;
 	while( !ok ) {
@@ -79,7 +86,7 @@ bool SpatialPolygon::intersection(const SpatialVector& v ) {
 			}
 //		}
 	}
-	return cross_count > 0;
+	return cross_count != 0;
 }
 
 int SpatialPolygon::intersect_triangle( const Triangle& tr ) {

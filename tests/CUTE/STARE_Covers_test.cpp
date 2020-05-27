@@ -40,6 +40,7 @@ LatLonDegrees64ValueVector readCSV(string file_path) {
     std::ifstream file(file_path);
     std::string row;
     // cout << endl << flush;
+    // cout << "readCSV file " << file_path << endl << flush;
     while (std::getline(file, row)) {  
         float lon = stof(row.substr(0, row.find(",")));        
         float lat = stof(row.substr(row.find(",")+1));
@@ -239,7 +240,26 @@ void STARE_Covers_test() {
 		ASSERT_EQUAL(indexValues[5434], 4166328008962998284);
     }
 
-}
+
+    if (true) {
+    	cout << "050"<< endl << flush;
+    	cout << "051 " << base_dir+"tests/CUTE/polygons/san_joaquin/san_joaquin_simple.csv" <<  endl << flush;
+    	// LatLonDegrees64ValueVector san_joaquin_pts = readCSV(base_dir+"tests/CUTE/polygons/san_joaquin/san_joaquin_simple.csv");
+    	LatLonDegrees64ValueVector san_joaquin_pts = readCSV(base_dir+"tests/CUTE/polygons/san_joaquin/san_joaquin.csv");
+
+    	cout << "100 sjp size: " << san_joaquin_pts.size() << endl << flush;
+    	for(int i=0; i<20; ++i)   {
+    		cout << i << " sjp lon,lat: " << san_joaquin_pts[i].lon << " " << san_joaquin_pts[i].lat << endl << flush;
+    	}
+
+    	cout << "150"<< endl << flush;
+    	STARE_SpatialIntervals sj_cover = stare.ConvexHull(san_joaquin_pts, 12);
+
+    	cout << endl << "sj_cover n " << sj_cover.size() << endl << flush;
+
+    }
+
+} // End STARE_Covers_test
 
 double lons_lats1[] = {
 			   0.01389, 0.01056

@@ -17,7 +17,7 @@
 #include <iostream>
 #include <algorithm>
 
-// #define DIAG
+#define DIAG
 
 #ifndef DIAG
 #define DIAGOUT1(a)
