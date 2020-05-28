@@ -25,7 +25,7 @@ public:
 	Vertices nodes;
 	Vertices edge_gcs,left_gcs,right_gcs;
 
-	SpatialVector ray_dest = SpatialVector(0,0,1);
+	SpatialVector ray_dest;
 
 	void initialize();
 	bool intersection(const SpatialVector& v );

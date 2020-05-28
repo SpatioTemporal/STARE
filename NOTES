@@ -1,4 +1,14 @@
 
+2020-05-28 Version 0.15.4
+
+Removing polygon parity seems to introduce other ambiguities. Now we
+require that polygons processed by non-convex hull be counter-clockwise,
+i.e. areal normal pointing outward from sphere (right-hand sense).
+
+2020-05-27 Version 0.15.3
+
+Removed restriction on polygon parity.
+
 * 2020-05-22 Version 0.15.0, 0.15.1, 0.15.2
 
 Added a non-convex hull routine. Correction because of polygon parity needed more care.

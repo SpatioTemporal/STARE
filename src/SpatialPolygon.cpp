@@ -10,6 +10,7 @@
 #include "SpatialPolygon.h"
 #include "SpatialVector.h"
 #include "SpatialRotation.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -38,6 +39,13 @@ void SpatialPolygon::initialize() {
 		right_gcs.push_back(right_gc);
 	}
 
+	ray_dest = SpatialVector(0,0,0);
+	for( int j = 0; j < ns-1; ++j ) {
+		ray_dest = ray_dest + nodes[j];
+	}
+	ray_dest.normalize(); // Maybe check the validity of ray_dest.
+	// ray_dest = -1.0*ray_dest; // Be cute.
+
 	bool ok = false;
 	int j = 0;
 	while( !ok ) {
@@ -47,7 +55,7 @@ void SpatialPolygon::initialize() {
 			j = 0; ok = false;
 		} else {
 			++ j;
-			if( j == ns ) {
+			if( j == ns-1 ) {
 				ok = true;
 			}
 		}
@@ -60,25 +68,55 @@ bool SpatialPolygon::intersection(const SpatialVector& v ) {
 		SpatialRotation R = SpatialRotation(SpatialVector(1,0,0),0.1);
 		ray_dest = R.rotated_from(ray_dest);
 	}
+#ifdef DIAG
+	cout << setprecision(17);
+	cout << "-----" << endl << flush;
+#endif
 	int cross_count = 0;
 	SpatialVector ray = v ^ ray_dest; // ray.normalize();
-//	cout << "i:v: [" << v << "] r: [" << ray << "]" << endl << flush;
-	for( int j = 0; j < edge_gcs.size(); ++j ) {
+#ifdef DIAG
+	cout << "i:v: [" << v << "] r: [" << ray << "]" << " rd: [" << ray_dest << "]"<< endl << flush;
+#endif
+	for( uint j = 0; j < edge_gcs.size(); ++j ) {
 		SpatialVector intersection = edge_gcs[j] ^ ray;
-//		if( intersection.length() > 1.0e-14 ) {
-//			intersection.normalize();
-//			cout << "i:j,inter: " << j << " [" << intersection << "] " << endl << flush;
+		// What if intersection is zero?
+#ifdef DIAG
+			cout << endl << flush;
+			cout << "i:j,inter: " << j << " [" << intersection << "] " << endl << flush;
+			cout << "i:j,e,left,right: "
+					<< j
+					<< " [" << edge_gcs[j] << "] "
+					<< " [" << left_gcs[j] << "] "
+					<< " [" << right_gcs[j] << "] "
+					<< endl << flush;
+			cout << "i:j,dots:  "
+					<< (intersection * left_gcs[j])
+					<< " "
+					<<  (intersection * right_gcs[j])
+					<< endl << flush;
+#endif
 			if( (intersection * left_gcs[j]) * (intersection * right_gcs[j]) > 0 ) {
-//				cout << "i: v.e: [" << v*edge_gcs[j] << "] " << endl << flush;
-//				if( v * edge_gcs[j] > 0 ) { // Which way round the polygon?
-				if( v * edge_gcs[j] < 0 ) {
+#ifdef DIAG
+				cout << "i: v.e: [" << v*edge_gcs[j] << "] " << endl << flush;
+#endif
+				float64 ve =  v * edge_gcs[j];
+				 if( ve > 0) { // CCW, and sim below.
 					cross_count += 1;
-				} else {
+				} else if ( ve < 0 ) { // CCW
 					cross_count -= 1;
-				}
+				} // Note ve==0 case is significant.
+
+//				if( ve < 0 ) { // CW
+//					cross_count += 1;
+//				} else if ( ve > 0 ) { // CW
+//					cross_count -= 1;
+//          	} // Note ve==0 case is significant.
+//
 			}
-//		}
 	}
+#ifdef DIAG
+	cout << endl << "i: cross_count " << cross_count << endl << flush;
+#endif
 	return cross_count > 0;
 }
 
