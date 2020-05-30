@@ -10,6 +10,7 @@
  */
 
 #include "STARE.h"
+#include "SpatialRange.h"
 #include "RangeConvex.h"
 #include "SpatialDomain.h"
 #include "SpatialInterface.h"
@@ -452,7 +453,7 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_)
 	b  = b_elne1.getSciDBLeftJustifiedFormat(),
 	bt = b_elne1.getSciDBTerminatorLeftJustifiedFormat();
 
-	// at = sTerminator(a), bt = sTerminator(b);
+	at = sTerminator(a), bt = sTerminator(b);
 
 	int overlap = 0;
 	if( ( a <= b ) && ( bt <= at ) ) {
@@ -460,8 +461,17 @@ int cmpSpatial(STARE_ArrayIndexSpatialValue a_, STARE_ArrayIndexSpatialValue b_)
 	} else if( ( b <= a ) && ( at <= bt ) ) {
 		overlap = -1;
 	}
-//	cout << "a,at,b,bt: " << a << " " << at << " " << b << " " << bt << endl << flush;
+#ifdef DIAG
+	cout << "a,at,b,bt: " << a << " " << at << " " << b << " " << bt << endl << flush;
+	cout << " a,at,b,bt: " << endl << hex
+			<< " " << a  << endl
+			<< " " << at << endl
+			<< " " << b  << endl
+			<< " " << bt << endl
+			<< dec << endl << flush;
+#endif
 	return overlap;
+
 }
 
 
@@ -682,7 +692,14 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 	SpatialVector v;
 	v.setLatLonDegrees(points[0].lat, points[0].lon);
 	vs[points.size()] = v;
+
 	SpatialPolygon p(vs);
+	bool ccw_orientation = p.ccw_orientation;
+	if( !ccw_orientation ) {
+		reverse(vs.begin(),vs.end());
+		p = SpatialPolygon(vs);
+	}
+
 	// - Loop over trixels, remove those outside the polygon.
 	STARE_SpatialIntervals cover1;
 	int i = 0;
@@ -751,6 +768,9 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 //							<< " h = " << hit
 //							<< endl << flush;
 					++k;
+				}
+				if(!hit) {
+					hit = p.triangle_crossp(tr);
 				}
 				if(hit) {
 					if( (i0 & lj.levelMaskSciDB) == force_resolution_level ) {
@@ -864,6 +884,102 @@ STARE_SpatialIntervals STARE::NonConvexHull(LatLonDegrees64ValueVector points, i
 		}
 		++i;
 	}
+
+	if( !ccw_orientation ) {
+		// Construct and return the complement, since we're using a CW polygon.
+		STARE_SpatialIntervals cover2, cover3;
+		cover2.push_back( 0x0000000000000000 );
+		cover2.push_back( 0x0800000000000000 );
+		cover2.push_back( 0x1000000000000000 );
+		cover2.push_back( 0x1800000000000000 );
+		cover2.push_back( 0x2000000000000000 );
+		cover2.push_back( 0x2800000000000000 );
+		cover2.push_back( 0x3000000000000000 );
+		cover2.push_back( 0x3800000000000000 );
+
+		SpatialRange interior(cover1);
+
+		int i = 0;
+		while( i < cover2.size() ) {
+			uint64 i0 = cover2[i];
+#if 0
+			uint64 i1 = i < (cover2.size()-1) ? cover2[i+1] : cover2[i];
+			// cout << "cw i0: " << hex << i0 << dec << endl << flush;
+			if( i0 != i1 ) {
+				cout << "cw i0 vs. i1: " << hex << i0 << " " << i1 << endl << flush;
+			}
+			bool diag = (i0 == 0x3d2b600000000009) || (i0 == 0x3d2b61000000000a);
+//			cout << "cw i0: " << hex << i0 << dec << flush;
+			if( diag ) {
+				cout << "cw i0: " << hex << i0 << dec << flush;
+				cout << " *** " << flush;
+				cout << endl << flush;
+			}
+			// cout << endl << flush;
+#endif
+
+			STARE_SpatialIntervals si;
+			si.push_back(i0);
+			SpatialRange test(si);
+			SpatialRange *overlap = sr_intersect(interior,test);
+			KeyPair kp;
+			overlap->reset();
+			int at_least_one = overlap->getNext(kp);
+#if 0
+			if( diag ) {
+				cout << "cw kp: " << hex << kp.lo << " " << kp.hi << dec << " " << at_least_one << endl << flush;
+			}
+#endif
+			if( at_least_one ) {
+				int level = i0 & lj.levelMaskSciDB;
+				if( level < force_resolution_level ) { // Still room to recurse
+					// subdivide i0 and push into cover2
+					for(uint64 j = 0; j < 4; ++j ) {
+						uint64 one_mask_to_resolution1, one_at_resolution1;
+						lj.SciDBincrement_LevelToMaskDelta((i0 & lj.levelMaskSciDB)+1,one_mask_to_resolution1,one_at_resolution1);
+						uint64 child = 1+i0+j*one_at_resolution1; // Add them to the end of the working queue.
+#if 0
+						bool diag = (child == 0x3d2b600000000009) || (child == 0x3d2b61000000000a);
+						if( diag ) {
+							cout << "cw child ----" << endl << flush;
+							cout << "cw child: " << hex << i0 << " " << child << endl << flush;
+						}
+#endif
+						if( ! interior.contains(child) ) {
+							STARE_SpatialIntervals childi; childi.push_back(child);
+							// SpatialRange *childi_overlap = sr_intersect(interior,childi);
+							SpatialRange *childi_overlap = sr_intersect(childi,interior);
+							KeyPair ckp;
+							childi_overlap->reset();
+							int at_least_one1 = childi_overlap->getNext(ckp);
+							if( at_least_one1 ) {
+//								if( diag ) cout << "cw cover2 needs work" << endl << flush;
+								cover2.push_back(child); // Needs more work
+							} else {
+#if 0
+								if( diag ) {
+									cout << "cw cover3 done" << endl << flush;
+									cout << "cw at least o " << at_least_one1 << endl << flush;
+									cout << "cw ckp l h "    << ckp.lo << " " << ckp.hi << endl << flush;
+								}
+#endif
+								cover3.push_back(child); // Done here.
+							}
+						}
+					}
+				} else { // level == force_resolution_level
+					// The finest resolution... we're done, keep as on boundary.
+					cover3.push_back(i0);
+				} // End case where i0 overlaps interior.
+			} else { // No overlap, so we're outside.
+				// push i0 into cover3
+				cover3.push_back(i0);
+			}
+			++i;
+		}
+		return cover3;
+	}
+
 	return cover1;
 }
 

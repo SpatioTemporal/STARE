@@ -8,6 +8,7 @@
  */
 
 #include "Test.h"
+#include "SpatialPolygon.h"
 
 class srange {
 public:
@@ -365,6 +366,138 @@ void SpatialRange_test () {
 		delete r1;
 		delete r2;
 
+	}
+
+	if(true) {
+		/* CCW */
+		LatLonDegrees64ValueVector latlon6ccw;
+		latlon6ccw.push_back(LatLonDegrees64(-4,0));
+		latlon6ccw.push_back(LatLonDegrees64(-4,1));
+		latlon6ccw.push_back(LatLonDegrees64(-3,1));
+		latlon6ccw.push_back(LatLonDegrees64(-3.5,0.5));
+		latlon6ccw.push_back(LatLonDegrees64(-3,0));
+		latlon6ccw.push_back(LatLonDegrees64(-4,0));
+
+		Vertices vs;
+		for( uint i=0; i < latlon6ccw.size(); ++i ) {
+			SpatialVector v;
+			v.setLatLonDegrees(latlon6ccw[i].lat, latlon6ccw[i].lon);
+			vs.push_back(v);
+		}
+
+		// uint64 i0 = 0;
+		uint64 i0   = 0x3d2b61000000000a;
+	    // uint64 i0   = 0x3d2b600000000009;
+		uint64 ix   = 0x3d2b61800000000d;
+
+		SpatialPolygon p(vs);
+		Triangle tr = index.TriangleFromValue(i0, 10);
+		float64 clat,clon; tr.centroid.getLatLonDegrees(clat, clon);
+/*
+		cout << " tr 0 " << tr.vertices[0] << " " << p.intersection(tr.vertices[0]) << endl;
+		cout << " tr 1 " << tr.vertices[1] << " " << p.intersection(tr.vertices[1]) << endl;
+		cout << " tr 2 " << tr.vertices[2] << " " << p.intersection(tr.vertices[2]) << endl;
+		cout << " c    " << tr.centroid    << " " << p.intersection(tr.centroid) << endl;
+		cout << " c ll " << clat << " " << clon << endl;
+		cout << " tr count " << p.intersect_triangle(tr) << endl << flush;
+		cout << " tr crossp " << p.triangle_crossp(tr) << endl << flush;
+ */
+		ASSERT_EQUAL(0,p.intersect_triangle(tr));
+		ASSERT_EQUAL(1,p.triangle_crossp(tr));
+
+#if 0
+
+		// FAIL();
+
+		STARE_SpatialIntervals cover_ccw = index.NonConvexHull(latlon6ccw,13);
+
+		SpatialRange interior(cover_ccw);
+
+//		cout << "i0: " << hex << i0 << endl << flush;
+/*
+		for(uint i=0; i<cover_ccw.size(); ++i) {
+			if(!interior.contains(cover_ccw[i])) {
+				cout << i << " ccw? " << hex << cover_ccw[i] << dec << endl << flush;
+			}
+			int cmp_ = cmpSpatial(i0,cover_ccw[i]);
+			if( cmp_ ) {
+				cout << i << " ccw in i0 " << hex << cover_ccw[i] << dec << endl << flush;
+			}
+		}
+ */
+
+		int cmp_ = cmpSpatial(i0,ix);
+//		cout << " i0,ix: " << hex << i0 << " " << ix << dec << " " << cmp_ << endl << flush;
+		// uint64 di_a = 0x0000010000000000;
+		STARE_SpatialIntervals si;
+		si.push_back(i0);
+		SpatialRange test(si);
+		SpatialRange *overlap = sr_intersect(interior,test);
+		KeyPair kp;
+		overlap->reset();
+		int at_least_one = overlap->getNext(kp);
+		cout << "cw kp: " << hex << kp.lo << " " << kp.hi << dec << " " << at_least_one << endl << flush;
+		cout << "ccw size: " << cover_ccw.size() << endl << flush;
+#endif
+
+#if 0
+		for( uint i=0; i < cover_ccw.size(); ++i ) {
+
+			int cmp_ = cmpSpatial(i0,cover_ccw[i]);
+//			if( cmp_ != 0 ) {
+			if( true ) {
+				cout << i << " ccw " << hex << cover_ccw[i] << dec << " " << cmp_ << endl << flush;
+			}
+		}
+#endif
+
+#if 0
+		/*
+		859 ccw 3d2b61800000000d 0
+		860 ccw 3d2b61820000000d 0
+		861 ccw 3d2b61840000000d 0
+		862 ccw 3d2b61860000000d 0
+		863 ccw 3d2b61900000000d 0
+		864 ccw 3d2b61920000000d 0
+		865 ccw 3d2b61940000000d 0
+		866 ccw 3d2b61960000000d 0
+		867 ccw 3d2b61980000000d 0
+		868 ccw 3d2b619a0000000d 0
+		869 ccw 3d2b619c0000000d 0
+		870 ccw 3d2b619e0000000d 0
+		871 ccw 3d2b61c00000000d 0
+		872 ccw 3d2b61c20000000d 0
+		873 ccw 3d2b61c40000000d 0
+		874 ccw 3d2b61c60000000d 0
+		875 ccw 3d2b61c80000000d 0
+		876 ccw 3d2b61ca0000000d 0
+		877 ccw 3d2b61cc0000000d 0
+		878 ccw 3d2b61ce0000000d 0
+		879 ccw 3d2b61d80000000d 0
+		880 ccw 3d2b61da0000000d 0
+		881 ccw 3d2b61dc0000000d 0
+		882 ccw 3d2b61de0000000d 0
+		883 ccw 3d2b61e80000000d 0
+		884 ccw 3d2b61ea0000000d 0
+		885 ccw 3d2b61ec0000000d 0
+		886 ccw 3d2b61ee0000000d 0
+		*/
+
+		/* CW
+	    lat6 = np.array([ -2-2, -2-2, -1-2, -1.5-2, -1-2], dtype=np.double)[::-1]
+	    lon6 = np.array([ 0,1,1,0.5,0], dtype=np.double)[::-1]
+	    */
+		LatLonDegrees64ValueVector latlon6cw;
+		latlon6cw.push_back(LatLonDegrees64(-3,0));
+		latlon6cw.push_back(LatLonDegrees64(-3.5,0.5));
+		latlon6cw.push_back(LatLonDegrees64(-3,1));
+		latlon6cw.push_back(LatLonDegrees64(-4,1));
+		latlon6cw.push_back(LatLonDegrees64(-4,0));
+		latlon6cw.push_back(LatLonDegrees64(-3,0));
+		STARE_SpatialIntervals cover_cw = index.NonConvexHull(latlon6cw,13);
+#endif
+
+		// FAIL();
 	}
 
 #undef SIVOUT

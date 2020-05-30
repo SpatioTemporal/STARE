@@ -130,7 +130,7 @@ void STARE_Covers_test() {
         }
     }
     
-    if (true) {
+    if (false) {
         LatLonDegrees64ValueVector cornerVector = readCSV(base_dir+"tests/CUTE/polygons/0/0.csv");
         // cout << "cv size: " << cornerVector.size() << endl << flush;
 

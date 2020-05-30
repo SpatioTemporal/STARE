@@ -97,4 +97,24 @@ void SpatialPolygon_test() {
 	tr.vertices[2] = tr2;
 //	cout << "tr intersection " << p.intersect_triangle(tr) << endl << flush;
 	ASSERT_EQUALM("-z",4,p.intersect_triangle(tr));
+
+	// cout << "ccw" << endl << flush;
+	// CCW
+	nodes.clear();
+	nodes.push_back(SpatialVector(1,0,0));
+	nodes.push_back(SpatialVector(0,1,0));
+	nodes.push_back(SpatialVector(0,0,1));
+	nodes.push_back(SpatialVector(1,0,0));
+	SpatialPolygon p0(nodes);
+	ASSERT_EQUAL(true,p0.ccw_orientation);
+
+	// cout << "cw" << endl << flush;
+	// CW
+	nodes.clear();
+	nodes.push_back(SpatialVector(1,0,0));
+	nodes.push_back(SpatialVector(0,0,1));
+	nodes.push_back(SpatialVector(0,1,0));
+	nodes.push_back(SpatialVector(1,0,0));
+	SpatialPolygon p1(nodes);
+	ASSERT_EQUAL(false,p1.ccw_orientation);
 }

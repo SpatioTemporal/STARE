@@ -22,6 +22,8 @@ public:
 
 	void push_back(const SpatialVector& v) { nodes.push_back(v); }
 
+	bool ccw_orientation;
+
 	Vertices nodes;
 	Vertices edge_gcs,left_gcs,right_gcs;
 
@@ -30,6 +32,9 @@ public:
 	void initialize();
 	bool intersection(const SpatialVector& v );
 	int intersect_triangle( const Triangle& tr );
+
+	bool triangle_crossp(const Triangle& tr);
+	bool segment_crossp(const SpatialVector& v0,const SpatialVector& v1);
 
 	void update();
 

@@ -1,3 +1,10 @@
+2020-05-30 Version 0.15.5
+
+Nonconvex now produces the complement when the input polygon is CW.
+Needs more testing.
+
+Fixed subtle error in nonconvex that dropped trixels when not enough
+of the pixel intersected the ROI.
 
 2020-05-28 Version 0.15.4
 
