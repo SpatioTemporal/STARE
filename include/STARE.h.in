@@ -150,6 +150,7 @@ public:
 	
 	STARE_ArrayIndexSpatialValues adaptSpatialResolutionEstimates(STARE_ArrayIndexSpatialValues spatialStareIds);
     void adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValues &spatialStareIds);
+    void adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValue *spatialStareIds, const int s_indices_size);    
 	
     STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
     STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int resolution, int type);

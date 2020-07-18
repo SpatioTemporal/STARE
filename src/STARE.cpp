@@ -386,6 +386,41 @@ void STARE::adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValues
     }
 }
 
+/**
+ * @brief Adapt the resolution of the spatial index values based on proximity.
+ *
+ * Copied from the STARE_ArrayIndexSpatialValues version above.
+ *
+ * Scan the s-indices vector and set the 5 resolution bits based on the distance
+ * between any two of the s-indices. For any set of s-indices, the level is the
+ * maximum computed level.
+ * @note The complexity of this method is O(N(N-1)) where N is the length of the
+ * input vector.
+ *
+ * @param s_indices Reference to a STARE_ArrayIndexSpatialValues (vector of STARE indices)
+ * @return The maximum level found.
+ * @author Mike Rilee <mike@rilee.net>
+ */
+void STARE::adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValue *s_indices, const int s_indices_size) {
+
+    EmbeddedLevelNameEncoding lj;
+
+    vector<int> lvl_maxes(s_indices_size, 0);
+
+    for(int i=0; i < s_indices_size; ++i) {
+        for(int j=i+1; j < s_indices_size; ++j) {
+            int lvl = cmpSpatialResolutionEstimateI(s_indices[i], s_indices[j]);
+            if( lvl > lvl_maxes[i] ) {
+                lvl_maxes[i] = lvl;
+            }
+            if( lvl > lvl_maxes[j] ) {
+                lvl_maxes[j] = lvl;
+            }
+        }
+
+        s_indices[i] = (s_indices[i] & ~lj.levelMaskSciDB) | lvl_maxes[i];
+    }
+}
 
 
 /**
