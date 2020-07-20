@@ -1,3 +1,7 @@
+2020-05-30 Version 0.15.6
+
+Added an in-place adaptive resolution function for STARE spatial index value arrays.
+
 2020-05-30 Version 0.15.5
 
 Nonconvex now produces the complement when the input polygon is CW.
