@@ -1,0 +1,35 @@
+language: c
+dist: bionic
+sudo: false
+
+branches:
+  only:
+  - master
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - pkg-config wget
+
+before_install:
+
+before_script:
+
+env:
+  global:
+    - CPPFLAGS='-I/usr/include -I/usr/local/include'
+    - LDFLAGS='-L/usr/lib -L/usr/local/lib'
+  
+script:
+  - export CFLAGS='-fsanitize=address'
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - ctest
+ 
+
+
+
