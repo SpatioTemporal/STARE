@@ -25,7 +25,7 @@ jobs:
         cd build
         cmake -DCMAKE_INSTALL_PREFIX=~/stare ..
         make VERBOSE=1
-        make VERBOSE=1 test
+#        make VERBOSE=1 test
 
 
 
