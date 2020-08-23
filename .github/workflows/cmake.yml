@@ -1,0 +1,31 @@
+name: CMake ununtu-latest
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PWD_DIR: /home/runner
+      CPPFLAGS: "-I/usr/include -I/usr/local/include -I/home/runner/stare/include"
+      LDFLAGS: "-L/home/runner/stare/lib"
+        
+    steps:
+    - uses: actions/checkout@v2
+    - name: cmake
+      run: |
+        set -x
+        mkdir build
+        cd build
+        cmake -DCMAKE_INSTALL_PREFIX=~/stare ..
+        make VERBOSE=1
+        make VERBOSE=1 test
+
+
+
