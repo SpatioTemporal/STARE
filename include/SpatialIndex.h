@@ -229,6 +229,19 @@ void printNode(int nodeIndex) const;
   /// set the maximum depth of the layer
   void setMaxlevel(size_t level);
 
+  bool isInsideBarycentric(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2,
+		  bool verbose
+		  ) const;
+
+  // Test whether a vector v is inside a triangle v0,v1,v2. Input
+  // triangle has to be sorted in a counter-clockwise direction.
+  bool isInside(
+		  const SpatialVector & v, const SpatialVector & v0,
+		  const SpatialVector & v1, const SpatialVector & v2
+		  ) const;
+
 private:
 
   // STRUCTURES
@@ -276,18 +289,7 @@ private:
   // sort the index so that the leaf nodes are at the beginning
   void sortIndex();
 
-  // Test whether a vector v is inside a triangle v0,v1,v2. Input
-  // triangle has to be sorted in a counter-clockwise direction.
-  bool isInside(
-		  const SpatialVector & v, const SpatialVector & v0,
-		  const SpatialVector & v1, const SpatialVector & v2
-		  ) const;
 
-  bool isInsideBarycentric(
-		  const SpatialVector & v, const SpatialVector & v0,
-		  const SpatialVector & v1, const SpatialVector & v2,
-		  bool verbose
-		  ) const;
 
   // VARIABLES
 

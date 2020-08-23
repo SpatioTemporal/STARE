@@ -33,7 +33,8 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialIndex.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialInterface.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialInterface.hxx
-    ${CMAKE_CURRENT_SOURCE_DIR}/SpatialSign.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialPolygon.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/SpatialSign.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialVector.h
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialVector.hxx
   ${CMAKE_CURRENT_SOURCE_DIR}/SpatialRange.h
@@ -86,6 +87,7 @@ install(FILES STARE.h
   SpatialIndex.hxx
   SpatialInterface.h
   SpatialInterface.hxx
+  SpatialPolygon.h
   SpatialRange.h
   SpatialSign.h
   SpatialVector.h

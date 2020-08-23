@@ -7,6 +7,7 @@
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
 
+// #include <conio>
 #include <iostream>
 #include "Test.h"
 
@@ -22,27 +23,7 @@
 #define DIAGOUTDELTA(out,a,b) {SpatialVector delta_ = a-b; cout << delta_.length() << " ";}
 #endif
 
-LatLonDegrees64ValueVector makeCornerVector(void){
-	LatLonDegrees64ValueVector cornerVector;
-	cornerVector.push_back(LatLonDegrees64(35.65007233330923, 61.21081709172574));
-	cornerVector.push_back(LatLonDegrees64(35.27066396742229, 62.23065148300589));
-	cornerVector.push_back(LatLonDegrees64(37.66116404881207, 65.74563073106683));
-	cornerVector.push_back(LatLonDegrees64(38.25890534113216, 71.34813113799026));
-	cornerVector.push_back(LatLonDegrees64(36.72000702569632, 72.92002485544447));
-	cornerVector.push_back(LatLonDegrees64(31.90141225842444, 69.31776411324256));
-	cornerVector.push_back(LatLonDegrees64(31.62018911389207, 68.92667687365767));
-	cornerVector.push_back(LatLonDegrees64(29.88794342703618, 66.34647260932442));
-	cornerVector.push_back(LatLonDegrees64(29.56003062592809, 65.04686201361611));
-	cornerVector.push_back(LatLonDegrees64(29.34081920014597, 64.14800215033125));
-	cornerVector.push_back(LatLonDegrees64(29.46833079682617, 63.55026085801117));
-	cornerVector.push_back(LatLonDegrees64(31.37950613049267, 61.69931440618083));
-	cornerVector.push_back(LatLonDegrees64(34.40410187431986, 60.80319339380745));
 
-	cornerVector.push_back(LatLonDegrees64(33.52883230237626, 60.96370039250601 ));
-
-	cornerVector.push_back(LatLonDegrees64(35.65007233330923, 61.21081709172574));
-	return cornerVector;
-}
 
 void STARE_test() {
 
@@ -1199,11 +1180,11 @@ void STARE_test() {
 
 	// #define DIAG
 #ifndef DIAG
-#define DIAGOUT2(p,m)
+// defined above on line 17 #define DIAGOUT2(p,m)
 #define SIVOUT(m,siv)
 #define SIVSOUT(p,m,v)
 #else
-#define DIAGOUT2(p,m) p << m;
+// #define DIAGOUT2(p,m) p << m;
 #define SIVOUT(m,siv) cout << m << " " << setw(16) << setfill('0') << hex << siv << dec << endl << flush;
 #define SIVSOUT(p,m,v) { p << m << " "; for(int l=0; l<v.size(); ++l) { p << "0x" << setw(16) << setfill('0') << hex << v[l] << " ";}; p << dec << endl << flush; }
 #endif
@@ -1498,54 +1479,7 @@ void STARE_test() {
 		}
 	}
 
-	{ /* See makeCornerVector at the start of the file. */
-		STARE stare;
 
-		// Getting index Value
-		STARE_SpatialIntervals indexValues;
-		LatLonDegrees64ValueVector cornerVector = makeCornerVector();
-		indexValues = stare.ConvexHull(cornerVector, 12);
-		// Producing outputs
-		// std::cout << "Integer Value of STARE index: "<< std::endl;
-		/*
-		int i = 0;
-		for(auto const& value: indexValues) {
-			if( i % 209 == 0 ) {
-				std::cout << i << " " << value << std::endl;
-			}
-			++i;
-		}
-		*/
-		// A regression. Perhaps foolhardy.
-		ASSERT_EQUAL(indexValues[   0], 4063372763795030021);
-		ASSERT_EQUAL(indexValues[ 209], 4047214340913233929);
-		ASSERT_EQUAL(indexValues[ 418], 4048304506692173834);
-		ASSERT_EQUAL(indexValues[ 627], 4069240857352470538);
-		ASSERT_EQUAL(indexValues[ 836], 4047805878168977419);
-		ASSERT_EQUAL(indexValues[1045], 4062281498504462347);
-		ASSERT_EQUAL(indexValues[1254], 4071136552837709835);
-		ASSERT_EQUAL(indexValues[1463], 4037621170680365068);
-		ASSERT_EQUAL(indexValues[1672], 4037929652411432972);
-		ASSERT_EQUAL(indexValues[1881], 4046503437926400012);
-		ASSERT_EQUAL(indexValues[2090], 4047784506411712524);
-		ASSERT_EQUAL(indexValues[2299], 4048209742533754892);
-		ASSERT_EQUAL(indexValues[2508], 4049064166147751948);
-		ASSERT_EQUAL(indexValues[2717], 4050190581450670092);
-		ASSERT_EQUAL(indexValues[2926], 4050638220122128396);
-		ASSERT_EQUAL(indexValues[3135], 4051281090826993676);
-		ASSERT_EQUAL(indexValues[3344], 4051436980959969292);
-		ASSERT_EQUAL(indexValues[3553], 4062307233948499980);
-		ASSERT_EQUAL(indexValues[3762], 4062741541041471500);
-		ASSERT_EQUAL(indexValues[3971], 4063200552786329612);
-		ASSERT_EQUAL(indexValues[4180], 4066811658209591308);
-		ASSERT_EQUAL(indexValues[4389], 4068128048505946124);
-		ASSERT_EQUAL(indexValues[4598], 4068353207871471628);
-		ASSERT_EQUAL(indexValues[4807], 4070473512966422540);
-		ASSERT_EQUAL(indexValues[5016], 4071135865642942476);
-		ASSERT_EQUAL(indexValues[5225], 4165894663942701068);
-		ASSERT_EQUAL(indexValues[5434], 4166328008962998284);
-
-	}
 
 	// Didn't handle level = 0 in STARE::htmIDFromValue properly.
 	if(false) {
@@ -1598,15 +1532,61 @@ void STARE_test() {
 		ASSERT_EQUAL(10,int(0.5+index.levelFromLengthMeterScaleFromEdge(10.0e3)));
 	}
 
+	// I turned this test off an added a new, separate test for adaptSpatialResolutionEstimates()
+	// and the new adaptSpatialResolutionEstimatesInPlace(). jhrg 4/20/20
+    if(false) {
+        double delta = 0.001;
+        double lat = 0,lon = 0;
+        int lvl = 27;
+        EmbeddedLevelNameEncoding lj;
+        STARE_ArrayIndexSpatialValues spatialStareIds;
+
+        uint64 source[10] = {
+                0x3d7e69d09dbc425b
+                ,0x3d7e69d7057d10fb
+                ,0x3d7e69d312f1ca1b
+                ,0x3d7e69d32945f71b
+                ,0x3d7e69da6914455b
+                ,0x3d7e69c7c92cde7b
+                ,0x3d7e112622b49e5b
+                ,0x3d7e115866c6b81b
+                ,0x3d7e17a8c067401b
+                ,0x3d7e1ab50be8303b
+        };
+
+        uint64 result[10] = {
+                0x3d7e69d09dbc4250
+                ,0x3d7e69d7057d10f0
+                ,0x3d7e69d312f1ca0f
+                ,0x3d7e69d32945f70e
+                ,0x3d7e69da6914454d
+                ,0x3d7e69c7c92cde6c
+                ,0x3d7e112622b49e4b
+                ,0x3d7e115866c6b80a
+                ,0x3d7e17a8c0674009
+                ,0x3d7e1ab50be83028
+        };
+
+        for( int i=0; i < 10; ++i ) {
+            spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
+            lat += 0; lon += delta; delta += delta;
+        }
+        STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
+
+        for( int i = 0; i < 10; ++i ) {
+            if(false) {
+                cout << i << " "
+                     << hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
+                     << " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
+                     << endl << flush;
+            }
+            ASSERT_EQUAL(source[i],spatialStareIds[i]);
+            ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
+        }
+    }
+
 	if(true) {
-		double delta = 0.001;
-		double lat = 0,lon = 0;
-		int lvl = 27;
-		EmbeddedLevelNameEncoding lj;
-		STARE_ArrayIndexSpatialValues spatialStareIds;
-
-
-
+		/* Stash test #1 */
 		uint64 source[10] = {
 				0x3d7e69d09dbc425b
 				,0x3d7e69d7057d10fb
@@ -1619,38 +1599,99 @@ void STARE_test() {
 				,0x3d7e17a8c067401b
 				,0x3d7e1ab50be8303b
 		};
-
-		uint64 result[10] = {
-				0x3d7e69d09dbc4250
-				,0x3d7e69d7057d10f0
-				,0x3d7e69d312f1ca0f
-				,0x3d7e69d32945f70e
-				,0x3d7e69da6914454d
-				,0x3d7e69c7c92cde6c
-				,0x3d7e112622b49e4b
-				,0x3d7e115866c6b80a
-				,0x3d7e17a8c0674009
-				,0x3d7e1ab50be83028
-		};
+		STARE_ArrayIndexSpatialValues spatialStareIds;
 
 		for( int i=0; i < 10; ++i ) {
-			spatialStareIds.push_back(index.ValueFromLatLonDegrees(lat,lon,lvl));
-			lat += 0; lon += delta; delta += delta;
+			spatialStareIds.push_back(source[i]);
 		}
-		STARE_ArrayIndexSpatialValues spatialStareIdsAdapted = index.adaptSpatialResolutionEstimates(spatialStareIds);
 
-		for( int i = 0; i < 10; ++i ) {
-			if(false) {
-				cout << i << " "
-						<< hex << spatialStareIds[i] << " " << spatialStareIdsAdapted[i] << dec
-						<< " " << ( spatialStareIdsAdapted[i] & lj.levelMaskSciDB )
-						<< endl << flush;
-			}
-			ASSERT_EQUAL(source[i],spatialStareIds[i]);
-			ASSERT_EQUAL(result[i],spatialStareIdsAdapted[i]);
+		typedef struct stash_record {
+			uint64 id;
+		} stash_record;
+
+		stash_record record;
+
+		uint64 n_record    = spatialStareIds.size();
+		int size_record = sizeof(record);
+
+		// cout << "n_record,size_record: " << n_record << " " << size_record << endl << flush;
+
+		STARE_Stash ostash(
+				"test.st"
+				,size_record
+				,n_record
+				,ios::out | ios::binary
+				);
+		for( int i=0; i < n_record; ++i ) {
+			record.id = spatialStareIds[i];
+			ostash.stashFile->write(reinterpret_cast<char*>(&record),size_record);
 		}
+		ostash.close();
+
+		n_record    = -1;
+		size_record = -1;
+		record.id   = -1;
+		STARE_Stash istash(
+				"test.st"
+				,size_record
+				,n_record
+				,ios::in | ios::binary
+				);
+		stringstream ss;
+		for( int i=0; i < n_record; ++i ) {
+			// record.id = spatialStareIds[i];
+			istash.stashFile->read(reinterpret_cast<char*>(&record),size_record);
+//			cout << i << " i expected,found: " << source[i] << " - " << record.id << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),source[i],record.id);
+		}
+		istash.close();
+
+		/* Stash test #2 */
+		STARE_Stash ostash1(
+				"test1.st"
+				,spatialStareIds
+				,ios::out | ios::binary
+				);
+		STARE_ArrayIndexSpatialValues spatialStareIds1;
+		STARE_Stash istash1(
+				"test1.st"
+				,spatialStareIds1
+				,ios::in | ios::binary
+				);
+		for(int i=0; i<spatialStareIds1.size(); ++i) {
+			// cout << i << " i,source,ids1 " << spatialStareIds[i] << " " << spatialStareIds1[i] << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record1 i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),spatialStareIds[i],spatialStareIds1[i]);
+		}
+
+		/* Stash test #3 */
+		SpatialRange sr(spatialStareIds);
+		STARE_SpatialIntervals sis = sr.toSpatialIntervals();
+		STARE_Stash ostash2(
+				"test2.st"
+				,sis
+				,ios::out | ios::binary
+				);
+		STARE_ArrayIndexSpatialValues spatialStareIds2;
+		STARE_Stash istash2(
+				"test2.st"
+				,spatialStareIds2
+				,ios::in | ios::binary
+				);
+		SpatialRange sr2(spatialStareIds2);
+		for(int i=0; i<spatialStareIds2.size(); ++i) {
+			// cout << i << " i,source,ids1 " << spatialStareIds[i] << " " << spatialStareIds1[i] << endl << flush;
+			ss.clear(); ss.str(string());
+			ss << "stash record2 ids i = " << i;
+			ASSERT_EQUALM(ss.str().c_str(),sis[i],spatialStareIds2[i]);
+		}
+
+		// TODO Operation that checks equality of two SpatialRanges.
+
 	}
-
 	// FAIL();
 }
 

@@ -70,19 +70,24 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/include )
 
 if(BUILD_TESTING)
   message( "Adding tests...\n" )
-  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)
-  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/python)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
 endif()
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/app)
 add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
-
 
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
 
 # Read the version number from a file.
-file (STRINGS "VERSION" VERSION)
+
+# Modified from 'file(STRING "VERSION" VERSION) so that the tar ball name
+# does not contain a trailing ';' jhrg 5/11/20
+file(READ "VERSION" ver)
+string(REGEX MATCH "^[.0-9]*" VERSION ${ver})
+# message(STATUS "ver = ${ver}")
+# message(STATUS "VERSION = ${VERSION}")
 
 # Generate the header in the source include dir. Not really the
 # best plan since it should be in the build dir, but I cannot get
@@ -103,7 +108,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/STARE.h.in
 set(CPACK_SOURCE_GENERATOR "TBZ2")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${VERSION}")
 
-set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+set(CPACK_SOURCE_IGNORE_FILES "/build/;/cmake-build-debug/;/.git/;/.idea/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 include(CPack)
 
 # By default, CPack names the target 'package_source'. This makes

@@ -20,10 +20,12 @@ SpatialRange::SpatialRange(STARE_SpatialIntervals intervals) {
 }
 
 SpatialRange::~SpatialRange() {
-	delete this->range; // TODO mlr. Um. Dangerous if range is from elsewhere? Maybe use some sort of smart pointer?
+  if( this->range != NULL ) {
+	  delete this->range; // TODO mlr. Um. Dangerous if range is from elsewhere? Maybe use some sort of smart pointer?
+  }
 }
 
-void SpatialRange::addSpatialRange(SpatialRange range) {
+void SpatialRange::addSpatialRange(const SpatialRange& range) {
 	this->range->addRange(range.range);
 }
 
@@ -112,6 +114,7 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
+	// cout << endl << flush << "**sr_intersect**" << endl << flush;
 	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 // #define DIAG
 #ifdef DIAG
@@ -131,6 +134,7 @@ SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool co
 	cout << dec;
 #endif
 	SpatialRange *sr = new SpatialRange(range);
+
 #ifdef DIAG
 	cout << "sr-r          " << hex << sr->range << endl << flush;
 	cout << "sr-r-r        " << hex << sr->range->range << endl << flush;

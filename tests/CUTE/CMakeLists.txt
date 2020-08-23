@@ -3,9 +3,11 @@ set (
   TestSrcFiles
   Test.h 
   EmbeddedLevelNameEncoding_test.cpp
+  AdaptSpatialResolutionEstimates_test.cpp
   SpatialFailure_test.cpp
   SpatialIndex_test.cpp
   SpatialInterface_test.cpp
+  SpatialPolygon_test.cpp
   SpatialRange_test.cpp
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
@@ -14,6 +16,8 @@ set (
   TemporalIndex_test.cpp
   Test.cpp
   )
+  
+ set(ENV{STARE_SRC_HOME} "${CMAKE_SOURCE_DIR}" )
 
 # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -I${PROJECT_SOURCE_DIR}/include" )
 
@@ -33,3 +37,5 @@ set_tests_properties( STARETests PROPERTIES
   PASS_REGULAR_EXPRESSION "#success;#starting"
   FAIL_REGULAR_EXPRESSION "#failure;#error"
 )
+
+file(COPY polygons DESTINATION .)

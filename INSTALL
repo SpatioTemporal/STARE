@@ -35,7 +35,7 @@ Dependencies:
 # how the include_directories is set.
 
 mkdir build; cd build
-cmake ../STARE
+cmake ..
 make
 
 # To make a source distribution after running cmake...
@@ -45,7 +45,8 @@ make dist
 # To install the include files and library, try the following.
 
 mkdir build; cd build
-cmake -DCMAKE_INSTALL_PREFIX=< install_path > .. 
+cmake -DCMAKE_INSTALL_PREFIX:PATH=< install_path > .. 
+make test
 make install
 
 # Optimization flags may be set via an environment variable OPTFLAGS or via
@@ -59,6 +60,12 @@ cmake -DOPTFLAGS="-O2"
 #
 # To run tests, after making the library as above, try the following
 # in the build directory.
+#
+# For tests to find the data files you  may need to set the following
+# environment variable to the TOPDIR as follows.
+#
+# export STARE_SRC_HOME=/Users/mrilee/git/STARE/
+#
 
 make test
 

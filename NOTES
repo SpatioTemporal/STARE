@@ -1,3 +1,63 @@
+2020-05-30 Version 0.15.6
+
+Added an in-place adaptive resolution function for STARE spatial index value arrays.
+
+2020-05-30 Version 0.15.5
+
+Nonconvex now produces the complement when the input polygon is CW.
+Needs more testing.
+
+Fixed subtle error in nonconvex that dropped trixels when not enough
+of the pixel intersected the ROI.
+
+2020-05-28 Version 0.15.4
+
+Removing polygon parity seems to introduce other ambiguities. Now we
+require that polygons processed by non-convex hull be counter-clockwise,
+i.e. areal normal pointing outward from sphere (right-hand sense).
+
+2020-05-27 Version 0.15.3
+
+Removed restriction on polygon parity.
+
+* 2020-05-22 Version 0.15.0, 0.15.1, 0.15.2
+
+Added a non-convex hull routine. Correction because of polygon parity needed more care.
+
+Fixed problems with non-convex hull. Removed dependence on convex hull.
+
+Found bug in index counting. Switched to older less precise point-in-triangle solve.
+
+* 2020-05-20 Version 0.14.3
+
+Small change to tests. Added in-place data-driven data resolution estimation
+& coercion for STARE spatial indexing. 
+
+* 2020-05-01 Version 0.14.2
+
+Extended domain of TriangleFromValue and LatLonDegreesFromValue to cover
+terminators. LatLons are calculated by converting to resolution level of 27.
+
+* 2020-04-10 Version 0.14.1
+
+Add range in SpatialRange was implicitly destructing (a complex) SpatialRange
+input, leading to a double-freeing of certain objects. Fixed by changing
+signature to const&. We should look for other places where we pass complex
+objects that require such treatment. Perhaps I'm not getting value- or
+copy-semantics right.
+
+* 2020-03-27 Version 0.14
+
+PySTARE removed.
+
+* 2020-03-20 Version 0.13
+
+Added box_cover_from_latlon to PySTARE, also checked effect of correct varlen
+signature in convex hull routines.
+
+* 2020-03-19 Version 0.12
+
+Adding STARE_Stash for a basic persistence mechanism, writing to binary files.
 
 * 2020-03-11 Version 0.11.3
 

@@ -4213,11 +4213,17 @@ void runSuite(int argc, char const *argv[]){
 
 	s.push_back(CUTE(ucsbBug1));
 	s.push_back(CUTE(SpatialInterface_test));
-	s.push_back(CUTE(SpatialRange_test));
 
 	s.push_back(CUTE(EmbeddedLevelNameEncoding_test));
 	s.push_back(CUTE(STARE_test));
+	s.push_back(CUTE(STARE_Covers_Old_test));
 	s.push_back(CUTE(STARE_Covers_test));
+
+	// Added jhrg 4/20/20
+    s.push_back(CUTE(AdaptSpatialResolutionEstimates_test));
+
+    s.push_back(CUTE(SpatialPolygon_test));
+    s.push_back(CUTE(SpatialRange_test));
 
 	//	s.push_back(CUTE(testRange));
 

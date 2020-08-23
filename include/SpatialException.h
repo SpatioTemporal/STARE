@@ -15,6 +15,8 @@
 #ifndef _SpatialException_h
 #define _SpatialException_h
 
+#include <exception>
+
 #include "SpatialGeneral.h"
 
 /** HTM SpatialIndex Exception base class
@@ -25,7 +27,7 @@
     inheritance.
 */
 
-class LINKAGE SpatialException {
+class LINKAGE SpatialException : public std::exception {
 public:
   /** Default and explicit constructor.  
       The default constructor

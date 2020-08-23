@@ -9,7 +9,7 @@ This release is being made in the hope it may be useful for early users wishing 
 An encoding for high-performance search and subsetting of geospatial data.
 
 ### --THIS CODE IS UNDER HEAVY DEVELOPMENT--
-### --IT'S API AND NUMERICAL RESULTS ARE BOUND TO CHANGE--
+### --IT'S API AND NUMERICAL RESULTS MAY CHANGE--
 
 Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
 
@@ -24,12 +24,10 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ## INSTALL
   Please see the INSTALL file for more information about dependences and installation.
 
-## PySTARE
-  A fledgling Python 3 interface is available. See INSTALL for more information.
-  See also contrib/python for examples of how to use the Python interface and the low-level-lookup-tool in the app directory.
-
 ## GITHUB
-  STARE is made available at https://github.com/michaelleerilee/STARE
+  STARE is made available at https://github.com/SpatioTemporal/STARE
+  
+  A Python API is at https://github.com/SpatioTemporal/pystare
 
 ---
 # ENCODING HIGHLIGHTS
@@ -100,7 +98,7 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 ---
 # HISTORY
 
-2018-2019 Development supported by NASA/ACCESS-17.
+2018-2020 Development supported by NASA/ACCESS-17.
 
 The spatial indexing is a fork of version 2 of the Hierarchical Triangular Mesh (HTM) developed for the Sloan Digital Sky Survey.
 
