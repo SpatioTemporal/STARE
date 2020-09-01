@@ -1,3 +1,8 @@
+
+2020-09-1 Version 0.16.0
+
+Add SpatialRange::intersects that checks if a single spatial index value is contained therein. Performance scaling is not as expected.
+
 2020-05-30 Version 0.15.6
 
 Added an in-place adaptive resolution function for STARE spatial index value arrays.

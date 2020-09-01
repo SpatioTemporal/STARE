@@ -36,6 +36,17 @@ public:
 		return range->range->isIn(leftJustified.maskOffLevelBit());
 	}
 
+	bool intersects(STARE_ArrayIndexSpatialValue siv) {
+		EmbeddedLevelNameEncoding leftJustified;
+		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+		Key lo = leftJustified.maskOffLevelBit();
+		Key hi = lo;
+		KeyPair pr = KeyPair(lo,hi);
+		int rstat = range->range->contains(lo,hi);
+		bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
+		return intersectp;
+	}
+
 	HstmRange *range;
 
 	/////////// private: Maybe? ////////////
