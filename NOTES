@@ -1,5 +1,10 @@
 
-2020-09-1 Version 0.16.0
+
+2020-09-12 Version 0.16.1
+
+Add default constructor to LatLonDegrees64.
+
+2020-09-01 Version 0.16.0
 
 Add SpatialRange::intersects that checks if a single spatial index value is contained therein. Performance scaling is not as expected.
 
