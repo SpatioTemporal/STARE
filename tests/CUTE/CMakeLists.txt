@@ -38,4 +38,4 @@ set_tests_properties( STARETests PROPERTIES
   FAIL_REGULAR_EXPRESSION "#failure;#error"
 )
 
-file(COPY polygons DESTINATION .)
+file(COPY polygons DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
