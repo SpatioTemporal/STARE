@@ -30,3 +30,6 @@ set_tests_properties( STARETests PROPERTIES
   ENVIRONMENT "STARE_SRC_HOME=${CMAKE_SOURCE_DIR}"
 )
 
+# Copy files so that one car run <build-directory>/tests/CUTE/tests
+# from command line.
+file(COPY polygons DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
