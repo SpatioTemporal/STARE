@@ -1,5 +1,9 @@
 
 
+2020-09-13 Version 0.16.2
+
+Fix test/CUTE/tests segfault arising when STARE_SRC_HOME not set.
+
 2020-09-12 Version 0.16.1
 
 Add default constructor to LatLonDegrees64.
