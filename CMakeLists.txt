@@ -30,8 +30,13 @@ else()
 endif()
 
 # Set CC and CXX before calling cmake...
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
+if( NOT DEFINED CMAKE_C_COMPILER )
+  set(CMAKE_C_COMPILER gcc)
+endif()
+
+if( NOT DEFINED CMAKE_CXX_COMPILER )
+  set(CMAKE_CXX_COMPILER g++)
+endif()
 
 if( NOT DEFINED OPTFLAGS )
   if(DEFINED ENV{OPTFLAGS})
@@ -85,9 +90,30 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
 # Modified from 'file(STRING "VERSION" VERSION) so that the tar ball name
 # does not contain a trailing ';' jhrg 5/11/20
 file(READ "VERSION" ver)
-string(REGEX MATCH "^[.0-9]*" VERSION ${ver})
+# string(REGEX MATCH "^[.0-9]*" VERSION ${ver})
 # message(STATUS "ver = ${ver}")
 # message(STATUS "VERSION = ${VERSION}")
+
+string(REGEX MATCH "^([.0-9]*)-?(.*)?\n$" VERSION_SOURCE ${ver})
+# message(STATUS "VERSION_SOURCE src = ${VERSION_SOURCE}")
+# message(STATUS "0: ${CMAKE_MATCH_0}")
+# message(STATUS "1: ${CMAKE_MATCH_1}")
+# message(STATUS "2: ${CMAKE_MATCH_2}") 
+set(VERSION ${CMAKE_MATCH_1})
+set(VERSION_NOTE ${CMAKE_MATCH_2})
+# message(STATUS "VERSION      = ${VERSION}")
+# message(STATUS "VERSION_NOTE = ${VERSION_NOTE}")
+string(REGEX MATCH "([0-9]*)\\.?([0-9]*)\\.?([0-9]*)\\.?.*" VERSION_PARTS ${VERSION})
+# message(STATUS "VERSION_PARTS = ${VERSION_PARTS}")
+# message(STATUS "0: ${CMAKE_MATCH_0}")
+# message(STATUS "1: ${CMAKE_MATCH_1}")
+# message(STATUS "2: ${CMAKE_MATCH_2}") 
+# message(STATUS "3: ${CMAKE_MATCH_3}")
+set(VERSION_MAJOR ${CMAKE_MATCH_1})
+set(VERSION_MINOR ${CMAKE_MATCH_2})
+set(VERSION_PATCH ${CMAKE_MATCH_3})
+
+# quit()
 
 # Generate the header in the source include dir. Not really the
 # best plan since it should be in the build dir, but I cannot get

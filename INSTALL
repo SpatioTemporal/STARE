@@ -10,9 +10,6 @@ Dependencies:
   ERFA (included) - Essential Routines for Fundamental Astronomy - https://github.com/liberfa/erfa
   CUTE (included) - https://cute-test.com/
 
-2. PySTARE: Python interface using SWIG
-  Python3, Numpy, SWIG
-
 ########################################################################### 
 #
 # CMake build 
@@ -20,7 +17,7 @@ Dependencies:
 # Out-of-source build. Assume ./STARE is the TOPDIR.
 # 
 # Products:
-#   libSTARE.a and PySTARE.so (if built) will be in build/default/src
+#   libSTARE.a will be in build/default/src
 #   tests will be in build/default/tests
 #   ./STARE/include contains the headers
 #
@@ -29,10 +26,6 @@ Dependencies:
 #	or c:/Program Files (Windows). Running the below cmake command will
 #	set it to $prefix/deps. If you wish to install it elsewhere, simply
 #	set the environment variable to your preferred location.
-
-# The PYTHON_INCLUDE_DIRS environment variable can be set to the locations
-# of python and numpy/core include directories. See src/CMakeLists.txt for
-# how the include_directories is set.
 
 mkdir build; cd build
 cmake ..
@@ -95,10 +88,7 @@ ctest -T memcheck
 #
 
 sudo apt install cmake # Might need to manually update to 3.15+
-sudo apt install swig
 # sudo apt install liberfa-dev # optional, STARE contains a copy
-sudo apt install python3-numpy
-sudo apt install python3-dev
 sudo apt install g++
 
 ###########################################################################
@@ -108,10 +98,8 @@ sudo apt install g++
 
 sudo yum install epel-release
 # sudo yum install erfa-devel.x86_64 # optional, STARE contains a copy
-sudo yum install swig
 sudo yum install cmake3 # Might have to manually update to 3.15+
 sudo yum install gcc-c++
-sudo yum install python36-devel.x86_64
 sudo yum install devtoolset-3-gcc devtoolset-3-gcc-c++
 scl enable devtoolset-3 bash
 

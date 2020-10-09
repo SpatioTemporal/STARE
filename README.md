@@ -8,9 +8,6 @@ This release is being made in the hope it may be useful for early users wishing 
 
 An encoding for high-performance search and subsetting of geospatial data.
 
-### --THIS CODE IS UNDER HEAVY DEVELOPMENT--
-### --IT'S API AND NUMERICAL RESULTS MAY CHANGE--
-
 Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
@@ -28,6 +25,10 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
   STARE is made available at https://github.com/SpatioTemporal/STARE
   
   A Python API is at https://github.com/SpatioTemporal/pystare
+
+  A growing number of examples are available at https://github.com/SpatioTemporal/STARE-Cookbooks
+  
+  Please visit https://github.com/SpatioTemporal for more STARE-related resources.
 
 ---
 # ENCODING HIGHLIGHTS
