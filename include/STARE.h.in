@@ -30,6 +30,10 @@ typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_TemporalIntervals;
 typedef std::vector<STARE_ArrayIndexTemporalValue> STARE_ArrayIndexTemporalValues;
 
 #define STARE_VERSION "@VERSION@"
+#define STARE_VERSION_MAJOR @VERSION_MAJOR@
+#define STARE_VERSION_MINOR @VERSION_MINOR@
+#define STARE_VERSION_PATCH @VERSION_PATCH@
+#define STARE_VERSION_NOTE "@VERSION_NOTE@"
 
 // TODO Consider index vs. array index vs. collections of the same & set logic.
 
