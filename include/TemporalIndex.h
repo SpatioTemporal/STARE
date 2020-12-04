@@ -71,12 +71,12 @@ public:
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
 				    make_shared<BitField>("year",
-						pow(2,19)-1, // maxValue
-						19, // width
-						offset_base,
-						(13ll*28+1)*24*3600*1000,
-						fieldId++
-							 )
+							  pow(13,1)-1, // maxValue
+							  13, // width
+							  offset_base,
+							  (13ll*(13-1)+1)*24*3600*1000, // millisec in  a regularized (24-day) month
+							  fieldId++
+							  )
 		);
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
@@ -159,7 +159,7 @@ public:
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				make_shared<BitField>("resolution",
+				make_shared<BitField>("forward_resolution",
 						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
 						pow(2,6)-1, // maxValue
 						6, // width
@@ -169,6 +169,19 @@ public:
 						     )
 		);
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
+
+		bitFields.push_back(
+				make_shared<BitField>("reverse_resolution",
+						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
+						pow(2,6)-1, // maxValue
+						6, // width
+						offset_base,
+						-1, // time unit, not applicable
+						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
+						     )
+		);
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
+		
 
 		bitFields.push_back(
 				make_shared<BitField>("type",
@@ -184,7 +197,7 @@ public:
 
 		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
 		setFieldMaxId(fieldId-1);
-		setValue("type",2); //
+		setValue("type",1); //
 
 		/*
 		bitFields.push_back(
@@ -253,7 +266,8 @@ public:
 		// data = temporalWordFormat; // Copy the format
 		TemporalWordFormat data;
 		// data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
-		data.setValue("resolution",63);
+		data.setValue("forward_resolution",63);
+		data.setValue("reverse_resolution",63);
 	};
 	virtual ~TemporalIndex();
 	/**
@@ -269,7 +283,8 @@ public:
 			int64_t minute,
 			int64_t second,
 			int64_t millisecond,
-			int64_t resolution,
+			int64_t forward_resolution,
+			int64_t reverse_resolution,
 			int64_t type
 			)
 //	:
@@ -309,7 +324,8 @@ public:
 		SET_VALUE( minute );
 		SET_VALUE( second );
 		SET_VALUE( millisecond );
-		SET_VALUE( resolution );
+		SET_VALUE( forward_resolution );
+		SET_VALUE( reverse_resolution );
 		SET_VALUE( type );
 		// SET_VALUE( coResolutionLevel );
 #undef SET_VALUE
@@ -374,7 +390,8 @@ public:
 		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
-		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(forward_resolution)
+		SHIFT_AND_MASK(reverse_resolution)
 		SHIFT_AND_MASK(type)
 
 		// if(false) {
@@ -412,7 +429,8 @@ public:
 		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
-		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(forward_resolution)
+		SHIFT_AND_MASK(reverse_resolution)
 		SHIFT_AND_MASK(type)
 
 		// if(false) {
@@ -480,7 +498,8 @@ public:
 		SET(minute)
 		SET(second)
 		SET(millisecond)
-		SET(resolution)
+		SET(forward_resolution)
+		SET(reverse_resolution)
 		SET(type)
 #undef SET
 	}
@@ -577,14 +596,21 @@ public:
 	double daysAtResolution(int64_t resolution) const;
 	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
 	double getResolutionTimescaleDays() const {
-		return daysAtResolution(get_resolution());
+	  return daysAtResolution(max(get_forward_resolution(),get_reverse_resolution()));
+	}	
+	double getForwardResolutionTimescaleDays() const {
+		return daysAtResolution(get_forward_resolution());
+	}
+	double getReverseResolutionTimescaleDays() const {
+		return daysAtResolution(get_reverse_resolution());
 	}
 	/**
 	 * Set resolution to the finest level coarser than the resolutionDays input.
 	 */
 	TemporalIndex& setResolutionFromTimescaleDays( double resolutionDays ) {
 		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerThanMilliseconds( resolutionDays*86400.0e3 )-1);
-		set_resolution(resolutionLevel);
+		set_forward_resolution(resolutionLevel);
+		set_reverse_resolution(resolutionLevel);
 		return *this;
 	}
 
@@ -603,7 +629,8 @@ public:
 	SET(minute)
 	SET(second)
 	SET(millisecond)
-	SET(resolution)
+	SET(forward_resolution)
+	SET(reverse_resolution)
 	SET(type)
 	// SET(coResolutionLevel)
 #undef  SET
@@ -623,7 +650,8 @@ public:
 	GET(minute)
 	GET(second)
 	GET(millisecond)
-	GET(resolution)
+	GET(forward_resolution)
+	GET(reverse_resolution)
 	GET(type)
 	// GET(coResolutionLevel)
 #undef GET
@@ -689,7 +717,11 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 			ret =  1*CE_factor; done = true;
 		}
 		++iField;
-		 if( iField >= a.data.getFieldId("resolution") ){
+		 if( iField >= a.data.getFieldId("forward_resolution") ){
+			 done = true;
+		 }
+		++iField;
+		 if( iField >= a.data.getFieldId("reverse_resolution") ){
 			 done = true;
 		 }
 	} while (!done);
@@ -709,7 +741,8 @@ inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	// TemporalIndex* c = new TemporalIndex;
 	TemporalIndex c;
 	c.fromInt64Milliseconds(ab);
-	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	c.set_forward_resolution(min(a.get_forward_resolution(),b.get_forward_resolution()));
+	c.set_reverse_resolution(min(a.get_reverse_resolution(),b.get_reverse_resolution()));
 	return c;
 }
 
@@ -752,7 +785,8 @@ inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	// TemporalIndex* c = new TemporalIndex;
 	TemporalIndex c;
 	c.fromJulianTAI(cd1, cd2);
-	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	c.set_forward_resolution(min(a.get_forward_resolution(),b.get_forward_resolution()));
+	c.set_reverse_resolution(min(a.get_reverse_resolution(),b.get_reverse_resolution()));
 	return c;
 }
 

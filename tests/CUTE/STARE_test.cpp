@@ -507,7 +507,7 @@ void STARE_test() {
 
 	/* */
 
-	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(10).set_type(2);
+	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_forward_resolution(10).set_reverse_resolution(10).set_type(1);
 	if(globalPrintFlag) {
 	cout
 	<< "tI: " << index.tIndex.toStringJulianTAI()
@@ -519,7 +519,10 @@ void STARE_test() {
 	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (10) (2)",index.tIndex.toStringJulianTAI());
 	ASSERT_EQUAL(0x7d166dfbefe72a,index.getArrayIndexTemporalValue());
 
-	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999).set_resolution(20).set_type(2);
+	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999)
+	  .set_forward_resolution(20)
+	  .set_reverse_resolution(20)
+	  .set_type(2);
 	if(globalPrintFlag) {
 	cout
 	<< "tI: " << index.tIndex.toStringJulianTAI()
@@ -531,7 +534,10 @@ void STARE_test() {
 	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (20) (2)",index.tIndex.toStringJulianTAI());
 	ASSERT_EQUAL(0x7d166dfbefe752,index.getArrayIndexTemporalValue());
 
-	index1.tIndex.fromFormattedJulianTAI(2001, 7, 1, 0, 0, 0, 0).set_resolution(20).set_type(2);
+	index1.tIndex.fromFormattedJulianTAI(2001, 7, 1, 0, 0, 0, 0)
+	  .set_forward_resolution(20)
+	  .set_reverse_resolution(20)
+	  .set_type(2);
 	if(globalPrintFlag) {
 	cout
 	<< "tI: " << index1.tIndex.toStringJulianTAI()
@@ -557,7 +563,10 @@ void STARE_test() {
 		}
 		ASSERT_NOT_EQUAL_TO(index.tIndex,index1.tIndex);
 
-		index.tIndex.fromFormattedJulianTAI(2001, 5, 30, 12, 59, 59, 999).set_resolution(22).set_type(2);
+		index.tIndex.fromFormattedJulianTAI(2001, 5, 30, 12, 59, 59, 999)
+		  .set_forward_resolution(22)
+		  .set_reverse_resolution(22)
+		  .set_type(2);
 		index1.setArrayIndexTemporalValue(index.getArrayIndexTemporalValue());
 		ASSERT_EQUAL(index.tIndex,index1.tIndex);
 
@@ -657,9 +666,9 @@ void STARE_test() {
 		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
 		// }
 		time_t datetime = 0;
-		int resolution = 10;
-		int tValType       = 2;
-		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+		int forward_resolution = 10, reverse_resolution = 10;
+		int tValType       = 1;
+		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
 		// if(globalPrintFlag) {
 		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
 		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
@@ -709,9 +718,9 @@ void STARE_test() {
 			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
 			// }
 			time_t datetime = (30*365+7)*86400;
-			int resolution = 10;
-			int tValType       = 2;
-			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+			int forward_resolution = 10, reverse_resolution = 10;
+			int tValType       = 1;
+			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
 			// if(globalPrintFlag) {
 			cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
 			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
@@ -739,11 +748,11 @@ void STARE_test() {
 		{
 			cout << endl << "PySTARE debugging" << endl << flush;
 			STARE stare;
-			int resolution = 10;
-			int type = 2;
+			int forward_resolution = 10, reverse_resolution = 10;
+			int type = 1;
 			time_t datetime = (30*365+7)*86400;
 			// int64_t datetime = (30*365+7)*86400;
-			STARE_ArrayIndexTemporalValue idx = stare.ValueFromUTC(datetime, resolution, type);
+			STARE_ArrayIndexTemporalValue idx = stare.ValueFromUTC(datetime, forward_resolution, reverse_resolution, type);
 			stare.setArrayIndexTemporalValue(idx);
 			double jd19700101_erfa = 2440587.5;
 			double jd = stare.toJulianDayUTC();

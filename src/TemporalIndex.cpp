@@ -47,7 +47,8 @@ void TemporalIndex::checkBitFormat() {
 	OUTPUT(minute);
 	OUTPUT(second);
 	OUTPUT(millisecond);
-	OUTPUT(resolution);
+	OUTPUT(forward_resolution);
+	OUTPUT(reverse_resolution);
 	OUTPUT(type);
 	// OUTPUT(coResolutionLevel);
 	cout << dec;
@@ -175,7 +176,8 @@ string TemporalIndex::toStringJulianTAI() {
 	<< setw(2) << minute << ":"
 	<< setw(2) << second << "."
 	<< setw(3) << millisecond
-	<< " (" << setw(2) << data.getValue("resolution") << ")"
+	<< " (" << setw(2) << data.getValue("forward_resolution") << " "
+	<<         setw(2) << data.getValue("reverse_resolution") << ")"
 	<< " (" << setw(1) << data.getValue("type") << ")"
 	;
 	return ss.str();
@@ -210,8 +212,9 @@ TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	PARSE_INT(minute,2);
 	PARSE_INT(second,2);
 	PARSE_INT(millisecond,3);
-	++pos;
-	PARSE_INT(resolution,2);
+	++pos; // 2020-1112 mlr why? To match toString format... See above.
+	PARSE_INT(forward_resolution,2);
+	PARSE_INT(reverse_resolution,2);
 	++pos; ++pos;
 	PARSE_INT(type,1);
 #undef PARSE_INT
@@ -220,7 +223,8 @@ TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	}
 	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
 	this->fromFormattedJulianTAI(year, month, day_of_month, hour, minute, second, millisecond);
-	data.setValue("resolution",resolution);
+	data.setValue("forward_resolution",forward_resolution);
+	data.setValue("reverse_resolution",reverse_resolution);
 	data.setValue("type",type);
 	return *this;
 }
@@ -300,7 +304,8 @@ string TemporalIndex::stringInNativeDate() {
 	<< setw(2) << setfill('0') << data.getValue("minute") << ":"
 	<< setw(2) << setfill('0') << data.getValue("second") << "."
 	<< setw(3) << setfill('0') << data.getValue("millisecond")
-	<< " (" << setw(2) << data.getValue("resolution") << ")"
+	<< " (" << setw(2) << data.getValue("forward_resolution") << " "
+	<<         setw(2) << data.getValue("reverse_resolution") << ")"
 	<< " (" << setw(1) << data.getValue("type") << ")"
 	;
 
@@ -330,7 +335,9 @@ void TemporalIndex::fromNativeString(string nativeString) {
 	PARSE_INT(minute,2); ++pos;
 	PARSE_INT(second,2); ++pos;
 	PARSE_INT(millisecond,3); pos += 2;
-	PARSE_INT(resolutionLevel,2);
+	PARSE_INT(forward_resolution,2);
+	PARSE_INT(reverse_resolution,2);
+	// PARSE_INT(resolutionLevel,2);
 #undef PARSE_INT
 	data.setValue("BeforeAfterStartBit",1);
 }
@@ -406,7 +413,8 @@ int64_t TemporalIndex::scidbTemporalIndex() {
 			MASK_AND_SHIFT_REVERSE(babit,minute) |
 			MASK_AND_SHIFT_REVERSE(babit,second) |
 			MASK_AND_SHIFT_REVERSE(babit,millisecond) |
-			MASK_AND_SHIFT(1,resolution) |
+			MASK_AND_SHIFT(1,forward_resolution) |
+			MASK_AND_SHIFT(1,reverse_resolution) |
 			MASK_AND_SHIFT(1,type)
 			;
 	/*
@@ -488,14 +496,14 @@ int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
 int64_t TemporalIndex::scidbTerminator() {
 	//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
 	TemporalIndex tmpIndex(this->scidbTemporalIndex());
-	int64_t resolution = tmpIndex.get_resolution();
+	int64_t forward_resolution = tmpIndex.get_forward_resolution();
 
 	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-	tmpIndex.set_resolution(tmpIndex.data.get("resolution")->getMask());
+	tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
 
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
-	int64_t delta = tmpIndex.millisecondsAtResolution(resolution);
+	int64_t delta = tmpIndex.millisecondsAtResolution(forward_resolution);
 	int64_t t0    = tmpIndex.toInt64Milliseconds();
 	int64_t t1    = t0 + delta;
 	tmpIndex.fromInt64Milliseconds(t1);
@@ -514,14 +522,14 @@ int64_t TemporalIndex::scidbTerminator() {
 int64_t TemporalIndex::scidbTerminatorJulianTAI() {
 	int64_t idx_ = 0;
 	TemporalIndex tmpIndex(this->scidbTemporalIndex());
-	int64_t resolution = tmpIndex.get_resolution();
+	int64_t forward_resolution = tmpIndex.get_forward_resolution();
 
 	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-	tmpIndex.set_resolution(tmpIndex.data.get("resolution")->getMask());
+	tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
 
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
-	double delta = tmpIndex.daysAtResolution(resolution);
+	double delta = tmpIndex.daysAtResolution(forward_resolution);
 	double d1, d2;
 	tmpIndex.toJulianTAI(d1,d2);
 	tmpIndex.fromJulianTAI(d1,d2+delta);
@@ -533,9 +541,9 @@ int64_t TemporalIndex::scidbTerminatorJulianTAI() {
  * Determine if the stored index value is a terminator.
  */
 bool TemporalIndex::scidbTerminatorp() {
-	int64_t resolution = this->data.getValue("resolution");
-	// return resolution == 63;
-	return resolution == this->data.get("resolution")->getMask();
+	int64_t forward_resolution = this->data.getValue("forward_resolution");
+	// return forward_resolution == 63;
+	return forward_resolution == this->data.get("forward_resolution")->getMask();
 }
 
 TemporalIndex& TemporalIndex::set_zero() {
@@ -877,7 +885,6 @@ double TemporalIndex::daysAtResolution(const int64_t resolution) const {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 
-
 /**
  * Determine the resolution level immediately finer than the resolution given in milliseconds.
  *
@@ -905,7 +912,8 @@ int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseco
  */
 int64_t scidbMinimumTemporalIndex() {
 	TemporalIndex tIndex;
-	tIndex.setZero().set_year(262143).set_type(2);
+	tIndex.setZero().set_year(8192/2).set_type(1);
+	// tIndex.setZero().set_year(262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
 }
 
@@ -914,7 +922,8 @@ int64_t scidbMinimumTemporalIndex() {
  */
 int64_t scidbMaximumTemporalIndex() {
 	TemporalIndex tIndex;
-	tIndex.setZero().setEOY(1,262143).set_type(2);
+	tIndex.setZero().setEOY(1,8192/2).set_type(1);
+	// tIndex.setZero().setEOY(1,262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
 }
 
