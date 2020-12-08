@@ -71,10 +71,10 @@ public:
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
 				    make_shared<BitField>("year",
-							  pow(13,1)-1, // maxValue
+							  pow(2,13)-1, // maxValue
 							  13, // width
 							  offset_base,
-							  (13ll*(13-1)+1)*24*3600*1000, // millisec in  a regularized (24-day) month
+							  (13ll*28+1)*24*3600*1000, // months times millisec in  a regularized (24-day) month, plus one day for leap stuff
 							  fieldId++
 							  )
 		);
