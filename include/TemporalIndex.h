@@ -244,7 +244,7 @@ static const int64_t YearNativeCanonicalInMS_i64 = 31536000000; // 365  *86400  
 
 // TODO Question: Am I working myself towards an n-adic template?
 /**
- * TemporalIndex defines a particular temporal index, in this case type=2.
+ * TemporalIndex defines a particular temporal index, in this case type=1.
  * The constructor and the set_* methods are low level methods and do not
  * check bounds. Other methods can be defined that provide a higher level
  * API that includes such checks. We need at least one set of low-level

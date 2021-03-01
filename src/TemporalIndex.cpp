@@ -477,7 +477,7 @@ int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
 	//	return iPos+1;
 }
 
-/*
+/**
  *
  * Use native milliseconds to set the terminator. A terminator is an upper bound to a temporal interval. It corresponds
  * to a particular time, but has a special resolution encoding marking it as a terminator.

@@ -393,7 +393,7 @@ void TemporalIndex_test() {
 	int64_t offsetTop = tIndex.data.get("year")->getOffset()+tIndex.data.get("year")->getWidth()-1;
 	TemporalIndex tIndex2, tIndex3, tIndex4;
 	// Big year veresion tIndex2.fromFormattedJulianTAI(262144, 12, 31, 23, 59, 59, 999);
-	tIndex2.fromFormattedJulianTAI(8192, 12, 31, 23, 59, 59, 999);
+	tIndex2.fromFormattedJulianTAI(8192-1, 12, 31, 23, 59, 59, 999);
 
 	if(globalPrintFlag) {
 
@@ -412,9 +412,9 @@ void TemporalIndex_test() {
 			tIndex = TemporalIndex(iBit);
 			TAG(731)
 			// tIndex.data.setValue("BeforeAfterStartBit",1);
-			tIndex.data.setValue("resolution",iResolution);
+			tIndex.data.setValue("forward_resolution",iResolution);
 			TAG(732)
-			tIndex.data.setValue("type",2);
+			tIndex.data.setValue("type",1);
 			TAG(733)
 			// tIndex.data.print();
 			cout << setw(2) << setfill('0') << dec << i << hex;
@@ -508,8 +508,8 @@ void TemporalIndex_test() {
 	// cout << "tI3: " << tIndex3.toStringJ() << endl << flush;
 	// cout << "tI4: " << tIndex4.toStringJ() << endl << flush;
 
-	ASSERT_EQUAL("0 000000003-03-26 00:00:00.000 (62) (1)",tIndex3.toStringJulianTAI());
-	ASSERT_EQUAL("0 000000002-03-26 00:00:00.000 (63) (1)",tIndex4.toStringJulianTAI());
+	ASSERT_EQUAL("0 000000003-03-26 00:00:00.000 (62 62) (1)",tIndex3.toStringJulianTAI());
+	ASSERT_EQUAL("0 000000002-03-26 00:00:00.000 (63 63) (1)",tIndex4.toStringJulianTAI());
 /*
 	failureMessage = "'";
 	try {
@@ -703,7 +703,8 @@ void TemporalIndex_test() {
 		}
 
 		ASSERT_EQUAL(tIndex.bitOffsetCoarsest(),62);
-		ASSERT_EQUAL(tIndex.bitOffsetFinest(),8);
+		// old type 2 ASSERT_EQUAL(tIndex.bitOffsetFinest(),8);
+		ASSERT_EQUAL(tIndex.bitOffsetFinest(),14);
 		ASSERT_EQUAL(tIndex.bitOffsetResolution(10),52);
 		ASSERT_EQUAL(tIndex.bitfieldIdFromResolution(10),1);
 
@@ -777,15 +778,23 @@ void TemporalIndex_test() {
 		cout << endl << flush;
 		cout << "a" << endl << flush;
 		cout << "tI3:  idx: 0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTemporalIndex() << dec << endl << flush;
-		cout << "tI3: term: 0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTerminator() << " " << dec << tIndex3.scidbTerminatorp() << endl << flush;
-		cout << "tI4: term: 0x" << setw(16) << setfill('0') << hex << tIndex4.scidbTerminator() << " " << dec << tIndex4.scidbTerminatorp() << endl << flush;
+		cout << "tI3: term: 0x" << setw(16) << setfill('0') << hex << tIndex3.scidbTerminator() << " " << dec << tIndex3.scidbTerminatorp() << endl << flush; // Not a terminator?
+		cout << "tI4: term: 0x" << setw(16) << setfill('0') << hex << tIndex4.scidbTerminator() << " " << dec << tIndex4.scidbTerminatorp() << endl << flush; // A terminator?
 	}
 
+	ASSERT_EQUALM("tI3:  idx:",0x0004000000000a29,tIndex3.scidbTemporalIndex());
+	ASSERT_EQUALM("tI3: term:",0x0014000000003f29,tIndex3.scidbTerminator());
+	ASSERT_EQUAL(0, tIndex3.scidbTerminatorp());
+	ASSERT_EQUALM("tI4: term:",0x0014000000003f29,tIndex4.scidbTerminator());
+	ASSERT_EQUAL(1,tIndex4.scidbTerminatorp());
+	
+	/*
 	ASSERT_EQUALM("tI3:  idx:",0x000010000000002a,tIndex3.scidbTemporalIndex());
 	ASSERT_EQUALM("tI3: term:",0x00101000000000fe,tIndex3.scidbTerminator());
 	ASSERT_EQUAL(0, tIndex3.scidbTerminatorp());
 	ASSERT_EQUALM("tI4: term:",0x00101000000000fe,tIndex4.scidbTerminator());
 	ASSERT_EQUAL(1,tIndex4.scidbTerminatorp());
+	*/
 
 	tIndex3.set_year(0);
 	// tIndex3.set_year(1);
@@ -946,12 +955,14 @@ void TemporalIndex_test() {
 	tIndex = TemporalIndex(max_coordinate); INDEX_OUT(++tag_id,tIndex);
 	// .set_year(262143)
 	if(globalPrintFlag) { cout << "Native maximum (scidb)" << endl << flush; }
-	tIndex.setZero().setEOY(1,262143);INDEX_OUT(++tag_id,tIndex);
+	// tIndex.setZero().setEOY(1,262143);INDEX_OUT(++tag_id,tIndex);
+	tIndex.setZero().setEOY(1,8191);INDEX_OUT(++tag_id,tIndex);
 	tIndex1 = TemporalIndex(tIndex.scidbTerminator()); INDEX_OUT(++tag_id,tIndex1);
 	if(globalPrintFlag) { cout << "-" << endl << flush; }
 	tIndex.setZero()
 			.set_BeforeAfterStartBit(1)
-			.set_year(262144)
+			.set_year(8191)
+	  //			.set_year(262144)
 		; INDEX_OUT(++tag_id,tIndex);
 	if(globalPrintFlag) { cout << "-" << endl << flush; }
 
@@ -985,7 +996,8 @@ void TemporalIndex_test() {
 
 		cout << endl << flush;
 		cout << "Native minimum (scidb)" << endl << flush;
-		tIndex.setZero().set_year(262143);   	INDEX_OUT(++tag_id,tIndex);
+		// tIndex.setZero().set_year(262143);   	INDEX_OUT(++tag_id,tIndex);
+		tIndex.setZero().set_year(8191);   	INDEX_OUT(++tag_id,tIndex);
 		cout << "nat-min0 " << scidbMinimumTemporalIndex() << endl << flush;
 		cout << "nat-min > sci-min: " << (tIndex.scidbTemporalIndex() > min_coordinate) << endl << flush;
 		tIndex = TemporalIndex(scidbMinimumTemporalIndex()); INDEX_OUT(++tag_id,tIndex);
