@@ -9,6 +9,7 @@
 
 #include "Test.h"
 #include "SpatialPolygon.h"
+#include "data/sids.h"
 
 class srange {
 public:
@@ -46,6 +47,25 @@ public:
 // #define DIAG
 
 void SpatialRange_test () {
+
+  {
+    cout << "1000 " << endl << flush;
+    int sivlen = 1000;
+    // STARE_ArrayIndexSpatialValue siv[sivlen];
+    STARE_SpatialIntervals sivs(sids, sids + sivlen);
+    SpatialRange sr(sivs);
+    cout << "1100 " << endl << flush;
+  }
+
+  {
+    cout << "1200 " << endl << flush;
+    int sivlen = 10000;
+    // STARE_ArrayIndexSpatialValue siv[sivlen];
+    STARE_SpatialIntervals sivs(sids, sids + sivlen);
+    SpatialRange sr(sivs);
+    cout << "1300 " << endl << flush;
+  }
+  
 
 	STARE index;
 	STARE_ArrayIndexSpatialValue siv = index.ValueFromLatLonDegrees( 30, 30, 8 );

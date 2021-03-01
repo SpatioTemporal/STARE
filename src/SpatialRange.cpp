@@ -34,10 +34,16 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
  *
  * TODO: Have a SpatialRange class instead of an HstmRange?
  */
-// #define DIAG
+#define DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	EmbeddedLevelNameEncoding leftJustified;
+#ifdef DIAG
+  int count = 0;
+#endif  
 	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
+#ifdef DIAG
+    cout << "sr::adsi count = " << ++count << endl << flush;
+#endif
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
 		uint64 a = leftJustified.getId(), b = a;
 		auto i1 = (i0+1);
@@ -60,10 +66,12 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 #endif
 		this->range->addRange(a,b);
 #ifdef DIAG
+    cout << "sr::addsi addRange done" << endl << flush;    
 		cout << "sr::addsi nr = " << this->range->range->nranges() << endl << flush;
 #endif
 	}
 }
+#undef DIAG
 
 // #define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {

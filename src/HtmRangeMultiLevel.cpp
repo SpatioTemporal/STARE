@@ -557,12 +557,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 
 	errorCount = 0;
 	// TODO Main routine to modify to enable multi-level ranges.
-//	cout << "8000 " << hex
-//			<< "0x"	<< setfill('0') << setw(16) << lo
-//			<< ", 0x" << setfill('0') << setw(16) << hi
-//			<< endl << flush;
-//	cout << "8001 " << dec << "  " << lo << ",   " << hi << endl << flush;
-
+	cout << "8000 " << hex
+       << "0x"	<< setfill('0') << setw(16) << lo
+       << ", 0x" << setfill('0') << setw(16) << hi
+       << endl << flush;
+	cout << "8001 " << dec << "  " << lo << ",   " << hi << endl << flush;
+  
 	// Add the first one.
 	if( my_los->myHeader->getElement(0) == NIL ) {
 		// my_los->insert(lo,100);
@@ -572,7 +572,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 		return;
 	}
 
-//	cout << "8000-400" << endl << flush;
+	cout << "8000-400" << endl << flush;
 
 	// TInsideResult loFlag = tinside(lo);
 	// int lo_flag = loFlag.incl;
@@ -582,12 +582,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 
 	// TODO I think loFlag and hiFlag can help with the logic below.
 
-//	cout << "8000-500" << endl << flush;
+	cout << "8000-500" << endl << flush;
 	// New stuff.
 
 	uint32 level = encoding->levelById(lo);
 
-//	cout << "8000-600" << endl << flush;
+	cout << "8000-600" << endl << flush;
 
 	// Possible values:
 	//   loFlag:  InclInside, InclLo, InclHi, InclOutside
@@ -598,12 +598,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	my_los->reset();
 	my_his->reset();
 
-//	cout << "8000-700" << endl << flush;
+	cout << "8000-700" << endl << flush;
 
 	Key lo1 = lo, hi1 = hi;
 	Key l, h;
 	bool done = false;
-//	cout << "8000-1000-while" << endl << flush;
+	cout << "8000-1000-while" << endl << flush;
 // 2019-1212 ORIG	while(((l = my_los->getkey()) >= 0) && (not done) ){
 	while( (not done) ){
 	  l = my_los->getkey();
@@ -611,31 +611,39 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 		h = my_his->getkey();
 		uint32 l_level = encoding->levelById(l);
 
-//		cout << "8000-1001-lo1,hi1: " << lo1 << " " << hi1 << " " << level << endl << flush;
-//		cout << "8000-1002-    l,h: " << l << " " << h << " " << l_level << endl << flush;
-//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+		cout << "8000-1001-lo1,hi1: " << lo1 << " " << hi1 << " " << level << endl << flush;
+		cout << "8000-1002-    l,h: " << l << " " << h << " " << l_level << endl << flush;
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 ////		cout << endl << flush;
-//		hexOut("lh1 ",lo1,hi1);
-//		hexOut("lh  ",l,h);
-//#undef hexOut
+		hexOut("lh1 ",lo1,hi1);
+		hexOut("hh  ",h,h);
+		hexOut("lh  ",l,h);
+#undef hexOut
 		if ( h < lo1 ) {
 		  // Case NOT-YET-THERE.
-//			cout << "Don't know what's above h. Iterate." << endl << flush;
-//			errorCount++; if(errorCount>errorCountMax) {
-//				cout << "HRML::Iterate::errorCount" << endl << flush;
+			cout << "Don't know what's above h. Iterate." << endl << flush;
+			errorCount++; if(errorCount>errorCountMax) {
+				cout << "HRML::Iterate::errorCount" << endl << flush;
 //				exit(1);
-//			}
-			my_los->step(); my_his->step();
+			}
+      cout << "8000-1010 not-yet-there" << endl << flush;
+			my_los->step();
+      cout << "8000-1012 not-yet-there" << endl << flush;
+      my_his->step();
+      cout << "8000-1013 not-yet-there" << endl << flush;
 			// Don't know what's above h.  Iterate.
 		} else if( hi1 < l ) {
 			// Case 1. A is below B.  Just add
+      cout << "8000-1014 Case 1 a<b just add" << endl << flush;
 			// my_los->insert(lo1,10001);
 			my_los->insert(lo1,hi1);
+      cout << "8000-1015 Case 1 a<b just add" << endl << flush;
 			my_his->insert(hi1,10001);
+      cout << "8000-1016 Case 1 a<b just add" << endl << flush;
 			done = true;
 		} else if( (lo1 < l) && ( (l <= hi1) && (hi1 <= h) ) ) {
 			// Case 2. A.lo is below B.lo, but A.hi is in B.
-//			cout << "8000-103x" << endl << flush;
+			cout << "8000-103x" << endl << flush;
 			// The upper end of the new interval overlaps the current one, but not its lower part. Do surgery.
 			// Bounds of the lower part below the current interval.
 			Key l_m = lo1;
@@ -655,7 +663,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			}
 			Key h_p = h;    // No change. Level is correct.
 			if( level == l_level ) { // Case 2.1 Merge.
-//				cout << "8000-1030" << endl << flush;
+				cout << "8000-1030" << endl << flush;
 				// At the same level, merge the two.
 				my_los->freeRange(l_m,h_p); // Freeing up to h_p is okay because h_p==h is still part of current interval.
 				my_his->freeRange(l_m,h_p);
@@ -665,7 +673,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			} else {
 				// The lower part overlaps an empty part. Just add.  // ??? Don't need a freeRange ??? Okay...
 				if(level > l_level) {
-//					cout << "8000-1031" << endl << flush;
+					cout << "8000-1031" << endl << flush;
 					// If the new interval's level is greater, just skip in the current, add before.
 					// my_los->insert(l_m,100022);
 					my_los->insert(l_m,h_m);
@@ -674,14 +682,14 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 					// TODO WORRY -- What about collisions? If we have a collision, will we simply put in the value back in?
 					// If the new level is lower than the current, then the new lower level wins. Current is trimmed.
 					// Rewrite the current.
-//					cout << "8000-1032" << endl << flush;
+					cout << "8000-1032" << endl << flush;
 //					if(l_m == 0x7500000000000002) {
-//#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
-//						hexOut("lm-hm ",l_m,h_m);
-//						hexOut("l0-h0 ",l_0,h_0);
-//						hexOut("lp-hp ",l_p,h_p);
-//						cout << " h_0 " << h_0 << endl << flush;
-//#undef hexOut
+// #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+// 						hexOut("lm-hm ",l_m,h_m);
+//             hexOut("l0-h0 ",l_0,h_0);
+// 						hexOut("lp-hp ",l_p,h_p);
+// 						cout << " h_0 " << h_0 << endl << flush;
+// #undef hexOut
 //					}
 					my_los->freeRange(l_m,h_p);
 					my_his->freeRange(l_m,h_p);
@@ -699,19 +707,19 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			// Done!
 			done = true;
 		} else if( (lo1 < l) && (h < hi1) ) {
-//			cout << "HRML::Case 4.2/4.4 A covers B." << endl << flush;
+			cout << "HRML::Case 4.2/4.4 A covers B." << endl << flush;
 			// Case 4.2 A covers B.
 			// Test.cpp 4.4.1
 			if( level <= l_level ) { // New interval wins.
-//				cout << "4.2.2" << endl << flush;
+				cout << "4.2.2" << endl << flush;
 				// Case 4.2.2
 				my_los->freeRange(l,h);
 				my_his->freeRange(l,h);
 				// Keep lo1 and h1 and try again.
 				// Where does the iterator go?
-//				cout << "4.2.2 end" << endl << flush;
+				cout << "4.2.2 end" << endl << flush;
 			} else if( level > l_level ) { // Current interval wins.
-//				cout << "HRML::4.2.1" << endl << flush;
+				cout << "HRML::4.2.1" << endl << flush;
 				// Case 4.2.1
 				Key l_m = lo1;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(l,level); // TODO Verify no gaps
@@ -740,7 +748,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			my_los->reset(); my_his->reset();
 			// huh? -> 			my_los->freeRange(l_m,h_p);	my_his->freeRange(l_m,h_p);
 		} else if ( (l <= lo1) && (hi1 <= h) ) {
-//			cout << "HRML::Case 4. A is in B." << endl << flush;
+			cout << "HRML::Case 4. A is in B." << endl << flush;
 			// Case 4. A is in B.
 			if( level >= l_level ) {
 				// Ignore. Triangles already included.
@@ -750,12 +758,12 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				// Test.cpp 4.3 Collision at the end.
 				Key l_m = l;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
-//				if(l_m>h_m) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 PRED WARNING. BOUNDS EQUIVALENT" << endl << flush;
+				if(l_m>h_m) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 PRED WARNING. BOUNDS EQUIVALENT" << endl << flush;
 				Key l_0 = lo1;
 				Key h_0 = hi1;
 				Key l_p = encoding->successorToTerminator_NoDepthBit(hi1,l_level);
 				Key h_p = h;
-//				if(l_p>h_p) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 SUCC WARNING. BOUNDS EQUIVALENT" << endl << flush;
+				if(l_p>h_p) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 SUCC WARNING. BOUNDS EQUIVALENT" << endl << flush;
 				// Blow away the old and add the three.
 				my_los->freeRange(l_m,h_p);
 				my_his->freeRange(l_m,h_p);
@@ -777,10 +785,10 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			}
 		} else if ( (l <= lo1) && (h < hi1) ) { // Note the case h < lo1 is handled above.
 			// Case 5.
-//			cout << "HRML::Case 5" << endl << flush;
+			cout << "HRML::Case 5" << endl << flush;
 			if ( level >= l_level ) {
 				// Case 5.1
-//				cout << "HRML::Case 5.1" << endl << flush;
+				cout << "HRML::Case 5.1" << endl << flush;
 				//+ Key l_m = l; // Note:  no need to add...
 				//+ Key h_m = h;
 				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // Might map l_p > h_p.
@@ -794,14 +802,14 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 					hi1 = h_p;
 					return; // without stepping.  Try again.
 				}
-//				cout << "m " << l_m << " " << h_m << endl << flush;
-////				cout << "0 " << l_0 << " " << h_0 << endl << flush;
-//				cout << "p " << l_p << " " << h_p << endl << flush;
-//				cout << hex << "m " << l_m << " " << h_m << dec << endl << flush;
-////				cout << "0 " << l_0 << " " << h_0 << endl << flush;
-//				cout << hex << "p " << l_p << " " << h_p << dec << endl << flush;
-//				// cout << "? " << encoding->successorToTerminator_NoDepthBit(h,l_level) << endl << flush;
-//				// update for iteration
+// 				cout << "m " << l_m << " " << h_m << endl << flush;
+// //				cout << "0 " << l_0 << " " << h_0 << endl << flush;
+// 				cout << "p " << l_p << " " << h_p << endl << flush;
+// 				cout << hex << "m " << l_m << " " << h_m << dec << endl << flush;
+// //				cout << "0 " << l_0 << " " << h_0 << endl << flush;
+// 				cout << hex << "p " << l_p << " " << h_p << dec << endl << flush;
+				// cout << "? " << encoding->successorToTerminator_NoDepthBit(h,l_level) << endl << flush;
+				// update for iteration
 				errorCount++; if(errorCount>errorCountMax) {
 					cout << "HRML::5.1::errorCount" << endl << flush;
 					exit(1);
@@ -811,7 +819,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				my_los->step(); my_his->step(); // Didn't change skiplists.
 			} else if ( level < l_level ) {
 				if(true){
-//				cout << "HRML::Case 5.2" << endl << flush;
+				cout << "HRML::Case 5.2" << endl << flush;
 				Key l_m = l;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
 				Key l_0 = lo1;
@@ -842,7 +850,10 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			cout << "8000-9999 ERROR" << endl << flush;
 			exit(1);
 		}
+    cout << "8000-9999-100 okay exit" << endl << flush;
 	}
+
+  cout << "8000-9999-200 okay exit" << endl << flush;
 
 	if(not done) {
 		// The new interval goes at the end of the skiplists.
@@ -853,6 +864,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 		done = true;
 	}
 
+	cout << dec << 9000 << endl << flush;
+  
 	return;
 
 //	cout << dec << 9000 << endl << flush;
@@ -874,6 +887,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
  */
 void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
+
+#define DIAG
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)... Like storing hi...
 //	my_his->insert(hi, (Value) 0);
 	// cout << "x200: " << hex << lo << " " << hi << endl;
@@ -885,12 +900,16 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 		mergeRange(lo,encoding->getIdTerminator_NoDepthBit());
 	} else {
 		// TODO Simplest thing that might possibly work.
-		// cout << "x250: " << hex << lo << " " << hi << endl;
+#ifdef DIAG
+		cout << "x250: " << hex << lo << " " << hi << endl;
+#endif
 		// TODO should we coerce hi to be a terminator?
 		mergeRange(lo,hi);
 	}
 	return;
 }
+#undef DIAG
+
 void HtmRangeMultiLevel::addRange(const Key lohi)
 {
 //	cout << "x100: " << hex << lohi << endl;
@@ -1238,17 +1257,17 @@ void HtmRangeMultiLevel::reset()
 /// The number of ranges.
 int HtmRangeMultiLevel::nranges()
 {
-	// cout << "z000" << endl << flush;
-	Key lo;
-	// Key hi;
+	cout << "z000" << endl << flush;
+	Key lo; Value lo_value;
+	Key hi; Value hi_value;
 	int n_ranges;
 	n_ranges = 0;
-	// cout << "z001" << endl << flush;
-	// cout << "z001 my_los " << hex << my_los << dec << endl << flush;
+	cout << "z001" << endl << flush;
+	cout << "z001 my_los " << hex << my_los << dec << endl << flush;
 	my_los->reset();
-	// cout << "z002" << endl << flush;
+	cout << "z002" << endl << flush;
 	my_his->reset();
-	// cout << "z010" << endl << flush;
+	cout << "z010" << endl << flush;
 
 	// This is a problem when lo can be zero. Is it?
 	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327
@@ -1256,15 +1275,23 @@ int HtmRangeMultiLevel::nranges()
 	// OLD while((lo = my_los->getkey()) > 0){
 	while((lo = my_los->getkey()) >= 0){
 		n_ranges++;
-//		cout << "z020 " << n_ranges << flush;
-		// hi = my_his->getkey();
-		my_his->getkey();
-//		cout << " : " << lo << ", " << hi << " " << flush << endl;
+    cout << "z020 " << n_ranges << flush;
+		hi = my_his->getkey();
+		// my_his->getkey();
+    lo_value = my_los->getvalue();
+    hi_value = my_his->getvalue();
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec    
+		cout << " : "
+         << "( " << FMTX(lo) << ", " << FMTX(lo_value) << " ) "
+         << "( " << FMTX(hi) << ", " << hi_value << " ) "
+         << flush << endl;
+#undef FMTX
+		// cout << " : " << lo << flush << endl;
 		my_los->step();
 		my_his->step();
 	}
 
-//	cout << "z100" << endl << flush;
+	cout << "z100" << endl << flush;
 
 	return n_ranges;
 }

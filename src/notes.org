@@ -1,0 +1,24 @@
+
+
+* 2021-0301-0411-47-UTC SpatialRange Crash Bug Notes
+
+From HtmRangeMultiLevel::nranges
+
+From the SkipLists
+
+id   pos  my_los (key,value)                     my_his (key,value)
+z020 58 : ( 3f3e7dbe8effaa8c, 3f3e7dbfffffffff ) ( 3f3e7dbfffffffff, 100021 ) 
+z020 59 : ( 3f3e7dd334a31fcb, 3f3e7dffffffffff ) ( 3f3e7dffffffffff, 10001 ) 
+z020 60 : ( 3f3e7e000000000b, 3f3e7dffffffffff ) ( 3f3e7fafffffffff, 10001 ) 
+z020 61 : ( 3f3e7fa7927b570c, 3f3e7fafffffffff ) ( 3f3e7fbfffffffff, 100021 ) 
+z020 62 : ( 3f3e7fbb5bd2e14c, 3f3e7fbfffffffff ) ( 3f3ea0ffffffffff, 100021 ) 
+
+** Note Line 60, lo.value != hi.key, an error.
+
+** Also note we have a terminator collision for 59 and 60, which is probably the source of the trouble.
+
+** The error probably occurred with the collision. 
+
+** Most likely 60:( 3f3e7e000000000b, 3f3e7dffffffffff ) should have been dropped as already being a part of 59:( 3f3e7dd334a31fcb, 3f3e7dffffffffff ).
+
+
