@@ -21,4 +21,6 @@ z020 62 : ( 3f3e7fbb5bd2e14c, 3f3e7fbfffffffff ) ( 3f3ea0ffffffffff, 100021 )
 
 ** Most likely 60:( 3f3e7e000000000b, 3f3e7dffffffffff ) should have been dropped as already being a part of 59:( 3f3e7dd334a31fcb, 3f3e7dffffffffff ).
 
+** Note 60:( 3f3e7e000000000b, 3f3e7dffffffffff ), the term is < lo, so is the wrong terminator. It looks like the predecessor. So maybe a botched segmentation?
+
 

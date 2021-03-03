@@ -606,7 +606,9 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	cout << "8000-1000-while" << endl << flush;
 // 2019-1212 ORIG	while(((l = my_los->getkey()) >= 0) && (not done) ){
 	while( (not done) ){
+    cout << "8000-1001-while-----" << endl << flush;
 	  l = my_los->getkey();
+    cout << "8000-1001-000 l: " << hex << l << dec << endl << flush;
 	  if( l < 0 ) break;
 		h = my_his->getkey();
 		uint32 l_level = encoding->levelById(l);
@@ -621,7 +623,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 #undef hexOut
 		if ( h < lo1 ) {
 		  // Case NOT-YET-THERE.
-			cout << "Don't know what's above h. Iterate." << endl << flush;
+			cout << "Don't know what's above h. Iterate. " << errorCount + 1 << endl << flush;
 			errorCount++; if(errorCount>errorCountMax) {
 				cout << "HRML::Iterate::errorCount" << endl << flush;
 //				exit(1);
@@ -818,18 +820,60 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				hi1 = h_p;
 				my_los->step(); my_his->step(); // Didn't change skiplists.
 			} else if ( level < l_level ) {
+///////////////////////////////////////////////////////////////////////////
+/// 8000-1001-while-----
+/// 8000-1001-000 l: 3f3e7dd29ef6348c
+/// 8000-1001-lo1,hi1: 4557218219020197835 4557218411410620415 11
+/// 8000-1002-    l,h: 4557218216509060236 4557218273971666943 12
+/// lh1  0x3f3e7dd334a31fcb..3f3e7dffffffffff
+/// hh   0x3f3e7ddfffffffff..3f3e7ddfffffffff
+/// lh   0x3f3e7dd29ef6348c..3f3e7ddfffffffff
+/// HRML::Case 5
+/// HRML::Case 5.2
+/// 8000-9999-100 okay exit, done = 0
+/// 8000-1001-while-----
+/// 8000-1001-000 l: 3f159921c28ef809
+/// 8000-1001-lo1,hi1: 4557218411410620427 4557218411410620415 11
+/// 8000-1002-    l,h: 4545707769177503753 4545710922714316799 9
+/// lh1  0x3f3e7e000000000b..3f3e7dffffffffff
+/// hh   0x3f159bffffffffff..3f159bffffffffff
+/// lh   0x3f159921c28ef809..3f159bffffffffff
+///////////////////////////////////////////////////////////////////////////
+        /*
+          Note we have the complication that the levels are different.
+
+          level(l1) < level(l) (l1 is coarser than l). In the bug case level(l1)==b, level(l)==c.
+          
+          Need to review Case 5.2. Here we have lh1 (the interval to be added), with h1>h, where h is the current hi in my_his.
+          Thus we have: l < l1 < h < h1.
+
+          NOT THIS: We should remove l..h and add l..h1. 
+
+          We should remove l..h and add l..l1--@level(l) and l1..h1. <- verify...
+
+          This is what the following code attempts to do at present.
+
+         */
 				if(true){
 				cout << "HRML::Case 5.2" << endl << flush;
+
+        // Low segment. To add in. l's level.
 				Key l_m = l;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
+
+        // Next segment To add in. l1's level.
 				Key l_0 = lo1;
 				Key h_0 = h; // But need to adjust to avoid creating holes. // Note this has the wrong level compared to l_0.
-				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level);
+
+        // Any leftover? Try again.
+				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // BUG: Found a case where h_p < l_p !?? Note: level for lo1
 				h_0 = encoding->predecessorToLowerBound_NoDepthBit(l_p,level); // level is the level of lo1
-				Key h_p = hi1;
+				Key h_p = hi1; // BUG: This is the old term
+        
 				// Blow away the old and add two and defer the third.
 				my_los->freeRange(l_m,h_0);
 				my_his->freeRange(l_m,h_0);
+        
 				// TODO NOTE:  When predecessor is used, you have to check to see if pred(b) is less than inf(interval).
 				if( l_m < h_m ) { // If l_m and l_0 are "equivalent", so the current interval wins and we ignore interval_m.
 					// my_los->insert(l_m,100052);
@@ -844,14 +888,15 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				hi1 = h_p;
 				my_los->reset(); my_his->reset(); // TODO Is this too conservative? Where should the iter be?
 				}
+///////////////////////////////////////////////////////////////////////////
 //				done = true;
 			}
 		}  else {
 			cout << "8000-9999 ERROR" << endl << flush;
 			exit(1);
 		}
-    cout << "8000-9999-100 okay exit" << endl << flush;
-	}
+    cout << "8000-9999-100 okay exit, done = " << done << endl << flush;
+	} // while( (not done) ) // line 608 cf 8000-1000-while
 
   cout << "8000-9999-200 okay exit" << endl << flush;
 
@@ -859,6 +904,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 		// The new interval goes at the end of the skiplists.
 		// Case 6. We're at the top.  Just add.
 		// my_los->insert(lo1,10006);
+    cout << "8000-9999-300 l1,h1: " << hex << lo1 << " " << hi1 << dec << endl << flush;
 		my_los->insert(lo1,hi1);
 		my_his->insert(hi1,10006);
 		done = true;

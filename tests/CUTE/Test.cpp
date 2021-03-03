@@ -2496,6 +2496,24 @@ void htmRangeMultiLevel() {
   //	cout << "b. nr: " << range.nranges() << endl << flush;
   //	cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
 
+  range.purge();
+  range.addRange( 0x3f3e7dbe8effaa8c, 0x3f3e7dbfffffffff );
+  range.addRange( 0x3f3e7dd334a31fcb, 0x3f3e7dffffffffff );
+  // range.addRange( 0x3f3e7e000000000b, 0x3f3e7dffffffffff ); // In the wild but incorrect.
+  range.addRange( 0x3f3e7fa7927b570c, 0x3f3e7fafffffffff );
+  range.addRange( 0x3f3e7fbb5bd2e14c, 0x3f3e7fbfffffffff );
+
+#define CHECK(lo,term) {range.getNext(lo1,terminator1); ASSERT_EQUAL(lo,lo1); ASSERT_EQUAL(term,terminator1);}
+
+  range.reset();
+  
+  CHECK( 0x3f3e7dbe8effaa8c, 0x3f3e7dbfffffffff );
+  CHECK( 0x3f3e7dd334a31fcb, 0x3f3e7dffffffffff );
+  // CHECK( 0x3f3e7e000000000b, 0x3f3e7dffffffffff ); // In the wild, but incorrect.
+  CHECK( 0x3f3e7fa7927b570c, 0x3f3e7fafffffffff );
+  CHECK( 0x3f3e7fbb5bd2e14c, 0x3f3e7fbfffffffff );
+
+#undef CHECK
 
 }
 
