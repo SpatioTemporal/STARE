@@ -868,7 +868,9 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
         // Any leftover? Try again.
 				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // BUG: Found a case where h_p < l_p !?? Note: level for lo1
 				h_0 = encoding->predecessorToLowerBound_NoDepthBit(l_p,level); // level is the level of lo1
-				Key h_p = hi1; // BUG: This is the old term
+				Key h_p = hi1; // BUG: This is the old term, but we get hi1 < l_p...
+        // Does this mean that in getting coarser, we lost the ability to distinguish between h and h1?
+        // So instead of going from l < l1 < h < h1 to l..l1-, l1..h, h+..h1, we only do l..l1-,l1..h1. I.e. h1 ate h.
         
 				// Blow away the old and add two and defer the third.
 				my_los->freeRange(l_m,h_0);
@@ -882,10 +884,10 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				}
 				// my_los->insert(l_0,100052);
 				my_los->insert(l_0,h_0);
-				my_his->insert(h_0,100052); // TODO Subtle bug?  Need to verify edge case.
+				my_his->insert(h_0,100052); // TODO Subtle bug?  // Need to verify edge case.
 				// update for iteration
 				lo1 = l_p;
-				hi1 = h_p;
+				hi1 = h_p; // Need to verify edge case. BUG Bit us. Fix and verify.
 				my_los->reset(); my_his->reset(); // TODO Is this too conservative? Where should the iter be?
 				}
 ///////////////////////////////////////////////////////////////////////////
