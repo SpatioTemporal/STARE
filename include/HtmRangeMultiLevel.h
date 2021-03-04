@@ -84,6 +84,7 @@ public:
 	int stats(int desiredSize);
 	int nranges();
 	int nindexes_in_ranges();
+  int verify();
 
 	int getLosLength() {
 		return my_los->getLength();

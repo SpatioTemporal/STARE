@@ -24,6 +24,13 @@
 #define INTERSECT  0
 #define GAP_HISTO_SIZE 10000
 
+#define DIAGOUTFLUSH(x)
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
+
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
+
+
 using namespace std;
 using namespace HtmRangeMultiLevel_NameSpace;
 
@@ -92,9 +99,13 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::HtmRangeMultiLevelAtLevelFromIntersectio
 
 	//	cout << "indexp1: " << indexp1 << endl << flush;
 	//	cout << "l,lo,hi1: " << htmIdLevel << " " << lo1 << " " << hi1 << endl << flush;
+#ifdef DIAG
 	cout << "a" << flush;
+#endif
 	do {
+#ifdef DIAG
 		cout << "b" << endl << flush;
+#endif
 		KeyPair testRange1 = HtmRangeMultiLevelAtLevelFromHtmRangeMultiLevel(htmIdLevel,lo1,hi1);
 		range2->reset();
 		uint64 indexp2 = range2->getNext(lo2,hi2);
@@ -557,11 +568,13 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 
 	errorCount = 0;
 	// TODO Main routine to modify to enable multi-level ranges.
+#ifdef DIAG
 	cout << "8000 " << hex
        << "0x"	<< setfill('0') << setw(16) << lo
        << ", 0x" << setfill('0') << setw(16) << hi
        << endl << flush;
 	cout << "8001 " << dec << "  " << lo << ",   " << hi << endl << flush;
+#endif
   
 	// Add the first one.
 	if( my_los->myHeader->getElement(0) == NIL ) {
@@ -571,8 +584,9 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 		// cout << 8002 << " First one inserted. " << endl << flush;
 		return;
 	}
-
+#ifdef DIAG
 	cout << "8000-400" << endl << flush;
+#endif
 
 	// TInsideResult loFlag = tinside(lo);
 	// int lo_flag = loFlag.incl;
@@ -581,13 +595,17 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	// int hi_flag = hiFlag.incl;
 
 	// TODO I think loFlag and hiFlag can help with the logic below.
-
+  
+#ifdef DIAG
 	cout << "8000-500" << endl << flush;
+#endif
 	// New stuff.
 
 	uint32 level = encoding->levelById(lo);
 
+#ifdef DIAG
 	cout << "8000-600" << endl << flush;
+#endif
 
 	// Possible values:
 	//   loFlag:  InclInside, InclLo, InclHi, InclOutside
@@ -598,56 +616,117 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 	my_los->reset();
 	my_his->reset();
 
+#ifdef DIAG
 	cout << "8000-700" << endl << flush;
-
+#endif
+  
 	Key lo1 = lo, hi1 = hi;
 	Key l, h;
 	bool done = false;
+
+#ifdef DIAG
 	cout << "8000-1000-while" << endl << flush;
+#endif
 // 2019-1212 ORIG	while(((l = my_los->getkey()) >= 0) && (not done) ){
 	while( (not done) ){
+#ifdef DIAG    
+    cout << "8000-1001-while-----" << endl << flush;
+#endif
 	  l = my_los->getkey();
+#ifdef DIAG
+    cout << "8000-1001-000 l: " << hex << l << dec << endl << flush;
+#endif
+    
 	  if( l < 0 ) break;
 		h = my_his->getkey();
 		uint32 l_level = encoding->levelById(l);
 
-		cout << "8000-1001-lo1,hi1: " << lo1 << " " << hi1 << " " << level << endl << flush;
-		cout << "8000-1002-    l,h: " << l << " " << h << " " << l_level << endl << flush;
+#ifdef DIAG    
+		cout << "8000-1001-lo1,hi1: " << lo1 << " " << hi1 << " " << level << flush;
+
+    if( lo1 < hi1 ) {
+      cout << " valid " << flush;
+    } else {
+      cout << " invalid " << flush;
+    }
+    cout << endl << flush;
+    
+		cout << "8000-1002-    l,h: " << l << " " << h << " " << l_level << flush;
+    if( l < h ) {
+      cout << " valid " << flush;
+    } else {
+      cout << " invalid " << flush;
+    }
+    cout << endl << flush;
+
+    cout << "8000-1003- h < hi1: " << (h < hi1) << flush << endl;
+    cout << "8000-1003- h < lo1: " << (h < lo1) << flush << endl;
+    cout << "8000-1004- l < hi1: " << (l < hi1) << flush << endl;
+    cout << "8000-1004- l < lo1: " << (l < lo1) << flush << endl;
+    
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 ////		cout << endl << flush;
 		hexOut("lh1 ",lo1,hi1);
 		hexOut("hh  ",h,h);
 		hexOut("lh  ",l,h);
 #undef hexOut
+#endif
+    
 		if ( h < lo1 ) {
 		  // Case NOT-YET-THERE.
-			cout << "Don't know what's above h. Iterate." << endl << flush;
+#ifdef DIAG
+			cout << "Don't know what's above h. Iterate. " << errorCount + 1 << endl << flush;
+#endif
 			errorCount++; if(errorCount>errorCountMax) {
+#ifdef DIAG        
 				cout << "HRML::Iterate::errorCount" << endl << flush;
+#endif
 //				exit(1);
 			}
+#ifdef DIAG      
       cout << "8000-1010 not-yet-there" << endl << flush;
+#endif
 			my_los->step();
+#ifdef DIAG      
       cout << "8000-1012 not-yet-there" << endl << flush;
+#endif
       my_his->step();
+#ifdef DIAG      
       cout << "8000-1013 not-yet-there" << endl << flush;
+#endif
 			// Don't know what's above h.  Iterate.
 		} else if( hi1 < l ) {
 			// Case 1. A is below B.  Just add
+#ifdef DIAG      
       cout << "8000-1014 Case 1 a<b just add" << endl << flush;
+#endif
 			// my_los->insert(lo1,10001);
 			my_los->insert(lo1,hi1);
+#ifdef DIAG      
       cout << "8000-1015 Case 1 a<b just add" << endl << flush;
+#endif
 			my_his->insert(hi1,10001);
+#ifdef DIAG      
       cout << "8000-1016 Case 1 a<b just add" << endl << flush;
+#endif
 			done = true;
 		} else if( (lo1 < l) && ( (l <= hi1) && (hi1 <= h) ) ) {
 			// Case 2. A.lo is below B.lo, but A.hi is in B.
+#ifdef DIAG
 			cout << "8000-103x" << endl << flush;
+#endif
 			// The upper end of the new interval overlaps the current one, but not its lower part. Do surgery.
 			// Bounds of the lower part below the current interval.
 			Key l_m = lo1;
-			Key h_m = encoding->predecessorToLowerBound_NoDepthBit(l,level); // l-
+			// Bug?
+      Key h_m = encoding->predecessorToLowerBound_NoDepthBit(l,level); // l-
+			// Bad hypothesis Key h_m = encoding->predecessorToLowerBound_NoDepthBit(l,27); // l-
+
+//      if( h_m < l_m ) {
+//        // If getting the pred of l jumps back too far...
+//        h_m = encoding->getTerminator_NoDepthBit(l_m);
+//      }
+      
 			// Bounds of the overlap.
 			//+ Key l_0 = l;
 			Key h_0 = hi1; // TODO Should we re-encode this with l_level? Only an issue if level ??? l_level?
@@ -663,7 +742,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			}
 			Key h_p = h;    // No change. Level is correct.
 			if( level == l_level ) { // Case 2.1 Merge.
-				cout << "8000-1030" << endl << flush;
+        DIAGOUT("8000-1030");
 				// At the same level, merge the two.
 				my_los->freeRange(l_m,h_p); // Freeing up to h_p is okay because h_p==h is still part of current interval.
 				my_his->freeRange(l_m,h_p);
@@ -673,24 +752,37 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			} else {
 				// The lower part overlaps an empty part. Just add.  // ??? Don't need a freeRange ??? Okay...
 				if(level > l_level) {
-					cout << "8000-1031" << endl << flush;
+					DIAGOUT("8000-1031");
 					// If the new interval's level is greater, just skip in the current, add before.
 					// my_los->insert(l_m,100022);
+#ifdef DIAG
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+						hexOut("lm-hm ",l_m,h_m);
+            hexOut("l -h0 ",l  ,h_0);
+						hexOut("lp-hp ",l_p,h_p);
+						cout << " h_0 " << h_0 << endl << flush;
+            cout << " lm < hm : " << (l_m<h_m) << endl << flush;
+#undef hexOut
+#endif
+          
 					my_los->insert(l_m,h_m);
 					my_his->insert(h_m,100022);
 				} else if(true) { // Case 2.3 level < l_level -- new interval wins
 					// TODO WORRY -- What about collisions? If we have a collision, will we simply put in the value back in?
 					// If the new level is lower than the current, then the new lower level wins. Current is trimmed.
 					// Rewrite the current.
-					cout << "8000-1032" << endl << flush;
+					DIAGOUT("8000-1032");
 //					if(l_m == 0x7500000000000002) {
-// #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
-// 						hexOut("lm-hm ",l_m,h_m);
-//             hexOut("l0-h0 ",l_0,h_0);
-// 						hexOut("lp-hp ",l_p,h_p);
-// 						cout << " h_0 " << h_0 << endl << flush;
-// #undef hexOut
-//					}
+          if(true) {
+#ifdef DIAG            
+#define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+						hexOut("lm-hm ",l_m,h_m);
+            hexOut("l -h0 ",l  ,h_0);
+						hexOut("lp-hp ",l_p,h_p);
+						cout << " h_0 " << h_0 << endl << flush;
+#undef hexOut
+#endif
+					}
 					my_los->freeRange(l_m,h_p);
 					my_his->freeRange(l_m,h_p);
 					// my_los->insert(l_m,100023); // lo1 // this changes the level to level
@@ -707,19 +799,19 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			// Done!
 			done = true;
 		} else if( (lo1 < l) && (h < hi1) ) {
-			cout << "HRML::Case 4.2/4.4 A covers B." << endl << flush;
+			DIAGOUT("HRML::Case 4.2/4.4 A covers B.");
 			// Case 4.2 A covers B.
 			// Test.cpp 4.4.1
 			if( level <= l_level ) { // New interval wins.
-				cout << "4.2.2" << endl << flush;
+				DIAGOUT("4.2.2");
 				// Case 4.2.2
 				my_los->freeRange(l,h);
 				my_his->freeRange(l,h);
 				// Keep lo1 and h1 and try again.
 				// Where does the iterator go?
-				cout << "4.2.2 end" << endl << flush;
+				DIAGOUT("4.2.2 end");
 			} else if( level > l_level ) { // Current interval wins.
-				cout << "HRML::4.2.1" << endl << flush;
+				DIAGOUT("HRML::4.2.1");
 				// Case 4.2.1
 				Key l_m = lo1;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(l,level); // TODO Verify no gaps
@@ -727,9 +819,11 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				//+ Key h_0 = h;
 				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // TODO Verify no gaps
 				Key h_p = hi1;
+#ifdef DIAG
 				if( l_p > h_p ) {
-					cout << "HtmRangeMultiLevel::mergeRange::ERROR!!! SUCC(H) > HI1, I.E. THEY'RE EQUIVALENT." << endl << flush;
+					DIAGOUT("HtmRangeMultiLevel::mergeRange::ERROR!!! SUCC(H) > HI1, I.E. THEY'RE EQUIVALENT.");
 				}
+#endif
 				if( l_m < h_m ) { // If lo1 and l are equivalent, current one wins, and we ignore the new one.
 					// my_los->insert(l_m,1000421);
 					my_los->insert(l_m,h_m);
@@ -748,7 +842,7 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			my_los->reset(); my_his->reset();
 			// huh? -> 			my_los->freeRange(l_m,h_p);	my_his->freeRange(l_m,h_p);
 		} else if ( (l <= lo1) && (hi1 <= h) ) {
-			cout << "HRML::Case 4. A is in B." << endl << flush;
+			DIAGOUT("HRML::Case 4. A is in B.");
 			// Case 4. A is in B.
 			if( level >= l_level ) {
 				// Ignore. Triangles already included.
@@ -758,12 +852,16 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				// Test.cpp 4.3 Collision at the end.
 				Key l_m = l;
 				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
+#ifdef DIAG
 				if(l_m>h_m) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 PRED WARNING. BOUNDS EQUIVALENT" << endl << flush;
+#endif
 				Key l_0 = lo1;
 				Key h_0 = hi1;
 				Key l_p = encoding->successorToTerminator_NoDepthBit(hi1,l_level);
 				Key h_p = h;
+#ifdef DIAG
 				if(l_p>h_p) cout << "HtmRangeMultiLevel::mergeRange::WARNING!!! 4 SUCC WARNING. BOUNDS EQUIVALENT" << endl << flush;
+#endif
 				// Blow away the old and add the three.
 				my_los->freeRange(l_m,h_p);
 				my_his->freeRange(l_m,h_p);
@@ -785,10 +883,10 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 			}
 		} else if ( (l <= lo1) && (h < hi1) ) { // Note the case h < lo1 is handled above.
 			// Case 5.
-			cout << "HRML::Case 5" << endl << flush;
+			DIAGOUT("HRML::Case 5");
 			if ( level >= l_level ) {
 				// Case 5.1
-				cout << "HRML::Case 5.1" << endl << flush;
+				DIAGOUT("HRML::Case 5.1");
 				//+ Key l_m = l; // Note:  no need to add...
 				//+ Key h_m = h;
 				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // Might map l_p > h_p.
@@ -796,7 +894,9 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				if( l_p > h_p ) {
 					l_p = h; // Abandoning the level bits for the moment.
 					uint64 l__ = encoding->decrement(l_p,level);
+#ifdef DIAG
 					if (l__ < (uint64) l) cout << "huh?" << endl << flush;
+#endif
 					l_p = l__;
 					lo1 = l_p;
 					hi1 = h_p;
@@ -812,59 +912,139 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 				// update for iteration
 				errorCount++; if(errorCount>errorCountMax) {
 					cout << "HRML::5.1::errorCount" << endl << flush;
-					exit(1);
+					exit(1); // TODO -- we shouldn't just exit...
 				}
 				lo1 = l_p;
 				hi1 = h_p;
 				my_los->step(); my_his->step(); // Didn't change skiplists.
 			} else if ( level < l_level ) {
+///////////////////////////////////////////////////////////////////////////
+/// 8000-1001-while-----
+/// 8000-1001-000 l: 3f3e7dd29ef6348c
+/// 8000-1001-lo1,hi1: 4557218219020197835 4557218411410620415 11
+/// 8000-1002-    l,h: 4557218216509060236 4557218273971666943 12
+/// lh1  0x3f3e7dd334a31fcb..3f3e7dffffffffff
+/// hh   0x3f3e7ddfffffffff..3f3e7ddfffffffff
+/// lh   0x3f3e7dd29ef6348c..3f3e7ddfffffffff
+/// HRML::Case 5
+/// HRML::Case 5.2
+/// 8000-9999-100 okay exit, done = 0
+/// 8000-1001-while-----
+/// 8000-1001-000 l: 3f159921c28ef809
+/// 8000-1001-lo1,hi1: 4557218411410620427 4557218411410620415 11
+/// 8000-1002-    l,h: 4545707769177503753 4545710922714316799 9
+/// lh1  0x3f3e7e000000000b..3f3e7dffffffffff
+/// hh   0x3f159bffffffffff..3f159bffffffffff
+/// lh   0x3f159921c28ef809..3f159bffffffffff
+///////////////////////////////////////////////////////////////////////////
+        /*
+          Note we have the complication that the levels are different.
+
+          level(l1) < level(l) (l1 is coarser than l). In the bug case level(l1)==b, level(l)==c.
+          
+          Need to review Case 5.2. Here we have lh1 (the interval to be added), with h1>h, where h is the current hi in my_his.
+          Thus we have: l < l1 < h < h1.
+
+          NOT THIS: We should remove l..h and add l..h1. 
+
+          We should remove l..h and add l..l1--@level(l) and l1..h1. <- verify...
+
+          This is what the following code attempts to do at present.
+
+         */
 				if(true){
-				cout << "HRML::Case 5.2" << endl << flush;
-				Key l_m = l;
-				Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
-				Key l_0 = lo1;
-				Key h_0 = h; // But need to adjust to avoid creating holes. // Note this has the wrong level compared to l_0.
-				Key l_p = encoding->successorToTerminator_NoDepthBit(h,level);
-				h_0 = encoding->predecessorToLowerBound_NoDepthBit(l_p,level); // level is the level of lo1
-				Key h_p = hi1;
-				// Blow away the old and add two and defer the third.
-				my_los->freeRange(l_m,h_0);
-				my_his->freeRange(l_m,h_0);
-				// TODO NOTE:  When predecessor is used, you have to check to see if pred(b) is less than inf(interval).
-				if( l_m < h_m ) { // If l_m and l_0 are "equivalent", so the current interval wins and we ignore interval_m.
-					// my_los->insert(l_m,100052);
-					my_los->insert(l_m,h_m);
-					my_his->insert(h_m,100052);
-				}
-				// my_los->insert(l_0,100052);
-				my_los->insert(l_0,h_0);
-				my_his->insert(h_0,100052); // TODO Subtle bug?  Need to verify edge case.
-				// update for iteration
-				lo1 = l_p;
-				hi1 = h_p;
-				my_los->reset(); my_his->reset(); // TODO Is this too conservative? Where should the iter be?
-				}
+          DIAGOUT("HRML::Case 5.2");
+
+          // Low segment. To add in. l's level.
+          Key l_m = l;
+          // Bug?
+          Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,l_level);
+          // Bad hypothesis Key h_m = encoding->predecessorToLowerBound_NoDepthBit(lo1,27);
+
+          // Next segment To add in. l1's level.
+          Key l_0 = lo1;
+          Key h_0 = h; // But need to adjust to avoid creating holes. // Note this has the wrong level compared to l_0. Replaced below.
+        
+          // Any leftover? Try again.
+          Key l_p = encoding->successorToTerminator_NoDepthBit(h,level); // BUG: Found a case where h_p < l_p !?? Note: level for lo1
+
+
+          // Bad hypothesis h_0 = encoding->predecessorToLowerBound_NoDepthBit(l_p,27); // level is the level of lo1
+          // Bug?
+          h_0 = encoding->predecessorToLowerBound_NoDepthBit(l_p,level); // level is the level of lo1
+          Key h_p = hi1; // The original end of the term. // BUG: This is the old term, but we get hi1 < l_p...
+          // Does this mean that in getting coarser, we lost the ability to distinguish between h and h1?
+          // So instead of going from l < l1 < h < h1 to l..l1-, l1..h, h+..h1, we only do l..l1-,l1..h1. I.e. h1 ate h.
+
+          // Let's check the terminator h_0.
+        
+          // Blow away the old and add two and defer the third.
+          my_los->freeRange(l_m,h_0);
+          my_his->freeRange(l_m,h_0);
+
+          // The first segment
+          // TODO NOTE:  When predecessor is used, you have to check to see if pred(b) is less than inf(interval).
+          if( l_m < h_m ) { // If l_m and l_0 are "equivalent", so the current interval wins and we ignore interval_m.
+            my_los->insert(l_m,h_m);
+            my_his->insert(h_m,1000520);
+          }
+
+          // The second segment
+          my_los->insert(l_0,h_0);
+          my_his->insert(h_0,1000521); // TODO Subtle bug?  // Need to verify edge case.
+          // update for iteration
+
+#ifdef DIAG
+//#define hexOut(a,b) cout << a << "0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;          
+#define hexOut3(a,b,c) cout << a << "0x" << hex << setfill('0') << setw(16) << b << " " << "0x" << hex << setfill('0') << setw(16) << c << " " << dec << " validp: " << (b < c) << endl << flush;
+          cout << "+++++" << endl << flush;
+          hexOut3("1000520 l_m,h_m ",l_m,h_m);
+          hexOut3("1000520 l_0,h_0 ",l_0,h_0);
+          hexOut3("1000520 l_p,h_p ",l_p,h_p);
+          cout << "-----" << endl << flush;
+#undef hexOut3
+          {
+            cout << "h_m < l_0 " << (h_m < l_0) << endl << flush;
+            cout << "h_0 < l_p " << (h_0 < l_p) << endl << flush;
+            cout << "-----" << endl << flush;
+          }
+#endif
+          // The third segment
+          if( h_p > l_p )
+          // if( true )
+          {
+            lo1 = l_p;
+            hi1 = h_p; // Need to verify edge case. BUG Bit us. Fix and verify.
+          } else {
+            // The re-leveled middle ate the third segment, i.e., the end of the original interval to be added.
+            done = true;
+          }
+          my_los->reset(); my_his->reset(); // TODO Is this too conservative? Where should the iter be?
+                                     
+        }
+///////////////////////////////////////////////////////////////////////////
 //				done = true;
 			}
 		}  else {
-			cout << "8000-9999 ERROR" << endl << flush;
-			exit(1);
+      cout << "8000-9999 ERROR" << endl << flush;
+      exit(1);
 		}
-    cout << "8000-9999-100 okay exit" << endl << flush;
-	}
+      DIAGOUT("8000-9999-100 okay exit, done = " << done);
+	} // while( (not done) ) // line 608 cf 8000-1000-while
 
-  cout << "8000-9999-200 okay exit" << endl << flush;
+    DIAGOUT("8000-9999-200 okay exit");
 
 	if(not done) {
 		// The new interval goes at the end of the skiplists.
 		// Case 6. We're at the top.  Just add.
 		// my_los->insert(lo1,10006);
+    DIAGOUT("8000-9999-300 l1,h1: " << hex << lo1 << " " << hi1 << dec);
 		my_los->insert(lo1,hi1);
 		my_his->insert(hi1,10006);
 		done = true;
 	}
 
-	cout << dec << 9000 << endl << flush;
+	DIAGOUT(dec << 9000);
   
 	return;
 
@@ -888,7 +1068,8 @@ void HtmRangeMultiLevel::mergeRange(const Key lo, const Key hi)
 void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 {
 
-#define DIAG
+// #define DIAG
+#undef DIAG
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)... Like storing hi...
 //	my_his->insert(hi, (Value) 0);
 	// cout << "x200: " << hex << lo << " " << hi << endl;
@@ -943,8 +1124,10 @@ void HtmRangeMultiLevel::addRange(HtmRangeMultiLevel *range) {
 
 void HtmRangeMultiLevel::defrag(Key gap)
 {
-	cout << "HtmRangeMultiLevel::defrag::NOT-IMPLEMENTED EXITING" << endl << flush;
+	cout << "HtmRangeMultiLevel::defrag-Key-gap::NOT-IMPLEMENTED EXITING" << endl << flush;
 	exit(1);
+
+  /* ???
 
 	if(nranges()<2) return;
 
@@ -1000,11 +1183,15 @@ void HtmRangeMultiLevel::defrag(Key gap)
 	// cout << "DONE looping"  << endl;
 	// my_los->list(cout);
 	// my_his->list(cout);
+
+  */
 }
 
 void HtmRangeMultiLevel::defrag()
 {
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
+
+  DIAGOUT("HRML::defrag " << "0000");
 
 	if(nranges()<2) return;
 
@@ -1047,10 +1234,17 @@ void HtmRangeMultiLevel::defrag()
 				}
 				my_his->step();
 				save_key = my_his->getkey();
+        
 				my_his->free(hi0);
 				if( save_key >= 0 ) {
 					my_his->search(save_key,1);
 				}
+
+        // MLR Addition
+        my_los->insert(my_los->getkey(),save_key);
+        Value tag = my_his->getvalue();
+        my_his->insert(save_key,2000000000+tag);
+                       
 			} else {
 
 				my_los->step();
@@ -1163,7 +1357,10 @@ void HtmRangeMultiLevel::CompressionPass() {
 				// oldLo..newLoPredecessor; newLo..hi0 Modify the skiplists.
 				my_his->insert(newLoPredecessor,1024);
 				// my_los->insert(newLo,1024);
-				my_los->insert(newLo,newLoPredecessor);
+				// 2021-0304+
+        my_los->insert(newLo,newLoPredecessor); // Suspicious
+        my_los->insert(oldLo,newLoPredecessor);
+        // 2021-0304-
 				// Set lists to the new lo
 				my_los->reset(); my_his->reset(); // TODO Until we know better, start over. Bad, bad, bad.
 				// TODO Perhaps instead try a find or a search that would set the iterators.
@@ -1188,7 +1385,9 @@ void HtmRangeMultiLevel::CompressionPass() {
 				my_los->free(oldLo);
 				--oldLo; // Reduce level
 				// my_los->insert(oldLo,1025);
-				my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
+        // TODO FIX THIS MLR
+				// test fix my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
+        // my_los->insert(oldLo);
 
 				try {
 					// Scoop up a bunch
@@ -1202,8 +1401,11 @@ void HtmRangeMultiLevel::CompressionPass() {
 					if(newLoPredecessor != hi0) {
 						my_his->insert(newLoPredecessor,1025);
 						// my_los->insert(newLo,1025);
-						my_los->insert(newLo,newLoPredecessor);
+            // my_los->insert(newLo,newLoPredecessor); // mlr ???
 					}
+          // TODO VERIFY THIS WHOLE ROUTINE MLR 2021-0304
+          my_los->insert(oldLo,newLoPredecessor);
+          my_los->insert(newLo,hi0); // mlr ??? NOTE: this is just a wag. Not sure if correct.
 				} catch ( SpatialException &e ) {
 					// What if we're at the top index already? Ooops, there's no new low at the new break.
 					// cout << "400: " << e.what() << endl << flush;
@@ -1255,19 +1457,29 @@ void HtmRangeMultiLevel::reset()
 // return the number of ranges
 //
 /// The number of ranges.
+
+// #define DIAGOUTFLUSH(x)
+#define DIAGOUTFLUSH(x) {cout << x << flush;}
+
+// #define DIAGOUT(x)
+#define DIAGOUT(x) {cout << x << endl << flush;}
+
 int HtmRangeMultiLevel::nranges()
 {
-	cout << "z000" << endl << flush;
+
+  bool flag_error = false;
+  
+	DIAGOUT("z000");
 	Key lo; Value lo_value;
 	Key hi; Value hi_value;
 	int n_ranges;
 	n_ranges = 0;
-	cout << "z001" << endl << flush;
-	cout << "z001 my_los " << hex << my_los << dec << endl << flush;
+	DIAGOUT("z001");
+	DIAGOUT("z001 my_los " << hex << my_los << dec);
 	my_los->reset();
-	cout << "z002" << endl << flush;
+	DIAGOUT("z002");
 	my_his->reset();
-	cout << "z010" << endl << flush;
+	DIAGOUT("z010");
 
 	// This is a problem when lo can be zero. Is it?
 	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327
@@ -1275,23 +1487,35 @@ int HtmRangeMultiLevel::nranges()
 	// OLD while((lo = my_los->getkey()) > 0){
 	while((lo = my_los->getkey()) >= 0){
 		n_ranges++;
-    cout << "z020 " << n_ranges << flush;
+    DIAGOUTFLUSH("z020 " << n_ranges);
 		hi = my_his->getkey();
 		// my_his->getkey();
     lo_value = my_los->getvalue();
     hi_value = my_his->getvalue();
+    
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec    
-		cout << " : "
-         << "( " << FMTX(lo) << ", " << FMTX(lo_value) << " ) "
-         << "( " << FMTX(hi) << ", " << hi_value << " ) "
-         << flush << endl;
+		DIAGOUTFLUSH(" : " << "( " << FMTX(lo) << ", " << FMTX(lo_value) << " ) "  << "( " << FMTX(hi) << ", " << hi_value << " ) ");
+    
+    if( lo_value != hi ) {
+      DIAGOUTFLUSH(" +lo_value.ne.hi");
+      flag_error = true;
+    }
+    if( lo > hi ) {
+      DIAGOUTFLUSH("+lo.gt.hi");
+      flag_error = true;
+    }
+    DIAGOUT("");
 #undef FMTX
 		// cout << " : " << lo << flush << endl;
 		my_los->step();
 		my_his->step();
 	}
 
-	cout << "z100" << endl << flush;
+	DIAGOUT("z100");
+  if( flag_error ) {
+    cout << "HRML::nranges Error exit..." << endl << flush;
+    // exit(1);
+  }
 
 	return n_ranges;
 }
@@ -1924,6 +2148,56 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 		my_his->step();
 	}
 	return;
+}
+
+int HtmRangeMultiLevel::verify()
+{
+  int flag_error = 0;
+  
+	Key lo; Value lo_value;
+	Key hi; Value hi_value;
+	int n_ranges;
+	n_ranges = 0;
+	my_los->reset();
+	my_his->reset();
+
+	// This is a problem when lo can be zero. Is it?
+	// getkey returns -1 if nothing is found, maybe fix the following using >= 0? Worry about id 0. Should be okay this low in the code. MLR 2019-0327
+	// TODO skiplist works for keys above and below zero. Here using only positives. Fix.
+	// OLD while((lo = my_los->getkey()) > 0){
+	while((lo = my_los->getkey()) >= 0){
+		n_ranges++;
+		hi = my_his->getkey();
+		// my_his->getkey();
+    lo_value = my_los->getvalue();
+    hi_value = my_his->getvalue();
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec    
+		DIAGOUTFLUSH(" : " << "( " << FMTX(lo) << ", " << FMTX(lo_value) << " ) "  << "( " << FMTX(hi) << ", " << hi_value << " ) ");
+    if( lo_value != hi ) {
+      DIAGOUTFLUSH(" +lo_value.ne.hi");
+      flag_error += 1;
+    }
+    if( lo > hi ) {
+      DIAGOUTFLUSH("+lo.gt.hi");
+      flag_error +=10;
+    }
+    DIAGOUT("");
+#undef FMTX
+		// cout << " : " << lo << flush << endl;
+		my_los->step();
+		my_his->step();
+	}
+
+  DIAGOUT("z100");
+  if( flag_error ) {
+    DIAGOUT("HRML::verify Error flagged...");
+#ifdef DIAG
+    DIAGOUT("Error exit...");
+    exit(1);
+#endif
+  }
+
+	return flag_error;
 }
 
 int HtmRangeMultiLevel::LOWS = 1;

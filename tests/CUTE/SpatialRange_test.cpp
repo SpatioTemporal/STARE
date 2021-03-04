@@ -45,10 +45,13 @@ public:
 };
 
 // #define DIAG
+// #define DIAGOUT(x)
+#define DIAGOUT(x) cout << x << endl << flush;
 
 void SpatialRange_test () {
 
   {
+
 #define NCSIVS 4
     uint64 coalesce_sivs[NCSIVS] = {
       //       0x300a300000000009,
@@ -89,21 +92,23 @@ void SpatialRange_test () {
   }
 
   {
-    cout << "1000 " << endl << flush;
+    DIAGOUT("1000 ");
+
     int sivlen = 1000;
     // STARE_ArrayIndexSpatialValue siv[sivlen];
     STARE_SpatialIntervals sivs(sids, sids + sivlen);
     SpatialRange sr(sivs);
-    cout << "1100 " << endl << flush;
+    
+    DIAGOUT("1100 ");
   }
 
   {
-    cout << "1200 " << endl << flush;
+    DIAGOUT("1200 ");    
     int sivlen = 10000;
     // STARE_ArrayIndexSpatialValue siv[sivlen];
     STARE_SpatialIntervals sivs(sids, sids + sivlen);
     SpatialRange sr(sivs);
-    cout << "1300 " << endl << flush;
+    DIAGOUT("1300 ");    
   }
   
 
@@ -111,23 +116,38 @@ void SpatialRange_test () {
 	STARE_ArrayIndexSpatialValue siv = index.ValueFromLatLonDegrees( 30, 30, 8 );
 	STARE_SpatialIntervals sis; sis.push_back(siv);
 
+  STARE_SpatialIntervals sis_cleared;
+  EmbeddedLevelNameEncoding lj_sis;
+  for(auto i0=sis.begin(); i0 != sis.end(); ++i0) {
+    if(!terminatorp(*i0)) {
+      lj_sis.setIdFromSciDBLeftJustifiedFormat(*i0);
+      sis_cleared.push_back(lj_sis.clearDeeperThanLevel(lj_sis.getLevel()).getSciDBLeftJustifiedFormat());
+    } else {
+      sis_cleared.push_back(*i0);
+    }
+  }
+
 	SpatialRange range(sis);
 	STARE_SpatialIntervals sis_out;
 
 	sis_out = range.toSpatialIntervals();
 
-// #define DIAG
+  // #define DIAG
 #ifdef DIAG
 	for(int i=0; i < sis.size(); ++i ) {
 		cout << i << " i,si: " << setw(16) << setfill('0') << hex << sis[i] << dec << endl << flush;
 	}
+	for(int i=0; i < sis_cleared.size(); ++i ) {
+		cout << i << " i,sc: " << setw(16) << setfill('0') << hex << sis_cleared[i] << dec << endl << flush;
+	}  
 	for(int i=0; i < sis_out.size(); ++i ) {
 		cout << i << " i,so: " << setw(16) << setfill('0') << hex << sis_out[i] << dec << endl << flush;
 	}
 #endif
+  // #undef DIAG
 
 	ASSERT_EQUAL(1,sis_out.size());
-	ASSERT_EQUAL(sis[0],sis_out[0]);
+	ASSERT_EQUAL(sis_cleared[0],sis_out[0]);
 
 	// sids.push_back(index.ValueFromLatLonDegrees( 45, 45, 8));
 
@@ -147,9 +167,13 @@ void SpatialRange_test () {
 #endif
 
 	// cout << 50 << endl << flush;
+  DIAGOUT(50);
 
 	range.purge();
 	range.addSpatialIntervals(sis);
+
+  DIAGOUT(100);
+  
 //	cout << 100
 //			<< " nr: " << range.range->range->nranges()
 //			<< endl << flush;
@@ -164,14 +188,42 @@ void SpatialRange_test () {
 	}
 #endif
 
-	ASSERT_EQUAL(2,sis_out.size());
-	ASSERT_EQUAL(sis[0],sis_out[0]);
-	ASSERT_EQUAL(sis[1],sis_out[1]);
+  {
+    STARE_SpatialIntervals sis_cleared;
+    EmbeddedLevelNameEncoding lj_sis;
+    for(auto i0=sis.begin(); i0 != sis.end(); ++i0) {
+      if(!terminatorp(*i0)) {
+        lj_sis.setIdFromSciDBLeftJustifiedFormat(*i0);
+        sis_cleared.push_back(lj_sis.clearDeeperThanLevel(lj_sis.getLevel()).getSciDBLeftJustifiedFormat());
+      } else {
+        sis_cleared.push_back(*i0);
+      }
+    }
+
+#define DIAG
+#ifdef DIAG
+    for(int i=0; i < sis.size(); ++i ) {
+      cout << i << " i,si: " << setw(16) << setfill('0') << hex << sis[i] << dec << endl << flush;
+    }
+    for(int i=0; i < sis_cleared.size(); ++i ) {
+      cout << i << " i,sc: " << setw(16) << setfill('0') << hex << sis_cleared[i] << dec << endl << flush;
+    }  
+    for(int i=0; i < sis_out.size(); ++i ) {
+      cout << i << " i,so: " << setw(16) << setfill('0') << hex << sis_out[i] << dec << endl << flush;
+    }
+#endif
+    // #undef DIAG
+  
+    ASSERT_EQUAL(2,sis_out.size());
+    ASSERT_EQUAL(sis_cleared[0],sis_out[0]);
+    ASSERT_EQUAL(sis_cleared[1],sis_out[1]);
+  }
 
 	if(true) {
 		// TODO Fix the following to use the new 0/1 variables defined above.
 
-#undef DIAG
+    // #undef DIAG
+#define DIAG    
 #ifndef DIAG
 #define SIVOUT(m,siv)
 #define SISOUT(m,sis)
@@ -207,6 +259,7 @@ void SpatialRange_test () {
 		SISOUT("sis1",sis1);
 
 		// cout << 100 << endl << flush;
+    DIAGOUT(100);
 		SpatialRange* deltaRange;
 		try {
 			// cout << 110 << endl << flush;
@@ -228,12 +281,13 @@ void SpatialRange_test () {
 		// cout << 1991 << " dR.r->r->my_los " << hex << (deltaRange->range->range->my_los) << dec << endl << flush;
 #endif
 		if(!deltaRange->range->range) { cout << "Error deltaRange is null!" << endl << flush; }
+    DIAGOUT(200);
 		// cout << 200 << " dR nR = " << deltaRange->range->range->nranges() << endl << flush;
 		STARE_SpatialIntervals deltaSis = deltaRange->toSpatialIntervals();
 		// cout << 300 << endl << flush;
 		SISOUT("deltaSis",deltaSis);
 		// cout << 400 << endl << flush;
-
+    DIAGOUT(400);
 		ASSERT_EQUAL(sis1[0],deltaSis[0]);
 		ASSERT_EQUAL(sis0[1],deltaSis[1]);
 
@@ -283,6 +337,7 @@ void SpatialRange_test () {
 		range1.addSpatialIntervals(sis1);
 		SISOUT("sis1",sis1);
 
+    DIAGOUT(500);
 		// cout << 100 << endl << flush;
 		SpatialRange* deltaRange;
 		try {
@@ -297,6 +352,7 @@ void SpatialRange_test () {
 		}
 
 #ifdef DIAG
+    DIAGOUT(500199);
 		cout << 199 << endl << flush;
 		cout << 1991 << " dR.r            " << hex << (deltaRange->range) << dec << endl << flush;
 		cout << 1991 << " dR.r->r         " << hex << (deltaRange->range->range) << dec << endl << flush;
@@ -316,21 +372,32 @@ void SpatialRange_test () {
 		delete deltaRange;
 	}
 
+  DIAGOUT(500500);  
+
 	// TODO Write many more tests & consider edge cases.
 	if(true) {
 		STARE_ArrayIndexSpatialValue siv1[2] = { 0x0000000000000008, 0x000067ffffffffff };
 		STARE_ArrayIndexSpatialValue siv2[2] = { 0x000030000000000a, 0x0000907fffffffff };
+  DIAGOUT(500600);
 		STARE_SpatialIntervals sis1(siv1,siv1+2);
+  DIAGOUT(500610);
 		STARE_SpatialIntervals sis2(siv2,siv2+2);
+  DIAGOUT(500620);
 		SpatialRange r1(sis1), r2(sis2);
-		SpatialRange *ri = r1 & r2;
+  DIAGOUT(500630);
+  SpatialRange *ri = r1 & r2;
+  DIAGOUT(500640);
 		// SpatialRange *ri = r1 & r2;
 		// SpatialRange *ri = sr_intersect(r1, r2);
+
+
 
 		STARE_SpatialIntervals result = ri->toSpatialIntervals();
 		ASSERT_EQUAL(2,result.size());
 		ASSERT_EQUAL(0x000030000000000a,result[0]);
 		ASSERT_EQUAL(0x000067ffffffffff,result[1]);
+
+  DIAGOUT(500700);    
 
 		ri->range->range->CompressionPass();
 		result = ri->toSpatialIntervals();
@@ -340,10 +407,21 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(0x0000400000000007,result[2]);
 		ASSERT_EQUAL(0x0000600000000008,result[3]);
 		delete ri;
+
+  DIAGOUT(500800);        
 		
 		ri = sr_intersect(r1, r2, true); // Run a compression pass on the range.
+
+  DIAGOUT(500810);        
+    
 		result.clear();
+
+  DIAGOUT(500820);        
+    
 		result = ri->toSpatialIntervals();
+
+  DIAGOUT(500830);        
+    
 		delete ri;
 		ASSERT_EQUAL(4,result.size());
 		ASSERT_EQUAL(0x0000300000000008,result[0]);
@@ -351,6 +429,8 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(0x0000400000000007,result[2]);
 		ASSERT_EQUAL(0x0000600000000008,result[3]);
 	}
+
+  DIAGOUT(600);
 
 	if(false) {
 		// From PySTARE.cpp for testing some odd behavior.
@@ -375,6 +455,8 @@ void SpatialRange_test () {
 		}
 		// }
 	}
+
+  DIAGOUT(700);
 
 	if(true) {
 		STARE_ArrayIndexSpatialValue siv1[2] = { 0x0000000000000008, 0x000067ffffffffff };
@@ -405,6 +487,8 @@ void SpatialRange_test () {
 		ASSERT_EQUAL(0,r1.contains(0x0000000000000007));
 	}
 
+  DIAGOUT(800);  
+
 	if(true) {
 		/*
 		STARE_SpatialIntervals sis[2] = { 0x0000000000000008, 0x000067ffffffffff };
@@ -425,9 +509,10 @@ void SpatialRange_test () {
 		srange r12 = r1->intersect(*r2);
 		delete r1;
 		delete r2;
-
 	}
 
+  DIAGOUT(900);  
+  
 	if(true) {
 		/* CCW */
 		LatLonDegrees64ValueVector latlon6ccw;
@@ -499,6 +584,9 @@ void SpatialRange_test () {
 		cout << "cw kp: " << hex << kp.lo << " " << kp.hi << dec << " " << at_least_one << endl << flush;
 		cout << "ccw size: " << cover_ccw.size() << endl << flush;
 #endif
+
+    DIAGOUT(1000);  
+    
 
 #if 0
 		for( uint i=0; i < cover_ccw.size(); ++i ) {

@@ -1590,7 +1590,8 @@ KeyPair rangeFromSymbols(string lo, string hi) {
 
 void htmRangeMultiLevel() {
 
-  bool verbose = false;
+  // bool verbose = false;
+  bool verbose = true;
 
   HtmRangeMultiLevel range;
   EmbeddedLevelNameEncoding leftJustified;
@@ -1599,6 +1600,64 @@ void htmRangeMultiLevel() {
   //	int level;
   //  Key successor, hi0;
   KeyPair A, B;
+
+  {
+    int level = 10;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.predecessorToLowerBound_NoDepthBit(terminator,level); 
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("pred test l=10: ",lo,terminator);
+#undef hexOut
+  }
+  {
+    int level = 10;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.idFromTerminatorAndLevel_NoDepthBit(terminator,level); 
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("lo test l=10:   ",lo,terminator)
+#undef hexOut
+  }
+
+  
+  {
+    int level = 10;
+    lo = 0x3f32ba65e09b790a;
+    terminator = leftJustified.getIdTerminator_NoDepthBit(lo,level);
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("lo/term test:   ",lo,terminator)
+#undef hexOut
+  }
+ 
+
+  {
+    int level = 27;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.predecessorToLowerBound_NoDepthBit(terminator,level); 
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("pred test l=27: ",lo,terminator)
+#undef hexOut
+  }
+  {
+    int level = 27;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.idFromTerminatorAndLevel_NoDepthBit(terminator,level); 
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("lo test l=27:   ",lo,terminator)
+#undef hexOut
+  }
+
+  {
+    int level = 27;
+    lo = 0x3f32baffffffffdb;
+    terminator = leftJustified.getIdTerminator_NoDepthBit(lo,level);
+#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
+    hexOut("lo/term test:   ",lo,terminator);
+    hexOut("fiducial marks: ",((1llu <<59) | 31),((1llu<<59) | 31));
+    hexOut("masked:         ",(lo & ~(31)),(terminator & ~(31)));
+#undef hexOut
+  }
+
+// exit(1);
 
   //	// leftJustified.setName("N0030");
   //	leftJustified.setName("S0012331");
@@ -2347,8 +2406,11 @@ void htmRangeMultiLevel() {
   //	cout << endl << flush;
   ////	FAIL();
 
+  cout << "Test:Case 5.3 waypoint 1000" << endl << flush;
   range.defrag();
+  cout << "Test:Case 5.3 waypoint 1010" << endl << flush;
   ASSERT_EQUAL(2,range.nranges());
+  cout << "Test:Case 5.3 waypoint 1020" << endl << flush;
 
   range.reset();
   range.getNext(lo1,terminator1);
@@ -2496,6 +2558,24 @@ void htmRangeMultiLevel() {
   //	cout << "b. nr: " << range.nranges() << endl << flush;
   //	cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
 
+  range.purge();
+  range.addRange( 0x3f3e7dbe8effaa8c, 0x3f3e7dbfffffffff );
+  range.addRange( 0x3f3e7dd334a31fcb, 0x3f3e7dffffffffff );
+  // range.addRange( 0x3f3e7e000000000b, 0x3f3e7dffffffffff ); // In the wild but incorrect.
+  range.addRange( 0x3f3e7fa7927b570c, 0x3f3e7fafffffffff );
+  range.addRange( 0x3f3e7fbb5bd2e14c, 0x3f3e7fbfffffffff );
+
+#define CHECK(lo,term) {range.getNext(lo1,terminator1); ASSERT_EQUAL(lo,lo1); ASSERT_EQUAL(term,terminator1);}
+
+  range.reset();
+  
+  CHECK( 0x3f3e7dbe8effaa8c, 0x3f3e7dbfffffffff );
+  CHECK( 0x3f3e7dd334a31fcb, 0x3f3e7dffffffffff );
+  // CHECK( 0x3f3e7e000000000b, 0x3f3e7dffffffffff ); // In the wild, but incorrect.
+  CHECK( 0x3f3e7fa7927b570c, 0x3f3e7fafffffffff );
+  CHECK( 0x3f3e7fbb5bd2e14c, 0x3f3e7fbfffffffff );
+
+#undef CHECK
 
 }
 

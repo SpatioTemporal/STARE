@@ -33,7 +33,8 @@ HstmRange::~HstmRange() {
  * @param a_ a Key (int64)
  * @param b_ a Key (int64)
  */
-#define DIAG
+// #define DIAG
+#undef DIAG
 void HstmRange::addRange(Key a_, Key b_) {
 	Key a = leftJustifiedEncoding.maskOffLevelBit(a_); // The level bit is a bit at the top used as a validity check. A deprecated feature and not needed for a left-justified index value.
 	int aLevel = leftJustifiedEncoding.levelById(a_);
@@ -114,8 +115,10 @@ void HstmRange::addRange(Key a_, Key b_) {
 	// TODO I.e. merge while retaining level.
 	// TODO Current implementation of SkipList depends on sign. Argh.
 	range->addRange(a,b);
+#ifdef DIAG
 	cout << dec << "1001a" << endl << flush;
 	cout << dec << "1001b" << " : nranges = " << range->nranges() << endl << flush;
+#endif
 }
 #undef DIAG
 
