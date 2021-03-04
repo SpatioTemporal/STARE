@@ -60,6 +60,7 @@ public:
 	};
 	void reset() { range->reset(); } // range not null?
 	void purge() { range->purge(); } // what if range null?
+	void compress() { range->range->CompressionPass(); }
 };
 
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);

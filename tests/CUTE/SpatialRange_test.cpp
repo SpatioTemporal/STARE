@@ -49,6 +49,46 @@ public:
 void SpatialRange_test () {
 
   {
+#define NCSIVS 4
+    uint64 coalesce_sivs[NCSIVS] = {
+      //       0x300a300000000009,
+      0x300a30000000000a,
+      0x300a30200000000a,
+      0x300a30400000000a,
+      0x300a30600000000a
+      // 0x300a30000000000a,
+      // 0x300a30800000000a,
+      // 0x300a31000000000a,
+      // 0x300a31800000000a
+      
+    };
+
+    STARE_SpatialIntervals sivs(coalesce_sivs,coalesce_sivs+NCSIVS);
+
+    for( int i=0; i < sivs.size(); ++i ) {
+      cout << i << " 800 " << hex << sivs[i] << dec << endl << flush;
+    }
+
+    SpatialRange sr(sivs);
+    
+    STARE_SpatialIntervals sr_sivs = sr.toSpatialIntervals();
+    
+    for( int i=0; i < sr_sivs.size(); ++i ) {
+      cout << i << " 900 " << hex << sr_sivs[i] << dec << endl << flush;
+    }
+
+    sr.compress();
+    sr_sivs = sr.toSpatialIntervals();
+    
+    for( int i=0; i < sr_sivs.size(); ++i ) {
+      cout << i << " 950 " << hex << sr_sivs[i] << dec << endl << flush;
+    }
+
+    exit(1);
+    
+  }
+
+  {
     cout << "1000 " << endl << flush;
     int sivlen = 1000;
     // STARE_ArrayIndexSpatialValue siv[sivlen];
