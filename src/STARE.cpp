@@ -19,6 +19,7 @@
 #include <algorithm>
 
 // #define DIAG
+#undef DIAG
 
 #ifndef DIAG
 #define DIAGOUT1(a)
