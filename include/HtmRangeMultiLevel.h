@@ -69,7 +69,8 @@ public:
 	void mergeRange(const Key lo, const Key hi);
 	void defrag();
 	void defrag(Key gap);
-	void CompressionPass();
+	void CompressionPass1();
+	void CompressionPass(bool onepass = false);
 	void purge();
 	int isIn(Key key);
 	int isIn(Key lo, Key hi);

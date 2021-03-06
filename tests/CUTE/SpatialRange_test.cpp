@@ -52,14 +52,16 @@ void SpatialRange_test () {
 
   {
 
-#define NCSIVS 4
+#define NCSIVS 7
     uint64 coalesce_sivs[NCSIVS] = {
       //       0x300a300000000009,
+      0x200a30000000000a,
       0x300a30000000000a,
       0x300a30800000000a,
       0x300a31000000000a,
-      0x300a31800000000a
-      
+      0x300a31800000000a,
+      0x300a42000000000b,
+      0x300a33000000000a
     };
 
     STARE_SpatialIntervals sivs(coalesce_sivs,coalesce_sivs+NCSIVS);
@@ -82,7 +84,8 @@ void SpatialRange_test () {
     sr.range->range->verify();
 
     DIAGOUT(9100);
-    sr.range->range->defrag();
+    // sr.range->range->defrag();
+    DIAGOUT(9110);    
     sr.range->range->verify();
 
     DIAGOUT(911);
@@ -90,12 +93,18 @@ void SpatialRange_test () {
     
     DIAGOUT(912);
     sr.range->range->verify();
-    
+
+    DIAGOUT(913);
     sr_sivs = sr.toSpatialIntervals();
+
+    DIAGOUT(914);
     
     for( int i=0; i < sr_sivs.size(); ++i ) {
       cout << i << " 950 " << hex << sr_sivs[i] << dec << endl << flush;
     }
+
+    DIAGOUT(915);
+    
     cout << endl << flush;
 
     exit(1);

@@ -1072,7 +1072,7 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 #undef DIAG
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)... Like storing hi...
 //	my_his->insert(hi, (Value) 0);
-	cout << "x200: " << hex << lo << " " << hi << endl;
+	DIAGOUT("x200: " << hex << lo << " " << hi);
 	// cout << "x201: " << (lo == hi) << endl;
 
 	if( lo == hi ) {
@@ -1311,7 +1311,7 @@ void HtmRangeMultiLevel::defrag()
 #define DIAGOUT(x) {cout << x << endl << flush;}
 
 /// Coalesce triangles and decrease resolution when possible.
-void HtmRangeMultiLevel::CompressionPass() {
+void HtmRangeMultiLevel::CompressionPass1() {
 
   //	throw SpatialFailure("HtmRangeMultiLevel::CompressionPass::NotImplemented!!");
 
@@ -2182,11 +2182,11 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 #undef DIAGOUTFLUSH
 #undef DIAGOUT
 
-// #define DIAGOUTFLUSH(x)
-#define DIAGOUTFLUSH(x) {cout << x << flush;}
+#define DIAGOUTFLUSH(x)
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
 
-// #define DIAGOUT(x)
-#define DIAGOUT(x) {cout << x << endl << flush;}
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 
 
 int HtmRangeMultiLevel::verify()
@@ -2238,6 +2238,179 @@ int HtmRangeMultiLevel::verify()
 
 	return flag_error;
 }
+
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+
+void HtmRangeMultiLevel::CompressionPass(bool onepass)
+{
+  DIAGOUT("HRML::CompressionPass");
+  
+  Key lo0, hi0;
+  Key lo1, hi1;
+  uint32 level0, level1;
+  
+  // Start at the beginning
+  my_los->reset(); my_his->reset();
+
+  //
+  bool done    = false;
+  bool changed = false;
+
+    
+  while(not done) {
+
+    lo0 = my_los->getkey(); hi0 = my_his->getkey();
+
+    if(lo0 < 0) { // Made it to the end
+      if( not changed || onepass ) {
+        done = true;
+      } else {
+        changed = false; // try again, unless one_pass is set
+      }
+    } else { // Got data to work on
+      level0 = encoding->levelById(lo0);
+      
+      // Can we combine any intervals?
+      bool done_defrag = false;
+      DIAGOUT("HRML::CP 880my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));
+      my_los->step(); my_his->step();
+      
+      while(not done_defrag) {
+        // Peek ahead
+        DIAGOUT("HRML::CP 890");
+        DIAGOUT("HRML::CP 890my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));        
+        // my_los->step(); my_his->step();
+        //        DIAGOUT("HRML::CP 891my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));        
+      
+        lo1    = my_los->getkey();
+        level1 = encoding->levelById(lo0);
+        hi1    = my_his->getkey();
+
+        Key hi_test = encoding->predecessorToLowerBound_NoDepthBit(lo1,level1);
+        DIAGOUT("HRML::CP 900");
+        DIAGOUT("HRML::CP 901 lh0 " << FMTX(lo0)     << " " << FMTX(hi0));
+        DIAGOUT("HRML::CP 910 lh1 " << FMTX(lo1)     << " " << FMTX(hi1));
+        DIAGOUT("HRML::CP 920 ht  " << FMTX(hi_test) << " " << FMTX(hi_test));
+
+        // Do not change level? level0 .eq. level1 ?
+        if( level0 != level1 || hi1 == -1 ) {
+          DIAGOUT("HRML::CP: 1000");
+          done_defrag = true;
+        } else {
+          if( hi_test != hi0 ) { // Is this too strict?
+            DIAGOUT("HRML::CP: 2000");
+            done_defrag = true;
+          } else {
+            // lo0..hi0 connects to lo1..hi1
+
+            // stitch them together
+            my_los->step();
+            Key lo_next = my_los->getkey();
+            my_los->free(lo1); // lo1 goes away.
+            if( lo_next >= 0 ) {
+              my_los->search(lo_next,1); // reset iter for stepping
+            }
+
+            my_his->step();
+            Key hi_next = my_his->getkey();
+            my_his->free(hi0); // hi0, its pred, goes away
+            if( hi_next >= 0 ) {
+              my_his->search(hi_next,1); // reset iter for stepping (the '1' indicates setting iter)
+            }
+
+            DIAGOUT("HRML::CP 950 lhn  " << FMTX(lo_next) << " " << FMTX(hi_next));
+            //            DIAGOUT("hrml::CP 951");
+            DIAGOUT("HRML::CP 960my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));
+            
+
+            // my_los->insert(my_los->getkey(),hi_next); Should be the following...
+            my_los->insert(lo0,hi1); // New interval is lo0..hi1.
+            my_his->insert(hi1,3000000000+my_his->getvalue()); // my_his at hi1...
+
+            DIAGOUT("HRML::CP 961my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));
+
+            // Get ready for the next iteration.
+            // lo1 is unchanged
+            hi0 = hi1;
+            done_defrag = false; // Still false, try again.
+
+            // hi0 will grow until we've eaten all of the contiguous intros
+          } // end hi_test == hi0
+        } // end level0 == level1.
+      } // end while not done_defrag
+
+      // lo1..hi1 is the next interval, lo0..hi0 is the current one.
+      lo1    = my_los->getkey();
+      level1 = encoding->levelById(lo1); // Should this be level1 or level0:
+      hi1    = my_his->getkey();
+
+      // Check to see if we have enough here to coalesce.
+      encoding->setId(lo0);
+      uint64 bareLo = encoding->bareId();
+      uint64 triangleNumber0 = encoding->getLocalTriangleNumber();
+    
+      Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
+      encoding->setId(hi0_id);
+      uint64 bareHi = encoding->bareId();
+      
+      uint64 delta = bareHi - bareLo; // How many triangles are here (-1)?
+
+      // There are no cycles of triangles in [bareLo..bareHi].
+      if( delta >= (uint64) (3 + triangleNumber0) ) {
+        // There are cycles of triangles in [bareLo..bareHi]!
+
+        // Find the first tNum 0.
+        uint64 delta_to_first = (4 - triangleNumber0) % 4;
+        uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
+        uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
+
+        // Cut to tNum 0.
+        Key lo_cut = lo0;
+        for(int i = 0; i< delta_to_first; ++i ) {
+          lo_cut = encoding->increment(lo_cut,level0);
+        }
+        uint32 level_lo_cut = level0 - 1;
+        DIAGOUT("\ndelta "<<delta<<"\nparents "<<number_of_full_parents<<"\ndelta1st "<<delta_to_first<<"\ndelta in last "<<delta_in_last);
+
+        
+        // Cut end from tNum last
+        Key lo_last = lo_cut;
+        if( delta_in_last > 0 ) {
+          for(int i = 0; i< number_of_full_parents; ++i ) {
+            lo_last = encoding->increment(lo_last,level0);
+          }
+        }
+        uint32 level_lo_last = level0;
+        
+        // Make the changes
+        if( level_lo_cut >= 0) { // No negative levels...
+          if( lo_cut != lo0 ) {
+            Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
+            my_los->insert(lo0,hi0_cutm);         // Change l0..h0, l0..hi0_cutm
+            my_his->insert(hi0_cutm,4000000001);  // Change l0..h0, l0..hi0_cutm
+          } else {
+            my_los->free(lo0);
+          }
+
+          if( lo_last != lo_cut ) {
+            Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last);
+            my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0_lastm);
+            my_his->insert(hi0_lastm,4000000002);
+            my_los->insert(lo_last,hi0);
+          } else {
+            my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0);           // Add cut lo_cut..hi0
+          }
+          my_his->insert(hi0,4000000003);
+          
+          changed = true;
+        } // my_los, my_his updated
+
+
+      } // endif if "delta" >= 4
+    } // end else there's work to do
+  } // While not done
+} // function def.
+
 
 int HtmRangeMultiLevel::LOWS = 1;
 int HtmRangeMultiLevel::HIGHS = 2;
