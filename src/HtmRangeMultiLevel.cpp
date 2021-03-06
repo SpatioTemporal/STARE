@@ -1072,7 +1072,7 @@ void HtmRangeMultiLevel::addRange(const Key lo, const Key hi)
 #undef DIAG
 //	my_los->insert(lo, (Value) 0); // TODO Consider doing something useful with (Value)... Like storing hi...
 //	my_his->insert(hi, (Value) 0);
-	// cout << "x200: " << hex << lo << " " << hi << endl;
+	cout << "x200: " << hex << lo << " " << hi << endl;
 	// cout << "x201: " << (lo == hi) << endl;
 
 	if( lo == hi ) {
@@ -1187,75 +1187,78 @@ void HtmRangeMultiLevel::defrag(Key gap)
   */
 }
 
+#undef DIAGOUT
+// #define DIAGOUT(x)
+#define DIAGOUT(x) {cout << x << endl << flush;}
 void HtmRangeMultiLevel::defrag()
 {
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 
   DIAGOUT("HRML::defrag " << "0000");
 
-	if(nranges()<2) return;
+  if(nranges()<2) return;
 
-	Key lo0, hi0;
-	Key lo1;
-	// Key hi1;
-	Key save_key;
-	uint32 level0, level1;
-	my_los->reset();
-	my_his->reset();
+  Key lo0, hi0;
+  Key lo1;
+  // Key hi1;
+  Key save_key;
+  uint32 level0, level1;
+  my_los->reset();
+  my_his->reset();
 
-	// compare lo at i+1 to hi at i.
-	// so step lo by one before anything
-	//
-	lo0 = my_los->getkey(); level0 = encoding->levelById(lo0);
-	my_los->step();
-	while((lo1 = my_los->getkey()) >= 0){
-		level1 = encoding->levelById(lo1);
-		hi0 = my_his->getkey();
-//		hexOut("lh0 ",0,hi0);
-//		hexOut("lh1 ",lo1,0);
-//		cout << "level 0,1 " << level0 << " " << level1 << endl << flush;
-		// cout << "compare " << hi << "---" << lo << endl;
+  // compare lo at i+1 to hi at i.
+  // so step lo by one before anything
+  //
+  lo0 = my_los->getkey(); level0 = encoding->levelById(lo0);
+  my_los->step();
+  while((lo1 = my_los->getkey()) >= 0){
+    level1 = encoding->levelById(lo1);
+    hi0 = my_his->getkey();
+    hexOut("lh0 ",0,hi0);
+    hexOut("lh1 ",lo1,0);
+    cout << "level 0,1 " << level0 << " " << level1 << endl << flush;
+    cout << "compare " << hi0 << "---" << lo1 << endl;
 
-		if( level0 == level1 ) { // Same level. Maybe merge?
-//			cout << "levels equal" << endl << flush;
-			Key hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(lo1,level0);
-			// Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
-			encoding->successorToTerminator_NoDepthBit(hi0,level1);
-//			hexOut("hi0_pred,hi0",hi0_pred,hi0);
-//			hexOut("lo1_succ,lo1",lo1_succ,lo1);
-			if( hi0_pred <= hi0 ) { // If the pred includes the actual...???
-//				cout << "merging" << endl << flush;
-				// Let's merge the intervals. Delete hi0 and lo1.
-				my_los->step();  // Step to the next lo
-				save_key = my_los->getkey();
-				my_los->free(lo1);
-				if( save_key >= 0 ) {
-					my_los->search(save_key,1); // reset iter for stepping // TODO Maybe use this in  mergeRange
-				}
-				my_his->step();
-				save_key = my_his->getkey();
+    if( level0 == level1 ) { // Same level. Maybe merge?
+      //			cout << "levels equal" << endl << flush;
+      Key hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(lo1,level0);
+      // Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
+      encoding->successorToTerminator_NoDepthBit(hi0,level1);
+      //			hexOut("hi0_pred,hi0",hi0_pred,hi0);
+      //			hexOut("lo1_succ,lo1",lo1_succ,lo1);
+      if( hi0_pred <= hi0 ) { // If the pred includes the actual...???
+	//				cout << "merging" << endl << flush;
+	// Let's merge the intervals. Delete hi0 and lo1.
+	my_los->step();  // Step to the next lo
+	save_key = my_los->getkey();
+	my_los->free(lo1);
+	if( save_key >= 0 ) {
+	  my_los->search(save_key,1); // reset iter for stepping // TODO Maybe use this in  mergeRange
+	}
+	my_his->step();
+	save_key = my_his->getkey();
         
-				my_his->free(hi0);
-				if( save_key >= 0 ) {
-					my_his->search(save_key,1);
-				}
+	my_his->free(hi0);
+	if( save_key >= 0 ) {
+	  my_his->search(save_key,1);
+	}
 
         // MLR Addition
         my_los->insert(my_los->getkey(),save_key);
         Value tag = my_his->getvalue();
         my_his->insert(save_key,2000000000+tag);
                        
-			} else {
+      } else {
 
-				my_los->step();
-				my_his->step();
-			}
-		} else {
-			my_los->step();
-			my_his->step();
-		}
-		level0 = level1;
-
+	my_los->step();
+	my_his->step();
+      }
+    } else {
+      my_los->step();
+      my_his->step();
+    }
+    level0 = level1;
+#undef DIAGOUT
 #undef hexOut
 
 //		if (hi0 >= lo1) { // TODO MLR Change... ???
@@ -1301,143 +1304,170 @@ void HtmRangeMultiLevel::defrag()
 	// my_his->list(cout);
 }
 
+// #define DIAGOUTFLUSH(x)
+#define DIAGOUTFLUSH(x) {cout << x << flush;}
+
+// #define DIAGOUT(x)
+#define DIAGOUT(x) {cout << x << endl << flush;}
+
 /// Coalesce triangles and decrease resolution when possible.
 void HtmRangeMultiLevel::CompressionPass() {
 
-//	throw SpatialFailure("HtmRangeMultiLevel::CompressionPass::NotImplemented!!");
+  //	throw SpatialFailure("HtmRangeMultiLevel::CompressionPass::NotImplemented!!");
 
-	Key lo0, hi0;
-	int triangleNumber0;
-	uint32 level0;
-	my_los->reset(); my_his->reset();
+  Key lo0, hi0;
+  int triangleNumber0;
+  uint32 level0;
+  my_los->reset(); my_his->reset();
 
-//	int nIters = 8;
-	while((lo0 = my_los->getkey()) >= 0) {
-		level0 = encoding->levelById(lo0);
-		hi0 = my_his->getkey();
+  //	int nIters = 8;
+  
+  while((lo0 = my_los->getkey()) >= 0) {
+    level0 = encoding->levelById(lo0);
+    hi0 = my_his->getkey();
 
-//		cout << "100: lo-hi-0 " << hex << lo0 << ".." << hi0 << dec << endl << flush;
+    DIAGOUT("100: lo-hi-0 " << hex << lo0 << ".." << hi0 << dec);
 
-		encoding->setId(lo0);
-		uint64 bareLo = encoding->bareId();
-		triangleNumber0 = encoding->getLocalTriangleNumber();
+    encoding->setId(lo0);
+    uint64 bareLo = encoding->bareId();
+    triangleNumber0 = encoding->getLocalTriangleNumber();
 
-//		cout << "110: tNum " << triangleNumber0 << endl << flush;
+    Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
+    encoding->setId(hi0_id);
+    uint64 bareHi = encoding->bareId();
 
-//		uint64 hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(hi0,level0);
-//		cout << "111: hi0_pred " << hex << hi0_pred << dec << endl << flush;
-//		encoding->setId(hi0_pred);
+    DIAGOUT("110: tNum " << triangleNumber0);
 
-		Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
+    //		uint64 hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(hi0,level0);
+    //		cout << "111: hi0_pred " << hex << hi0_pred << dec << endl << flush;
+    //		encoding->setId(hi0_pred);
 
-		encoding->setId(hi0_id);
-		uint64 bareHi = encoding->bareId();
+    DIAGOUT("120: bare-lo-hi " << bareLo << ", " << bareHi);
 
-//		cout << "120: bare-lo-hi " << bareLo << ", " << bareHi << endl << flush;
+    uint64 delta = bareHi - bareLo;
+    /*    
+    if( triangleNumber0 != 0 ) {
+      // We're not at the start of a trixel!
+      // Just continue to the next iteration of the while loop.
+    } else {
+      
+      
+    }
+      
 
-		uint64 delta = bareHi - bareLo;
-		// triangleNumber0; // if( delta > 3) {}
-//		cout << "200: delta " << delta << endl << flush;
-		if( delta < (uint64) (3 + triangleNumber0) ) {
-//			cout << "290: " << endl << flush;
-			// No full triangles of leaves in bareLo..bareHi; so skip.
-			my_los->step();
-			my_his->step();
-		} else {
-			// At least one triangle can be coalesced
-			if( triangleNumber0 != 0 ) {
-//				cout << "300: " << endl << flush;
-				// Snip off the front and then recurse
-				Key oldLo = lo0;
-				Key newLo = oldLo;
-				for(int i=triangleNumber0; i<4; i++) {
-					newLo = encoding->increment(newLo,level0);
-				}
-				Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
-				// oldLo..newLoPredecessor; newLo..hi0 Modify the skiplists.
-				my_his->insert(newLoPredecessor,1024);
-				// my_los->insert(newLo,1024);
-				// 2021-0304+
-        my_los->insert(newLo,newLoPredecessor); // Suspicious
-        my_los->insert(oldLo,newLoPredecessor);
-        // 2021-0304-
-				// Set lists to the new lo
-				my_los->reset(); my_his->reset(); // TODO Until we know better, start over. Bad, bad, bad.
-				// TODO Perhaps instead try a find or a search that would set the iterators.
-			} else {
-//				cout << "400: " << endl << flush;
-//				cout << "400: blo = 0x" << setw(16) << setfill('0') << hex << bareLo << endl << flush;
-//				cout << "400: bhi = 0x" << setw(16) << setfill('0') << hex << bareHi << endl << flush;
-//				cout << "400: dlt = 0x" << setw(16) << setfill('0') << hex << delta << endl << flush;
-//				cout << "400: dlt =   " << setw(16)                 << dec << delta << endl << flush;
-				// Snip off as much as possible
-				int numberToCoalesce = (delta+1) / 4;
-				// cout << "410: ntc " << dec << numberToCoalesce << endl << flush;
-				Key oldLo = lo0; Key newLo = oldLo;
-				// cout << "420: lo0 = 0x" << setw(16) << setfill('0') << hex << lo0 << endl << flush;
+    */
 
-//				for(int i=0; i<numberToCoalesce; ++i) {
-//					for(int k=0; k<4; ++k) {
-//						newLo = encoding->increment(newLo,level0);
-//					}
-//				}
+    // triangleNumber0; // if( delta > 3) {}
+		
+    DIAGOUT("200: delta " << delta);
+    if( delta < (uint64) (3 + triangleNumber0) ) {
+      DIAGOUT("290: ");
+      // No full triangles of leaves in bareLo..bareHi; so skip.
+      my_los->step();
+      my_his->step();
+    } else {
+      // At least one triangle can be coalesced
+      // There is no change in level, but we need to add a newLo, which will pick up the old terminator, and insert a new terminator newLo-.
+      if( triangleNumber0 != 0 ) {
+	DIAGOUT("300: ");
+	// Snip off the front and then recurse
+	Key oldLo = lo0;
+	Key newLo = oldLo;
+	for(int i=triangleNumber0; i<4; i++) {
+	  newLo = encoding->increment(newLo,level0);
+	}
+	Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
+	// oldLo..newLoPredecessor; newLo..hi0 Modify the skiplists.
+	my_his->insert(newLoPredecessor,1024);
+	// my_los->insert(newLo,1024);
+	// 2021-0304+
+	my_los->insert(newLo,newLoPredecessor); // Suspicious should be my_los->getvalue(oldLo), not newLoPredecessor.
+	my_los->insert(oldLo,newLoPredecessor); // BROKEN 2021-0304 MLR
+	// 2021-0304-
+	// Set lists to the new lo
+	my_los->reset(); my_his->reset(); // TODO Until we know better, start over. Bad, bad, bad.
+	// TODO Perhaps instead try a find or a search that would set the iterators.
+	// TODO e.g. my_los->search(something)...
+      } else {
+	DIAGOUT("400: ");
+	DIAGOUT("400: blo = 0x" << setw(16) << setfill('0') << hex << bareLo);
+	DIAGOUT("400: bhi = 0x" << setw(16) << setfill('0') << hex << bareHi);
+	DIAGOUT("400: dlt = 0x" << setw(16) << setfill('0') << hex << delta);
+	DIAGOUT("400: dlt =   " << setw(16)                 << dec << delta);
+	// Snip off as much as possible
+	int numberToCoalesce = (delta+1) / 4;
+	DIAGOUT("410: ntc " << dec << numberToCoalesce);
+	Key oldLo = lo0; Key newLo = oldLo;
+	DIAGOUT("420: lo0 = 0x" << setw(16) << setfill('0') << hex << lo0);
 
-				my_los->free(oldLo);
-				--oldLo; // Reduce level
-				// my_los->insert(oldLo,1025);
+	//				for(int i=0; i<numberToCoalesce; ++i) {
+	//					for(int k=0; k<4; ++k) {
+	//						newLo = encoding->increment(newLo,level0);
+	//					}
+	//				}
+
+	my_los->free(oldLo);
+	--oldLo; // Reduce level
+	// my_los->insert(oldLo,1025);
         // TODO FIX THIS MLR
-				// test fix my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
+	// test fix
+	my_los->insert(oldLo,my_his->getkey()); // What's the current key (for my_his)? // TODO Don't worry.
         // my_los->insert(oldLo);
 
-				try {
-					// Scoop up a bunch
-					for(int i=0; i<numberToCoalesce; ++i) {
-						for(int k=0; k<4; ++k) {
-							newLo = encoding->increment(newLo,level0);
-						}
-					}
-					// Then break it in half.
-					Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
-					if(newLoPredecessor != hi0) {
-						my_his->insert(newLoPredecessor,1025);
-						// my_los->insert(newLo,1025);
-            // my_los->insert(newLo,newLoPredecessor); // mlr ???
-					}
+	try {
+	  // Scoop up a bunch
+	  for(int i=0; i<numberToCoalesce; ++i) {
+	    for(int k=0; k<4; ++k) {
+	      newLo = encoding->increment(newLo,level0);
+	    }
+	  }
+	  // Then break it in half.
+	  Key newLoPredecessor = encoding->predecessorToLowerBound_NoDepthBit(newLo,level0);
+	  if(newLoPredecessor != hi0) {
+	    my_his->insert(newLoPredecessor,1025);
+	    //- my_los->insert(newLo,1025);
+            //? my_los->insert(newLo,newLoPredecessor); // mlr ???
+	  }
           // TODO VERIFY THIS WHOLE ROUTINE MLR 2021-0304
           my_los->insert(oldLo,newLoPredecessor);
-          my_los->insert(newLo,hi0); // mlr ??? NOTE: this is just a wag. Not sure if correct.
-				} catch ( SpatialException &e ) {
-					// What if we're at the top index already? Ooops, there's no new low at the new break.
-					// cout << "400: " << e.what() << endl << flush;
-					if( string(e.what()) != string("EmbeddedLevelNameEncoding::error-increment-overflow") ) {
-						throw SpatialFailure("HtmRangeMultiLevel::Compress::unknown error while incrementing to newLo.");
-					}
-				}
-
-
-				my_los->reset(); my_his->reset(); // TODO Reset is too drastic. Prefer to step back a little... Bad, bad, bad.
-			}
-		}
-//		if( !nIters-- ) exit(1);
+          //?
+	  my_los->insert(newLo,hi0); // mlr ??? NOTE: this is just a wag. Not sure if correct.
+	} catch ( SpatialException &e ) {
+	  // What if we're at the top index already? Ooops, there's no new low at the new break.
+	  // cout << "400: " << e.what() << endl << flush;
+	  if( string(e.what()) != string("EmbeddedLevelNameEncoding::error-increment-overflow") ) {
+	    throw SpatialFailure("HtmRangeMultiLevel::Compress::unknown error while incrementing to newLo.");
+	  }
 	}
+	my_los->reset(); my_his->reset(); // TODO Reset is too drastic. Prefer to step back a little... Bad, bad, bad.
+      }
+    }
+    //		if( !nIters-- ) exit(1);
+  }
 
-//	// my_los->step();
-//
-//	while((lo1 = my_los->getkey())){
-//		level1 = encoding->levelById(lo1);
-//
-//		// Look for full pods of sibling leaves.
-//		if( level0 == level1 ) {
-//			int lo0Id = encoding->getLocalTriangleNumber();
-//			if(lo0Id == 0) { // Found the first triangle
-//				int lo1Id = encoding->getLocalTriangleNumber();
-//			if( lo0Id != lo1Id ) {
-//
-//			}
-//		}
-//	}
-//}
+  //	// my_los->step();
+  //
+  //	while((lo1 = my_los->getkey())){
+  //		level1 = encoding->levelById(lo1);
+  //
+  //		// Look for full pods of sibling leaves.
+  //		if( level0 == level1 ) {
+  //			int lo0Id = encoding->getLocalTriangleNumber();
+  //			if(lo0Id == 0) { // Found the first triangle
+  //				int lo1Id = encoding->getLocalTriangleNumber();
+  //			if( lo0Id != lo1Id ) {
+  //
+  //			}
+  //		}
+  //	}
+  //}
 }
+
+#undef DIAGOUT
+#undef DIAGOUTFLUSH
+
+#define DIAGOUT(x) 
+#define DIAGOUTFLUSH(x) 
 
 /// Free the range los and his.
 void HtmRangeMultiLevel::purge()
@@ -1451,7 +1481,6 @@ void HtmRangeMultiLevel::reset()
 {
 	my_los->reset();
 	my_his->reset();
-
 }
 //
 // return the number of ranges
@@ -2149,6 +2178,16 @@ void HtmRangeMultiLevel::print(int what, std::ostream& os, bool symbolic)
 	}
 	return;
 }
+
+#undef DIAGOUTFLUSH
+#undef DIAGOUT
+
+// #define DIAGOUTFLUSH(x)
+#define DIAGOUTFLUSH(x) {cout << x << flush;}
+
+// #define DIAGOUT(x)
+#define DIAGOUT(x) {cout << x << endl << flush;}
+
 
 int HtmRangeMultiLevel::verify()
 {
