@@ -262,18 +262,29 @@ Value SkipList::search(const Key searchKey)
 ///////////////////////////////////////////////////////////////////////////////
 void SkipList::list(ostream & os)
 {
-  os << "List ing start *****************************************" << endl;
+  os << "Listing start *********************************************" << endl;
   SkipListElement* element;
   SkipListElement* nextElement;
 
   element = myHeader;
   nextElement = element->getElement(0);
   while( (nextElement != NIL) ) {
-    os << setw(20) << nextElement->getKey() << " " << setw(4) << nextElement->getValue() << " " <<  endl; 
+    /*    
+    os << setw(20)
+       << nextElement->getKey() << " " << setw(4)
+       << nextElement->getValue() << " " <<  endl;
+    */
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+    os << " 0x" << FMTX(nextElement->getKey())
+       << " 0x" << FMTX(nextElement->getValue())
+       << " " << setw(20) << nextElement->getValue()
+       << endl << flush;
+#undef FMTX
+    
     element=nextElement;
     nextElement = element->getElement(0);
   }
-  os << "List end ***********************************************" << endl;
+  os << "List end **************************************************" << endl;
   return;
 }
 

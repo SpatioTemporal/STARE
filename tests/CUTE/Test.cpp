@@ -2395,19 +2395,26 @@ void htmRangeMultiLevel() {
   //	cout << endl << "defrag" << endl << flush;
   //	range.defrag();
   //	cout << "nranges: " << range.nranges() << endl << flush;
-  //	range.reset();
+  	range.reset();
+  	range.getNext(lo1,terminator1);
+  	hexOut("r[0] ",lo1,terminator1);
+  	range.getNext(lo1,terminator1);
+  	hexOut("r[1] ",lo1,terminator1);
   //	range.getNext(lo1,terminator1);
-  //	hexOut("r[0] ",lo1,terminator1);
-  //	range.getNext(lo1,terminator1);
-  //	hexOut("r[1] ",lo1,terminator1);
-  ////	range.getNext(lo1,terminator1);
-  ////	hexOut("r[2] ",lo1,terminator1);
+  //	hexOut("r[2] ",lo1,terminator1);
   //
   //	cout << endl << flush;
   ////	FAIL();
 
   cout << "Test:Case 5.3 waypoint 1000" << endl << flush;
   range.defrag();
+
+  	range.reset();
+  	range.getNext(lo1,terminator1);
+  	hexOut("r[0] ",lo1,terminator1);
+  	range.getNext(lo1,terminator1);
+  	hexOut("r[1] ",lo1,terminator1);
+  
   cout << "Test:Case 5.3 waypoint 1010" << endl << flush;
   ASSERT_EQUAL(2,range.nranges());
   cout << "Test:Case 5.3 waypoint 1020" << endl << flush;
@@ -2537,13 +2544,15 @@ void htmRangeMultiLevel() {
     range.addRange(A.lo,A.hi);
   */
   // A = rangeFromSymbols("N1002","N1010"); // smaller inside // old
+  cout << "Compression test+" << endl << flush;
   A = rangeFromSymbols("N1001","N1030"); // smaller inside // old
   range.addRange(A.lo,A.hi);
-  //	cout << "a. nr: " << range.nranges() << endl << flush;
-  //	cout << "a. ni: " << range.nindexes_in_ranges() << endl << flush;
+  cout << "a. nr: " << range.nranges() << endl << flush;
+  cout << "a. ni: " << range.nindexes_in_ranges() << endl << flush;
   range.CompressionPass();
-  //	cout << "b. nr: " << range.nranges() << endl << flush;
-  //	cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
+  cout << "b. nr: " << range.nranges() << endl << flush;
+  cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
+  cout << "Compression test-" << endl << flush;
 
   range.purge();
   A = rangeFromSymbols("N300", "N313"); // bigger // new

@@ -78,17 +78,21 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 }
 #undef DIAG
 
-// #define DIAG
+#define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 	KeyPair kp(-1,-2);
+  Key lo_return, hi_return;
 	int istat = this->getNext(kp);
 #ifdef DIAG
-	cout << "sr::gnsi istat = " << istat << ", kp = " << kp.lo << ", " << kp.hi << endl << flush;
+  cout << "\nsr::gnsi start ---" << endl << flush;
+	cout << "\nsr::gnsi istat = " << istat << ", kp = " << kp.lo << ", " << kp.hi << endl << flush;
 #endif
 	if( istat > 0 ) {
 		EmbeddedLevelNameEncoding leftJustified;
 		leftJustified.setId(kp.lo);
-		interval.push_back(leftJustified.getSciDBLeftJustifiedFormat());
+    lo_return = leftJustified.getSciDBLeftJustifiedFormat();
+    cout << "pushing " << hex << lo_return << dec << endl << flush;
+		interval.push_back(lo_return);
 		if( kp.lo != kp.hi ) {
 			STARE_ArrayIndexSpatialValue term_lo = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
 			leftJustified.setId(kp.hi); // Note: hi should be a terminator already.
@@ -102,11 +106,14 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 					<< term_lo << ","
 					<< setw(16) << setfill('0') << hex
 					<< term_hi << endl << flush << dec;
+      cout << "---" << endl << flush;
 #endif
 
 			if( term_hi != term_lo ) {
-				interval.push_back( term_hi );
-			}
+        hi_return = term_hi;
+        cout << "pushing " << hex << hi_return << dec << endl << flush;
+				interval.push_back( hi_return );
+      }
 		}
 	}
 	return istat;

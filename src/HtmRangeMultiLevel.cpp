@@ -1124,8 +1124,8 @@ void HtmRangeMultiLevel::addRange(HtmRangeMultiLevel *range) {
 
 void HtmRangeMultiLevel::defrag(Key gap)
 {
-	cout << "HtmRangeMultiLevel::defrag-Key-gap::NOT-IMPLEMENTED EXITING" << endl << flush;
-	exit(1);
+	// cout << "HtmRangeMultiLevel::defrag-Key-gap::NOT-IMPLEMENTED EXITING" << endl << flush;
+  throw SpatialFailure("HtmRangeMultiLevel::defrag-key-gap::NotImplemented!!");
 
   /* ???
 
@@ -1187,7 +1187,9 @@ void HtmRangeMultiLevel::defrag(Key gap)
   */
 }
 
+#undef DIAG
 #undef DIAGOUT
+#define DIAG
 // #define DIAGOUT(x)
 #define DIAGOUT(x) {cout << x << endl << flush;}
 void HtmRangeMultiLevel::defrag()
@@ -1195,16 +1197,18 @@ void HtmRangeMultiLevel::defrag()
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 
   DIAGOUT("HRML::defrag " << "0000");
+	my_los->list(cout);
+	my_his->list(cout);
+  DIAGOUT("HRML::defrag " << "0001\n");
 
   if(nranges()<2) return;
 
   Key lo0, hi0;
   Key lo1;
-  // Key hi1;
+  Key hi1;
   Key save_key;
   uint32 level0, level1;
-  my_los->reset();
-  my_his->reset();
+  my_los->reset(); my_his->reset();
 
   // compare lo at i+1 to hi at i.
   // so step lo by one before anything
@@ -1212,97 +1216,110 @@ void HtmRangeMultiLevel::defrag()
   lo0 = my_los->getkey(); level0 = encoding->levelById(lo0);
   my_los->step();
   while((lo1 = my_los->getkey()) >= 0){
-    level1 = encoding->levelById(lo1);
+    
+    DIAGOUT("\n---top of while---");
     hi0 = my_his->getkey();
-    hexOut("lh0 ",0,hi0);
-    hexOut("lh1 ",lo1,0);
+    level1 = encoding->levelById(lo1);
+    my_his->step();
+    hi1 = my_his->getkey(); // Should be the same as my_los->getvalue().
+#ifdef DIAG
+    hexOut("lh0 ",lo0,hi0);
+    hexOut("lh1 ",lo1,hi1);
     cout << "level 0,1 " << level0 << " " << level1 << endl << flush;
-    cout << "compare " << hi0 << "---" << lo1 << endl;
-
+    cout << "compare " << hex << hi0 << "---" << lo1 << dec << endl << flush;
+#endif
     if( level0 == level1 ) { // Same level. Maybe merge?
-      //			cout << "levels equal" << endl << flush;
+      DIAGOUT("levels equal");
       Key hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(lo1,level0);
-      // Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
+      Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
       encoding->successorToTerminator_NoDepthBit(hi0,level1);
-      //			hexOut("hi0_pred,hi0",hi0_pred,hi0);
-      //			hexOut("lo1_succ,lo1",lo1_succ,lo1);
+#ifdef DIAG
+      hexOut("hi0_pred,hi0",hi0_pred,hi0);
+      hexOut("lo1_succ,lo1",lo1_succ,lo1);
+#endif
       if( hi0_pred <= hi0 ) { // If the pred includes the actual...???
-	//				cout << "merging" << endl << flush;
-	// Let's merge the intervals. Delete hi0 and lo1.
-	my_los->step();  // Step to the next lo
-	save_key = my_los->getkey();
-	my_los->free(lo1);
-	if( save_key >= 0 ) {
-	  my_los->search(save_key,1); // reset iter for stepping // TODO Maybe use this in  mergeRange
-	}
-	my_his->step();
-	save_key = my_his->getkey();
+        DIAGOUT("merging");
         
-	my_his->free(hi0);
-	if( save_key >= 0 ) {
-	  my_his->search(save_key,1);
-	}
+        // Let's merge the intervals. Delete hi0 and lo1.
+        my_los->step();  // Step to the next lo
+        save_key = my_los->getkey();
+        my_los->free(lo1);
+        if( save_key >= 0 ) {
+          my_los->search(save_key,1); // reset iter for stepping // TODO Maybe use this in  mergeRange
+        }
+        
+        my_his->step();
+        save_key = my_his->getkey(); // Should be hi1
+        
+        my_his->free(hi0);
+        if( save_key >= 0 ) {
+          my_his->search(save_key,1);
+        }
 
         // MLR Addition
-        my_los->insert(my_los->getkey(),save_key);
-        Value tag = my_his->getvalue();
-        my_his->insert(save_key,2000000000+tag);
+        // DIAGOUT("diag: los key: " << hex << my_los->getkey() << dec);
+        
+        my_los->insert(lo0,hi1);
+        Value tag = my_his->search(hi1,1); // Puts iter on h1...
+        my_his->insert(hi1,2000000000+tag);
                        
       } else {
-
-	my_los->step();
-	my_his->step();
+        DIAGOUT("Stepping to next (1)");
+        my_los->step(); my_his->step();
       }
     } else {
-      my_los->step();
-      my_his->step();
+      DIAGOUT("Stepping to next (2), levels different");
+      // my_los->step(); my_his->step(); Iterate the while
+      my_los->step(); // Iterate for the while
+      lo0 = lo1; hi0 = hi1;
     }
     level0 = level1;
-#undef DIAGOUT
+    // #undef DIAGOUT
 #undef hexOut
 
-//		if (hi0 >= lo1) { // TODO MLR Change... ???
-////		if (hi + 1 == lo){ // TODO Original code, seems such a rare case!!!
-//			//
-//			// merge to intervals, delete the lo and the high
-//			// is iter pointing to the right thing?
-//			// need setIterator(key past the one you are about to delete
-//			//
-//			// cout << "Will delete " << lo << " from lo " << endl;
-//			//
-//			// Look ahead, so you can set iter to it
-//			//
-//			my_los->step();
-//			save_key = my_los->getkey();
-//			my_los->free(lo1);
-//			// cout << "Deleted " << lo << " from lo " << endl;
-//			if (save_key >= 0) {
-//				my_los->search(save_key, 1); //resets iter for stepping
-//			}
-//			// cout << "Look ahead to " << save_key << endl << endl;
-//
-//			// cout << "Will delete " << hi << " from hi " << endl;
-//			my_his->step();
-//			save_key = my_his->getkey();
-//			my_his->free(hi0);
-//			// cout << "Deleted " << hi << " from hi " << endl;
-//			if (save_key >= 0){
-//				my_his->search(save_key, 1); //resets iter for stepping
-//			}
-//			// cout << "Look ahead to " << save_key << endl << endl;
-//
-//		} else {
-//			my_los->step();
-//			my_his->step();
-//		}
+      //		if (hi0 >= lo1) { // TODO MLR Change... ???
+      ////		if (hi + 1 == lo){ // TODO Original code, seems such a rare case!!!
+      //			//
+      //			// merge to intervals, delete the lo and the high
+      //			// is iter pointing to the right thing?
+      //			// need setIterator(key past the one you are about to delete
+      //			//
+      //			// cout << "Will delete " << lo << " from lo " << endl;
+      //			//
+      //			// Look ahead, so you can set iter to it
+      //			//
+      //			my_los->step();
+      //			save_key = my_los->getkey();
+      //			my_los->free(lo1);
+      //			// cout << "Deleted " << lo << " from lo " << endl;
+      //			if (save_key >= 0) {
+      //				my_los->search(save_key, 1); //resets iter for stepping
+      //			}
+      //			// cout << "Look ahead to " << save_key << endl << endl;
+      //
+      //			// cout << "Will delete " << hi << " from hi " << endl;
+      //			my_his->step();
+      //			save_key = my_his->getkey();
+      //			my_his->free(hi0);
+      //			// cout << "Deleted " << hi << " from hi " << endl;
+      //			if (save_key >= 0){
+      //				my_his->search(save_key, 1); //resets iter for stepping
+      //			}
+      //			// cout << "Look ahead to " << save_key << endl << endl;
+      //
+      //		} else {
+      //			my_los->step();
+      //			my_his->step();
+      //		}
 
+      } // while
 
-	} // while
-
-	// cout << "DONE looping"  << endl;
-	// my_los->list(cout);
-	// my_his->list(cout);
+	cout << "DONE looping"  << endl;
+	my_los->list(cout);
+	my_his->list(cout);
 }
+#undef DIAG
+#undef DIAGOUT
 
 // #define DIAGOUTFLUSH(x)
 #define DIAGOUTFLUSH(x) {cout << x << flush;}
@@ -1487,11 +1504,11 @@ void HtmRangeMultiLevel::reset()
 //
 /// The number of ranges.
 
-// #define DIAGOUTFLUSH(x)
-#define DIAGOUTFLUSH(x) {cout << x << flush;}
+#define DIAGOUTFLUSH(x)
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
 
-// #define DIAGOUT(x)
-#define DIAGOUT(x) {cout << x << endl << flush;}
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 
 int HtmRangeMultiLevel::nranges()
 {
@@ -2239,11 +2256,27 @@ int HtmRangeMultiLevel::verify()
 	return flag_error;
 }
 
+#undef DIAGOUTFLUSH
+#undef DIAGOUT
+
+#define DIAG
+
+// #define DIAGOUTFLUSH(x)
+#define DIAGOUTFLUSH(x) {cout << x << flush;}
+
+// #define DIAGOUT(x)
+#define DIAGOUT(x) {cout << x << endl << flush;}
+
+
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec
 
 void HtmRangeMultiLevel::CompressionPass(bool onepass)
 {
-  DIAGOUT("HRML::CompressionPass");
+  DIAGOUT("\n\nHRML::CompressionPass-----start");
+
+#ifdef DIAG
+        my_los->list(cout); // my_his->list(cout);
+#endif
   
   Key lo0, hi0;
   Key lo1, hi1;
@@ -2256,18 +2289,27 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
   bool done    = false;
   bool changed = false;
 
-    
+
+  //  int k = 0;
   while(not done) {
+    //    if(++k > 4) { exit(1); }
+    DIAGOUT("\n---top of while not done---");
 
     lo0 = my_los->getkey(); hi0 = my_his->getkey();
 
     if(lo0 < 0) { // Made it to the end
+      DIAGOUT("Made it to end, changed & onepass: " << changed << " " << onepass);
       if( not changed || onepass ) {
         done = true;
       } else {
         changed = false; // try again, unless one_pass is set
+#ifdef DIAG
+        my_los->list(cout); // my_his->list(cout);
+#endif
+        my_los->reset(); my_his->reset();
       }
     } else { // Got data to work on
+      DIAGOUT("---working---");
       level0 = encoding->levelById(lo0);
       
       // Can we combine any intervals?
@@ -2277,13 +2319,14 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
       
       while(not done_defrag) {
         // Peek ahead
+        DIAGOUT("---top of while not done_defrag---");
         DIAGOUT("HRML::CP 890");
         DIAGOUT("HRML::CP 890my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));        
         // my_los->step(); my_his->step();
         //        DIAGOUT("HRML::CP 891my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));        
       
         lo1    = my_los->getkey();
-        level1 = encoding->levelById(lo0);
+        level1 = encoding->levelById(lo1);
         hi1    = my_his->getkey();
 
         Key hi_test = encoding->predecessorToLowerBound_NoDepthBit(lo1,level1);
@@ -2339,76 +2382,102 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
         } // end level0 == level1.
       } // end while not done_defrag
 
+
       // lo1..hi1 is the next interval, lo0..hi0 is the current one.
       lo1    = my_los->getkey();
       level1 = encoding->levelById(lo1); // Should this be level1 or level0:
       hi1    = my_his->getkey();
 
-      // Check to see if we have enough here to coalesce.
-      encoding->setId(lo0);
-      uint64 bareLo = encoding->bareId();
-      uint64 triangleNumber0 = encoding->getLocalTriangleNumber();
-    
-      Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
-      encoding->setId(hi0_id);
-      uint64 bareHi = encoding->bareId();
-      
-      uint64 delta = bareHi - bareLo; // How many triangles are here (-1)?
-
-      // There are no cycles of triangles in [bareLo..bareHi].
-      if( delta >= (uint64) (3 + triangleNumber0) ) {
-        // There are cycles of triangles in [bareLo..bareHi]!
-
-        // Find the first tNum 0.
-        uint64 delta_to_first = (4 - triangleNumber0) % 4;
-        uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
-        uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
-
-        // Cut to tNum 0.
-        Key lo_cut = lo0;
-        for(int i = 0; i< delta_to_first; ++i ) {
-          lo_cut = encoding->increment(lo_cut,level0);
-        }
-        uint32 level_lo_cut = level0 - 1;
-        DIAGOUT("\ndelta "<<delta<<"\nparents "<<number_of_full_parents<<"\ndelta1st "<<delta_to_first<<"\ndelta in last "<<delta_in_last);
-
+      if( level0 == 0 ) {
+        // No coalescense is possible at the root level.
+      } else {      
+        // Check to see if we have enough here to coalesce.
+        encoding->setId(lo0);
+        uint64 bareLo = encoding->bareId();
+        uint64 triangleNumber0 = encoding->getLocalTriangleNumber();
         
-        // Cut end from tNum last
-        Key lo_last = lo_cut;
-        if( delta_in_last > 0 ) {
-          for(int i = 0; i< number_of_full_parents; ++i ) {
-            lo_last = encoding->increment(lo_last,level0);
+        Key hi0_id = encoding->idFromTerminatorAndLevel_NoDepthBit(hi0,level0);
+        encoding->setId(hi0_id);
+        uint64 bareHi = encoding->bareId();
+        
+        uint64 delta = bareHi - bareLo; // How many triangles are here (-1)?
+        
+        if( delta < (uint64) (3 + triangleNumber0) ) {
+          // There are no cycles of triangles possible in [bareLo..bareHi].
+          DIAGOUT("Not enough triangles for a parent. delta = " << delta );
+        } else {
+          // There are cycles of triangles in [bareLo..bareHi]!
+          
+          // Find the first tNum 0.
+          uint64 delta_to_first = (4 - triangleNumber0) % 4;
+          uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
+          uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
+          
+          // Cut to tNum 0.
+          Key lo_cut = lo0;
+          for(int i = 0; i< delta_to_first; ++i ) {
+            lo_cut = encoding->increment(lo_cut,level0);
           }
-        }
-        uint32 level_lo_last = level0;
+          uint32 level_lo_cut = level0 - 1;
+          
+          DIAGOUT("\ndelta "<<delta<<"\nparents "<<number_of_full_parents<<"\ndelta1st "<<delta_to_first<<"\ndelta in last "<<delta_in_last);
+          
+          // Cut end from tNum last
+          Key lo_last = lo_cut;
+          if( delta_in_last > 0 ) {
+            for(int i = 0; i< number_of_full_parents; ++i ) {
+              lo_last = encoding->increment(lo_last,level_lo_cut); // Use coarser level.
+            }
+          }
+          uint32 level_lo_last = level0;
         
-        // Make the changes
-        if( level_lo_cut >= 0) { // No negative levels...
+          // Make the changes
+          DIAGOUT("Making changes");
+          
           if( lo_cut != lo0 ) {
             Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
+
+            DIAGOUT("CP: 5000 l0..h0ctm  " << FMTX(lo0)      << " " << FMTX(hi0_cutm));
+            DIAGOUT("CP: 5000 h0ctm..tag " << FMTX(hi0_cutm) << " " << FMTX(4000000001));
+            
             my_los->insert(lo0,hi0_cutm);         // Change l0..h0, l0..hi0_cutm
             my_his->insert(hi0_cutm,4000000001);  // Change l0..h0, l0..hi0_cutm
           } else {
-            my_los->free(lo0);
+            DIAGOUT("CP: Freeing lo0: " << FMTX(lo0)); 
+            my_los->free(lo0); // my_los will be set in the next clause
           }
-
+          
           if( lo_last != lo_cut ) {
+            // Add the last segment.
             Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last);
+
+            DIAGOUT("CP: 5010 loct+..h0lst  " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0_lastm));
+            DIAGOUT("CP: 5010 h0lst..tag " << FMTX(hi0_lastm) << " " << FMTX(4000000001));
+            
             my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0_lastm);
             my_his->insert(hi0_lastm,4000000002);
             my_los->insert(lo_last,hi0);
+            
           } else {
+            // Didn't need last segment.
+            
             my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0);           // Add cut lo_cut..hi0
+            
           }
-          my_his->insert(hi0,4000000003);
           
+          my_his->insert(hi0,4000000003); // Update the tag
           changed = true;
-        } // my_los, my_his updated
-
-
-      } // endif if "delta" >= 4
+          // my_los, my_his updated
+            
+        } // end else if "delta" >= 4
+      } // else check to see if we have enough to coalesce
     } // end else there's work to do
   } // While not done
+#ifdef DIAG
+  DIAGOUT("HRML::CompressionPass-----done+");
+  my_los->list(cout); my_his->list(cout);
+  DIAGOUT("HRML::CompressionPass-----done-");
+#endif
 } // function def.
 
 

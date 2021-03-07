@@ -45,13 +45,14 @@ public:
 };
 
 // #define DIAG
-// #define DIAGOUT(x)
-#define DIAGOUT(x) cout << x << endl << flush;
+#undef DIAG
+
+#define DIAGOUT(x)
+// #define DIAGOUT(x) cout << x << endl << flush;
 
 void SpatialRange_test () {
-
+  
   {
-
 #define NCSIVS 7
     uint64 coalesce_sivs[NCSIVS] = {
       //       0x300a300000000009,
@@ -66,20 +67,24 @@ void SpatialRange_test () {
 
     STARE_SpatialIntervals sivs(coalesce_sivs,coalesce_sivs+NCSIVS);
 
+#ifdef DIAG
     for( int i=0; i < sivs.size(); ++i ) {
       cout << i << " 800 " << hex << sivs[i] << dec << endl << flush;
     }
     cout << endl << flush;
+#endif
 
     SpatialRange sr(sivs);
     
     STARE_SpatialIntervals sr_sivs = sr.toSpatialIntervals();
-    
+
+#ifdef DIAG
     for( int i=0; i < sr_sivs.size(); ++i ) {
       cout << i << " 900 " << hex << sr_sivs[i] << dec << endl << flush;
     }
     cout << endl << flush;
-
+#endif
+    
     DIAGOUT(910);
     sr.range->range->verify();
 
@@ -98,27 +103,32 @@ void SpatialRange_test () {
     sr_sivs = sr.toSpatialIntervals();
 
     DIAGOUT(914);
-    
+
+#ifdef DIAG
     for( int i=0; i < sr_sivs.size(); ++i ) {
       cout << i << " 950 " << hex << sr_sivs[i] << dec << endl << flush;
     }
-
     DIAGOUT(915);
-    
     cout << endl << flush;
+#endif
 
-    exit(1);
+    { int i = 0;
+      ASSERT_EQUAL(sr_sivs[i++],0x200a30000000000a);
+      ASSERT_EQUAL(sr_sivs[i++],0x300a300000000009);
+      ASSERT_EQUAL(sr_sivs[i++],0x300a33000000000a);
+      ASSERT_EQUAL(sr_sivs[i++],0x300a42000000000b);
+    }
+
+    // exit(1);
     
   }
 
   {
     DIAGOUT("1000 ");
-
     int sivlen = 1000;
     // STARE_ArrayIndexSpatialValue siv[sivlen];
     STARE_SpatialIntervals sivs(sids, sids + sivlen);
     SpatialRange sr(sivs);
-    
     DIAGOUT("1100 ");
   }
 
@@ -130,7 +140,6 @@ void SpatialRange_test () {
     SpatialRange sr(sivs);
     DIAGOUT("1300 ");    
   }
-  
 
 	STARE index;
 	STARE_ArrayIndexSpatialValue siv = index.ValueFromLatLonDegrees( 30, 30, 8 );
@@ -220,7 +229,8 @@ void SpatialRange_test () {
       }
     }
 
-#define DIAG
+#undef DIAG
+    // #define DIAG
 #ifdef DIAG
     for(int i=0; i < sis.size(); ++i ) {
       cout << i << " i,si: " << setw(16) << setfill('0') << hex << sis[i] << dec << endl << flush;
@@ -242,8 +252,8 @@ void SpatialRange_test () {
 	if(true) {
 		// TODO Fix the following to use the new 0/1 variables defined above.
 
-    // #undef DIAG
-#define DIAG    
+#undef DIAG
+    // #define DIAG    
 #ifndef DIAG
 #define SIVOUT(m,siv)
 #define SISOUT(m,sis)
@@ -322,6 +332,7 @@ void SpatialRange_test () {
 	if(true) {
 		// TODO Fix the following to use the new 0/1 variables defined above.
 // #define DIAG
+#undef DIAG
 #ifndef DIAG
 #define SIVOUT(m,siv)
 #define SISOUT(m,sis)
@@ -410,17 +421,46 @@ void SpatialRange_test () {
 		// SpatialRange *ri = r1 & r2;
 		// SpatialRange *ri = sr_intersect(r1, r2);
 
-
-
 		STARE_SpatialIntervals result = ri->toSpatialIntervals();
 		ASSERT_EQUAL(2,result.size());
 		ASSERT_EQUAL(0x000030000000000a,result[0]);
 		ASSERT_EQUAL(0x000067ffffffffff,result[1]);
 
-  DIAGOUT(500700);    
+  DIAGOUT(500700);
+
+#define DIAG
+#ifdef DIAG
+  EmbeddedLevelNameEncoding encoding;
+    cout << endl << flush;
+    result = ri->toSpatialIntervals();
+    for( int i=0; i < result.size(); ++i ) {
+      encoding.setIdFromSciDBLeftJustifiedFormat(result[i]);
+      cout << setw(4) << i   << " 500701 " << hex << result[i] << dec << endl << flush;
+      cout << setw(4) << "-" << "        " << hex 
+           << encoding.getSciDBTerminatorLeftJustifiedFormat()
+           << dec << endl << flush;
+    }
+    cout << endl << flush;
+#endif
+#undef DIAG  
 
 		ri->range->range->CompressionPass();
 		result = ri->toSpatialIntervals();
+
+#define DIAG
+#ifdef DIAG
+    cout << endl << flush;
+    for( int i=0; i < result.size(); ++i ) {
+      encoding.setIdFromSciDBLeftJustifiedFormat(result[i]);
+      cout << setw(4) << i   << " 500702 " << hex << result[i] << dec << endl << flush;
+      cout << setw(4) << "-" << "        " << hex 
+           << encoding.getSciDBTerminatorLeftJustifiedFormat()
+           << dec << endl << flush;
+    }
+    cout << endl << flush;
+#endif
+#undef DIAG
+    
 		ASSERT_EQUAL(4,result.size());
 		ASSERT_EQUAL(0x0000300000000008,result[0]);
 		ASSERT_EQUAL(0x00003fffffffffff,result[1]);
