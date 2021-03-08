@@ -1189,16 +1189,18 @@ void HtmRangeMultiLevel::defrag(Key gap)
 
 #undef DIAG
 #undef DIAGOUT
-#define DIAG
-// #define DIAGOUT(x)
-#define DIAGOUT(x) {cout << x << endl << flush;}
+// #define DIAG
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 void HtmRangeMultiLevel::defrag()
 {
 #define hexOut(a,b,c) cout << a << " 0x" << hex << setfill('0') << setw(16) << b << ".." << c << dec << endl << flush;
 
   DIAGOUT("HRML::defrag " << "0000");
+#ifdef DIAG
 	my_los->list(cout);
 	my_his->list(cout);
+#endif
   DIAGOUT("HRML::defrag " << "0001\n");
 
   if(nranges()<2) return;
@@ -1231,10 +1233,10 @@ void HtmRangeMultiLevel::defrag()
     if( level0 == level1 ) { // Same level. Maybe merge?
       DIAGOUT("levels equal");
       Key hi0_pred = encoding->predecessorToLowerBound_NoDepthBit(lo1,level0);
-      Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
       encoding->successorToTerminator_NoDepthBit(hi0,level1);
 #ifdef DIAG
       hexOut("hi0_pred,hi0",hi0_pred,hi0);
+      Key lo1_succ = encoding->successorToTerminator_NoDepthBit(hi0,level1);
       hexOut("lo1_succ,lo1",lo1_succ,lo1);
 #endif
       if( hi0_pred <= hi0 ) { // If the pred includes the actual...???
@@ -1313,19 +1315,20 @@ void HtmRangeMultiLevel::defrag()
       //		}
 
       } // while
-
+#ifdef DIAG
 	cout << "DONE looping"  << endl;
 	my_los->list(cout);
 	my_his->list(cout);
+#endif
 }
 #undef DIAG
 #undef DIAGOUT
 
-// #define DIAGOUTFLUSH(x)
-#define DIAGOUTFLUSH(x) {cout << x << flush;}
+#define DIAGOUTFLUSH(x)
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
 
-// #define DIAGOUT(x)
-#define DIAGOUT(x) {cout << x << endl << flush;}
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 
 /// Coalesce triangles and decrease resolution when possible.
 void HtmRangeMultiLevel::CompressionPass1() {
@@ -2259,13 +2262,13 @@ int HtmRangeMultiLevel::verify()
 #undef DIAGOUTFLUSH
 #undef DIAGOUT
 
-#define DIAG
+// #define DIAG
 
-// #define DIAGOUTFLUSH(x)
-#define DIAGOUTFLUSH(x) {cout << x << flush;}
+#define DIAGOUTFLUSH(x)
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
 
-// #define DIAGOUT(x)
-#define DIAGOUT(x) {cout << x << endl << flush;}
+#define DIAGOUT(x)
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 
 
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec
@@ -2392,6 +2395,8 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
         // No coalescense is possible at the root level.
       } else {      
         // Check to see if we have enough here to coalesce.
+        DIAGOUT("CP:5K: Working on lh0: " << FMTX(lo0) << " " << FMTX(hi0));
+        
         encoding->setId(lo0);
         uint64 bareLo = encoding->bareId();
         uint64 triangleNumber0 = encoding->getLocalTriangleNumber();
@@ -2401,7 +2406,16 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
         uint64 bareHi = encoding->bareId();
         
         uint64 delta = bareHi - bareLo; // How many triangles are here (-1)?
-        
+
+#ifdef DIAG
+        uint64 id_tmp = lo0; int knt = 0;
+        while( id_tmp < hi0 ) {
+          ++knt;
+          DIAGOUT(knt << " " << FMTX(id_tmp));
+          id_tmp = encoding->increment(id_tmp,level0);
+        }
+#endif
+
         if( delta < (uint64) (3 + triangleNumber0) ) {
           // There are no cycles of triangles possible in [bareLo..bareHi].
           DIAGOUT("Not enough triangles for a parent. delta = " << delta );
@@ -2412,28 +2426,47 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           uint64 delta_to_first = (4 - triangleNumber0) % 4;
           uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
           uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
-          
+
+#ifdef DIAG
+          uint64 number_of_triangles      = 1+delta;
+          uint64 number_in_first_segment  = delta_to_first;
+          uint64 number_in_middle_segment = 4*number_of_full_parents;
+          uint64 number_in_last_segment   = number_of_triangles - number_in_first_segment - number_in_middle_segment;
+
+          cout << "CP:"
+               << setw(24) << "\nnumber_of_triangles      " << number_of_triangles
+               << setw(24) << "\nnumber_in_first_segment  " << number_in_first_segment
+               << setw(24) << "\nnumber_in_middle_segment " << number_in_middle_segment
+               << setw(24) << "\nnumber_in_last_segment   " << number_in_last_segment
+               << "\n--"
+               << endl << flush;
+#endif
+            
           // Cut to tNum 0.
           Key lo_cut = lo0;
           for(int i = 0; i< delta_to_first; ++i ) {
             lo_cut = encoding->increment(lo_cut,level0);
-	    encoding->setId(lo_cut);
-	    Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level0);
-	    DIAGOUT("CP: l_cut,t_term " << FMTX(lo_cut) << " " << FMTX(tmp_term));
+            encoding->setId(lo_cut);
+#ifdef DIAG
+            Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level0);
+            DIAGOUT("CP: l_cut,t_term " << FMTX(lo_cut) << " " << FMTX(tmp_term));
+#endif
           }
           uint32 level_lo_cut = level0 - 1;
-          
-          DIAGOUT("\ndelta "<<delta<<"\nparents "<<number_of_full_parents<<"\ndelta1st "<<delta_to_first<<"\ndelta in last "<<delta_in_last);
+
+          DIAGOUT("\ndelta "<<delta<<"\nparents "<<number_of_full_parents<<"\ndelta_to_first "<<delta_to_first<<"\ndelta in last "<<delta_in_last);
           
           // Cut end from tNum last
           Key lo_last = lo_cut;
           if( delta_in_last > 0 ) {
-            for(int i = 0; i< number_of_full_parents; ++i ) {
+            for(int i = 0; i< 4*number_of_full_parents; ++i ) {
               // lo_last = encoding->increment(lo_last,level_lo_cut); // Use coarser level. ***BUG*** Wrong level?
               lo_last = encoding->increment(lo_last,level0); 
-	      encoding->setId(lo_last);
-	      Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_cut);
-	      DIAGOUT("CP: l_lst,t_term " << FMTX(lo_last) << " " << FMTX(tmp_term));
+              encoding->setId(lo_last);
+#ifdef DIAG
+              Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_cut);
+              DIAGOUT("CP: l_lst,t_term " << FMTX(lo_last) << " " << FMTX(tmp_term));
+#endif
             }
           }
           uint32 level_lo_last = level0;

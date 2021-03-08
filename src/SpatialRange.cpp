@@ -9,6 +9,8 @@
 
 #include "SpatialRange.h"
 
+#define DIAGOUT(x)
+
 
 SpatialRange::SpatialRange() {
 	this->range = new HstmRange;
@@ -34,7 +36,7 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
  *
  * TODO: Have a SpatialRange class instead of an HstmRange?
  */
-#define DIAG
+// #define DIAG
 #undef DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	EmbeddedLevelNameEncoding leftJustified, lj_cleared;
@@ -78,7 +80,7 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 }
 #undef DIAG
 
-#define DIAG
+// #define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 	KeyPair kp(-1,-2);
   Key lo_return, hi_return;
@@ -91,7 +93,7 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 		EmbeddedLevelNameEncoding leftJustified;
 		leftJustified.setId(kp.lo);
     lo_return = leftJustified.getSciDBLeftJustifiedFormat();
-    cout << "pushing " << hex << lo_return << dec << endl << flush;
+    DIAGOUT("pushing " << hex << lo_return << dec);
 		interval.push_back(lo_return);
 		if( kp.lo != kp.hi ) {
 			STARE_ArrayIndexSpatialValue term_lo = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
@@ -111,7 +113,7 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 
 			if( term_hi != term_lo ) {
         hi_return = term_hi;
-        cout << "pushing " << hex << hi_return << dec << endl << flush;
+        DIAGOUT("pushing " << hex << hi_return << dec);
 				interval.push_back( hi_return );
       }
 		}

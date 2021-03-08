@@ -1,6 +1,9 @@
 
 #include "Test.h"
 
+#undef DIAG
+#define DIAGOUT(x)
+
 // Convenience functions for the tests.
 double square(SpatialVector x){	return x*x; }
 double norm(SpatialVector x){ return sqrt(square(x)); }
@@ -738,6 +741,7 @@ void testIndexLevel() {
   int saveLevel  = 6;
   for(maxLevel=1;maxLevel<9;maxLevel++) {
     SpatialIndex *index = new SpatialIndex(maxLevel,saveLevel);
+#ifdef DIAG
     cout
       << " maxLevel=" << maxLevel
       << " saveLevel=" << saveLevel
@@ -750,6 +754,7 @@ void testIndexLevel() {
       //		<< " depth=" << depthOfName(index->nameById(index->idAtNodeIndex(9)))
       << " level=" << name->levelById(index->idAtNodeIndex(9))
       << endl << flush;
+#endif
     delete index;
   }
   delete name;
@@ -1590,8 +1595,8 @@ KeyPair rangeFromSymbols(string lo, string hi) {
 
 void htmRangeMultiLevel() {
 
-  // bool verbose = false;
-  bool verbose = true;
+  bool verbose = false;
+  // bool verbose = true;
 
   HtmRangeMultiLevel range;
   EmbeddedLevelNameEncoding leftJustified;
@@ -1601,61 +1606,77 @@ void htmRangeMultiLevel() {
   //  Key successor, hi0;
   KeyPair A, B;
 
-  {
-    int level = 10;
-    terminator = 0x3f32baffffffffff;
-    lo = leftJustified.predecessorToLowerBound_NoDepthBit(terminator,level); 
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
-    hexOut("pred test l=10: ",lo,terminator);
-#undef hexOut
-  }
-  {
-    int level = 10;
-    terminator = 0x3f32baffffffffff;
-    lo = leftJustified.idFromTerminatorAndLevel_NoDepthBit(terminator,level); 
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
-    hexOut("lo test l=10:   ",lo,terminator)
-#undef hexOut
-  }
+#define hexOut(c,a,b)
+  // #define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
 
+  /*
+pred test l=10:   0x3f32b9ffffffffff 0x3f32baffffffffff
+lo test l=10:     0x3f32ba000000000a 0x3f32baffffffffff
+lo/term test:     0x3f32ba65e09b790a 0x3f32baffffffffff
+pred test l=27:   0x3f32baffffffffbf 0x3f32baffffffffff
+lo test l=27:     0x3f32baffffffffdb 0x3f32baffffffffff
+lo/term test:     0x3f32baffffffffdb 0x3f32baffffffffff
+fiducial marks:   0x080000000000001f 0x080000000000001f
+masked:           0x3f32baffffffffc0 0x3f32baffffffffe0
+  */
+  {
+    int level = 10;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.predecessorToLowerBound_NoDepthBit(terminator,level);
+    hexOut("pred test l=10: ",lo,terminator);
+    ASSERT_EQUAL(lo,0x3f32b9ffffffffff);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
+  }
+  {
+    int level = 10;
+    terminator = 0x3f32baffffffffff;
+    lo = leftJustified.idFromTerminatorAndLevel_NoDepthBit(terminator,level);
+    hexOut("lo test l=10:   ",lo,terminator)
+    ASSERT_EQUAL(lo,0x3f32ba000000000a);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
+  }
   
   {
     int level = 10;
     lo = 0x3f32ba65e09b790a;
     terminator = leftJustified.getIdTerminator_NoDepthBit(lo,level);
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
     hexOut("lo/term test:   ",lo,terminator)
-#undef hexOut
+    ASSERT_EQUAL(lo,0x3f32ba65e09b790a);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
   }
- 
 
   {
     int level = 27;
     terminator = 0x3f32baffffffffff;
     lo = leftJustified.predecessorToLowerBound_NoDepthBit(terminator,level); 
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
     hexOut("pred test l=27: ",lo,terminator)
-#undef hexOut
+    ASSERT_EQUAL(lo,0x3f32baffffffffbf);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
   }
   {
     int level = 27;
     terminator = 0x3f32baffffffffff;
     lo = leftJustified.idFromTerminatorAndLevel_NoDepthBit(terminator,level); 
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
     hexOut("lo test l=27:   ",lo,terminator)
-#undef hexOut
+    ASSERT_EQUAL(lo,0x3f32baffffffffdb);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
   }
 
   {
     int level = 27;
     lo = 0x3f32baffffffffdb;
     terminator = leftJustified.getIdTerminator_NoDepthBit(lo,level);
-#define hexOut(c,a,b) cout << c << " " << " 0x" << hex << setfill('0') << setw(16) << a << " 0x" << hex << setfill('0') << setw(16) << b << dec << endl << flush;
     hexOut("lo/term test:   ",lo,terminator);
     hexOut("fiducial marks: ",((1llu <<59) | 31),((1llu<<59) | 31));
     hexOut("masked:         ",(lo & ~(31)),(terminator & ~(31)));
-#undef hexOut
+    ASSERT_EQUAL(lo,0x3f32baffffffffdb);
+    ASSERT_EQUAL(terminator,0x3f32baffffffffff);
+    ASSERT_EQUAL(((1llu <<59) | 31),0x080000000000001f);
+    ASSERT_EQUAL((lo & ~(31)),0x3f32baffffffffc0);
+    ASSERT_EQUAL((terminator & ~(31)),0x3f32baffffffffe0);
   }
+  
+#undef hexOut
 
 // exit(1);
 
@@ -2397,27 +2418,34 @@ void htmRangeMultiLevel() {
   //	cout << "nranges: " << range.nranges() << endl << flush;
   	range.reset();
   	range.getNext(lo1,terminator1);
-  	hexOut("r[0] ",lo1,terminator1);
+    ASSERT_EQUAL(lo1,0x4400000000000003);
+    ASSERT_EQUAL(terminator1,0x46ffffffffffffff);
+  //	hexOut("r[0] ",lo1,terminator1);
   	range.getNext(lo1,terminator1);
-  	hexOut("r[1] ",lo1,terminator1);
+    ASSERT_EQUAL(lo1,0x4700000000000002);
+    ASSERT_EQUAL(terminator1,0x4bffffffffffffff);
+  //  	hexOut("r[1] ",lo1,terminator1);
   //	range.getNext(lo1,terminator1);
   //	hexOut("r[2] ",lo1,terminator1);
   //
   //	cout << endl << flush;
   ////	FAIL();
 
-  cout << "Test:Case 5.3 waypoint 1000" << endl << flush;
+  // cout << "Test:Case 5.3 waypoint 1000" << endl << flush;
+    
   range.defrag();
 
+#if 0
   	range.reset();
   	range.getNext(lo1,terminator1);
   	hexOut("r[0] ",lo1,terminator1);
   	range.getNext(lo1,terminator1);
   	hexOut("r[1] ",lo1,terminator1);
+#endif
   
-  cout << "Test:Case 5.3 waypoint 1010" << endl << flush;
+  // cout << "Test:Case 5.3 waypoint 1010" << endl << flush;
   ASSERT_EQUAL(2,range.nranges());
-  cout << "Test:Case 5.3 waypoint 1020" << endl << flush;
+  // cout << "Test:Case 5.3 waypoint 1020" << endl << flush;
 
   range.reset();
   range.getNext(lo1,terminator1);
@@ -2544,15 +2572,19 @@ void htmRangeMultiLevel() {
     range.addRange(A.lo,A.hi);
   */
   // A = rangeFromSymbols("N1002","N1010"); // smaller inside // old
-  cout << "Compression test+" << endl << flush;
+  DIAGOUT("Compression test+");
   A = rangeFromSymbols("N1001","N1030"); // smaller inside // old
   range.addRange(A.lo,A.hi);
+#ifdef DIAG
   cout << "a. nr: " << range.nranges() << endl << flush;
   cout << "a. ni: " << range.nindexes_in_ranges() << endl << flush;
+#endif
   range.CompressionPass();
+#ifdef DIAG
   cout << "b. nr: " << range.nranges() << endl << flush;
   cout << "b. ni: " << range.nindexes_in_ranges() << endl << flush;
   cout << "Compression test-" << endl << flush;
+#endif
 
   range.purge();
   A = rangeFromSymbols("N300", "N313"); // bigger // new

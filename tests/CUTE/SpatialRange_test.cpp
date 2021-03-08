@@ -428,7 +428,7 @@ void SpatialRange_test () {
 
   DIAGOUT(500700);
 
-#define DIAG
+  // #define DIAG
 #ifdef DIAG
   EmbeddedLevelNameEncoding encoding;
     cout << endl << flush;
@@ -447,7 +447,7 @@ void SpatialRange_test () {
 		ri->range->range->CompressionPass();
 		result = ri->toSpatialIntervals();
 
-#define DIAG
+    // #define DIAG
 #ifdef DIAG
     cout << endl << flush;
     for( int i=0; i < result.size(); ++i ) {
@@ -592,8 +592,10 @@ void SpatialRange_test () {
 
 		// uint64 i0 = 0;
 		uint64 i0   = 0x3d2b61000000000a;
+#if 0
 	    // uint64 i0   = 0x3d2b600000000009;
 		uint64 ix   = 0x3d2b61800000000d;
+#endif
 
 		SpatialPolygon p(vs);
 		Triangle tr = index.TriangleFromValue(i0, 10);

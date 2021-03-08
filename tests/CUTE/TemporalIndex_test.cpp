@@ -367,7 +367,7 @@ void TemporalIndex_test() {
 
 	// tIndex.setZero();
 	int64_t one = 1;
-	int64_t offsetBase = tIndex.data.get("millisecond")->getOffset();
+	// ??? int64_t offsetBase = tIndex.data.get("millisecond")->getOffset();
 	int64_t offsetTop = tIndex.data.get("year")->getOffset()+tIndex.data.get("year")->getWidth()-1;
 	TemporalIndex tIndex2, tIndex3, tIndex4;
 	tIndex2.fromFormattedJulianTAI(262144, 12, 31, 23, 59, 59, 999);
