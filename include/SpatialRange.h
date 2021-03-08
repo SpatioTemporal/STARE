@@ -60,7 +60,8 @@ public:
 	};
 	void reset() { range->reset(); } // range not null?
 	void purge() { range->purge(); } // what if range null?
-	void compress() { range->range->CompressionPass(); }
+	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
+	void compress() { range->range->CompressionPass(); } // Defragment and coarsen resolution where possible
 };
 
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);
