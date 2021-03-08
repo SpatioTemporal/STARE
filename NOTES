@@ -1,3 +1,8 @@
+
+2021-03-08 Version 0.16.4
+
+Various fixes to SpatialRange and HtmRangeMultiLevel, specifically, degrag and compress.
+
 2020-10-09 Version 0.16.3
 
 Build couldn't find gcc/g++ on conda-forge installation. Removed pystare references.

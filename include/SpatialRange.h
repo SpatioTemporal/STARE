@@ -41,7 +41,7 @@ public:
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
 		Key lo = leftJustified.maskOffLevelBit();
 		Key hi = lo;
-		KeyPair pr = KeyPair(lo,hi);
+		// KeyPair pr = KeyPair(lo,hi);
 		int rstat = range->range->contains(lo,hi);
 		bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
 		return intersectp;
@@ -60,6 +60,8 @@ public:
 	};
 	void reset() { range->reset(); } // range not null?
 	void purge() { range->purge(); } // what if range null?
+	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
+	void compress() { range->range->CompressionPass(); } // Defragment and coarsen resolution where possible
 };
 
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);

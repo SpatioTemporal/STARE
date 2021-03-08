@@ -69,7 +69,7 @@ public:
 	void mergeRange(const Key lo, const Key hi);
 	void defrag();
 	void defrag(Key gap);
-	void CompressionPass();
+	void CompressionPass(bool onepass = false);
 	void purge();
 	int isIn(Key key);
 	int isIn(Key lo, Key hi);
@@ -84,6 +84,7 @@ public:
 	int stats(int desiredSize);
 	int nranges();
 	int nindexes_in_ranges();
+  int verify();
 
 	int getLosLength() {
 		return my_los->getLength();

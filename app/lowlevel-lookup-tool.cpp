@@ -250,7 +250,7 @@ main(int argc, char *argv[]) {
 
 	try {
 		if(!quiet)
-			printf("Depth = %d\n",depth);
+			printf("Depth = %zu\n",depth);
 		htm = new htmInterface(depth);
 
 		// *******************************************************
@@ -304,13 +304,13 @@ main(int argc, char *argv[]) {
 				cmd = "NAME ";
 				cmd += idname;
 			} else if(radec) {
-				sprintf(str,"J2000 %d %20.16f %20.16f",depth,ra,dec);
+				sprintf(str,"J2000 %zu %20.16f %20.16f",depth,ra,dec);
 				cmd = str;
 			} else if (latlon) {
-				sprintf(str,"LatLonDegrees %d %20.16f %20.16f",depth,ra,dec);
+				sprintf(str,"LatLonDegrees %zu %20.16f %20.16f",depth,ra,dec);
 				cmd = str;
 			} else {
-				sprintf(str,"CARTESIAN %d %20.16f %20.16f %20.16f",depth,x,y,z);
+				sprintf(str,"CARTESIAN %zu %20.16f %20.16f %20.16f",depth,x,y,z);
 				cmd = str;
 			}
 			id = htm->lookupIDCmd(cmd.data());
