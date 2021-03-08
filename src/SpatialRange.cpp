@@ -85,7 +85,7 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 	int istat = this->getNext(kp);
 #ifdef DIAG
   cout << "\nsr::gnsi start ---" << endl << flush;
-	cout << "\nsr::gnsi istat = " << istat << ", kp = " << kp.lo << ", " << kp.hi << endl << flush;
+  cout << "\nsr::gnsi istat = " << istat << ", kp = " << hex << kp.lo << ", " << kp.hi << dec << endl << flush;
 #endif
 	if( istat > 0 ) {
 		EmbeddedLevelNameEncoding leftJustified;

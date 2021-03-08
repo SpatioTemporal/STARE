@@ -2417,6 +2417,9 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           Key lo_cut = lo0;
           for(int i = 0; i< delta_to_first; ++i ) {
             lo_cut = encoding->increment(lo_cut,level0);
+	    encoding->setId(lo_cut);
+	    Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level0);
+	    DIAGOUT("CP: l_cut,t_term " << FMTX(lo_cut) << " " << FMTX(tmp_term));
           }
           uint32 level_lo_cut = level0 - 1;
           
@@ -2426,7 +2429,11 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           Key lo_last = lo_cut;
           if( delta_in_last > 0 ) {
             for(int i = 0; i< number_of_full_parents; ++i ) {
-              lo_last = encoding->increment(lo_last,level_lo_cut); // Use coarser level.
+              // lo_last = encoding->increment(lo_last,level_lo_cut); // Use coarser level. ***BUG*** Wrong level?
+              lo_last = encoding->increment(lo_last,level0); 
+	      encoding->setId(lo_last);
+	      Key tmp_term = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_cut);
+	      DIAGOUT("CP: l_lst,t_term " << FMTX(lo_last) << " " << FMTX(tmp_term));
             }
           }
           uint32 level_lo_last = level0;
@@ -2435,10 +2442,11 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           DIAGOUT("Making changes");
           
           if( lo_cut != lo0 ) {
-            Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
+            // old Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
+            // Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level_lo_cut); // ???
+            Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level0); // ???
 
-            DIAGOUT("CP: 5000 l0..h0ctm  " << FMTX(lo0)      << " " << FMTX(hi0_cutm));
-            DIAGOUT("CP: 5000 h0ctm..tag " << FMTX(hi0_cutm) << " " << FMTX(4000000001));
+            DIAGOUT("CP: 5000 l0..h0ctm     " << FMTX(lo0)      << " " << FMTX(hi0_cutm) << " h0ctm..tag " << FMTX(hi0_cutm) << " " << FMTX(4000000001));
             
             my_los->insert(lo0,hi0_cutm);         // Change l0..h0, l0..hi0_cutm
             my_his->insert(hi0_cutm,4000000001);  // Change l0..h0, l0..hi0_cutm
@@ -2449,10 +2457,10 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           
           if( lo_last != lo_cut ) {
             // Add the last segment.
-            Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last);
+            Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last); // ???
+            // Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level0); // ???
 
-            DIAGOUT("CP: 5010 loct+..h0lst  " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0_lastm));
-            DIAGOUT("CP: 5010 h0lst..tag " << FMTX(hi0_lastm) << " " << FMTX(4000000001));
+            DIAGOUT("CP: 5010 loct+..h0lst  " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0_lastm) << " h0lst..tag " << FMTX(hi0_lastm) << " " << FMTX(4000000001));
             
             my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0_lastm);
             my_his->insert(hi0_lastm,4000000002);
