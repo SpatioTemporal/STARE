@@ -283,6 +283,8 @@ int HtmRangeMultiLevel::compare(const HtmRangeMultiLevel & other) const
 int HtmRangeMultiLevel::isIn(Key a, Key b)
 {
 
+  cout << " HRML::isIn 050 < " << hex << a << " " << b << " > " << flush;
+
   //	Key a = this->encoding->maskOffLevel(a_);
   //	Key b = this->encoding->maskOffLevel(b_);
 
@@ -305,7 +307,7 @@ int HtmRangeMultiLevel::isIn(Key a, Key b)
   if( ka >= 0 ) { // a is a lower bound
     if( ka == kb ) {
       // Inside, because we're all 0-length.
-      //			cout << "100: " << a << " " << b << " " << ka << " " << kb << endl << flush;
+      cout << "100: " << hex << a << " " << b << " " << ka << " " << kb << dec << endl << flush;
       return 1;
     }
   }
@@ -313,7 +315,7 @@ int HtmRangeMultiLevel::isIn(Key a, Key b)
   if( kb >= 0 ) { // b is a lower bound! => intersection if != a.
     if( ka == kb ) {
       // Equality, because we're 0-length.
-      //			cout << "110: " << a << " " << b << " " << ka << " " << kb << endl << flush;
+      cout << "110: " << hex << a << " " << b << " " << ka << " " << kb << dec << endl << flush;
       return 1;
     }
   }
@@ -408,6 +410,8 @@ int HtmRangeMultiLevel::isIn(Key key)
 {
   //	Key key = this->encoding->maskOffLevel(key_);
 
+  // cout << " HRML::isIn-1 050 < " << hex << key << " > " << flush;
+  
   InclusionType incl;
   int rstat = 0;
   TInsideResult flags = tinside(key);
@@ -475,8 +479,16 @@ int HtmRangeMultiLevel::contains(Key a, Key b) {
 
 HtmRangeMultiLevel_NameSpace::TInsideResult HtmRangeMultiLevel::tinside(const Key mid) const
 {
+
+#if 0
+  if( mid == 0x7540000000000004 ) {
+    my_los->list(cout);
+    my_his->list(cout);
+  }
+#endif
+  
   TInsideResult results;
-  int level = -1;
+  int level = -1; // An invalid level.
 
   // clearly out, inside, share a boundary, off by one to some boundary
   InclusionType result, t1, t2;

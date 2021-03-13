@@ -51,6 +51,91 @@ public:
 // #define DIAGOUT(x) cout << x << endl << flush;
 
 void SpatialRange_test () {
+
+  {
+    /*
+     resolution = 6
+     resolution0 = resolution
+     lat0 = numpy.array([ 10, 5, 60,70], dtype=numpy.double)
+     lon0 = numpy.array([-30,-20,60,10], dtype=numpy.double)
+     hull0 = pystare.to_hull_range_from_latlon(lat0, lon0, resolution0)
+
+     resolution1 = 6
+     lat1 = numpy.array([10,  20, 30, 20 ], dtype=numpy.double)
+     lon1 = numpy.array([-60, 60, 60, -60], dtype=numpy.double)
+     hull1 = pystare.to_hull_range_from_latlon(lat1, lon1, resolution1)
+    */
+
+    STARE index;
+
+#define NPTS 4
+    float64 lat0[NPTS] = { 10, 5, 60, 70 };
+    float64 lon0[NPTS] = { -30, -20, 60, 10 };
+    float64 lat1[NPTS] = { 10, 20, 30, 20 };
+    float64 lon1[NPTS] = { -60, 60, 60, -60 };
+
+    int resolution0 = 6;
+    LatLonDegrees64ValueVector points0;
+    for(int i=0; i<NPTS; ++i) {
+      points0.push_back(LatLonDegrees64(lat0[i], lon0[i]));
+    }
+    SpatialRange r0;
+    r0.addSpatialIntervals(index.ConvexHull(points0, resolution0));
+    
+    int resolution1 = 6;
+    LatLonDegrees64ValueVector points1;
+    for(int i=0; i<NPTS; ++i) {
+      points1.push_back(LatLonDegrees64(lat1[i], lon1[i]));
+    }
+    SpatialRange r1;
+    r1.addSpatialIntervals(index.ConvexHull(points1, resolution1));
+    
+    SpatialRange* r01_;
+    r01_ = sr_intersect(r0,r1,true);
+
+    STARE_SpatialIntervals intersection = r01_->toSpatialIntervals();
+
+#if 0
+#define FMTX(x) " 0x" << setw(16) << hex << x << dec
+    {
+      // test
+      r0.compress();
+      
+      Key siv = 0x3aa0000000000004;
+      EmbeddedLevelNameEncoding leftJustified;
+      leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+      Key k = leftJustified.maskOffLevelBit();
+      HtmRangeMultiLevel_NameSpace::TInsideResult tResult = r0.range->range->tinside(k);
+      cout << " srange-contains-testing 0 tResult = { \n"
+	   << " incl  : " << tResult.incl      << endl
+	   << " level : " << tResult.level     << endl
+	   << " mid   : " << FMTX(tResult.mid) << endl
+	   << " GH    : " << FMTX(tResult.GH)  << endl
+	   << " GL    : " << FMTX(tResult.GL)  << endl
+	   << " SH    : " << FMTX(tResult.SH)  << endl
+	   << " SL    : " << FMTX(tResult.SL)  << endl
+	   << " }" << endl << flush
+	;
+    }
+#endif
+    
+    {
+      // r0...
+      r0.compress(); // Else the big compressed triangles won't be found... Yes, funny: compression makes bigger triangles.
+      
+      for(int i = 0; i < 10; ++i) {
+#if 0
+	cout << i << " srange-contains-testing = " << r0.contains(intersection[i])
+	     << " 0x" << setw(16) << hex << intersection[i] << dec
+	     << endl << flush;
+#endif
+	ASSERT_EQUAL(1,r0.contains(intersection[i]));
+      }
+    }
+
+    
+    
+  }
   
   {
 #define NCSIVS 7

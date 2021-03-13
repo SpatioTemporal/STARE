@@ -31,9 +31,10 @@ public:
 	int getNextSpatialInterval(STARE_SpatialIntervals &interval);
 
 	bool contains(STARE_ArrayIndexSpatialValue siv) {
-		EmbeddedLevelNameEncoding leftJustified;
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
-		return range->range->isIn(leftJustified.maskOffLevelBit());
+	  // cout << "sr::c " << flush;
+	  EmbeddedLevelNameEncoding leftJustified;
+	  leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+	  return range->range->isIn(leftJustified.maskOffLevelBit());
 	}
 
 	bool intersects(STARE_ArrayIndexSpatialValue siv) {
