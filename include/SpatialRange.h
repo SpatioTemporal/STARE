@@ -63,6 +63,57 @@ public:
 	void purge() { range->purge(); } // what if range null?
 	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
 	void compress() { range->range->CompressionPass(); } // Defragment and coarsen resolution where possible
+
+#define FMTX(x) " 0x" << setw(16) << hex << x << dec	
+	void dump() {
+	  EmbeddedLevelNameEncoding leftJustified;
+	  KeyPair kp;
+	  int k=0;
+	  STARE_SpatialIntervals sivs;
+	  this->reset();
+	  while(this->getNextSpatialInterval(sivs)) {
+	    /*
+	    STARE_SpatialIntervals sivs = spatialIntervalFromHtmIDKeyPair(kp);
+	    leftJustified.setId(BitShiftNameEkp.lo);
+	    uint64 siv_lo = leftJustified.getSciDBLeftJustifiedFormat();
+	    leftJustified.setId(kp.hi);
+	    uint64 siv_hi = leftJustified.getSciDBLeftJustifiedFormat();
+	    */
+
+	    uint64 sivs_lo = sivs[0];
+	    cout << k++ << " "
+		 << FMTX(sivs_lo) << " ";
+	    if( sivs.size() == 2 ) {
+	      uint64 sivs_hi = sivs[1];
+	      cout << FMTX(sivs_hi);
+	    }
+	    cout << endl << flush;
+	    sivs.clear();
+	  }
+
+	  cout << endl << flush;
+	  cout << "---expand---" << endl << flush;
+
+	  k = 0;
+	  this->reset();
+	  while(this->getNextSpatialInterval(sivs)) {
+	    /*
+	    STARE_SpatialIntervals sivs = spatialIntervalFromHtmIDKeyPair(kp);
+	    leftJustified.setId(BitShiftNameEkp.lo);
+	    uint64 siv_lo = leftJustified.getSciDBLeftJustifiedFormat();
+	    leftJustified.setId(kp.hi);
+	    uint64 siv_hi = leftJustified.getSciDBLeftJustifiedFormat();
+	    */
+
+	    STARE_ArrayIndexSpatialValues vals = expandInterval(sivs);
+
+	    for( int l=0; l < vals.size(); ++l ) {
+	      cout << k++ << " " << FMTX(vals[l]) << endl;
+	    }
+	    vals.clear();
+	    sivs.clear();
+	  }
+	}
 };
 
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);

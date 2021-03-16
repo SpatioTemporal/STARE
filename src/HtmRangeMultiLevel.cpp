@@ -229,10 +229,10 @@ HtmRangeMultiLevel *HtmRangeMultiLevel::RangeFromIntersection(
   // cout << "d nr " << resultRange->nranges() << endl << flush;
   // cout << "d rr " << hex << resultRange << dec << endl << flush;
   if(resultRange->nranges()>0) {
+    resultRange->defrag();
     if(compress) {
       resultRange->CompressionPass();
     }
-    resultRange->defrag();
   }
   // cout << "e" << flush;
   return resultRange;

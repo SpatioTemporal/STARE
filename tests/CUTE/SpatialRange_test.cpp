@@ -68,6 +68,32 @@ void SpatialRange_test () {
 
     STARE index;
 
+    {
+
+      STARE_SpatialIntervals sis = {
+	0x3bd7800000000006,  0x3bd9ffffffffffff
+      };
+
+      SpatialRange r(sis);
+      cout << "***r.dump()***" << endl << flush;
+      r.dump();
+      cout << "-----------------" << endl << flush;
+
+      r.compress();
+      cout << "\ncompress\n" << flush;
+      cout << "***r.dump()***" << endl << flush;
+      r.dump();
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+    
+    }
+
+    
+
+
+    
+
 #define NPTS 4
     float64 lat0[NPTS] = { 10, 5, 60, 70 };
     float64 lon0[NPTS] = { -30, -20, 60, 10 };
@@ -79,8 +105,13 @@ void SpatialRange_test () {
     for(int i=0; i<NPTS; ++i) {
       points0.push_back(LatLonDegrees64(lat0[i], lon0[i]));
     }
+
+    STARE_SpatialIntervals hull0 = index.ConvexHull(points0, resolution0);
+    cout << "hull0 size: " << hull0.size() << endl << flush;
+    
     SpatialRange r0;
     r0.addSpatialIntervals(index.ConvexHull(points0, resolution0));
+    cout << "r0: nranges " << r0.range->range->nranges() << endl << flush;
     
     int resolution1 = 6;
     LatLonDegrees64ValueVector points1;
@@ -89,11 +120,24 @@ void SpatialRange_test () {
     }
     SpatialRange r1;
     r1.addSpatialIntervals(index.ConvexHull(points1, resolution1));
-    
-    SpatialRange* r01_;
-    r01_ = sr_intersect(r0,r1,true);
+    cout << "r1: nranges " << r1.range->range->nranges() << endl << flush;
 
-    STARE_SpatialIntervals intersection = r01_->toSpatialIntervals();
+    STARE_SpatialIntervals hull1 = index.ConvexHull(points1, resolution1);
+    cout << "hull1 size: " << hull1.size() << endl << flush;
+    
+    SpatialRange* r01_p;
+    r01_p = sr_intersect(r0,r1,true);
+
+    SpatialRange r01_;
+    r01_.addSpatialRange(*r01_p);
+
+    cout << "***r01_.dump()***" << endl << flush;
+    r01_.dump();
+    cout << "-----------------" << endl << flush;
+
+    STARE_SpatialIntervals intersection = r01_.toSpatialIntervals();
+
+    // add_intersect is different?
 
 #if 0
 #define FMTX(x) " 0x" << setw(16) << hex << x << dec
@@ -118,10 +162,19 @@ void SpatialRange_test () {
 	;
     }
 #endif
+
+#define FMTX(x) " 0x" << setw(16) << hex << x << dec
+    {
+      for(int i=0; i<intersection.size(); ++i) {
+	cout << i << " intersection " << FMTX(intersection[i]) << endl << flush;
+      }
+    }
     
     {
       // r0...
       r0.compress(); // Else the big compressed triangles won't be found... Yes, funny: compression makes bigger triangles.
+
+      cout << "intersection size: " << intersection.size() << endl << flush;
       
       for(int i = 0; i < 10; ++i) {
 #if 0
