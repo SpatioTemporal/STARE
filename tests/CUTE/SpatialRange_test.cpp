@@ -69,6 +69,7 @@ void SpatialRange_test () {
     STARE index;
 
     {
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec      
 
       STARE_SpatialIntervals sis = {
 	0x3bd7800000000006,  0x3bd9ffffffffffff
@@ -84,12 +85,102 @@ void SpatialRange_test () {
       cout << "***r.dump()***" << endl << flush;
       r.dump();
       cout << "-----------------" << endl << flush;
-      cout << "-----------------" << endl << flush;
-      cout << "-----------------" << endl << flush;
-    
-    }
 
-    
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3bd9800000000006;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+
+      cout << "-----------------" << endl << flush;
+
+      siv = 0x3bd9800000000005;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      
+      cout << "-----------------" << endl << flush;
+
+      {
+
+	EmbeddedLevelNameEncoding lj;
+
+	lj.setIdFromSciDBLeftJustifiedFormat(sis[0]); // Lower bound of interval
+	uint64 bareLo  = lj.bareId();
+	uint32 levelLo = lj.getLevel();
+	
+	lj.setIdFromSciDBLeftJustifiedFormat(sis[1]); // Terminator
+
+	EmbeddedLevelNameEncoding lj_hi_last_value = lj.atLevel(levelLo);
+	uint64 bareHi = lj_hi_last_value.bareId();
+	uint64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
+
+	uint64 one_mask_to_level, one_at_level;
+	lj.SciDBincrement_LevelToMaskDelta(levelLo,one_mask_to_level, one_at_level);
+
+	cout << "levelLo " << levelLo << endl << flush;
+	cout << "delta   " << delta << endl << flush;
+
+	uint64 si  = sis[0];
+	lj.setIdFromSciDBLeftJustifiedFormat(si);
+	uint64 si_ = lj.getId();
+	for(int k=0; k<delta; ++k) {
+	  uint64 bareId = lj.bareId();
+	  cout << k << " " << FMTX(lj.getSciDBLeftJustifiedFormat()) << " " << FMTX(bareId) << " ltn: " << lj.getLocalTriangleNumber() << " " << FMTX(lj.getId()) << " " << FMTX(lj.increment(lj.getId(),levelLo)) << endl << flush;
+	  si_ = lj.increment(si_,levelLo); // Note no change in level // Question -- how to put si into a new lj?
+	  lj.setId(si_);
+	  si += one_at_level;
+	}
+
+	si = sis[0];
+	lj.setIdFromSciDBLeftJustifiedFormat(si);
+	uint64 lj_id0 = lj.getId();
+	lj.setId(lj_id0);
+	uint64 lj_id1 = lj.getId();
+	cout << "check 0: " << FMTX(si) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+	lj.setIdFromSciDBLeftJustifiedFormat(si+one_at_level);
+	lj_id0 = lj.getId();
+	lj_id1 = lj.increment(lj_id1,levelLo);
+	cout << "check 1: " << FMTX((si+one_at_level)) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+	
+      }
+
+
+      {
+	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,false);
+	for(int k=0; k<expanded.size(); ++k) {
+	  cout << "exp0 "
+	       << FMTX(expanded[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+
+      {
+	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,true);
+	for(int k=0; k<expanded.size(); ++k) {
+	  cout << "exp1 "
+	       << FMTX(expanded[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+      
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+    }
 
 
     

@@ -181,6 +181,7 @@ void STARE_ArrayIndexSpatialValues_insert(STARE_ArrayIndexSpatialValues& v,  STA
 
 STARE_SpatialIntervals expandInterval(STARE_SpatialIntervals interval, int64 force_resolution = -1);
 STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution = -1);
+STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals intervals, int64 force_resolution = -1, bool multi_resolution = false);
 
 STARE_ArrayIndexSpatialValue shiftSpatialIdAtLevel(
 		STARE_ArrayIndexSpatialValue spatialStareId,
