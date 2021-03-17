@@ -1325,7 +1325,10 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
       remaining_interval.push_back(interval[0]);
       remaining_interval.push_back(interval[1]);
 
+      cout << " 0100 " << FMTX(remaining_interval[0]) << endl << flush;
+      cout << " 0101 " << FMTX(remaining_interval[1]) << endl << flush;
 
+      
       while( remaining_interval[0] < remaining_interval[1] ) { // Can never be equal since [1] is a terminator
 	// Some kind of loop init
 	working_interval.push_back(remaining_interval[0]);
@@ -1388,11 +1391,13 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	    uint64 pred_term_htmid = lj.predecessorToLowerBound_NoDepthBit(lj.getId(),lj.getLevel()); // *Not* a STARE index
 	    lj.setId(pred_term_htmid);
 	    working_interval[1] = lj.getSciDBTerminatorLeftJustifiedFormat(); // Look at the sub-interval
-	    lj.setId(nextLo);
+	    lj.setIdFromSciDBLeftJustifiedFormat(nextLo);
 	    remaining_interval[0] = lj.atLevel(nextLo,level0).getSciDBLeftJustifiedFormat(); // Note this should have the original level untouched, also successor to working_interval[1]
+	    cout << " 2080 " << FMTX(nextLo) << endl << flush;
 	    cout << " 2090 " << FMTX(working_interval[0]) << endl << flush;
 	    cout << " 2091 " << FMTX(working_interval[1]) << endl << flush;
 	    cout << " 2100 " << FMTX(remaining_interval[0]) << endl << flush;
+	    cout << " 2101 " << FMTX(remaining_interval[1]) << endl << flush;
 				     
 	    // Note nextLo might get pulled in over multiple iterations of this segment of the loop...
 	  } // at least one full parent
