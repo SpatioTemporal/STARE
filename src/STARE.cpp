@@ -1226,107 +1226,256 @@ uint64 spatialLevelMask() {
 	return leftJustified.levelMaskSciDB;
 }
 
-STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) {
-	// STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
-    DIAGOUT1(cout << endl << dec << 200 << endl << flush;)
-	STARE_ArrayIndexSpatialValue siv_orig = interval[0];
-	STARE_ArrayIndexSpatialValue siv0 = siv_orig;
-	EmbeddedLevelNameEncoding leftJustified;
-	DIAGOUT1(cout << dec << 220 << endl << flush;)
-        uint64 input_resolution  = siv0 & leftJustified.levelMaskSciDB;
-	uint64 return_resolution = input_resolution; // To start with.
-	DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
-	if( force_resolution > -1 ) {
-		siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
-		return_resolution = force_resolution;
-	}
-	DIAGOUT1(cout << dec << 229 << " f & resolution: " << dec << force_resolution << " " << return_resolution << endl << flush;)
-	DIAGOUT1(cout << dec << 230 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
-	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
-	// cout << dec << 235 << endl << flush;
-	STARE_ArrayIndexSpatialValue siv_term;
-	if( interval.size() > 1 ) {
-		siv_term = interval[1];
-	} else {
-	  if( return_resolution != input_resolution ) { // TODO Maybe clean up this logic later.
-	    EmbeddedLevelNameEncoding lj; lj.setIdFromSciDBLeftJustifiedFormat(siv_orig);
-	    siv_term = lj.getSciDBTerminatorLeftJustifiedFormat(); // From siv_orig.
-	  } else {
-	    siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat(); // From siv0.
-	  }
-	}
-	DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
-	DIAGOUT1(cout << endl << dec << 240 << endl << flush;)
-	uint64 one_mask_to_resolution, one_at_resolution;
-	leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
-	// cout << dec << 242 << endl << flush;
+STARE_ArrayIndexSpatialValues expandInterval(STARE_SpatialIntervals interval, int64 force_resolution) { 
+  // STARE_SpatialIntervals interval should just be one interval, i.e. a value or value+terminator.
+  DIAGOUT1(cout << endl << dec << 200 << endl << flush;);
+  STARE_ArrayIndexSpatialValue siv_orig = interval[0];
+  STARE_ArrayIndexSpatialValue siv0 = siv_orig;
+  EmbeddedLevelNameEncoding leftJustified;
+  DIAGOUT1(cout << dec << 220 << endl << flush;);
+  uint64 input_resolution  = siv0 & leftJustified.levelMaskSciDB;
+  uint64 return_resolution = input_resolution; // To start with.
+  DIAGOUT1(cout << dec << 225 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;);
+    if( force_resolution > -1 ) {
+      siv0 = ( siv0 & ~leftJustified.levelMaskSciDB ) | force_resolution;
+      return_resolution = force_resolution;
+    }
+    DIAGOUT1(cout << dec << 229 << " f & resolution: " << dec << force_resolution << " " << return_resolution << endl << flush;);
+    DIAGOUT1(cout << dec << 230 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;);
+    leftJustified.setIdFromSciDBLeftJustifiedFormat(siv0);
+  // cout << dec << 235 << endl << flush;
+  STARE_ArrayIndexSpatialValue siv_term;
+  if( interval.size() > 1 ) {
+    siv_term = interval[1];
+  } else {
+    if( return_resolution != input_resolution ) { // TODO Maybe clean up this logic later.
+      EmbeddedLevelNameEncoding lj; lj.setIdFromSciDBLeftJustifiedFormat(siv_orig);
+      siv_term = lj.getSciDBTerminatorLeftJustifiedFormat(); // From siv_orig.
+    } else {
+      siv_term = leftJustified.getSciDBTerminatorLeftJustifiedFormat(); // From siv0.
+    }
+  }
+  DIAGOUT1(cout << dec << 239 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;);
+  DIAGOUT1(cout << endl << dec << 240 << endl << flush;);
+  uint64 one_mask_to_resolution, one_at_resolution;
+  leftJustified.SciDBincrement_LevelToMaskDelta(siv0 & leftJustified.levelMaskSciDB,one_mask_to_resolution,one_at_resolution);
+  // cout << dec << 242 << endl << flush;
 
-    DIAGOUT1(uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB)));
+  DIAGOUT1(uint64 delta = ((siv_term+1)-(siv0 & ~leftJustified.levelMaskSciDB)));
 
-	DIAGOUT1(cout << endl;)
-    DIAGOUT1(uint64 one = 1);
-	DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;)
-	DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;)
-	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;)
-	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
-	DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << delta << " " << dec << (delta/one_at_resolution) << endl << flush;)
+  DIAGOUT1(cout << endl;);
+  DIAGOUT1(uint64 one = 1);
+  DIAGOUT1(cout << dec << 243 << " " << setw(16) << setfill('0') << hex << (one << (63-3-2*return_resolution)) << dec << endl << flush;);
+  DIAGOUT1(cout << dec << 244 << " " << setw(16) << setfill('0') << hex <<  leftJustified.getSciDBTerminatorLeftJustifiedFormat() << dec << endl << flush;);
+  DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv_term << dec << endl << flush;);
+  DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;);
+  DIAGOUT1(cout << dec << 245 << " " << setw(16) << setfill('0') << hex << delta << " " << dec << (delta/one_at_resolution) << endl << flush;);
 
-	// Give as much rope as needed.
-	DIAGOUT1(cout << dec << 246 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
-	siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
-	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << endl << flush;)
-	DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << one_at_resolution << dec << endl << endl << flush;)
-	STARE_ArrayIndexSpatialValues expanded_interval;
-	while( siv0 < siv_term ) {
-		DIAGOUT1(cout << dec << 249 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;)
-		expanded_interval.push_back(siv0);
-		siv0 += one_at_resolution;
-	}
-	DIAGOUT1(cout << dec << 250 << endl << endl << flush;)
-	return expanded_interval;
+  // Give as much rope as needed.
+  DIAGOUT1(cout << dec << 246 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;);
+  siv0 = (siv0 & ~one_mask_to_resolution) | return_resolution;
+  DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << endl << flush;);
+  DIAGOUT1(cout << dec << 247 << " " << setw(16) << setfill('0') << hex << one_at_resolution << dec << endl << endl << flush;);
+  STARE_ArrayIndexSpatialValues expanded_interval;
+  while( siv0 < siv_term ) {
+    DIAGOUT1(cout << dec << 249 << " " << setw(16) << setfill('0') << hex << siv0 << dec << endl << flush;);
+    expanded_interval.push_back(siv0);
+    siv0 += one_at_resolution;
+  }
+  DIAGOUT1(cout << dec << 250 << endl << endl << flush;);
+  return expanded_interval;
 }
 
 /**
  * Expand intervals found in intervals into spatial ids.
  */
-STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
-	STARE_ArrayIndexSpatialValues expanded_values;
-	EmbeddedLevelNameEncoding leftJustified;
+STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals intervals, int64 force_resolution, bool multi_resolution) {
+  STARE_ArrayIndexSpatialValues expanded_values;
+  EmbeddedLevelNameEncoding leftJustified;
 
-	int i=0;
-	while( i < intervals.size() ) {
-		// cout << dec << 100 << endl << flush;
-		STARE_ArrayIndexSpatialValue siv0, siv1;
-		STARE_SpatialIntervals interval;
-		siv0 = intervals[i];
-		interval.push_back(siv0);
-		// cout << dec << 110 << endl << flush;
-		++i;
-		if( i < intervals.size() ) {
-			// peek
-			// cout << dec << 120 << endl << flush;
-			siv1 = intervals[i];
-			// cout << dec << 120 << " " << i << " " << setw(16) << setfill('0') << hex << siv1 << dec << endl << flush;
-			if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) { // Check for a terminator.
-				// cout << dec << 121 << " " << i << endl << flush;
-				interval.push_back(siv1);
-				++i;
-			}
-		}
-		// cout << dec << 130 << " " << i << endl << flush;
-		STARE_SpatialIntervals expandOne = expandInterval(interval,force_resolution);
-		// cout << dec << 140 << " " << i << endl << flush;
-		for(int j=0; j < expandOne.size(); ++j) {
-//			cout << dec << 142 << " " << i << " " << j
-//					<< setw(16) << setfill('0') << hex << expandOne[j] << dec
-//					<< endl << flush;
-			STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
-//			cout << dec << 143 << " " << i << " " << j << endl << flush;
-		}
-//		cout << dec << 150 << " " << i << endl << flush;
+  int i=0;
+  while( i < intervals.size() ) {
+    // cout << dec << 100 << endl << flush;
+    STARE_ArrayIndexSpatialValue siv0, siv1;
+    STARE_SpatialIntervals interval;
+    siv0 = intervals[i];
+    interval.push_back(siv0);
+    ++i;
+    if( i < intervals.size() ) {
+      // peek
+      siv1 = intervals[i];
+      if( (siv1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) { // Check for a terminator.
+	interval.push_back(siv1);
+	++i;
+      }
+    }
+    if( interval.size() == 1 || not multi_resolution ) {
+      STARE_SpatialIntervals expandOne = expandInterval(interval,force_resolution);
+      for(int j=0; j < expandOne.size(); ++j) {
+	STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+      }
+      interval.clear();
+    } else { // multi_resolution
+
+      EmbeddedLevelNameEncoding lj;
+      lj.setIdFromSciDBLeftJustifiedFormat(interval[0]);
+      int level0 = lj.getLevel();
+      
+      STARE_SpatialIntervals    working_interval, remaining_interval; // Should be clear...
+      remaining_interval.push_back(interval[0]);
+      remaining_interval.push_back(interval[1]);
+
+#if 0
+      cout << " 0100 " << FMTX(remaining_interval[0]) << endl << flush;
+      cout << " 0101 " << FMTX(remaining_interval[1]) << endl << flush;
+#endif
+      
+      while( remaining_interval[0] < remaining_interval[1] ) { // Can never be equal since [1] is a terminator
+	// Some kind of loop init
+	working_interval.push_back(remaining_interval[0]);
+	working_interval.push_back(remaining_interval[1]);
+
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec 	
+
+	while( working_interval.size() > 0 ) {
+#if 0
+	  cout << "working on : " << FMTX(working_interval[0]) << " " << FMTX(working_interval[1]) << endl << flush;
+#endif
+
+	  // Start loop
+	  lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // Lower bound of interval
+	  uint64 bareLo           = lj.bareId();
+	  uint32 levelLo          = lj.getLevel();
+	  uint32 triangleNumberLo = lj.getLocalTriangleNumber();
+
+	  lj.setIdFromSciDBLeftJustifiedFormat(working_interval[1]); // Terminator
+	  EmbeddedLevelNameEncoding lj_hi_last_value = lj.atLevel(levelLo);
+	  uint64 bareHi = lj_hi_last_value.bareId();
+	  uint64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
+      
+	  // Find the first tNum 0.
+	  uint64 delta_to_first = (4 - triangleNumberLo) % 4;
+	  uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
+	  // uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
+#if 0
+	  cout << "delta_to_first   " << delta_to_first << endl << flush;
+#endif
+	  uint64 one_mask_to_level, one_at_level;
+	  STARE_SpatialIntervals expandOne;
+
+	  if( number_of_full_parents < 1 ) {
+	    expandOne = expandInterval(working_interval,force_resolution);
+	    for(int j=0; j < expandOne.size(); ++j) {
+	      STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+	    }
+	    lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // make sure we have the right one
+	    lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment 
+	    while(remaining_interval[0] < working_interval[1]) { // Might also get from successor to expandOne...?
+	      remaining_interval[0] += one_at_level;
+	    }
+	    working_interval.clear(); // Try again...
+	  } else { // At least one full parent
+	    lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // make sure we have the right one	    
+	    lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment
+#if 0
+	    cout << " 1900 " << FMTX(working_interval[0]) << " " << FMTX(one_at_level) << " " << lj.getLevel() << endl << flush;
+#endif
+	    while( delta_to_first > 0 ) {
+	      STARE_ArrayIndexSpatialValues_insert( expanded_values, working_interval[0] ); // Insert the value directly
+	      working_interval[0] += one_at_level; // Should be closer to triangleNumber 0 now...
+	      --delta_to_first;
+	    }
+	    // delta to first is 0
+	    // How many triangles can we greedily coalesce?
+#if 0
+	    cout << " 2000 " << FMTX(working_interval[0]) << endl << flush;
+#endif
+	    lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // make sure we have the right one
+	    lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment
+	    uint64 nextLo = working_interval[0]+one_at_level*4*number_of_full_parents; // Increment through the parents
+	    working_interval[0]--; // -1 to coarsen the level
+	    lj.setIdFromSciDBLeftJustifiedFormat(nextLo-1); // -1 for the coarser level
+	    uint64 pred_term_htmid = lj.predecessorToLowerBound_NoDepthBit(lj.getId(),lj.getLevel()); // *Not* a STARE index
+	    lj.setId(pred_term_htmid);
+	    working_interval[1] = lj.getSciDBTerminatorLeftJustifiedFormat(); // Look at the sub-interval
+	    lj.setIdFromSciDBLeftJustifiedFormat(nextLo);
+	    remaining_interval[0] = lj.atLevel(nextLo,level0).getSciDBLeftJustifiedFormat(); // Note this should have the original level untouched, also successor to working_interval[1]
+#if 0
+	    cout << " 2080 " << FMTX(nextLo) << endl << flush;
+	    cout << " 2090 " << FMTX(working_interval[0]) << endl << flush;
+	    cout << " 2091 " << FMTX(working_interval[1]) << endl << flush;
+	    cout << " 2100 " << FMTX(remaining_interval[0]) << endl << flush;
+	    cout << " 2101 " << FMTX(remaining_interval[1]) << endl << flush;
+#endif
+	    // Note nextLo might get pulled in over multiple iterations of this segment of the loop...
+	  } // at least one full parent
+	} // working interval size is > 0
+      } // remaining lo < hi
+    } // if multi resolution
+  } // while i < intervals.size()
+
+  /*	    
+	    
+	  uint64 one_mask_to_level, one_at_level;
+	  lj.setIdFromSciDBLeftJustifiedFormat(interval[0]); // make sure we have the right one
+	  lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment
+	  lj.setIdFromSciDBLeftJustifiedFormat(interval[0]+one_at_level*(delta_to_first+1)); // Increment to first 0 triangle
+	  uint64 pred_term_htmid = lj.predecessorToLowerBound_NoDepthBit(lj.getId()); // *Not* a STARE index
+	  lj.setId(pred_term_htmid);
+	  sub_interval.push_back(lj.getSciDBTerminatorLeftJustifiedFormat());
+	  
 	}
-//	cout << dec << 160 << " " << i << endl << flush;
-	return expanded_values;
+	
+      }
+	
+     
+      
+      
+      SpatialRange sr(interval); sr.compress();
+      sr.dump();
+      STARE_SpatialIntervals sis = sr.toSpatialIntervals();
+      STARE_SpatialIntervals sub_interval;
+      STARE_ArrayIndexSpatialValue sis0, sis1;
+      int k=0;
+      while( k < sis.size() ) {
+	sub_interval.clear();
+	sis0=sis[k++];
+	sub_interval.push_back(sis0);
+	if( k < sis.size() ) {
+	  sis1 = sis[k]; // peek
+	  if( (sis1 & leftJustified.levelMaskSciDB) == leftJustified.levelMaskSciDB ) { // Check for a terminator.
+	    sub_interval.push_back(sis1);
+	    ++k;
+	  }
+	  STARE_SpatialIntervals expandOne = expandInterval(sub_interval,force_resolution);
+	  for(int j=0; j < expandOne.size(); ++j) {
+	    STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+	  }
+	}
+      }
+    } else {
+    
+      STARE_SpatialIntervals expandOne = expandInterval(interval,force_resolution);
+      // cout << dec << 140 << " " << i << endl << flush;
+      for(int j=0; j < expandOne.size(); ++j) {
+	//			cout << dec << 142 << " " << i << " " << j
+	//					<< setw(16) << setfill('0') << hex << expandOne[j] << dec
+	//					<< endl << flush;
+      
+	STARE_ArrayIndexSpatialValues_insert( expanded_values, expandOne[j] );
+      
+	//			cout << dec << 143 << " " << i << " " << j << endl << flush;
+      }
+      //		cout << dec << 150 << " " << i << endl << flush;
+    }
+    //	cout << dec << 160 << " " << i << endl << flush;
+  }
+  */
+  return expanded_values;
+}
+
+STARE_ArrayIndexSpatialValues expandIntervals(STARE_SpatialIntervals intervals, int64 force_resolution) {
+  return expandIntervalsMultiRes(intervals,force_resolution,false);
 }
 
 STARE_SpatialIntervals spatialIntervalFromHtmIDKeyPair(KeyPair kp) {

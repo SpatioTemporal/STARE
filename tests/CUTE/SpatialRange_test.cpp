@@ -51,6 +51,260 @@ public:
 // #define DIAGOUT(x) cout << x << endl << flush;
 
 void SpatialRange_test () {
+
+  {
+    /*
+     resolution = 6
+     resolution0 = resolution
+     lat0 = numpy.array([ 10, 5, 60,70], dtype=numpy.double)
+     lon0 = numpy.array([-30,-20,60,10], dtype=numpy.double)
+     hull0 = pystare.to_hull_range_from_latlon(lat0, lon0, resolution0)
+
+     resolution1 = 6
+     lat1 = numpy.array([10,  20, 30, 20 ], dtype=numpy.double)
+     lon1 = numpy.array([-60, 60, 60, -60], dtype=numpy.double)
+     hull1 = pystare.to_hull_range_from_latlon(lat1, lon1, resolution1)
+    */
+
+    STARE index;
+
+    {
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec      
+
+      STARE_SpatialIntervals sis = {
+	0x3bd7800000000006,  0x3bd9ffffffffffff
+      };
+
+      SpatialRange r(sis);
+#if 0
+      cout << "***r.dump()***" << endl << flush;
+      r.dump();
+      cout << "-----------------" << endl << flush;
+#endif
+
+      r.compress();
+#if 0
+      cout << "\ncompress\n" << flush;
+      cout << "***r.dump()***" << endl << flush;
+      r.dump();
+      cout << "-----------------" << endl << flush;
+#endif
+
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3bd9800000000006;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+
+      cout << "-----------------" << endl << flush;
+#endif
+
+      siv = 0x3bd9800000000005;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      
+      cout << "-----------------" << endl << flush;
+#endif
+
+      {
+
+	EmbeddedLevelNameEncoding lj;
+
+	lj.setIdFromSciDBLeftJustifiedFormat(sis[0]); // Lower bound of interval
+	uint64 bareLo  = lj.bareId();
+	uint32 levelLo = lj.getLevel();
+	
+	lj.setIdFromSciDBLeftJustifiedFormat(sis[1]); // Terminator
+
+	EmbeddedLevelNameEncoding lj_hi_last_value = lj.atLevel(levelLo);
+	uint64 bareHi = lj_hi_last_value.bareId();
+	uint64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
+
+	uint64 one_mask_to_level, one_at_level;
+	lj.SciDBincrement_LevelToMaskDelta(levelLo,one_mask_to_level, one_at_level);
+
+#if 0
+	cout << "levelLo " << levelLo << endl << flush;
+	cout << "delta   " << delta << endl << flush;
+#endif
+
+	uint64 si  = sis[0];
+	lj.setIdFromSciDBLeftJustifiedFormat(si);
+	uint64 si_ = lj.getId();
+	for(int k=0; k<delta; ++k) {
+	  uint64 bareId = lj.bareId();
+#if 0
+	  cout << k << " " << FMTX(lj.getSciDBLeftJustifiedFormat()) << " " << FMTX(bareId) << " ltn: " << lj.getLocalTriangleNumber() << " " << FMTX(lj.getId()) << " " << FMTX(lj.increment(lj.getId(),levelLo)) << endl << flush;
+#endif
+	  si_ = lj.increment(si_,levelLo); // Note no change in level // Question -- how to put si into a new lj?
+	  lj.setId(si_);
+	  si += one_at_level;
+	}
+
+	si = sis[0];
+	lj.setIdFromSciDBLeftJustifiedFormat(si);
+	uint64 lj_id0 = lj.getId();
+	lj.setId(lj_id0);
+	uint64 lj_id1 = lj.getId();
+#if 0
+	cout << "check 0: " << FMTX(si) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+#endif
+	lj.setIdFromSciDBLeftJustifiedFormat(si+one_at_level);
+	lj_id0 = lj.getId();
+	lj_id1 = lj.increment(lj_id1,levelLo);
+#if 0
+	cout << "check 1: " << FMTX((si+one_at_level)) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+#endif
+	
+      }
+
+#if 0
+      {
+	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,false);
+	for(int k=0; k<expanded.size(); ++k) {
+	  cout << "exp0 "
+	       << FMTX(expanded[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+#endif
+
+#if 0
+      {
+	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,true);
+	for(int k=0; k<expanded.size(); ++k) {
+	  cout << "exp1 "
+	       << FMTX(expanded[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+#endif
+
+#if 0
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+      cout << "-----------------" << endl << flush;
+#endif
+    }
+
+
+    
+
+#define NPTS 4
+    float64 lat0[NPTS] = { 10, 5, 60, 70 };
+    float64 lon0[NPTS] = { -30, -20, 60, 10 };
+    float64 lat1[NPTS] = { 10, 20, 30, 20 };
+    float64 lon1[NPTS] = { -60, 60, 60, -60 };
+
+    int resolution0 = 6;
+    LatLonDegrees64ValueVector points0;
+    for(int i=0; i<NPTS; ++i) {
+      points0.push_back(LatLonDegrees64(lat0[i], lon0[i]));
+    }
+
+    STARE_SpatialIntervals hull0 = index.ConvexHull(points0, resolution0);
+#if 0
+    cout << "hull0 size: " << hull0.size() << endl << flush;
+#endif
+    
+    SpatialRange r0;
+    r0.addSpatialIntervals(index.ConvexHull(points0, resolution0));
+#if 0
+    cout << "r0: nranges " << r0.range->range->nranges() << endl << flush;
+#endif    
+    int resolution1 = 6;
+    LatLonDegrees64ValueVector points1;
+    for(int i=0; i<NPTS; ++i) {
+      points1.push_back(LatLonDegrees64(lat1[i], lon1[i]));
+    }
+    SpatialRange r1;
+    r1.addSpatialIntervals(index.ConvexHull(points1, resolution1));
+#if 0
+    cout << "r1: nranges " << r1.range->range->nranges() << endl << flush;
+#endif
+    STARE_SpatialIntervals hull1 = index.ConvexHull(points1, resolution1);
+#if 0
+    cout << "hull1 size: " << hull1.size() << endl << flush;
+#endif
+    SpatialRange* r01_p;
+    r01_p = sr_intersect(r0,r1,true);
+
+    SpatialRange r01_;
+    r01_.addSpatialRange(*r01_p);
+#if 0
+    cout << "***r01_.dump()***" << endl << flush;
+    r01_.dump();
+    cout << "-----------------" << endl << flush;
+#endif
+    STARE_SpatialIntervals intersection = r01_.toSpatialIntervals();
+
+    // add_intersect is different?
+
+#if 0
+    {
+      // test
+      r0.compress();
+      
+      Key siv = 0x3aa0000000000004;
+      EmbeddedLevelNameEncoding leftJustified;
+      leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+      Key k = leftJustified.maskOffLevelBit();
+      HtmRangeMultiLevel_NameSpace::TInsideResult tResult = r0.range->range->tinside(k);
+      cout << " srange-contains-testing 0 tResult = { \n"
+	   << " incl  : " << tResult.incl      << endl
+	   << " level : " << tResult.level     << endl
+	   << " mid   : " << FMTX(tResult.mid) << endl
+	   << " GH    : " << FMTX(tResult.GH)  << endl
+	   << " GL    : " << FMTX(tResult.GL)  << endl
+	   << " SH    : " << FMTX(tResult.SH)  << endl
+	   << " SL    : " << FMTX(tResult.SL)  << endl
+	   << " }" << endl << flush
+	;
+    }
+#endif
+
+#if 0
+    {
+      for(int i=0; i<intersection.size(); ++i) {
+	cout << i << " intersection " << FMTX(intersection[i]) << endl << flush;
+      }
+    }
+#endif
+    
+    {
+      // r0...
+      r0.compress(); // Else the big compressed triangles won't be found... Yes, funny: compression makes bigger triangles.
+#if 0
+      cout << "intersection size: " << intersection.size() << endl << flush;
+#endif      
+      for(int i = 0; i < 10; ++i) {
+#if 0
+	cout << i << " srange-contains-testing = " << r0.contains(intersection[i])
+	     << " 0x" << setw(16) << hex << intersection[i] << dec
+	     << endl << flush;
+#endif
+	ASSERT_EQUAL(1,r0.contains(intersection[i]));
+      }
+    }
+
+    
+    
+  }
   
   {
 #define NCSIVS 7

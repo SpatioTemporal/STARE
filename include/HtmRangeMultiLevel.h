@@ -132,7 +132,7 @@ public:
 
 	friend LINKAGE ostream& operator<<(ostream& os, const HtmRangeMultiLevel& range);
 
-protected:
+	// protected:
 	TInsideResult tinside(const Key mid) const;
 	// const char buffer[256];
 	//  bool symbolicOutput;

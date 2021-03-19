@@ -1,7 +1,11 @@
 
+2021-03-19 Version 0.16.5
+
+Enhanced expandIntervals and added expandIntervalsMultiRes. The previous version looked only at the resolution of an interval and then expanded accordingly. Thus if one started an interval with a small trixel larger ones later in the sequence would be split using the finer resolution, even when multi-resolution was desired. expandIntervalsMultiRes is a revision of similar code in HtmRangeMultiResolution::compress, which was an improvement on HtmRangeMultiResolution::defrag. expandIntervalsMultiRes attempts to coalesce as many trixels as possible using a rolled-out recursion scheme. The previous API method, expandIntervals retains the older non-multi-resolution behavior.
+
 2021-03-08 Version 0.16.4
 
-Various fixes to SpatialRange and HtmRangeMultiLevel, specifically, degrag and compress.
+Various fixes to SpatialRange and HtmRangeMultiLevel, specifically, defrag and compress.
 
 2020-10-09 Version 0.16.3
 
