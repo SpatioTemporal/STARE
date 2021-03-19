@@ -1325,9 +1325,10 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
       remaining_interval.push_back(interval[0]);
       remaining_interval.push_back(interval[1]);
 
+#if 0
       cout << " 0100 " << FMTX(remaining_interval[0]) << endl << flush;
       cout << " 0101 " << FMTX(remaining_interval[1]) << endl << flush;
-
+#endif
       
       while( remaining_interval[0] < remaining_interval[1] ) { // Can never be equal since [1] is a terminator
 	// Some kind of loop init
@@ -1337,7 +1338,9 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec 	
 
 	while( working_interval.size() > 0 ) {
+#if 0
 	  cout << "working on : " << FMTX(working_interval[0]) << " " << FMTX(working_interval[1]) << endl << flush;
+#endif
 
 	  // Start loop
 	  lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // Lower bound of interval
@@ -1354,9 +1357,9 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	  uint64 delta_to_first = (4 - triangleNumberLo) % 4;
 	  uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
 	  // uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
-
+#if 0
 	  cout << "delta_to_first   " << delta_to_first << endl << flush;
-
+#endif
 	  uint64 one_mask_to_level, one_at_level;
 	  STARE_SpatialIntervals expandOne;
 
@@ -1374,7 +1377,9 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	  } else { // At least one full parent
 	    lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // make sure we have the right one	    
 	    lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment
+#if 0
 	    cout << " 1900 " << FMTX(working_interval[0]) << " " << FMTX(one_at_level) << " " << lj.getLevel() << endl << flush;
+#endif
 	    while( delta_to_first > 0 ) {
 	      STARE_ArrayIndexSpatialValues_insert( expanded_values, working_interval[0] ); // Insert the value directly
 	      working_interval[0] += one_at_level; // Should be closer to triangleNumber 0 now...
@@ -1382,7 +1387,9 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	    }
 	    // delta to first is 0
 	    // How many triangles can we greedily coalesce?
+#if 0
 	    cout << " 2000 " << FMTX(working_interval[0]) << endl << flush;
+#endif
 	    lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // make sure we have the right one
 	    lj.SciDBincrement_LevelToMaskDelta(lj.getLevel(),one_mask_to_level, one_at_level); // Get an increment
 	    uint64 nextLo = working_interval[0]+one_at_level*4*number_of_full_parents; // Increment through the parents
@@ -1393,22 +1400,19 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	    working_interval[1] = lj.getSciDBTerminatorLeftJustifiedFormat(); // Look at the sub-interval
 	    lj.setIdFromSciDBLeftJustifiedFormat(nextLo);
 	    remaining_interval[0] = lj.atLevel(nextLo,level0).getSciDBLeftJustifiedFormat(); // Note this should have the original level untouched, also successor to working_interval[1]
+#if 0
 	    cout << " 2080 " << FMTX(nextLo) << endl << flush;
 	    cout << " 2090 " << FMTX(working_interval[0]) << endl << flush;
 	    cout << " 2091 " << FMTX(working_interval[1]) << endl << flush;
 	    cout << " 2100 " << FMTX(remaining_interval[0]) << endl << flush;
 	    cout << " 2101 " << FMTX(remaining_interval[1]) << endl << flush;
-				     
+#endif
 	    // Note nextLo might get pulled in over multiple iterations of this segment of the loop...
 	  } // at least one full parent
 	} // working interval size is > 0
       } // remaining lo < hi
     } // if multi resolution
   } // while i < intervals.size()
-
-
-	    
-
 
   /*	    
 	    
