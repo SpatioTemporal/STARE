@@ -169,25 +169,30 @@ void TemporalIndex_test() {
 	ASSERT_EQUAL("+000000004-13-0-1 23:59:59.999 (00 00) (1)",tIndex.stringInNativeDate());
 	ASSERT_EQUAL("1 000000004-12-31 23:59:59.999 (00 00) (1)",tIndex.toStringJulianTAI());
 	// mlr ASSERT_EQUAL(0x00004d0dfbefe702,tIndex.scidbTemporalIndex());
-	// INDEX_OUTNC("Check: ",tIndex);
+// <<<<<<< HEAD
+// 	// INDEX_OUTNC("Check: ",tIndex);
+// =======
+// >>>>>>> f80cd105998be058c49e1f2441bd4d00fe06b16f
 	ASSERT_EQUAL(0x0013437efbf9c001,tIndex.scidbTemporalIndex());
 	
 	tIndex.fromFormattedJulianTAI(5, 12, 31, 23, 59, 59, 999);  INDEX_OUT(8,tIndex);
 	ASSERT_EQUAL("+000000005-13-0-0 23:59:59.999 (00 00) (1)",tIndex.stringInNativeDate());
 	ASSERT_EQUAL("1 000000005-12-31 23:59:59.999 (00 00) (1)",tIndex.toStringJulianTAI());
 	// mlr ASSERT_EQUAL(0x00005d05fbefe702,tIndex.scidbTemporalIndex());
+
 	INDEX_OUTNC("Check: ",tIndex);
 	ASSERT_EQUAL(0x0017417efbf9c001,tIndex.scidbTemporalIndex());
 	
 	// cout << endl << flush;
 
 	TAG(110)
-	tIndex.setZero().fromFormattedJulianTAI(1-1,  1,  1,  0,  0,  0, 0); // .set_BeforeAfterStartBit(0); // INDEX_OUT(1,tIndex);
+	tIndex.setZero().fromFormattedJulianTAI(1-1,  1,  1,  0,  0,  0, 0); // ??? -> .set_BeforeAfterStartBit(0);
+  INDEX_OUT(1,tIndex);
 	ASSERT_EQUAL("-000000000-00-0-0 00:00:00.000 (00 00) (1)",tIndex.stringInNativeDate());
 	ASSERT_EQUAL("0 000000001-01-01 00:00:00.000 (00 00) (1)",tIndex.toStringJulianTAI());
+
 	INDEX_OUTNC("Check: ",tIndex);
 	ASSERT_EQUAL(0xfffc828104063fff,tIndex.scidbTemporalIndex());
-	// ASSERT_EQUAL(0xfffff20a041018fe,tIndex.scidbTemporalIndex());
 
 	// cout << "1 nat,trad,scidb: " << tIndex.stringInNativeDate()	<< flush << ", " << tIndex.toStringJ() << flush << ", 0x" << setw(16) << setfill('0') << hex << tIndex.scidbTemporalIndex() << dec << tIndex.scidbTemporalIndex() << endl << flush;
 	// cout << "1 nat,trad,scidb: " << tIndex.stringInNativeDate()	<< flush << ", " << tIndex.toStringJ() << flush << hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
@@ -200,7 +205,7 @@ void TemporalIndex_test() {
 	// Months go 0..11 for hack-traditional
 	tIndex.fromFormattedJulianTAI(1-2, 12, 31, 23, 59, 59, 999);
 	// tIndex.setJulianFromTraditionalDate(0,  0,  1,  0,  0,  0, 0);
-	tIndex.set_BeforeAfterStartBit(0); // INDEX_OUT(2,tIndex);
+	tIndex.set_BeforeAfterStartBit(0); INDEX_OUT(2,tIndex);
 	// cout << "2 nat,trad,scidb: " << tIndex.stringInNativeDate()	<< flush << ", " << tIndex.toStringJ() << flush << ", 0x" << setw(16) << setfill('0') << hex << tIndex.scidbTemporalIndex() << dec << tIndex.scidbTemporalIndex() << endl << flush;
 	// cout << "2 nat,trad,scidb: " << tIndex.stringInNativeDate()	<< flush << ", " << tIndex.toStringJ() << flush << hex << tIndex.scidbTemporalIndex() << dec << endl << flush;
 	// cout << "2 nat,trad: " << tIndex.stringInNativeDate()  << ", " << tIndex.toStringJ() << endl << flush;
@@ -210,6 +215,7 @@ void TemporalIndex_test() {
 	ASSERT_EQUAL("-000000001-13-0-0 23:59:59.999 (00 00) (1)",tIndex.stringInNativeDate());
 	TAG(171)
 	ASSERT_EQUAL("0 000000002-12-31 23:59:59.999 (00 00) (1)",tIndex.toStringJulianTAI());
+
 	INDEX_OUTNC("Check: ",tIndex);	
 	TAG(177)
 	// DomainFailure in year...
@@ -222,7 +228,6 @@ void TemporalIndex_test() {
 	ASSERT_EQUAL(tIndex,tIndex);
 
 	TAG(180)
-
 
 	  /**/
 
@@ -281,8 +286,12 @@ void TemporalIndex_test() {
 
 	/**/
 
-	tIndex.fromFormattedJulianTAI(2009,  1,  1, 0, 0, 0, 0); // INDEX_OUT(9,tIndex);
+	tIndex.fromFormattedJulianTAI(2009,  1,  1,  0,  0,  0,   0); // INDEX_OUT(9,tIndex);
+//tIndex.fromFormattedJulianTAI(   1, 12, 31, 23, 59, 59, 998); INDEX_OUT(0,tIndex);
 	TemporalIndex tIndex0;
+
+  TAG(301)
+  
 
 	try {
 		tIndex0.fromStringJulianTAI(tIndex.toStringJulianTAI());
@@ -291,7 +300,7 @@ void TemporalIndex_test() {
 		cout << "failureMessage: " << failureMessage << "'" << endl << flush;
 	}
 
-	TAG(301)
+	TAG(302)
 
 	cout << dec;
 
@@ -392,8 +401,12 @@ void TemporalIndex_test() {
 	int64_t offsetBase = tIndex.data.get("millisecond")->getOffset();
 	int64_t offsetTop = tIndex.data.get("year")->getOffset()+tIndex.data.get("year")->getWidth()-1;
 	TemporalIndex tIndex2, tIndex3, tIndex4;
+// <<<<<<< HEAD
 	// Big year veresion tIndex2.fromFormattedJulianTAI(262144, 12, 31, 23, 59, 59, 999);
 	tIndex2.fromFormattedJulianTAI(8192-1, 12, 31, 23, 59, 59, 999);
+// =======
+// 	tIndex2.fromFormattedJulianTAI(8191, 12, 31, 23, 59, 59, 999);
+// >>>>>>> f80cd105998be058c49e1f2441bd4d00fe06b16f
 
 	if(globalPrintFlag) {
 
@@ -413,6 +426,10 @@ void TemporalIndex_test() {
 			TAG(731)
 			// tIndex.data.setValue("BeforeAfterStartBit",1);
 			tIndex.data.setValue("forward_resolution",iResolution);
+// <<<<<<< HEAD
+// =======
+ 			tIndex.data.setValue("reverse_resolution",iResolution);
+// >>>>>>> f80cd105998be058c49e1f2441bd4d00fe06b16f
 			TAG(732)
 			tIndex.data.setValue("type",1);
 			TAG(733)
@@ -687,8 +704,17 @@ void TemporalIndex_test() {
 		TAG(++tag)
 		if(globalPrintFlag) cout << endl << flush;
 		INDEX_OUT(++tag,a);
-		if(globalPrintFlag) cout << "a_i " << dec << a_i << endl << flush;
 		b.fromInt64Milliseconds(a_i);
+		INDEX_OUT(++tag,b);
+    c.setZero();
+		c.set_BeforeAfterStartBit(1);
+    c.fromInt64Milliseconds(0);
+		INDEX_OUT(++tag,c);
+		if(globalPrintFlag) cout << "a   " << dec << a.toInt64Milliseconds() << endl << flush;
+    if(globalPrintFlag) cout << "a_i " << dec << a_i << endl << flush;
+    int64 b_i = b.toInt64Milliseconds();
+		if(globalPrintFlag) cout << "b_i " << dec << b_i << endl << flush;
+		if(globalPrintFlag) cout << "c   " << dec << c.toInt64Milliseconds() << endl << flush;
 		ASSERT_EQUAL("+000000001-00-0-0 00:00:00.000 (00 00) (1)",b.stringInNativeDate());
 
 		if(globalPrintFlag) {

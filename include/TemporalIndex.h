@@ -71,13 +71,23 @@ public:
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
 				    make_shared<BitField>("year",
+// <<<<<<< HEAD
 							  pow(2,13)-1, // maxValue
 							  13, // width
 							  offset_base,
 							  (13ll*28+1)*24*3600*1000, // months times millisec in  a regularized (24-day) month, plus one day for leap stuff
 							  fieldId++
 							  )
-		);
+				    );
+// =======
+//                                   pow(2,13)-1, // maxValue
+//                                   13, // width
+//                                   offset_base,
+//                                   (13ll*(13-1)+1)*24*3600*1000, // millisec in  a regularized (24-day) month
+//                                   fieldId++
+//                                   )
+//                         );
+// >>>>>>> f80cd105998be058c49e1f2441bd4d00fe06b16f
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
@@ -619,7 +629,7 @@ public:
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
 	if( (x < 0) || (x > data.get(#field)->getMaxValue()))\
-	throw SpatialFailure("TemporalIndex:DomainFailure in ",data.get(#field)->getName().c_str()); return *this;}
+    {stringstream ss; ss << data.get(#field)->getName().c_str() << " = " << x << " upper: " << data.get(#field)->getMaxValue(); throw SpatialFailure("TemporalIndex:DomainFailure in ",ss.str().c_str());} return *this;}
 	SET(BeforeAfterStartBit)
 	SET(year)
 	SET(month)
