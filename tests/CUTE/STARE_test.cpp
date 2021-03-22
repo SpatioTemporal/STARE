@@ -515,8 +515,8 @@ void STARE_test() {
 	<< ", " << index.getArrayIndexTemporalValue()
 	<< endl << flush;
 	}
-	ASSERT_EQUAL("+000002001-06-1-5 23:59:59.999 (10) (2)",index.tIndex.stringInNativeDate());
-	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (10) (2)",index.tIndex.toStringJulianTAI());
+	ASSERT_EQUAL("+000002001-06-1-5 23:59:59.999 (10 10) (1)",index.tIndex.stringInNativeDate());
+	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (10 10) (1)",index.tIndex.toStringJulianTAI());
 	ASSERT_EQUAL(0x7d166dfbefe72a,index.getArrayIndexTemporalValue());
 
 	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999)
