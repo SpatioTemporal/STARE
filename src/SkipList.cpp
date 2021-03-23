@@ -121,9 +121,10 @@ void SkipList::insert(const Key searchKey, const Value value)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// greatest key less than searchKey.. almost completely, but not
+// quite entirely unlike a search ...
+//
 Key SkipList::findMAX(const Key searchKey) const
-  // greatest key less than searchKey.. almost completely, but not
-  // quite entirely unlike a search ...
 {
   int i;
   SkipListElement* element;
@@ -138,7 +139,7 @@ Key SkipList::findMAX(const Key searchKey) const
       nextElement = element->getElement(i);
     }
   }
-  // now nextElement is >= searhcKey
+  // now nextElement is >= searchKey
   // and element is < searchKey
   // therefore elemnt  key is largest key less than current
 
@@ -262,20 +263,71 @@ Value SkipList::search(const Key searchKey)
 ///////////////////////////////////////////////////////////////////////////////
 void SkipList::list(ostream & os)
 {
-  os << "List ing start *****************************************" << endl;
+  os << "Listing start *********************************************" << endl;
   SkipListElement* element;
   SkipListElement* nextElement;
 
   element = myHeader;
   nextElement = element->getElement(0);
   while( (nextElement != NIL) ) {
-    os << setw(20) << nextElement->getKey() << " " << setw(4) << nextElement->getValue() << " " <<  endl; 
+    /*    
+    os << setw(20)
+       << nextElement->getKey() << " " << setw(4)
+       << nextElement->getValue() << " " <<  endl;
+    */
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+    os << " 0x" << FMTX(nextElement->getKey())
+       << " 0x" << FMTX(nextElement->getValue())
+       << " " << setw(20) << nextElement->getValue()
+       << endl << flush;
+#undef FMTX
+    
     element=nextElement;
     nextElement = element->getElement(0);
   }
-  os << "List end ***********************************************" << endl;
+  os << "List end **************************************************" << endl;
   return;
 }
+
+#if 0
+////////////////////////////////////////////////////////////////////////////////
+// List a pair of closely coupled lists.
+//
+void list2(ostream & os, SkipList& a, SkipList& b)
+{
+  os << "Listing start *********************************************" << endl;
+  SkipListElement* a_element,b_element;
+  SkipListElement* a_nextElement,b_nextElement;
+
+  ETC.
+
+  a_element = a.myHeader;
+  nextElement = element->getElement(0);
+
+  
+  while( (nextElement != NIL) ) {
+    /*    
+    os << setw(20)
+       << nextElement->getKey() << " " << setw(4)
+       << nextElement->getValue() << " " <<  endl;
+    */
+#define FMTX(x) setw(16) << setfill('0') << hex << x << dec
+    os << " 0x" << FMTX(a.nextElement->getKey())
+       << " 0x" << FMTX(a.nextElement->getValue())
+       << " 0x" << FMTX(b.nextElement->getKey())
+       << " 0x" << FMTX(b.nextElement->getValue())
+       << " " << setw(20) << b.nextElement->getValue()
+       << endl << flush;
+#undef FMTX
+    
+    element=nextElement;
+    nextElement = element->getElement(0);
+  }
+  os << "List end **************************************************" << endl;
+  return;
+}
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void SkipList::freeRange(const Key loKey, const Key hiKey)

@@ -9,6 +9,8 @@
 
 #include "SpatialRange.h"
 
+#define DIAGOUT(x)
+
 
 SpatialRange::SpatialRange() {
 	this->range = new HstmRange;
@@ -35,11 +37,21 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
  * TODO: Have a SpatialRange class instead of an HstmRange?
  */
 // #define DIAG
+#undef DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
-	EmbeddedLevelNameEncoding leftJustified;
+	EmbeddedLevelNameEncoding leftJustified, lj_cleared;
+#ifdef DIAG
+  int count = 0;
+#endif  
 	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
+#ifdef DIAG
+    cout << "sr::adsi count = " << ++count << endl << flush;
+#endif
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
-		uint64 a = leftJustified.getId(), b = a;
+		uint64 a         = leftJustified.getId(), b = a;
+    int    a_level   = leftJustified.getLevel();
+    lj_cleared       = leftJustified.clearDeeperThanLevel(a_level);
+    uint64 a_cleared = lj_cleared.getId();
 		auto i1 = (i0+1);
 		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
 		if( i1 != intervals.end() ) {
@@ -58,24 +70,31 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 				<< setw(20) << dec << b << " "
 				<< endl << flush;
 #endif
-		this->range->addRange(a,b);
+		// old this->range->addRange(a,b);
+		this->range->addRange(a_cleared,b);
 #ifdef DIAG
+    cout << "sr::addsi addRange done" << endl << flush;    
 		cout << "sr::addsi nr = " << this->range->range->nranges() << endl << flush;
 #endif
 	}
 }
+#undef DIAG
 
 // #define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 	KeyPair kp(-1,-2);
+  Key lo_return, hi_return;
 	int istat = this->getNext(kp);
 #ifdef DIAG
-	cout << "sr::gnsi istat = " << istat << ", kp = " << kp.lo << ", " << kp.hi << endl << flush;
+  cout << "\nsr::gnsi start ---" << endl << flush;
+  cout << "\nsr::gnsi istat = " << istat << ", kp = " << hex << kp.lo << ", " << kp.hi << dec << endl << flush;
 #endif
 	if( istat > 0 ) {
 		EmbeddedLevelNameEncoding leftJustified;
 		leftJustified.setId(kp.lo);
-		interval.push_back(leftJustified.getSciDBLeftJustifiedFormat());
+    lo_return = leftJustified.getSciDBLeftJustifiedFormat();
+    DIAGOUT("pushing " << hex << lo_return << dec);
+		interval.push_back(lo_return);
 		if( kp.lo != kp.hi ) {
 			STARE_ArrayIndexSpatialValue term_lo = leftJustified.getSciDBTerminatorLeftJustifiedFormat();
 			leftJustified.setId(kp.hi); // Note: hi should be a terminator already.
@@ -89,11 +108,14 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 					<< term_lo << ","
 					<< setw(16) << setfill('0') << hex
 					<< term_hi << endl << flush << dec;
+      cout << "---" << endl << flush;
 #endif
 
 			if( term_hi != term_lo ) {
-				interval.push_back( term_hi );
-			}
+        hi_return = term_hi;
+        DIAGOUT("pushing " << hex << hi_return << dec);
+				interval.push_back( hi_return );
+      }
 		}
 	}
 	return istat;

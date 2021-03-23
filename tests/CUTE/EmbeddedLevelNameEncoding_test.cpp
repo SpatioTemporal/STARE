@@ -109,9 +109,11 @@ void EmbeddedLevelNameEncoding_test() {
 
 	    STARE_ArrayIndexSpatialValue not_siv1  = lj.increment(lj.getId(), lj.getLevel(), 1);
 	    EmbeddedLevelNameEncoding    lj1(not_siv1);
+#if 0
 	    STARE_ArrayIndexSpatialValue siv1 = lj1.getSciDBLeftJustifiedFormat();
 	    // STARE_ArrayIndexSpatialValue sivt_term = 0x232400000000001f;
 	    STARE_ArrayIndexSpatialValue sivt_term = lj1.getSciDBTerminatorLeftJustifiedFormat();
+#endif
 
 	    // .. 7...F
 	    // 11 11111
@@ -162,8 +164,8 @@ void EmbeddedLevelNameEncoding_test() {
 	    int level = lj.getLevel();
 	    uint64 one_mask_to_level, one_at_level;
 	    lj.SciDBincrement_LevelToMaskDelta(level, one_mask_to_level, one_at_level);
-	    STARE_ArrayIndexSpatialValue siv2      = siv0 + one_at_level;
-	    STARE_ArrayIndexSpatialValue siv2_term = siv2 | one_mask_to_level;
+	    // STARE_ArrayIndexSpatialValue siv2      = siv0 + one_at_level;
+	    // STARE_ArrayIndexSpatialValue siv2_term = siv2 | one_mask_to_level;
 
 	    STARE_ArrayIndexSpatialValue siv0_tchk = (siv0 | one_mask_to_level);
 

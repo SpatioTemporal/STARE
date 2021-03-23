@@ -579,7 +579,8 @@ RangeConvex::simplify0() {
 			cout << endl;
 #endif
 			cout << "rc::s0 3699 iFuse exit " << endl << flush;
-			exit(1);
+			throw SpatialFailure("RangeConvex::simplify0 3699 iFuse");
+			// exit(1);
 		}
 	}
 #ifdef DIAG
@@ -698,7 +699,6 @@ RangeConvex::simplify() {
   size_t i,j;
   size_t clen;
   bool redundancy = true;
-
     
   while(redundancy) {
     redundancy = false;

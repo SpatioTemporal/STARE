@@ -398,7 +398,7 @@ void TemporalIndex_test() {
 	TAG(719)
 	// tIndex.setZero();
 	int64_t one = 1;
-	int64_t offsetBase = tIndex.data.get("millisecond")->getOffset();
+	// ??? int64_t offsetBase = tIndex.data.get("millisecond")->getOffset();
 	int64_t offsetTop = tIndex.data.get("year")->getOffset()+tIndex.data.get("year")->getWidth()-1;
 	TemporalIndex tIndex2, tIndex3, tIndex4;
 // <<<<<<< HEAD

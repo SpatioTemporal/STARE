@@ -672,6 +672,11 @@ void STARE_test() {
 		int forward_resolution = 10, reverse_resolution = 10;
 		int tValType       = 1;
 		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
+    /* For later use?
+		// int resolution = 10;
+		// int tValType       = 2;
+		// STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
+    */
 		// if(globalPrintFlag) {
 		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
 		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
@@ -720,10 +725,14 @@ void STARE_test() {
 			cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
 			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
 			// }
+			/* For later use? */
 			time_t datetime = (30*365+7)*86400;
 			int forward_resolution = 10, reverse_resolution = 10;
 			int tValType       = 1;
 			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
+      //                        int resolution = 10;
+      //			int tValType       = 2;
+      //			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
 			// if(globalPrintFlag) {
 			cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
 			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
@@ -1330,7 +1339,7 @@ void STARE_test() {
 		STARE index;
 		// STARE_ArrayIndexSpatialValue sid = 0x4c0000000000003;
 		STARE_ArrayIndexSpatialValue sid = 0x4c000000000001b;
-		STARE_ArrayIndexSpatialValue sidtmp;
+    //		STARE_ArrayIndexSpatialValue sidtmp;
 		SpatialVector v_sid  = index.SpatialVectorFromValue(sid);
 		LatLonDegrees64 v_ll = index.LatLonDegreesFromValue(sid);
 		float64 v_lat,v_lon;
@@ -1369,6 +1378,8 @@ void STARE_test() {
 		}
 		cout << endl << flush;
 #endif
+    
+#ifdef DIAG
 
 		SpatialVector vecs[3] = {
 				SpatialVector( 0.4619397639595428, 0.8446232009168338, 0.2705980468259219 ),
@@ -1376,7 +1387,6 @@ void STARE_test() {
 				SpatialVector( 0.4619397591445266, 0.8446232068078616, 0.2705980366578833 )
 		};
 
-#ifdef DIAG
 		cout << "index... from Explicit vecs" << endl << flush;
 		for( int i=0; i<3; ++i) {
 			sidtmp = index.ValueFromSpatialVector(vecs[i]);
@@ -1411,9 +1421,9 @@ void STARE_test() {
 		sid = index.ValueFromSpatialVector(v);
 		SpatialVector vr = index.SpatialVectorFromValue(sid);
 		STARE_ArrayIndexSpatialValue sidr = index.ValueFromSpatialVector(vr);
-		float64 lat,lon;
-		LatLonDegrees64 ll = index.LatLonDegreesFromValue(sid);
-		LatLonDegrees64 llr = index.LatLonDegreesFromValue(sidr);
+    //		float64 lat,lon;
+		// LatLonDegrees64 ll = index.LatLonDegreesFromValue(sid);
+		// LatLonDegrees64 llr = index.LatLonDegreesFromValue(sidr);
 #ifdef DIAG
 		cout << "sid  0x" << setw(16) << setfill('0') << hex << sid << dec
 				<< " - " << ll.lat << " " << ll.lon
