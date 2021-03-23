@@ -1,4 +1,9 @@
 
+
+2021-03-23 Version 0.17.0
+
+Added two sided temporal resolution.
+
 2021-03-19 Version 0.16.5
 
 Enhanced expandIntervals and added expandIntervalsMultiRes. The previous version looked only at the resolution of an interval and then expanded accordingly. Thus if one started an interval with a small trixel larger ones later in the sequence would be split using the finer resolution, even when multi-resolution was desired. expandIntervalsMultiRes is a revision of similar code in HtmRangeMultiResolution::compress, which was an improvement on HtmRangeMultiResolution::defrag. expandIntervalsMultiRes attempts to coalesce as many trixels as possible using a rolled-out recursion scheme. The previous API method, expandIntervals retains the older non-multi-resolution behavior.
