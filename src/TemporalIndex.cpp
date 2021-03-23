@@ -851,7 +851,7 @@ int64_t TemporalIndex::millisecondsAtResolution(const int64_t resolution) const 
 	/*
 	 * If needed...
 	int64_t bitPosition;
-    int64_t offsetTop = bitOffsetCoarsest();
+        int64_t offsetTop = bitOffsetCoarsest();
 	*/
 
 	int64_t offsetResolution = bitOffsetResolution(resolution);

@@ -16,7 +16,7 @@
 
 void TemporalIndex_test() {
 
-  bool globalPrintFlag = true; // false
+  bool globalPrintFlag = false; // true
 
 	stringstream ss;
 
@@ -738,7 +738,8 @@ void TemporalIndex_test() {
 
 		if(globalPrintFlag) {
 			int64_t b_ms;
-			int level = 54;
+			// int level = 54;
+			int level = 48;
 			tag = 4470;
 			do {
 				int64_t ms = a.millisecondsAtResolution(level);
@@ -993,7 +994,8 @@ void TemporalIndex_test() {
 	if(globalPrintFlag) { cout << "-" << endl << flush; }
 
 	if(globalPrintFlag) {
-		int levels[7] = { 54, 50, 40, 20, 10, 5, 0 };
+	  // int levels[7] = { 54, 50, 40, 20, 10, 5, 0 };
+	  int levels[7] = { 48, 45, 40, 20, 10, 5, 0 };
 
 		for( int i = 0; i < 7; ++i ) {
 			level = levels[i];
@@ -1029,12 +1031,15 @@ void TemporalIndex_test() {
 		tIndex = TemporalIndex(scidbMinimumTemporalIndex()); INDEX_OUT(++tag_id,tIndex);
 		cout << endl << flush;
 
-		cout << "nat-max " << scidbMaximumTemporalIndex() << endl << flush;
+		cout << "nat/sci-max " << scidbMaximumTemporalIndex() << endl << flush; // nat-max?
 		cout << endl << flush;
 	}
 
-	ASSERT_EQUAL(-4611683776386295554,scidbMinimumTemporalIndex());
-	ASSERT_EQUAL(4611682745594144514,scidbMaximumTemporalIndex());
+	ASSERT_EQUAL(-4612668427704320001,scidbMinimumTemporalIndex());
+	ASSERT_EQUAL( 4612604656029908993,scidbMaximumTemporalIndex());
+	  
+	// ASSERT_EQUAL(-4611683776386295554,scidbMinimumTemporalIndex());
+	// ASSERT_EQUAL(4611682745594144514,scidbMaximumTemporalIndex());
 
 	tIndex.set_type(1);
 	tIndex.setZero().setEOY(1,1024);
@@ -1590,21 +1595,21 @@ void TemporalIndex_test() {
 			// ASSERT_EQUAL("'TemporalIndex::setDateFromYearAndMilliseconds: _milliseconds < 0.'",failureMessage);
 		};
 		if(globalPrintFlag) {
-			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,10000,0); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,10,0); INDEX_OUTN(++tag_id,tIndex);
 			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
 			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
 					<< " : " << tIndex.toNativeYear()
 					<< " : " << tIndex.scidbTemporalIndex()
 					<< endl << flush;
 
-			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,100000,120000); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(0,100,120000); INDEX_OUTN(++tag_id,tIndex);
 			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
 			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
 					<< " : " << tIndex.toNativeYear()
 					<< " : " << tIndex.scidbTemporalIndex()
 					<< endl << flush;
 
-			tIndex.setZero().fromNativeCEYearAndMilliseconds(1,100000,120000); INDEX_OUTN(++tag_id,tIndex);
+			tIndex.setZero().fromNativeCEYearAndMilliseconds(1,1000,120000); INDEX_OUTN(++tag_id,tIndex);
 			tIndex.toNativeCEYearAndMilliseconds(CE, year, milliseconds);
 			cout << "CE,year,milliseconds: " << CE << " " << year << " " << milliseconds
 					<< " : " << tIndex.toNativeYear()
@@ -1665,10 +1670,20 @@ void TemporalIndex_test() {
 		ASSERT_EQUAL(1,CE);
 		ASSERT_EQUAL(2000,year);
 		ASSERT_EQUAL(31622399999,milliseconds);
+		ASSERT_EQUAL(2252718451287769089,tIndex.scidbTemporalIndex());
+		ASSERT_EQUAL(6864613376924450561,tIndex.scidbTerminator()); // 0x5f44017efbf9ff01
+		ASSERT_EQUAL(6861488564878311169,tIndex.scidbTerminatorJulianTAI()); // 0x5f38e77efbf9ff01
+		ASSERT_EQUAL(2001.0027397259958,tIndex.toNativeYear()); // 
+		
+		/*
+		ASSERT_EQUAL(1,CE);
+		ASSERT_EQUAL(2000,year);
+		ASSERT_EQUAL(31622399999,milliseconds);
 		ASSERT_EQUAL(35198725801371394,tIndex.scidbTemporalIndex());
 		ASSERT_EQUAL(4646888008403904510,tIndex.scidbTerminator());
 		ASSERT_EQUAL(4643822982302525438,tIndex.scidbTerminatorJulianTAI());
 		ASSERT_EQUAL(2001.0027397259958,tIndex.toNativeYear());
+		*/
 
 		year_ti = tIndex.toNativeYear(); tIndex.setZero().fromNativeYear(year_ti);  INDEX_OUTN(++tag_id,tIndex);
 
@@ -1678,32 +1693,142 @@ void TemporalIndex_test() {
 			cout << "max resolution level: " << tIndex.data.maxResolutionLevel() << endl << flush;
 			cout << "max resolution ms:    " << tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()) << endl << flush;
 		}
-		ASSERT_EQUAL(54,tIndex.data.maxResolutionLevel());
+		ASSERT_EQUAL(48,tIndex.data.maxResolutionLevel());
+		// ASSERT_EQUAL(54,tIndex.data.maxResolutionLevel());
 		ASSERT_EQUAL(1,tIndex.millisecondsAtResolution(tIndex.data.maxResolutionLevel()));
 
 		if(globalPrintFlag){
 		cout << setw(12) << "iDelta" << "  " << setw(4) << "ti" << endl << flush;
+		cout	<< setw(18) << "iDelta" << "  "
+			<< setw(4)  << "cR<iD" << " " 
+			<< setw(18) << "ms@cR<iD" << " "
+			<< setw(18) << "dy@cR<iD" << " "
+			<< endl << flush;
 		int64_t iDelta = 1;
 		while( iDelta < 1000000000000000000 ) {
 			cout
 			<< setw(18) << iDelta << "  "
-			<< setw(4) << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
+			<< setw(4)  << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
 			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)) << " "
-			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3 << " "
+			<< setw(18) << tIndex.getResolutionTimescaleDays() << " " 
 			<< endl << flush;
 			iDelta *= 10;
 		}
+		/*
+max resolution level: 48
+max resolution ms:    1
+      iDelta    ti
+            iDelta  cR<iD           ms@cR<iD           dy@cR<iD 
+                 1    48                  1 1.1574074074074074e-08            1495040 
+                10    45                  8 9.2592592592592591e-08            1495040 
+               100    42                 64 7.4074074074074073e-07            1495040 
+              1000    38               1000 1.1574074074074073e-05            1495040 
+             10000    35               8000 9.2592592592592588e-05            1495040 
+            100000    32              60000 0.00069444444444444447            1495040 
+           1000000    28             960000 0.011111111111111112            1495040 
+          10000000    25            7200000 0.083333333333333329            1495040 
+         100000000    21           86400000                  1            1495040 
+        1000000000    18          604800000                  7            1495040 
+       10000000000    14         9676800000                112            1495040 
+      100000000000    11        63072000000                730            1495040 
+     1000000000000     8       504576000000               5840            1495040 
+    10000000000000     4      8073216000000              93440            1495040 
+   100000000000000     1     64585728000000             747520            1495040 
+  1000000000000000    -1                 -2 -2.3148148148148148e-08            1495040 
+ 10000000000000000    -1                 -2 -2.3148148148148148e-08            1495040 
+100000000000000000    -1                 -2 -2.3148148148148148e-08            1495040 
+		 */
 		}
 		if(globalPrintFlag){
 		cout << "----" << endl << flush;
 		}
+
+		if(globalPrintFlag){
+		cout	<< setw(18) << "iDelta" << "  "
+			<< setw(4)  << "cR<iD" << " " 
+			<< setw(18) << "ms@cR<iD" << " "
+			<< setw(18) << "dy@cR<iD" << " "
+			<< endl << flush;
+		int64_t iDelta = 1;
+		while( iDelta < 1000000000000000 ) {
+			cout
+			<< setw(18) << iDelta << "  "
+			<< setw(4)  << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3 << " "
+			<< setw(18) << tIndex.getResolutionTimescaleDays() << " " 
+			<< endl << flush;
+			iDelta *= 2;
+		}
+		/*
+            iDelta  cR<iD           ms@cR<iD           dy@cR<iD 
+                 1    48                  1 1.1574074074074074e-08            1495040 
+                 2    47                  2 2.3148148148148148e-08            1495040 
+                 4    46                  4 4.6296296296296295e-08            1495040 
+                 8    45                  8 9.2592592592592591e-08            1495040 
+                16    44                 16 1.8518518518518518e-07            1495040 
+                32    43                 32 3.7037037037037036e-07            1495040 
+                64    42                 64 7.4074074074074073e-07            1495040 
+               128    41                128 1.4814814814814815e-06            1495040 
+               256    40                256 2.9629629629629629e-06            1495040 
+               512    39                512 5.9259259259259258e-06            1495040 
+              1024    38               1000 1.1574074074074073e-05            1495040 
+              2048    37               2000 2.3148148148148147e-05            1495040 
+              4096    36               4000 4.6296296296296294e-05            1495040 
+              8192    35               8000 9.2592592592592588e-05            1495040 
+             16384    34              16000 0.00018518518518518518            1495040 
+             32768    33              32000 0.00037037037037037035            1495040 
+             65536    32              60000 0.00069444444444444447            1495040 
+            131072    31             120000 0.0013888888888888889            1495040 
+            262144    30             240000 0.0027777777777777779            1495040 
+            524288    29             480000 0.0055555555555555558            1495040 
+           1048576    28             960000 0.011111111111111112            1495040 
+           2097152    27            1920000 0.022222222222222223            1495040 
+           4194304    26            3600000 0.041666666666666664            1495040 
+           8388608    25            7200000 0.083333333333333329            1495040 
+          16777216    24           14400000 0.16666666666666666            1495040 
+          33554432    23           28800000 0.33333333333333331            1495040 
+          67108864    22           57600000 0.66666666666666663            1495040 
+         134217728    21           86400000                  1            1495040 
+         268435456    20          172800000                  2            1495040 
+         536870912    19          345600000                  4            1495040 
+        1073741824    18          604800000                  7            1495040 
+        2147483648    17         1209600000                 14            1495040 
+        4294967296    16         2419200000                 28            1495040 
+        8589934592    15         4838400000                 56            1495040 
+       17179869184    14         9676800000                112            1495040 
+       34359738368    12        31536000000                365            1495040 
+       68719476736    11        63072000000                730            1495040 
+      137438953472    10       126144000000               1460            1495040 
+      274877906944     9       252288000000               2920            1495040 
+      549755813888     8       504576000000               5840            1495040 
+     1099511627776     7      1009152000000              11680            1495040 
+     2199023255552     6      2018304000000              23360            1495040 
+     4398046511104     5      4036608000000              46720            1495040 
+     8796093022208     4      8073216000000              93440            1495040 
+    17592186044416     3     16146432000000             186880            1495040 
+    35184372088832     2     32292864000000             373760            1495040 
+    70368744177664     1     64585728000000             747520            1495040 
+   140737488355328    -1                 -2 -2.3148148148148148e-08            1495040 
+   281474976710656    -1                 -2 -2.3148148148148148e-08            1495040 
+   562949953421312    -1                 -2 -2.3148148148148148e-08            1495040 
+
+		 */
+		}
+		if(globalPrintFlag){
+		cout << "----" << endl << flush;
+		}
+
+		
 		level = 10;
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level); INDEX_OUTN_NC(++tag_id,tIndex1);
 
 		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		}
-		level = 54;
+		// level = 54;
+		level = 48;
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level); INDEX_OUTN_NC(++tag_id,tIndex2);
 
 		if(globalPrintFlag){
@@ -1712,19 +1837,27 @@ void TemporalIndex_test() {
 		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 		cout << "----" << endl << flush;
 		}
-		level = 40;
+		// level = 40;
+		level = 34;
 		tIndex1.setZero().fromFormattedJulianTAI(2000, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level); INDEX_OUTN_NC(++tag_id,tIndex1);
 
 		if(globalPrintFlag){
-		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
+		  cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << " " 
+		       << tIndex1.getReverseResolutionTimescaleDays() << " " 
+		       << tIndex1.getForwardResolutionTimescaleDays() << " " 
+		       << endl << flush;
 		}
-		level = 54;
+		// level = 54;
+		level = 48;
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level); INDEX_OUTN_NC(++tag_id,tIndex2);
 
 		if(globalPrintFlag){
-		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
-		cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
-		cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		  cout << " res_days: " << tIndex2.getResolutionTimescaleDays() << " " 
+		       << tIndex2.getReverseResolutionTimescaleDays() << " " 
+		       << tIndex2.getForwardResolutionTimescaleDays() << " " 
+		       << endl << flush;
+		  cout << " dif_days: " << diff_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
+		  cout << " cmp_days: " << cmp_JulianTAIDays(tIndex1,tIndex2) << endl << flush;
 		}
 		ASSERT_EQUAL(0.000185185185185185,tIndex1.getResolutionTimescaleDays());
 
@@ -1747,7 +1880,8 @@ void TemporalIndex_test() {
 		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		}
-		level = 54;
+		// level = 54;
+		level = 48;
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level);
 
 		INDEX_OUTN_NC(++tag_id,tIndex2);
@@ -1769,7 +1903,8 @@ void TemporalIndex_test() {
 		if(globalPrintFlag){
 		cout << " res_days: " << tIndex1.getResolutionTimescaleDays() << endl << flush;
 		}
-		level = 54;
+		// level = 54;
+		level = 48;
 		tIndex2.setZero().fromFormattedJulianTAI(1990, 12, 31, 23, 59, 59, 999).set_forward_resolution(level).set_reverse_resolution(level);
 		ASSERT_EQUAL(5840,tIndex1.getResolutionTimescaleDays());
 		ASSERT_EQUAL(3653,diff_JulianTAIDays(tIndex1,tIndex2));
@@ -1790,7 +1925,7 @@ void TemporalIndex_test() {
 
 	}
 
-	if(false) {
+	if(true) {
 		cout << endl << "Print some resolution information." << endl << flush;
 		STARE index;
 
@@ -1800,6 +1935,78 @@ void TemporalIndex_test() {
 			cout << "temp res level,days: " << resolution << " " << days << " hours = " << days*24.0 << endl << flush;
 		}
 /*
+
+///--- The new type 1. Two-sided resolution.
+///---
+
+                Print some resolution information.
+                temp res level,days: 0 1495040 hours = 35880960
+                temp res level,days: 1 747520 hours = 17940480
+                temp res level,days: 2 373760 hours = 8970240
+                temp res level,days: 3 186880 hours = 4485120
+                temp res level,days: 4 93440 hours = 2242560
+                temp res level,days: 5 46720 hours = 1121280
+                temp res level,days: 6 23360 hours = 560640
+                temp res level,days: 7 11680 hours = 280320
+                temp res level,days: 8 5840 hours = 140160
+                temp res level,days: 9 2920 hours = 70080
+                temp res level,days: 10 1460 hours = 35040
+                temp res level,days: 11 730 hours = 17520
+                temp res level,days: 12 365 hours = 8760
+                temp res level,days: 13 224 hours = 5376
+                temp res level,days: 14 112 hours = 2688
+                temp res level,days: 15 56 hours = 1344
+                temp res level,days: 16 28 hours = 672
+                temp res level,days: 17 14 hours = 336
+                temp res level,days: 18 7 hours = 168
+                temp res level,days: 19 4 hours = 96
+                temp res level,days: 20 2 hours = 48
+                temp res level,days: 21 1 hours = 24
+                temp res level,days: 22 0.66666666666666663 hours = 16
+                temp res level,days: 23 0.33333333333333331 hours = 8
+                temp res level,days: 24 0.16666666666666666 hours = 4
+                temp res level,days: 25 0.083333333333333329 hours = 2
+                temp res level,days: 26 0.041666666666666664 hours = 1
+                temp res level,days: 27 0.022222222222222223 hours = 0.53333333333333333
+                temp res level,days: 28 0.011111111111111112 hours = 0.26666666666666666
+                temp res level,days: 29 0.0055555555555555558 hours = 0.13333333333333333
+                temp res level,days: 30 0.0027777777777777779 hours = 0.066666666666666666
+                temp res level,days: 31 0.0013888888888888889 hours = 0.033333333333333333
+                temp res level,days: 32 0.00069444444444444447 hours = 0.016666666666666666
+                temp res level,days: 33 0.00037037037037037035 hours = 0.0088888888888888889
+                temp res level,days: 34 0.00018518518518518518 hours = 0.0044444444444444444
+                temp res level,days: 35 9.2592592592592588e-05 hours = 0.0022222222222222222
+                temp res level,days: 36 4.6296296296296294e-05 hours = 0.0011111111111111111
+                temp res level,days: 37 2.3148148148148147e-05 hours = 0.00055555555555555556
+                temp res level,days: 38 1.1574074074074073e-05 hours = 0.00027777777777777778
+                temp res level,days: 39 5.9259259259259258e-06 hours = 0.00014222222222222221
+                temp res level,days: 40 2.9629629629629629e-06 hours = 7.1111111111111106e-05
+                temp res level,days: 41 1.4814814814814815e-06 hours = 3.5555555555555553e-05
+                temp res level,days: 42 7.4074074074074073e-07 hours = 1.7777777777777777e-05
+                temp res level,days: 43 3.7037037037037036e-07 hours = 8.8888888888888883e-06
+                temp res level,days: 44 1.8518518518518518e-07 hours = 4.4444444444444441e-06
+                temp res level,days: 45 9.2592592592592591e-08 hours = 2.2222222222222221e-06
+                temp res level,days: 46 4.6296296296296295e-08 hours = 1.111111111111111e-06
+                temp res level,days: 47 2.3148148148148148e-08 hours = 5.5555555555555552e-07
+                temp res level,days: 48 1.1574074074074074e-08 hours = 2.7777777777777776e-07
+                temp res level,days: 49 0 hours = 0
+                temp res level,days: 50 0 hours = 0
+                temp res level,days: 51 0 hours = 0
+                temp res level,days: 52 0 hours = 0
+                temp res level,days: 53 0 hours = 0
+                temp res level,days: 54 0 hours = 0
+                temp res level,days: 55 0 hours = 0
+                temp res level,days: 56 0 hours = 0
+                temp res level,days: 57 0 hours = 0
+                temp res level,days: 58 0 hours = 0
+                temp res level,days: 59 0 hours = 0
+                temp res level,days: 60 0 hours = 0
+                temp res level,days: 61 0 hours = 0
+                temp res level,days: 62 0 hours = 0
+                temp res level,days: 63 0 hours = 0
+
+///--- The old type 2. One-sided resolution.
+///---
 		Print some resolution information.
 		temp res level,days: 0 9.56826e+07 hours = 2.29638e+09
 		temp res level,days: 1 4.78413e+07 hours = 1.14819e+09

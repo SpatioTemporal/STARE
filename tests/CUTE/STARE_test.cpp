@@ -517,12 +517,13 @@ void STARE_test() {
 	}
 	ASSERT_EQUAL("+000002001-06-1-5 23:59:59.999 (10 10) (1)",index.tIndex.stringInNativeDate());
 	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (10 10) (1)",index.tIndex.toStringJulianTAI());
-	ASSERT_EQUAL(0x7d166dfbefe72a,index.getArrayIndexTemporalValue());
+	ASSERT_EQUAL(2253378158264437289,index.getArrayIndexTemporalValue());
+	//?? ASSERT_EQUAL(0x7d166dfbefe72a,index.getArrayIndexTemporalValue());
 
 	index.tIndex.fromFormattedJulianTAI(2001, 6, 30, 23, 59, 59, 999)
 	  .set_forward_resolution(20)
 	  .set_reverse_resolution(20)
-	  .set_type(2);
+	  .set_type(1);
 	if(globalPrintFlag) {
 	cout
 	<< "tI: " << index.tIndex.toStringJulianTAI()
@@ -530,14 +531,15 @@ void STARE_test() {
 	<< ", " << index.getArrayIndexTemporalValue()
 	<< endl << flush;
 	}
-	ASSERT_EQUAL("+000002001-06-1-5 23:59:59.999 (20) (2)",index.tIndex.stringInNativeDate());
-	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (20) (2)",index.tIndex.toStringJulianTAI());
-	ASSERT_EQUAL(0x7d166dfbefe752,index.getArrayIndexTemporalValue());
+	ASSERT_EQUAL("+000002001-06-1-5 23:59:59.999 (20 20) (1)",index.tIndex.stringInNativeDate());
+	ASSERT_EQUAL("1 000002001-06-30 23:59:59.999 (20 20) (1)",index.tIndex.toStringJulianTAI());
+	ASSERT_EQUAL(2253378158264439889,index.getArrayIndexTemporalValue());
+	// ASSERT_EQUAL(0x7d166dfbefe752,index.getArrayIndexTemporalValue());
 
 	index1.tIndex.fromFormattedJulianTAI(2001, 7, 1, 0, 0, 0, 0)
 	  .set_forward_resolution(20)
 	  .set_reverse_resolution(20)
-	  .set_type(2);
+	  .set_type(1);
 	if(globalPrintFlag) {
 	cout
 	<< "tI: " << index1.tIndex.toStringJulianTAI()
@@ -545,9 +547,10 @@ void STARE_test() {
 	<< ", " << index1.getArrayIndexTemporalValue()
 	<< endl << flush;
 	}
-	ASSERT_EQUAL("+000002001-06-1-6 00:00:00.000 (20) (2)",index1.tIndex.stringInNativeDate());
-	ASSERT_EQUAL("1 000002001-07-01 00:00:00.000 (20) (2)",index1.tIndex.toStringJulianTAI());
-	ASSERT_EQUAL(0x7d167000000052,index1.getArrayIndexTemporalValue());
+	ASSERT_EQUAL("+000002001-06-1-6 00:00:00.000 (20 20) (1)",index1.tIndex.stringInNativeDate());
+	ASSERT_EQUAL("1 000002001-07-01 00:00:00.000 (20 20) (1)",index1.tIndex.toStringJulianTAI());
+	ASSERT_EQUAL(2253378712382739537,index1.getArrayIndexTemporalValue());
+	// ASSERT_EQUAL(0x7d167000000052,index1.getArrayIndexTemporalValue());
 
 	{
 
@@ -602,14 +605,14 @@ void STARE_test() {
 			<< setprecision(18) << setw(20) << scientific
 			<< jd0 << endl << flush;
 		}
-		ASSERT_EQUAL("1 000002001-05-30 12:59:59.999 (22) (2)",index.tIndex.toStringJulianTAI());
+		ASSERT_EQUAL("1 000002001-05-30 12:59:59.999 (22 22) (2)",index.tIndex.toStringJulianTAI());
 
 		double jd1 = jd0 + 1.0;
 		index.fromJulianDayTAI(jd1);
 		if(printFlag) {
 			cout << index.tIndex.toStringJulianTAI() << endl << flush;
 		}
-		ASSERT_EQUAL("1 000002001-05-31 12:59:59.999 (22) (2)",index.tIndex.toStringJulianTAI());
+		ASSERT_EQUAL("1 000002001-05-31 12:59:59.999 (22 22) (2)",index.tIndex.toStringJulianTAI());
 
 		jd1 = -1;
 		jd1 = index.toJulianDayTAI();
@@ -621,7 +624,7 @@ void STARE_test() {
 			<< jd0 << endl << flush;
 			cout << index.tIndex.toStringJulianTAI() << endl << flush;
 		}
-		ASSERT_EQUAL("1 000002001-05-31 12:59:59.999 (22) (2)",index.tIndex.toStringJulianTAI());
+		ASSERT_EQUAL("1 000002001-05-31 12:59:59.999 (22 22) (2)",index.tIndex.toStringJulianTAI());
 
 		if(printFlag) {
 			cout << "cmp-0.5:   " << cmpTemporalAtResolution3(id0,id1,0.5) << endl << flush;
