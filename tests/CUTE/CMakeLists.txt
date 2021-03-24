@@ -11,6 +11,7 @@ set (
   SpatialRange_test.cpp
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
+  SpatioTemporalUsage_test.cpp
   STARE_test.cpp
   STARE_Covers_test.cpp
   TemporalIndex_test.cpp

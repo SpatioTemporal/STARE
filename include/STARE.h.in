@@ -197,6 +197,7 @@ void STARE_test();
 void STARE_Covers_test();
 void STARE_Covers_Old_test();
 void AdaptSpatialResolutionEstimates_test();    // Added jhrg 4/20/20
+void SpatioTemporalUsage_test();
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19
 extern "C" const char *STARE_version();

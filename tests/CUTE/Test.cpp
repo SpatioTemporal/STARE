@@ -1,3 +1,12 @@
+/*
+ * Test.cpp
+ *
+ *  Created:    ~October 2015
+ *      Author: Michael Lee Rilee
+ *
+ *  Copyright (C) 2015-2021 Rilee Systems Technologies LLC
+ *
+ */
 
 #include "Test.h"
 
@@ -4345,6 +4354,8 @@ void runSuite(int argc, char const *argv[]){
 
     s.push_back(CUTE(SpatialPolygon_test));
     s.push_back(CUTE(SpatialRange_test));
+
+    s.push_back(CUTE(SpatioTemporalUsage_test));
 
 	//	s.push_back(CUTE(testRange));
 

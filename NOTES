@@ -1,38 +1,38 @@
 
 
-2021-03-23 Version 0.17.0
+* 2021-03-23 Version 0.17.0
 
 Added two sided temporal resolution.
 
-2021-03-19 Version 0.16.5
+* 2021-03-19 Version 0.16.5
 
 Enhanced expandIntervals and added expandIntervalsMultiRes. The previous version looked only at the resolution of an interval and then expanded accordingly. Thus if one started an interval with a small trixel larger ones later in the sequence would be split using the finer resolution, even when multi-resolution was desired. expandIntervalsMultiRes is a revision of similar code in HtmRangeMultiResolution::compress, which was an improvement on HtmRangeMultiResolution::defrag. expandIntervalsMultiRes attempts to coalesce as many trixels as possible using a rolled-out recursion scheme. The previous API method, expandIntervals retains the older non-multi-resolution behavior.
 
-2021-03-08 Version 0.16.4
+* 2021-03-08 Version 0.16.4
 
 Various fixes to SpatialRange and HtmRangeMultiLevel, specifically, defrag and compress.
 
-2020-10-09 Version 0.16.3
+* 2020-10-09 Version 0.16.3
 
 Build couldn't find gcc/g++ on conda-forge installation. Removed pystare references.
 
-2020-09-13 Version 0.16.2
+* 2020-09-13 Version 0.16.2
 
 Fix test/CUTE/tests segfault arising when STARE_SRC_HOME not set.
 
-2020-09-12 Version 0.16.1
+* 2020-09-12 Version 0.16.1
 
 Add default constructor to LatLonDegrees64.
 
-2020-09-01 Version 0.16.0
+* 2020-09-01 Version 0.16.0
 
 Add SpatialRange::intersects that checks if a single spatial index value is contained therein. Performance scaling is not as expected.
 
-2020-05-30 Version 0.15.6
+* 2020-05-30 Version 0.15.6
 
 Added an in-place adaptive resolution function for STARE spatial index value arrays.
 
-2020-05-30 Version 0.15.5
+* 2020-05-30 Version 0.15.5
 
 Nonconvex now produces the complement when the input polygon is CW.
 Needs more testing.
@@ -40,13 +40,13 @@ Needs more testing.
 Fixed subtle error in nonconvex that dropped trixels when not enough
 of the pixel intersected the ROI.
 
-2020-05-28 Version 0.15.4
+* 2020-05-28 Version 0.15.4
 
 Removing polygon parity seems to introduce other ambiguities. Now we
 require that polygons processed by non-convex hull be counter-clockwise,
 i.e. areal normal pointing outward from sphere (right-hand sense).
 
-2020-05-27 Version 0.15.3
+* 2020-05-27 Version 0.15.3
 
 Removed restriction on polygon parity.
 

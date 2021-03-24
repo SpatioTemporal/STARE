@@ -8,7 +8,10 @@ This release is being made in the hope it may be useful for early users wishing 
 
 An encoding for high-performance search and subsetting of geospatial data.
 
-Copyrights and licenses as asserted in individual files. Legacy HTM distributed under GNU/GPLv2.
+Copyrights and licenses as asserted in individual files. Legacy HTM
+distributed under GNU/GPLv2.
+
+Default copyrights are asserted.
 
 Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 
@@ -75,15 +78,16 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 | BITS |  WIDTH |  USAGE |
 |:-----:|:--------:|:--------|
 |63      |     | Set by the sign (2-s complement), also called the Before/After bit|
-|44 - 62 | 19  | Year (0..\*)|
-|40 - 43 |  4  | Month (0..13)|
-|38 - 39 |  2  | Week (0..4)|
-|35 - 37 |  3  | Day (0..7)|
-|30 - 34 |  5  | Hour (0..23)|
-|24 - 29 |  6  | Minute (0..59)|
-|18 - 23 |  6  | Second (0..59)|
-| 8 - 17 | 10  | Millisecond (0..999)|
-| 2 -  7 |  6  | Resolution indicates a time scale associated with a bit position\*\*|
+|50 - 62 | 13  | Year (0..\*)|
+|46 - 49 |  4  | Month (0..13)|
+|44 - 45 |  2  | Week (0..4)|
+|41 - 43 |  3  | Day (0..7)|
+|36 - 40 |  5  | Hour (0..23)|
+|30 - 35 |  6  | Minute (0..59)|
+|24 - 29 |  6  | Second (0..59)|
+|14 - 23 | 10  | Millisecond (0..999)|
+| 8 - 13 |  6  | Forward Resolution indicates a time scale associated with a bit position\*\*|
+| 2 -  7 |  6  | Reverse Resolution indicates a time scale associated with a bit position\*\*|
 | 0 -  1 |  2  | Type indicator (default = 2)|
 
 \*The default STARE temporal index can range between year -262143 and 262143 in the
@@ -94,12 +98,13 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 \*\*A resolution of zero corresponds to the coarsest bit, e.g. the top of the
    year field (bit position 62). A resolution of 54 corresponds to the finest
    resolution, 1 ms (bit position 8). These are for the default encoding,
-   type = 2.
+   type = 1. Forward and reverse resolution indicate direction in time
+   away from encoded temporal position.
 
 ---
 # HISTORY
 
-2018-2020 Development supported by NASA/ACCESS-17.
+2018-2021 Development supported by NASA/ACCESS-17.
 
 The spatial indexing is a fork of version 2 of the Hierarchical Triangular Mesh (HTM) developed for the Sloan Digital Sky Survey.
 

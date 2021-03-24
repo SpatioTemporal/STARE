@@ -4,7 +4,7 @@
  *  The API to the STARE index functions.
  *
  *  Created on: Jan 31, 2019
- *      Author: mrilee
+ *      Author: Michael Lee Rilee
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
