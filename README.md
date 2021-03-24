@@ -90,7 +90,7 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
 | 2 -  7 |  6  | Reverse Resolution indicates a time scale associated with a bit position\*\*|
 | 0 -  1 |  2  | Type indicator (default = 2)|
 
-\*The default STARE temporal index can range between year -262143 and 262143 in the
+\*The default STARE temporal index can range between year -8191 and 8191 in the
    internal native format. Year zero and negative years are set by setting
    a *positive* number in the year field and setting the Before/After bit to 0.
    Year=0 and Before/After=1 is an error. See TemporalIndex for more detail.
