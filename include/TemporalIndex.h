@@ -738,6 +738,9 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
+/**
+   Add two TemporalIndex values by adding their Int64Milliseconds representations.
+ */
 // inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
@@ -776,6 +779,9 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
+/**
+   Add two TemporalIndex values by adding their Julian TAI representations.
+ */
 // inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {

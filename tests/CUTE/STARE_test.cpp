@@ -668,17 +668,17 @@ void STARE_test() {
 		cout << "tI: jdTAI: " << index.toJulianDayTAI() << endl << flush;
 		cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
 		// }
-		time_t datetime = 0;
-		int forward_resolution = 10, reverse_resolution = 10;
-		int tValType       = 1;
-		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
+		// time_t datetime = 0;
+		// int forward_resolution = 10, reverse_resolution = 10;
+		// int tValType       = 1;
+		// STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
     /* For later use?
 		// int resolution = 10;
 		// int tValType       = 2;
 		// STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
     */
 		// if(globalPrintFlag) {
-		cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
+		// cout << endl << "time_t datetime=0 Set through STARE." << endl << flush;
 		cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
 		cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
 		// cout << "tI: utcjd: " << index.tIndex. ;
@@ -726,15 +726,15 @@ void STARE_test() {
 			cout << "tI: jdUTC: " << index.toJulianDayUTC() << endl << flush;
 			// }
 			/* For later use? */
-			time_t datetime = (30*365+7)*86400;
-			int forward_resolution = 10, reverse_resolution = 10;
-			int tValType       = 1;
-			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
+			// time_t datetime = (30*365+7)*86400;
+			// int forward_resolution = 10, reverse_resolution = 10;
+			// int tValType       = 1;
+      // 		STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, forward_resolution, reverse_resolution, tValType);
       //                        int resolution = 10;
       //			int tValType       = 2;
       //			STARE_ArrayIndexTemporalValue tVal = index.ValueFromUTC(datetime, resolution, tValType);
 			// if(globalPrintFlag) {
-			cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
+			// cout << endl << "time_t datetime=2000 Set through STARE." << endl << flush;
 			cout << "tI: jd:    " << index.tIndex.toStringJulianTAI() << endl << flush;
 			cout << "tI: nd:    " << index.tIndex.stringInNativeDate() << endl << flush;
 			// cout << "tI: utcjd: " << index.tIndex. ;

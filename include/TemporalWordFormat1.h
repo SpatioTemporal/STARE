@@ -104,6 +104,12 @@ public:
 		return bitFieldMap.at(bitFields[id]->getName())->getValue();
 	}
 
+	/**
+	   Increment the index value at the id'th bitfield by delta. Carry if the id'th maxvalue is exceeded.
+
+	   Note: Not verified, e.g., if carry exceeds 'one?'
+
+	 */
 	void incrementAtId(int64_t id,int64_t delta) {
 		if( (id < pos_CoarsestResolutionLevel)
 			|| (pos_FinestResolutionLevel < id) )
