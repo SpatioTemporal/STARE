@@ -53,8 +53,9 @@ public:
 void SpatialRange_test () {
 
 #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
-  
-  { // pystare bug#27
+
+  if(false)
+  { // pystare bug#27-1
 
 #if 0
     STARE_SpatialIntervals sids = {
@@ -195,6 +196,46 @@ void SpatialRange_test () {
       }
   }
 
+  
+  { // pystare bug#27-2
+
+    cout << "-----------------" << endl << flush;
+    
+    STARE_SpatialIntervals compressed = {
+      0x22ff8a000000000b,
+      0x22ff8a3fffffffff,
+      0x22ff8a600000000b,
+      0x22ff8affffffffff
+    };
+#if 0
+    for(int k=0; k<compressed.size(); ++k) {
+      cout << "exp1 "
+	   << FMTX(compressed[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals expanded = expandIntervalsMultiRes(compressed,-1,true);
+#if 0    
+    for(int k=0; k<expanded.size(); ++k) {
+      cout << "exp2 "
+	   << FMTX(expanded[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    STARE_SpatialIntervals expanded_expected = { // Abuse of the type...
+      0x22ff8a000000000b,
+      0x22ff8a200000000b,
+      0x22ff8a600000000b,
+      0x22ff8a800000000a
+    };
+    for(int k=0; k<expanded.size(); ++k) {
+      ASSERT_EQUAL(expanded_expected[k],expanded[k]);
+    }
+  }
 
   {
     /*
