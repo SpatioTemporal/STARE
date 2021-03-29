@@ -52,6 +52,191 @@ public:
 
 void SpatialRange_test () {
 
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+
+  if(false)
+  { // pystare bug#27-1
+
+#if 0
+    STARE_SpatialIntervals sids = {
+      2521898143583305738, 2521997099629805578, 2521989952804225034,
+      2521991052315852810, 2521893745536794634, 2521897044071677962,
+      2521897593827491850, 2521898693339119626, 2521899792850747402,
+      2521991602071666698, 2521889347490283530, 2521899243094933514,
+      2521900892362375178, 2521901442118189066, 2521901991874002954,
+      2521903091385630730, 2521887698222841866, 2521886048955400202,
+      2521992701583294474, 2521902541629816842, 2521906389920514058,
+      2521890447001911306, 2521993251339108362, 2521886598711214090,
+      2521908588943769610, 2521892646025166858, 2521894295292608522,
+      2521989403048411146 };
+#endif
+
+    STARE_SpatialIntervals sids = {
+      0x22ff98a00000000b,
+      0x22ff98e00000000b,
+      0x22ff96a00000000b,
+      0x22ff96c00000000b,
+      0x22ff96e00000000b,
+      0x22ffea400000000b,
+      0x22ffeb000000000b,
+      0x22ffeb200000000b,
+      0x22ffeb400000000b,
+      0x22ffef000000000b,
+      0x22ff8d200000000b,
+      0x22ffea200000000b,
+      0x22ff99200000000b,
+      0x22ff9ea00000000b,
+      0x22ff91a00000000b,
+      0x22ff98200000000b,
+      0x22ffe8800000000b,
+      0x22ffe8e00000000b,
+      0x22ffe9c00000000b,
+      0x22ffef200000000b,
+      0x22ffef600000000b,
+      0x22ff95400000000b,
+      0x22ff95600000000b,
+      0x22ff95800000000b,
+      0x22ff8d600000000b,
+      0x22ff99800000000b,
+      0x22ff98400000000b,
+      0x22ff94600000000b,
+      0x22ff98c00000000b,
+      0x22ff94c00000000b,
+      0x22ff95c00000000b,
+      0x22ffe8c00000000b,
+      0x22ff8d400000000b,
+      0x22ff97c00000000b,
+      0x22ff8bc00000000b,
+      0x22ff99400000000b,
+      0x22ff90400000000b,
+      0x22ff91400000000b,
+      0x22ff8e400000000b,
+      0x22ffebc00000000b,
+      0x22ff97e00000000b,
+      0x22ff98600000000b,
+      0x22ff99600000000b,
+      0x22ff94e00000000b,
+      0x22ff8e600000000b,
+      0x22ff8a600000000b,
+      0x22ff8be00000000b,
+      0x22ff95a00000000b,
+      0x22ff99a00000000b,
+      0x22ff94000000000b,
+      0x22ff99c00000000b,
+      0x22ff95e00000000b,
+      0x22ff99e00000000b,
+      0x22ff8a000000000b,
+      0x22ffea000000000b,
+      0x22ff96200000000b,
+      0x22ff8e200000000b,
+      0x22ffea600000000b,
+      0x22ff8ac00000000b,
+      0x22ff8ae00000000b,
+      0x22ff8d000000000b,
+      0x22ff8e000000000b,
+      0x22ff8aa00000000b,
+      0x22ff91000000000b,
+      0x22ff91200000000b,
+      0x22ff91600000000b,
+      0x22ff94200000000b,
+      0x22ff94a00000000b,
+      0x22ff96800000000b,
+      0x22ff8b800000000b,
+      0x22ff97800000000b,
+      0x22ff98000000000b,
+      0x22ff9c800000000b,
+      0x22ff9e800000000b,
+      0x22ff98800000000b,
+      0x22ff99000000000b,
+      0x22ff9ee00000000b,
+      0x22ffe8200000000b,
+      0x22ff94400000000b,
+      0x22ff95000000000b,
+      0x22ff95200000000b,
+      0x22ff94800000000b,
+      0x22ffeb600000000b,
+      0x22ffeb800000000b,
+      0x22ffeba00000000b,
+      0x22ffebe00000000b,
+      0x22ff8a800000000b,
+      0x22ff8a200000000b
+    };
+  
+    SpatialRange r(sids);
+
+    r.compress();
+
+#if 1
+      cout << "\npystare-bug#27" << flush;
+      cout << "\ncompress\n" << flush;
+      cout << "***r.dump()***" << endl << flush;
+      r.dump();
+      cout << "-----------------" << endl << flush;
+#endif
+
+      STARE_SpatialIntervals sis = r.toSpatialIntervals();
+      
+      {
+	for(int k=0; k<sis.size(); ++k) {
+	  cout << "sis "
+	       << FMTX(sis[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+      
+      {
+	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,true);
+	for(int k=0; k<expanded.size(); ++k) {
+	  cout << "exp1 "
+	       << FMTX(expanded[k])
+	       << endl << flush;
+	}
+	cout << "-----------------" << endl << flush;
+      }
+  }
+
+  
+  { // pystare bug#27-2
+
+    cout << "-----------------" << endl << flush;
+    
+    STARE_SpatialIntervals compressed = {
+      0x22ff8a000000000b,
+      0x22ff8a3fffffffff,
+      0x22ff8a600000000b,
+      0x22ff8affffffffff
+    };
+#if 0
+    for(int k=0; k<compressed.size(); ++k) {
+      cout << "exp1 "
+	   << FMTX(compressed[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals expanded = expandIntervalsMultiRes(compressed,-1,true);
+#if 0    
+    for(int k=0; k<expanded.size(); ++k) {
+      cout << "exp2 "
+	   << FMTX(expanded[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    STARE_SpatialIntervals expanded_expected = { // Abuse of the type...
+      0x22ff8a000000000b,
+      0x22ff8a200000000b,
+      0x22ff8a600000000b,
+      0x22ff8a800000000a
+    };
+    for(int k=0; k<expanded.size(); ++k) {
+      ASSERT_EQUAL(expanded_expected[k],expanded[k]);
+    }
+  }
+
   {
     /*
      resolution = 6
@@ -69,7 +254,7 @@ void SpatialRange_test () {
     STARE index;
 
     {
-#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec      
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
       STARE_SpatialIntervals sis = {
 	0x3bd7800000000006,  0x3bd9ffffffffffff
@@ -968,6 +1153,7 @@ void SpatialRange_test () {
 
     // FAIL();
   }
+
 
 #undef SIVOUT
 #undef SISOUT

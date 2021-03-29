@@ -1344,26 +1344,30 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 
 	while( working_interval.size() > 0 ) {
 #if 0
-	  cout << "working on : " << FMTX(working_interval[0]) << " " << FMTX(working_interval[1]) << endl << flush;
+	  cout << "\n---\nworking on : " << FMTX(working_interval[0]) << " " << FMTX(working_interval[1]) << endl << flush;
 #endif
 
 	  // Start loop
 	  lj.setIdFromSciDBLeftJustifiedFormat(working_interval[0]); // Lower bound of interval
-	  uint64 bareLo           = lj.bareId();
-	  uint32 levelLo          = lj.getLevel();
-	  uint32 triangleNumberLo = lj.getLocalTriangleNumber();
+	  int64 bareLo           = lj.bareId();
+	  int64 levelLo          = lj.getLevel();
+	  int64 triangleNumberLo = lj.getLocalTriangleNumber();
 
 	  lj.setIdFromSciDBLeftJustifiedFormat(working_interval[1]); // Terminator
 	  EmbeddedLevelNameEncoding lj_hi_last_value = lj.atLevel(levelLo);
-	  uint64 bareHi = lj_hi_last_value.bareId();
-	  uint64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
+	  int64 bareHi = lj_hi_last_value.bareId();
+	  int64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
       
 	  // Find the first tNum 0.
-	  uint64 delta_to_first = (4 - triangleNumberLo) % 4;
-	  uint64 number_of_full_parents = (1+delta-delta_to_first)/4;
+	  int64 delta_to_first = (4 - triangleNumberLo) % 4; // Note that the delta_to_first may exceed number in interval.
+	  int64 number_of_full_parents = (1+delta-delta_to_first)/4;
 	  // uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
 #if 0
-	  cout << "delta_to_first   " << delta_to_first << endl << flush;
+	  cout << "bareLo, bareHi         " << bareLo << " " << bareHi << endl << flush;
+	  cout << "bareLo, bareHi         " << hex << bareLo << " " << bareHi << dec << endl << flush;
+	  cout << "triangleNumberLo       " << triangleNumberLo << endl << flush;
+	  cout << "delta_to_first         " << delta_to_first << endl << flush;
+	  cout << "number_of_full_parents " << number_of_full_parents << endl << flush;
 #endif
 	  uint64 one_mask_to_level, one_at_level;
 	  STARE_SpatialIntervals expandOne;
