@@ -30,7 +30,7 @@ public:
 	int64_t maxCoResolutionLevelValue =  9;  // Would be const in a perfect universe.
 	int64_t minCoResolutionLevelValue = -1; // Corresponds to "Ma"
 	// int64_t resolutionLevelConstraint =  7;
-	int64_t nonDataLevels             =  3; // Was 2 when there was no type.
+	// Not needed. int64_t nonDataLevels             =  3; // Was 2 when there was no type.
 
 	TemporalWordFormat1(); // Overload this
 	virtual ~TemporalWordFormat1();

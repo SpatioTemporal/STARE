@@ -442,22 +442,33 @@ int64_t TemporalIndex::scidbTemporalIndex() {
 // #undef MASK_AND_SHIFT_RESOLUTION
 
 
+/**
+   Return bit offset (bit location in word) for the finest resolution.
+ */
 int64_t TemporalIndex::bitOffsetFinest() const {
 	int64_t offsetBottom = data.bitFields[data.pos_FinestResolutionLevel]->getOffset();
 	return offsetBottom;
 }
 
+/**
+   Return bit offset (bit location in word) for the coarsest resolution.
+ */
 int64_t TemporalIndex::bitOffsetCoarsest() const {
 	int64_t offsetTop =
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getOffset() +
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getWidth()-1;
 	return offsetTop;
 }
-
+/**
+   Return the bit offset (location) of a given resolution.
+ */
 int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) const {
 	return bitOffsetCoarsest() - resolution;
 }
 
+/**
+   Return the id of the bitfield associated with a resolution level.
+ */
 int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
     // Note: int offsetTop = bitOffsetCoarsest(); // If needed.
 	int offsetResolution = bitOffsetResolution(resolution);
@@ -500,6 +511,7 @@ int64_t TemporalIndex::scidbTerminator() {
 
 	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
 	tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
+	tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask()); // Terminator doesn't care about the reverse resolution.
 
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
@@ -508,6 +520,53 @@ int64_t TemporalIndex::scidbTerminator() {
 	int64_t t1    = t0 + delta;
 	tmpIndex.fromInt64Milliseconds(t1);
 	int64_t idx_ = tmpIndex.scidbTemporalIndex();
+	return idx_;
+}
+
+/**
+   Use native milliseconds to set the lower bound from the temporal index. Note this doesn't respect leap year or second corrections.
+ */
+int64_t TemporalIndex::scidbLowerBound() {
+	//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
+	TemporalIndex tmpIndex(this->scidbTemporalIndex());
+	int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
+
+	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+	tmpIndex.set_forward_resolution(0);
+	tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask()); // Terminator doesn't care about the reverse resolution.
+
+	//////////////////////////////////
+	// Let's add an amount corresponding to the resolution.
+	int64_t delta = -tmpIndex.millisecondsAtResolution(reverse_resolution);
+	int64_t t0    = tmpIndex.toInt64Milliseconds();
+	int64_t t1    = t0 + delta;
+	tmpIndex.fromInt64Milliseconds(t1);
+	int64_t idx_ = tmpIndex.scidbTemporalIndex();
+	return idx_;
+}
+
+
+/**
+   Use IAU TAI to set the lower bound of an interval. It is the converse of a terminator.
+
+   The calculation is similar to that for scidbTerminator(), except using IAU standards (ERFA), instead
+   of the native encoding.
+
+ */
+int64_t TemporalIndex::scidbLowerBoundJulianTAI() {
+	int64_t idx_ = 0;
+	TemporalIndex tmpIndex(this->scidbTemporalIndex());
+	int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
+
+	// TODO What should the forward_resolution be for a lower_bound?
+	
+	//////////////////////////////////
+	// Let's add an amount corresponding to the resolution.
+	double delta = -tmpIndex.daysAtResolution(reverse_resolution);
+	double d1, d2;
+	tmpIndex.toJulianTAI(d1,d2);
+	tmpIndex.fromJulianTAI(d1,d2+delta);
+	idx_ = tmpIndex.scidbTemporalIndex();
 	return idx_;
 }
 
@@ -526,6 +585,7 @@ int64_t TemporalIndex::scidbTerminatorJulianTAI() {
 
 	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
 	tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
+	tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask());
 
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
@@ -544,6 +604,7 @@ bool TemporalIndex::scidbTerminatorp() {
 	int64_t forward_resolution = this->data.getValue("forward_resolution");
 	// return forward_resolution == 63;
 	return forward_resolution == this->data.get("forward_resolution")->getMask();
+	// reverse_resolution is also set to its mask.
 }
 
 TemporalIndex& TemporalIndex::set_zero() {
@@ -925,6 +986,76 @@ int64_t scidbMaximumTemporalIndex() {
 	tIndex.setZero().setEOY(1,8192/2).set_type(1);
 	// tIndex.setZero().setEOY(1,262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
+}
+
+
+/**
+   Set bits at finer resolutions to zero.
+
+   Note, calling with res=48 when max_res=48 has no effect.
+ */
+int64_t scidbClearBitsFinerThanResolution(int64_t ti_value, int resolution) {
+  // throw SpatialFailure("TemporalIndex.scidbClearBitsFinerThanResolution::NotImplemented!!");
+  // 1. Get ti_value type and find finest bit
+  // 2. Make mask
+  // 3. And it into the result
+
+  TemporalIndex tIndex = TemporalIndex(ti_value);
+  
+  // int64_t offsetBottom = tIndex.data.bitFields[tIndex.data.pos_FinestResolutionLevel]->getOffset();
+  int64_t offsetBottom = tIndex.bitOffsetFinest();
+  int64_t offsetTop    = tIndex.bitOffsetResolution(resolution);
+
+  int64_t mask = ~(((1ll << offsetTop)-1) & ~((1ll << offsetBottom)-1));
+  return ti_value & mask;
+}
+
+/**
+   Set bits at finer resolutions to one.
+
+   Setting the bits corresponding to finer resolutions yields a
+   "terminator" of sorts with the bits corresponding to ~1ms less than
+   the nominal scale of the resolution. I.e. if a resolution
+   corresponds to 2 days, then setting the bits finer than that
+   corresponds to 2 days minus ~1ms, or whatever is the finest
+   temporal increments.
+
+   This routine might be helpful in constructing terminators to
+   intervals.  Terminators are index values that are >= to any encoded
+   time in the preceding interval, but < any time in the next
+   interval.
+
+   Note, calling with res=48 when max_res=48 has no effect.
+ */
+int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution) {
+  // throw SpatialFailure("TemporalIndex.scidbSetBitsFinerThanResolution::NotImplemented!!");
+  // 1. Get ti_value type and find finest bit
+  // 2. Make mask
+  // 3. Or it into the result
+
+  TemporalIndex tIndex = TemporalIndex(ti_value);
+  
+  // int64_t offsetBottom = tIndex.data.bitFields[tIndex.data.pos_FinestResolutionLevel]->getOffset();
+  int64_t offsetBottom = tIndex.bitOffsetFinest();
+  int64_t offsetTop    = tIndex.bitOffsetResolution(resolution);
+
+  int64_t mask = (((1ll << offsetTop)-1) & ~((1ll << offsetBottom)-1));
+  return ti_value | mask;
+}
+/**
+   The same as scidbSetBitsFinerThanResolution, except limited to valid temporal scales.
+ */
+int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution) {
+  int64_t idx = scidbSetBitsFinerThanResolution(ti_value,resolution);
+  TemporalIndex tIndex(idx);
+  int iPos = tIndex.data.pos_FinestResolutionLevel;
+  while( iPos >= tIndex.data.pos_CoarsestResolutionLevel ) {
+    if( tIndex.data.getValueAtId(iPos) > tIndex.data.getBitFieldAtId(iPos)->getMaxValue() ) {
+      tIndex.data.getBitFieldAtId(iPos)->setValue(tIndex.data.getBitFieldAtId(iPos)->getMaxValue());
+    }
+    --iPos;
+  }
+  return tIndex.scidbTemporalIndex();
 }
 
 // } /* namespace std */

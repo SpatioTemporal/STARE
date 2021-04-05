@@ -11,11 +11,11 @@
 
 // #define TAG(X) cout << dec << X << hex << endl << flush;
 // #define TAGNC(X) cout << dec << X << hex << flush;
-// #define ENDL(out) if(globalPrintFlag) { out << endl << flush; }
+#define ENDL(out) if(globalPrintFlag) { out << endl << flush; }
 // #define ENDL(out) { out << endl << flush; }
 #define TAG(x) {}
 #define TAGNC(x) {}
-#define ENDL(out) {}
+// #define ENDL(out) {}
 
 void TemporalIndex_test() {
 
@@ -815,9 +815,9 @@ void TemporalIndex_test() {
 	}
 
 	ASSERT_EQUALM("tI3:  idx:",0x0004000000000a29,tIndex3.scidbTemporalIndex());
-	ASSERT_EQUALM("tI3: term:",0x0014000000003f29,tIndex3.scidbTerminator());
+	ASSERT_EQUALM("tI3: term:",0x0014000000003ffd,tIndex3.scidbTerminator());
 	ASSERT_EQUAL(0, tIndex3.scidbTerminatorp());
-	ASSERT_EQUALM("tI4: term:",0x0014000000003f29,tIndex4.scidbTerminator());
+	ASSERT_EQUALM("tI4: term:",0x0014000000003ffd,tIndex4.scidbTerminator());
 	ASSERT_EQUAL(1,tIndex4.scidbTerminatorp());
 	
 	/*
@@ -1676,8 +1676,8 @@ void TemporalIndex_test() {
 		ASSERT_EQUAL(2000,year);
 		ASSERT_EQUAL(31622399999,milliseconds);
 		ASSERT_EQUAL(2252718451287769089,tIndex.scidbTemporalIndex());
-		ASSERT_EQUAL(6864613376924450561,tIndex.scidbTerminator()); // 0x5f44017efbf9ff01
-		ASSERT_EQUAL(6861488564878311169,tIndex.scidbTerminatorJulianTAI()); // 0x5f38e77efbf9ff01
+		ASSERT_EQUAL(6864613376924450813,tIndex.scidbTerminator()); // 0x5f44017efbf9fffd
+		ASSERT_EQUAL(6861488564878311421,tIndex.scidbTerminatorJulianTAI()); // 0x5f38e77efbf9fffd
 		ASSERT_EQUAL(2001.0027397259958,tIndex.toNativeYear()); // 
 		
 		/*
@@ -2081,6 +2081,131 @@ max resolution ms:    1
 		*/
 	}
 #endif
+
+	{
+	  TemporalIndex tIndex;
+	  int64_t forward_resolution = 48;
+	  int64_t reverse_resolution = 48;
+
+	  ENDL(cout);
+	  cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
+
+	  tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution);
+	  // tIndex.setZero().setEOY(1,2020);
+
+	  globalPrintFlag = true;
+
+	  ENDL(cout);
+
+	  int resolution = 20; // 2 days
+
+	  int64_t tv0 = tIndex.scidbTemporalIndex();
+	  int64_t tv1 = scidbClearBitsFinerThanResolution(tv0,resolution);
+	  int64_t tv2 = scidbSetBitsFinerThanResolution(tv0,resolution);
+
+	  cout << "resolution ms " << tIndex.millisecondsAtResolution(resolution) << endl << flush;
+	  cout << "resolution dy " << tIndex.daysAtResolution(resolution) << endl << flush;	  
+
+	  FMT("tv0 ",tv0); ENDL(cout);
+	  FMT("tv1 ",tv1); ENDL(cout);
+	  FMT("tv2 ",tv2); ENDL(cout);
+
+	  ENDL(cout);
+
+	  tIndex.fromTemporalIndexValue(tv0);
+	  INDEX_OUT("tv0 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tv1);
+	  INDEX_OUT("tv1 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tv2);
+	  INDEX_OUT("tv2 ",tIndex);
+	  
+	  globalPrintFlag = false;
+	}
+
+	{
+	  TemporalIndex tIndex;
+	  int64_t forward_resolution = 48;
+	  int64_t reverse_resolution = 48;
+
+	  ENDL(cout);
+	  cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
+
+	  globalPrintFlag = true;
+
+	  ENDL(cout);
+
+	  int resolution = 21; // 1 day
+	  // int resolution = 48; // 1 ms // No effect
+	  // int resolution = 47; // 2 ms
+	  // int resolution = 46; // 4 ms
+
+	  reverse_resolution = resolution; forward_resolution = resolution;
+	  tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution);
+	  // tIndex.setZero().setEOY(1,2020);
+
+	  int64_t tvl = tIndex.scidbLowerBound();
+	  int64_t tv0 = tIndex.scidbTemporalIndex();
+	  int64_t tv1 = scidbClearBitsFinerThanResolution(tv0,resolution);
+	  int64_t tv2 = scidbSetBitsFinerThanResolution(tv0,resolution);
+	  int64_t tv3 = scidbSetBitsFinerThanResolutionLimited(tv0,resolution);
+	  int64_t tvt = tIndex.scidbTerminator();
+
+	  cout << "resolution ms " << tIndex.millisecondsAtResolution(resolution) << endl << flush;
+	  cout << "resolution dy " << tIndex.daysAtResolution(resolution) << endl << flush;	  
+	  
+	  FMT("tvl ",tvl); ENDL(cout);
+	  FMT("tv0 ",tv0); ENDL(cout);
+	  FMT("tv1 ",tv1); ENDL(cout);
+	  FMT("tv2 ",tv2); ENDL(cout);
+	  FMT("tv3 ",tv3); ENDL(cout);
+	  FMT("tvt ",tvt); ENDL(cout);
+
+	  ENDL(cout);
+
+	  tIndex.fromTemporalIndexValue(tvl);
+	  INDEX_OUT("tvl ",tIndex);
+	  
+	  tIndex.fromTemporalIndexValue(tv0);
+	  INDEX_OUT("tv0 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tv1);
+	  INDEX_OUT("tv1 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tv2);
+	  INDEX_OUT("tv2 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tv3);
+	  INDEX_OUT("tv3 ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tvt);
+	  INDEX_OUT("tvt ",tIndex);
+	  
+	  ENDL(cout);
+
+	  tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution);	  
+	  int64_t tvl_tai = tIndex.scidbLowerBoundJulianTAI();
+	  int64_t tvt_tai = tIndex.scidbTerminatorJulianTAI();
+
+	  tIndex.fromTemporalIndexValue(tvl_tai);
+	  INDEX_OUT("tla ",tIndex);
+
+	  tIndex.fromTemporalIndexValue(tvt_tai);
+	  INDEX_OUT("tta ",tIndex);
+
+	  ENDL(cout);
+	  
+
+	  tIndex.checkBitFormat();
+
+	  int64_t offsetBottom = tIndex.bitOffsetFinest();
+	  int64_t offsetTop    = tIndex.bitOffsetResolution(resolution);
+	  cout << "offsetBottom " << offsetBottom << endl << flush;
+	  cout << "offsetTop    " << offsetTop << endl << flush;
+	  
+	  globalPrintFlag = false;
+	}
 
 //	if( true ) {
 //

@@ -40,7 +40,7 @@ public:
 	 */
 	TemporalWordFormat() {
 		// resolutionLevelConstraint =  7; // Counts the number of levels, including
-		nonDataLevels             =  3;
+		// Not needed. nonDataLevels             =  3;
 
 		// maxCoResolutionLevelValue = 9; // Is actually more than we count in resLevel.
 		int64_t offset_base = 64;
@@ -551,6 +551,8 @@ public:
 
 	int64_t scidbTemporalIndex();
 	int64_t scidbTerminator();
+	int64_t scidbLowerBound();
+	int64_t scidbLowerBoundJulianTAI();
 	int64_t scidbTerminatorJulianTAI();
 	bool    scidbTerminatorp();
 
@@ -868,6 +870,21 @@ int64_t scidbMinimumTemporalIndex();
 int64_t scidbMaximumTemporalIndex();
 
 int64_t millisecondsInYear(int64_t CE, int64_t year);
+
+/**
+   Set bits at finer resolutions to zero.
+ */
+int64_t scidbClearBitsFinerThanResolution(int64_t ti_value, int resolution);
+
+/**
+   Set bits at finer resolutions to one.
+ */
+int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution);
+
+/**
+   Set bits at finer resolutions to one, but limit values to calendrical maxes. I.e. 60 seconds per minute, not 63.
+ */
+int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution);
 
 // } /* namespace std */
 
