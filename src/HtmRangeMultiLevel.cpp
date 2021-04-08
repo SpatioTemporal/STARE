@@ -2112,17 +2112,16 @@ int HtmRangeMultiLevel::verify()
   return flag_error;
 }
 
+#undef DIAG
 #undef DIAGOUTFLUSH
 #undef DIAGOUT
 
 // #define DIAG
-
 #define DIAGOUTFLUSH(x)
-// #define DIAGOUTFLUSH(x) {cout << x << flush;}
-
 #define DIAGOUT(x)
-// #define DIAGOUT(x) {cout << x << endl << flush;}
 
+// #define DIAGOUTFLUSH(x) {cout << x << flush;}
+// #define DIAGOUT(x) {cout << x << endl << flush;}
 
 #define FMTX(x) setw(16) << setfill('0') << hex << x << dec
 
@@ -2220,6 +2219,7 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
             DIAGOUT("HRML::CP 950 lhn  " << FMTX(lo_next) << " " << FMTX(hi_next));
             //            DIAGOUT("hrml::CP 951");
             DIAGOUT("HRML::CP 960my_lh " << FMTX(my_los->getkey()) << " " << FMTX(my_his->getkey()));
+            DIAGOUT("HRML::CP 965 insert lo0,hi1: " << FMTX(lo0) << " " << FMTX(hi1));
             
 
             // my_los->insert(my_los->getkey(),hi_next); Should be the following...
@@ -2325,44 +2325,62 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
           uint32 level_lo_last = level0;
         
           // Make the changes
-          DIAGOUT("Making changes");
-          
-          if( lo_cut != lo0 ) {
-            // old Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
-            // Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level_lo_cut); // ???
-            Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level0); // ???
+          DIAGOUT("\nMaking changes");
 
-            DIAGOUT("CP: 5000 l0..h0ctm     " << FMTX(lo0)      << " " << FMTX(hi0_cutm) << " h0ctm..tag " << FMTX(hi0_cutm) << " " << FMTX(4000000001));
-            
-            my_los->insert(lo0,hi0_cutm);         // Change l0..h0, l0..hi0_cutm
-            my_his->insert(hi0_cutm,4000000001);  // Change l0..h0, l0..hi0_cutm
-          } else {
-            DIAGOUT("CP: Freeing lo0: " << FMTX(lo0)); 
-            my_los->free(lo0); // my_los will be set in the next clause
-          }
-          
-          if( lo_last != lo_cut ) {
-            // Add the last segment.
-            Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last); // ???
-            // Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level0); // ???
+	  if( number_of_full_parents > 0 ) {
+	  
+	    if( lo_cut != lo0 ) {
+	      // old Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit(lo_cut,level_lo_cut);
+	      // Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level_lo_cut); // ???
+	      Key hi0_cutm = encoding->predecessorToLowerBound_NoDepthBit((lo_cut & ~31llu)|level_lo_cut,level0); // ???
 
-            DIAGOUT("CP: 5010 loct+..h0lst  " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0_lastm) << " h0lst..tag " << FMTX(hi0_lastm) << " " << FMTX(4000000001));
+	      DIAGOUT("CP: 5000 l0..h0ctm     " << FMTX(lo0)      << " " << FMTX(hi0_cutm) << " h0ctm..tag " << FMTX(hi0_cutm) << " " << FMTX(4000000001));
             
-            my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0_lastm);
-            my_his->insert(hi0_lastm,4000000002);
-            my_los->insert(lo_last,hi0);
-            
-          } else {
-            // Didn't need last segment.
-            
-            my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0);           // Add cut lo_cut..hi0
-            
-          }
+	      my_los->insert(lo0,hi0_cutm);         // Change l0..h0, l0..hi0_cutm
+	      my_his->insert(hi0_cutm,4000000001);  // Change l0..h0, l0..hi0_cutm
+	    } else {
+	      DIAGOUT("CP: Freeing lo0: " << FMTX(lo0)); 
+	      my_los->free(lo0); // my_los will be set in the next clause
+	    }
           
-          my_his->insert(hi0,4000000003); // Update the tag
-          changed = true;
-          // my_los, my_his updated
+	    if( lo_last != lo_cut ) {
+	      // Add the last segment.
+	      Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level_lo_last); // ???
+	      // Key hi0_lastm = encoding->predecessorToLowerBound_NoDepthBit(lo_last,level0); // ???
+
+	      DIAGOUT("CP: 5010 loct+..h0lst  " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0_lastm) << " h0lst..tag " << FMTX(hi0_lastm) << " " << FMTX(4000000001));
             
+	      my_los->insert((lo_cut & ~31llu)|level_lo_cut,hi0_lastm);
+	      my_his->insert(hi0_lastm,4000000002);
+	      my_los->insert(lo_last,hi0);
+            
+	    } else {
+	      // Didn't need last segment.
+
+	      // Iterate the level until lo_cut fits under the terminator hi0.
+	      //
+	      Key lo_cut_fit = (lo_cut & ~31llu)|level_lo_cut;
+	      encoding->setId(lo_cut_fit);
+	      DIAGOUT("CP: 5019 my_los->insert: loct and lo_cut_fit, hi0:        " << FMTX(lo_cut) << " " << FMTX(lo_cut_fit) << " " << FMTX(hi0));
+	      while(encoding->getIdTerminator_NoDepthBit() > hi0) {
+		encoding->setId(++lo_cut_fit);
+		DIAGOUT("CP: 5020 my_los->insert: loct and lo_cut_fit, hi0:        " << FMTX(lo_cut) << " " << FMTX(lo_cut_fit) << " " << FMTX(hi0));
+		if( encoding->getLevel() > 27 ) {
+		  throw SpatialFailure("HtmRange::CompressionPass resolution underflow. Can't find fine enough index value to fit under terminator.");
+		}
+	      }
+
+	      DIAGOUT("CP: 5021 my_los->insert: loct and loct&level_lo_cut, hi0: " << FMTX(lo_cut) << " " << FMTX(((lo_cut & ~31llu)|level_lo_cut)) << " " << FMTX(hi0));
+	      DIAGOUT("CP: 5022 my_los->insert: loct and lo_cut_fit, hi0:        " << FMTX(lo_cut) << " " << FMTX(lo_cut_fit) << " " << FMTX(hi0));
+	    
+	      my_los->insert(lo_cut_fit,hi0);           // Add cut lo_cut..hi0
+            
+	    }
+          
+	    my_his->insert(hi0,4000000003); // Update the tag
+	    changed = true;
+	    // my_los, my_his updated
+	  } // if number_of_full_parents > 0
         } // end else if "delta" >= 4
       } // else check to see if we have enough to coalesce
     } // end else there's work to do
@@ -2372,8 +2390,10 @@ void HtmRangeMultiLevel::CompressionPass(bool onepass)
   my_los->list(cout); my_his->list(cout);
   DIAGOUT("HRML::CompressionPass-----done-");
 #endif
-} // function def.
+} // function def. ::CompressionPass
 
+#undef DIAGOUTFLUSH
+#undef DIAGOUT
 
 int HtmRangeMultiLevel::LOWS = 1;
 int HtmRangeMultiLevel::HIGHS = 2;
