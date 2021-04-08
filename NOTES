@@ -1,4 +1,8 @@
 
+20201-04-07 Version 0.16.7
+
+Fixed bug in HtmRangeMultiLevel::CompressionPass, which inappropriately cut an interval, coarsened its resolution, and then wrote it to the SpatialRange skiplist. The fix was to check the number of triangles to be coalesced in the interval and to leave the SpatialRange alone if there weren't enough trixels to combine.
+
 20201-03-27 Version 0.16.6
 
 Fixed careless uint64 vs. int64 bug. Was testing a uint64 delta < 1 where delta actually should have been int64. Delta < 0 was a valid exit criteria, but uint64 masked that leading to a catastrophic error.
