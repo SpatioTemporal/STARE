@@ -556,6 +556,11 @@ public:
 	int64_t scidbTerminatorJulianTAI();
 	bool    scidbTerminatorp();
 
+	/**
+	   Get a mask that is ones for bits to the right of the temporal bits.
+	 */
+	uint64_t scidbResolutionAndTypeMask() { return (1llu << bitOffsetFinest()) - 1; }
+
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
@@ -702,6 +707,11 @@ public:
 void fractionalDayToHMSM   (double  fd, int& hour, int& minute, int& second, int& ms);
 void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int  ms);
 
+/**
+   Numerical compare (if) of the bits associated with two TemporalIndex objects.
+
+   Question: might this have problems in edge cases involving leap years or seconds?
+ */
 inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
@@ -718,6 +728,9 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 		}
 	}
 
+	/*
+	  Start at the coarsest field and compare successively finer fields.
+	 */
 	do {
 		int64_t lhs = a.data.getValueAtId(iField);
 		int64_t rhs = b.data.getValueAtId(iField);
@@ -734,6 +747,7 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 		 }
 		++iField;
 		 if( iField >= a.data.getFieldId("reverse_resolution") ){
+		   // TODO this code should be unnecessary.
 			 done = true;
 		 }
 	} while (!done);
@@ -760,7 +774,9 @@ inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	c.set_reverse_resolution(min(a.get_reverse_resolution(),b.get_reverse_resolution()));
 	return c;
 }
-
+/**
+   Compare TemporalIndex objects according to their Julian TAI values.
+ */
 inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");

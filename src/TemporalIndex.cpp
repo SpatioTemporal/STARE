@@ -374,6 +374,13 @@ int TemporalIndex::eraTest() {
 // TODO Check for errors/integrity of data value.
 // #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
 
+/**
+   MASK_AND_SHIFT_REVERSE retrieves the value, reverses sub-year calendrial values for negative years.
+   This is because those terms, like month and day, always count forward in the calendar, even when they year
+   is negative. So, while -0.1 and +0.1 are neighbors, Year 0 December is not a neighbor of Year+1 December.
+
+   babit=1 corresponds to positive years in the epoch, while babit=0 is for negative years.
+ */
 #define MASK_AND_SHIFT_REVERSE(babit,field) (( data.get(#field)->getMask() \
 		& ( babit*data.getValue(#field)   + (1-babit)*(data.get(#field)->getMaxValue()-data.getValue(#field)))  ) \
 		<< data.get(#field)->getOffset() )

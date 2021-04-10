@@ -92,10 +92,19 @@ public:
 	int64_t getCoFieldId(string levelName) {
 		return bitFieldMap.at(levelName)->getCoFieldId();
 	}
+
+	/**
+	   Get the id (position in the bitFieldMap vector) from a field's name.
+	 */
 	int64_t getFieldId(string levelName) const {
 		return bitFieldMap.at(levelName)->getFieldId();
 	}
+	/**
+	   Get the bitfield from the bitFieldMap at location id.
+	   
+	   Thus one can get a mask for that field via data.getFieldId(i_year)->getMask(), where i_year = data.getFieldId("year");
 
+	 */
 	shared_ptr<BitField> getBitFieldAtId(int64_t id) const {
 		return bitFieldMap.at(bitFields[id]->getName());
 	}
