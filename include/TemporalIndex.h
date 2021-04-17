@@ -902,6 +902,15 @@ int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution);
  */
 int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution);
 
+/*
+overlap
+segment
+gt, lt, eq, contains
+
+*/
+
+
+
 // } /* namespace std */
 
 void TemporalIndex_test();

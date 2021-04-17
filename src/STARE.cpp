@@ -1098,7 +1098,8 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 
 TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type) {
 	if( type != 1 ) {
-		throw SpatialFailure("STARE::setTIndexTAI::type != 1 NOT IMPLEMENTED");
+	  stringstream ss; ss << "STARE::setTIndexTAI::type = " << dec << type << flush;  
+	  throw SpatialFailure(ss.str().c_str());
 	}
 	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
 	tIndex.set_forward_resolution(forward_resolution);
@@ -1108,7 +1109,8 @@ TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int m
 
 TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type) {
 	if( type != 1 ) {
-		throw SpatialFailure("STARE::setTIndexTAI::type != 1 NOT IMPLEMENTED");
+	  stringstream ss; ss << "STARE::setTIndexUTC::type = " << dec << type << flush;
+	  throw SpatialFailure(ss.str().c_str());
 	}
 	tIndex.fromUTC(year, month, day, hour, minute, second, ms);
 	tIndex.set_forward_resolution(forward_resolution);
@@ -1138,7 +1140,8 @@ STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, 
 STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int forward_resolution, int reverse_resolution, int type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
-    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, forward_resolution, reverse_resolution, 2);
+    // type should be 1...
+    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, forward_resolution, reverse_resolution, type);
 }    
 
 STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int forward_resolution, int reverse_resolution, int type) {
