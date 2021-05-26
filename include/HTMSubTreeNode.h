@@ -11,6 +11,7 @@ int MAX_NUM_CHILD_II = 4;
 class HTMSubTreeNodeEntry{
 public:
     HTMSubTreeNodeEntry();
+    HTMSubTreeNodeEntry(Key _key);
     ~HTMSubTreeNodeEntry();
     HTMSubTreeNode* child;
     Key key;            // Key is stored twice (in the current node and in its entries), 
@@ -22,6 +23,7 @@ class HTMSubTreeNode{
 public:
     // Contructors
     HTMSubTreeNode();    
+    HTMSubTreeNode(Key _key, bool _isLeaf, int _level, int _count)
 
     // Destructors
     ~HTMSubTreeNode();

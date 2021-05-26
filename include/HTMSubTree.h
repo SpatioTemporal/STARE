@@ -16,6 +16,7 @@ public:
 
     // Attributes
     HTMSubTreeNode* root;
+    //HTMSubTreeNodeEntry* root[MAX_NUM_CHILD];
 
     // Methods
     bool isIntersect(HTMSubTreeNode* Ins_root);
@@ -26,7 +27,7 @@ public:
     void printTree();
     
 private:
-    HTMSubTreeNode*    createChildNode(HTMSubTreeNode* current, int code, int level);
+    HTMSubTreeNode*    createChildNode(HTMSubTreeNode* current, int64 code, int level);
     void    addSTAREID(STARE_ArrayIndexSpatialValue key);
     // Helper functions
     int     getSTARELEVELCode(STARE_ArrayIndexSpatialValue key, int level);

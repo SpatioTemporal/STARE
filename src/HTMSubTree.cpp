@@ -3,6 +3,9 @@
 
 HTMSubTree::HTMSubTree(){
     root = new HTMSubTreeNode();
+    //for (int64 i = 0; i < MAX_NUM_CHILD; i++){
+    //    root[i] = new HTMSubTreeNodeEntry(i);
+    //}
 }
 
 HTMSubTree::~HTMSubTree(){
@@ -42,12 +45,17 @@ void HTMSubTree::addSTAREID(STARE_ArrayIndexSpatialValue key){
     }
 }
 
-HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, int code, int level){
-    if(level == 0){
-        //HERE
-    }
-    else if(level > 0 and level < 28){
-
+HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, int64 code, int level){
+    if(level >= 0 and level < 28){
+        pos = code >> (5 + (27 - level) * 2);
+        if(current.entries[pos] == NULL){    
+            newNode = HTMSubTreeNode(code, true, level, 0);
+            current.entries[pos].child = newNode;
+            current.entries[pos].key = code;
+            current.count += 1;
+            current.isLeaf = false;
+        }
+        return current.entries[pos].child;
     }
     else{
         std::cout << "Input Error (createChildNode): Stare level is out of range (i.e., [0, 27])!"
