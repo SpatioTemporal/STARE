@@ -6,7 +6,7 @@ typedef int64 Key;      // STARE Encode - 64 bits
 typedef int64 STARE_ENCODE;     
 
 int MAX_NUM_CHILD = 8;  // 8 children in the first level, and 4 children in other levels.
-//int MAX_NUM_CHILD = 4;
+int MAX_NUM_CHILD_II = 4;
 
 class HTMSubTreeNodeEntry{
 public:
