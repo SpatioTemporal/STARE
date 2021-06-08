@@ -3,6 +3,8 @@
 #define INCLUDE_HTMSUBTREE_H_
 
 #include "HTMSubTreeNode.h"
+#include <list>
+#include <iostream>
 
 class HTMSubTree{
 public:
@@ -22,7 +24,7 @@ public:
     bool isIntersect(HTMSubTreeNode* Ins_root);
     bool isContain(STARE_ArrayIndexSpatialValue siv);
 
-    STARE_ENCODE* intersect(HTMSubTreeNode* Ins_root); // Return a list of STARE_ENCODE
+    std::list<STARE_ENCODE>* intersect(HTMSubTreeNode* Ins_root); // Return a list of STARE_ENCODE
 
     void printTree();
     
@@ -31,5 +33,6 @@ private:
     void    addSTAREID(STARE_ArrayIndexSpatialValue key);
     // Helper functions
     int     getSTARELEVELCode(STARE_ArrayIndexSpatialValue key, int level);
+    int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
 }
 #endif /* INCLUDE_HTMSUBTREE_H_ */
