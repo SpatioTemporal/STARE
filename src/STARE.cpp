@@ -1343,6 +1343,7 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	working_interval.push_back(remaining_interval[0]);
 	working_interval.push_back(remaining_interval[1]);
 
+#undef FMTX
 #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec 	
 
 	while( working_interval.size() > 0 ) {

@@ -2207,6 +2207,107 @@ max resolution ms:    1
 	  globalPrintFlag = false;
 	}
 
+	{
+	  globalPrintFlag = false; // true
+
+	  int tag_id = 10000;
+	  TemporalIndex tIndex;
+	  
+	  tIndex.setZero().setEOY(1,2002); INDEX_OUT(++tag_id,tIndex);
+	  if(globalPrintFlag){
+	    cout
+	      << " toStringJ0: " << tIndex.toStringJulianTAI()
+	      << ", toStringJ0_ISO: " << tIndex.toStringJulianTAI_ISO()
+	      << ", ms: " << tIndex.toInt64MillisecondsFractionOfYear()
+	      << ", msj: " << tIndex.toInt64MillisecondsFractionOfYearJ()
+	      << ", msp: " << millisecondsInYear(tIndex.get_BeforeAfterStartBit(),tIndex.get_year())
+	      << endl << flush;
+	    cout << "---" << endl << flush;
+	  }
+	  TemporalIndex tIndex0;
+	  tIndex0.fromStringJulianTAI_ISO(tIndex.toStringJulianTAI_ISO());
+	  if(globalPrintFlag){
+	    cout
+	      << " toStringJ0: " << tIndex0.toStringJulianTAI()
+	      << ", toStringJ0_ISO: " << tIndex0.toStringJulianTAI_ISO()
+	      << ", ms: " << tIndex0.toInt64MillisecondsFractionOfYear()
+	      << ", msj: " << tIndex0.toInt64MillisecondsFractionOfYearJ()
+	      << ", msp: " << millisecondsInYear(tIndex0.get_BeforeAfterStartBit(),tIndex0.get_year())
+	      << endl << flush;
+	    cout << "---" << endl << flush;
+	  }
+	  ASSERT_EQUAL(tIndex.toStringJulianTAI(), tIndex0.toStringJulianTAI());
+	  ASSERT_EQUAL(tIndex.toStringJulianTAI_ISO(), tIndex0.toStringJulianTAI_ISO());
+	  ASSERT_EQUAL(tIndex.toStringJulianTAI_ISO(),"2002-12-31T23:59:59.999 (00 00) (1)");
+	  ASSERT_EQUAL(tIndex0.toStringJulianTAI_ISO(),"2002-12-31T23:59:59.999 (00 00) (1)");
+		  
+	  globalPrintFlag = false;
+	}
+
+	{
+	  globalPrintFlag = true; // false
+
+	  int tag_id = 11000;
+	  
+	  TemporalIndex tIndex0;
+	  tIndex0.setZero().set_BeforeAfterStartBit(1).set_year(2002); INDEX_OUT(++tag_id,tIndex0);
+	  if(globalPrintFlag){
+	    cout
+	      << " toStringJ0: " << tIndex0.toStringJulianTAI()
+	      << ", toStringJ0_ISO: " << tIndex0.toStringJulianTAI_ISO()
+	      << ", ms: " << tIndex0.toInt64MillisecondsFractionOfYear()
+	      << ", msj: " << tIndex0.toInt64MillisecondsFractionOfYearJ()
+	      << ", msp: " << millisecondsInYear(tIndex0.get_BeforeAfterStartBit(),tIndex0.get_year())
+	      << endl << flush;
+	    cout << "---" << endl << flush;
+	  }
+
+	  tIndex0.setZero().set_BeforeAfterStartBit(1).set_year(2002); INDEX_OUT(++tag_id,tIndex0);
+	  int64_t t0L = tIndex0.scidbTemporalIndex();
+
+	  tIndex0.setZero().set_BeforeAfterStartBit(1).set_year(2004); INDEX_OUT(++tag_id,tIndex0);
+	  int64_t t0U = tIndex0.scidbTemporalIndex();
+
+	  int64_t t0 = scidbNewTemporalValue(t0L,-1,t0U);
+
+	  TemporalIndex tIndex1(t0);
+	  // tIndex1.setZero().setEOY(1,2002); INDEX_OUT(++tag_id,tIndex1);
+	  if(globalPrintFlag){
+	    cout
+	      << " toStringJ0: " << tIndex1.toStringJulianTAI()
+	      << ", toStringJ0_ISO: " << tIndex1.toStringJulianTAI_ISO()
+	      << ", ms: " << tIndex1.toInt64MillisecondsFractionOfYear()
+	      << ", msj: " << tIndex1.toInt64MillisecondsFractionOfYearJ()
+	      << ", msp: " << millisecondsInYear(tIndex1.get_BeforeAfterStartBit(),tIndex1.get_year())
+	      << endl << flush;
+	    cout << "---" << endl << flush;
+	  }
+
+	  TemporalIndex tIndex2;
+	  tIndex2.fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)");
+	  if(globalPrintFlag){
+	    cout
+	      << " toStringJ0: " << tIndex2.toStringJulianTAI()
+	      << ", toStringJ0_ISO: " << tIndex2.toStringJulianTAI_ISO()
+	      << ", ms: " << tIndex2.toInt64MillisecondsFractionOfYear()
+	      << ", msj: " << tIndex2.toInt64MillisecondsFractionOfYearJ()
+	      << ", msp: " << millisecondsInYear(tIndex2.get_BeforeAfterStartBit(),tIndex2.get_year())
+	      << endl << flush;
+	    cout << "---" << endl << flush;
+	  }
+	  ASSERT_EQUAL(tIndex1.toStringJulianTAI_ISO(),tIndex2.toStringJulianTAI_ISO());
+
+	  int64_t t2  = tIndex2.scidbTemporalIndex();
+	  int64_t t2L = scidbLowerBoundMS(t2);
+	  int64_t t2U = scidbUpperBoundMS(t2);
+	  FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	  ENDL(cout);
+
+	  globalPrintFlag = false;
+	}
+
 //	if( true ) {
 //
 //

@@ -21,6 +21,8 @@
 #include <ctime>
 #include <cmath>
 
+#include <algorithm>
+
 #include "BitField.h"
 #include "TemporalWordFormat1.h"
 
@@ -607,7 +609,9 @@ public:
 			);
 
 	string toStringJulianTAI();
+	string toStringJulianTAI_ISO();
 	TemporalIndex& fromStringJulianTAI(string inputString);
+	TemporalIndex& fromStringJulianTAI_ISO(string inputString);
 
 	int64_t millisecondsAtResolution(int64_t resolution) const;
 	double daysAtResolution(int64_t resolution) const;
@@ -902,14 +906,78 @@ int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution);
  */
 int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution);
 
+/**
+   Approximate the upper bound (terminator) of a temporal index value.
+ */
+int64_t scidbUpperBoundMS(int64_t ti_value);
+
+/**
+   Approximate the lower bound (terminator) of a temporal index value.
+ */
+int64_t scidbLowerBoundMS(int64_t ti_value);
+
+/**
+   A more accurate the upper bound (terminator) of a temporal index value, based on TAI.
+ */
+int64_t scidbUpperBoundTAI(int64_t ti_value);
+
+/**
+   A more accurate the lower bound of a temporal index value, based on TAI.
+ */
+int64_t scidbLowerBoundTAI(int64_t ti_value);
+
 /*
 overlap
 segment
 gt, lt, eq, contains
-
 */
 
+/**
+   True if temporal index values overlap using approximate millisecond calculations.
+ */
+bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1);
 
+/**
+   True if temporal index values overlap using more accurate but expensive TAI calculations.
+ */
+bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1);
+
+/**
+   Return forward resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t forward_resolution(int64_t ti_value);
+
+/**
+   Return reverse resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t reverse_resolution(int64_t ti_value);
+
+/**
+   True if the temporal index value is a lower bound.
+ */
+bool lowerBoundP(int64_t ti_value);
+
+/**
+   True if the temporal index value is an upper bound.
+ */
+bool upperBoundP(int64_t ti_value);
+
+bool validBoundP(int64_t ti_value);
+
+bool validResolutionP(int64_t resolution);
+
+/**
+   Make a new temporal index value from a triple of values (lower, t0, upper).
+
+   A negative value for lower or upper will cause that resolution to be set to the finest resolution (i.e. maximum resolution).
+
+   A negative value for the "center" or tiv will be set to the mean of the lower and upper.
+ */
+int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper);
 
 // } /* namespace std */
 
