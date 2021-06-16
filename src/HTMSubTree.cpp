@@ -25,6 +25,7 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
         int size = sids.size();
         unsigned long long curSID = 0;
         root = new HTMSubTreeNode();
+        root->isLeaf = false;//start to insert
         for (int i = 0; i < size; i++){
             curSID = sids[i];
             addSTAREID(curSID);
@@ -37,7 +38,7 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
 
 void HTMSubTree::addSTAREID(Key key){
     HTMSubTreeNode* curNode = root;
-    int level = key & 0x000000000000000f;
+    unsigned long long level = key & 0x000000000000000f;
     Key curCode = 0;
     for (int i = 0; i <= level; i++){
         curCode = getSTARELEVELCode(key, i);
@@ -45,26 +46,43 @@ void HTMSubTree::addSTAREID(Key key){
         if (i == 0)
             loop = MAX_NUM_CHILD;
         for(int j = 0; j < loop; j++){
+            if(curNode->isLeaf)
+                break;//There are already a bigger leaf node in the subtree
             if(curCode == curNode->keys[j]){
                 if(curNode->children[j] == NULL){
                     HTMSubTreeNode* temp = new HTMSubTreeNode(curCode, true, i + 1, 0);
                     if((i + 1) <= level)
-                        temp->isLeaf = false;
+                        temp->isLeaf = false;//Continue to go further
+                    if(i == level){ //Set the level for the key
+                        temp->key = temp->key | ((unsigned long long)level);
+                        //temp->key = key; // This can be faster
+                    }
                     curNode->children[j] = temp;
                     curNode->count += 1;
                     curNode = temp;
                 }else{
-                    if(i < level)
+                    if(i < level){
                         curNode->isLeaf = false;
+                    }
+                    else if(i == level){
+                        //Remove all children in level i+1 of the subtree
+                        int loop1 = MAX_NUM_CHILD_II;
+                        if (i == 0)
+                            loop1 = MAX_NUM_CHILD;
+                        for (int t = 0; t < loop1; t++){
+                            if(curNode->children[j]->children[t] != NULL){ 
+                                delete curNode->children[j]->children[t];
+                                curNode->children[j]->children[t] = NULL;
+                            }   
+                        }
+                        curNode->children[j]->isLeaf = true;
+                        curNode->children[j]->count = 0;
+                    }
                     curNode = curNode->children[j];
                 }
                 break;
             }
         }
-        //TODO: handle the case when inserting a stare encode that covers some
-        //      existing stare encodes in the sub-tree
-        //      Output: - new stare encode is the new leaf node
-        //              - previous existing stare encodes need to be removed
     }
 }
 
@@ -134,7 +152,6 @@ int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, st
         if (root_a->level == 0)
             loop = MAX_NUM_CHILD;
         int res = 0;
-        std::cout << "\n Still alive ... \n";
         for (int i = 0; i < loop; i++){
             if((root_a->children[i] != NULL) && (root_b->children[i] != NULL)){
                 res = rec_intersect(root_a->children[i], root_b->children[i], result);
@@ -201,7 +218,7 @@ HTMSubTreeNode* HTMSubTree::getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTre
         return NULL;
     }
 }
-
+//Print the keyCode (i.e. keys)
 void HTMSubTree::printTree(){
     if(root == NULL){
         std::cout << "Error: The root is NULL!";

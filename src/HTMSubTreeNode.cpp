@@ -68,9 +68,12 @@ Key HTMSubTreeNode::genSTARELEVELCode(Key key, unsigned int level, unsigned int 
 HTMSubTreeNode::~HTMSubTreeNode(){    
     key = 0;
     isLeaf = true;
-    level = 0;
     count = 0;
-    for (int i = 0; i < MAX_NUM_CHILD; i++){
+    int loop = MAX_NUM_CHILD;
+    if(level > 0)
+        loop = MAX_NUM_CHILD_II;
+    level = 0;
+    for (int i = 0; i < loop; i++){
         if(children[i] != NULL){
             delete children[i];
             children[i] = NULL;
