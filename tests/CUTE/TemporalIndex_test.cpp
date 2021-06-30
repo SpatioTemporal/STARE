@@ -1713,9 +1713,9 @@ void TemporalIndex_test() {
 		while( iDelta < 1000000000000000000 ) {
 			cout
 			<< setw(18) << iDelta << "  "
-			<< setw(4)  << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
-			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)) << " "
-			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3 << " "
+			<< setw(4)  << tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta)) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta))/86400.0e3 << " "
 			<< setw(18) << tIndex.getResolutionTimescaleDays() << " " 
 			<< endl << flush;
 			iDelta *= 10;
@@ -1759,9 +1759,9 @@ max resolution ms:    1
 		while( iDelta < 1000000000000000 ) {
 			cout
 			<< setw(18) << iDelta << "  "
-			<< setw(4)  << tIndex.coarsestResolutionFinerThanMilliseconds(iDelta) << " "
-			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta)) << " "
-			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerThanMilliseconds(iDelta))/86400.0e3 << " "
+			<< setw(4)  << tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta)) << " "
+			<< setw(18) << tIndex.millisecondsAtResolution(tIndex.coarsestResolutionFinerOrEqualMilliseconds(iDelta))/86400.0e3 << " "
 			<< setw(18) << tIndex.getResolutionTimescaleDays() << " " 
 			<< endl << flush;
 			iDelta *= 2;
@@ -2088,12 +2088,12 @@ max resolution ms:    1
 	  int64_t reverse_resolution = 48;
 
 	  ENDL(cout);
-	  cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
+	  // cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
 
 	  tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution);
 	  // tIndex.setZero().setEOY(1,2020);
 
-	  globalPrintFlag = true;
+	  globalPrintFlag = false; // true
 
 	  ENDL(cout);
 
@@ -2102,9 +2102,11 @@ max resolution ms:    1
 	  int64_t tv0 = tIndex.scidbTemporalIndex();
 	  int64_t tv1 = scidbClearBitsFinerThanResolution(tv0,resolution);
 	  int64_t tv2 = scidbSetBitsFinerThanResolution(tv0,resolution);
-
+	  
+#if 0
 	  cout << "resolution ms " << tIndex.millisecondsAtResolution(resolution) << endl << flush;
-	  cout << "resolution dy " << tIndex.daysAtResolution(resolution) << endl << flush;	  
+	  cout << "resolution dy " << tIndex.daysAtResolution(resolution) << endl << flush;
+#endif
 
 	  FMT("tv0 ",tv0); ENDL(cout);
 	  FMT("tv1 ",tv1); ENDL(cout);
@@ -2124,15 +2126,16 @@ max resolution ms:    1
 	  globalPrintFlag = false;
 	}
 
+	if(false)
 	{
 	  TemporalIndex tIndex;
 	  int64_t forward_resolution = 48;
 	  int64_t reverse_resolution = 48;
 
 	  ENDL(cout);
-	  cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
+	  // cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
 
-	  globalPrintFlag = true;
+	  globalPrintFlag = false; // true
 
 	  ENDL(cout);
 
@@ -2151,10 +2154,10 @@ max resolution ms:    1
 	  int64_t tv2 = scidbSetBitsFinerThanResolution(tv0,resolution);
 	  int64_t tv3 = scidbSetBitsFinerThanResolutionLimited(tv0,resolution);
 	  int64_t tvt = tIndex.scidbTerminator();
-
+#if 0
 	  cout << "resolution ms " << tIndex.millisecondsAtResolution(resolution) << endl << flush;
 	  cout << "resolution dy " << tIndex.daysAtResolution(resolution) << endl << flush;	  
-	  
+#endif  
 	  FMT("tvl ",tvl); ENDL(cout);
 	  FMT("tv0 ",tv0); ENDL(cout);
 	  FMT("tv1 ",tv1); ENDL(cout);
@@ -2196,7 +2199,6 @@ max resolution ms:    1
 
 	  ENDL(cout);
 	  
-
 	  tIndex.checkBitFormat();
 
 	  int64_t offsetBottom = tIndex.bitOffsetFinest();
@@ -2245,7 +2247,7 @@ max resolution ms:    1
 	}
 
 	{
-	  globalPrintFlag = true; // false
+	  globalPrintFlag = false; // true
 
 	  int tag_id = 11000;
 	  
@@ -2300,11 +2302,224 @@ max resolution ms:    1
 	  int64_t t2  = tIndex2.scidbTemporalIndex();
 	  int64_t t2L = scidbLowerBoundMS(t2);
 	  int64_t t2U = scidbUpperBoundMS(t2);
+#if 0
 	  FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
 	  FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
 	  FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
 	  ENDL(cout);
+#endif
 
+	  FMT("t2 from string ",fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)")); ENDL(cout);
+	  // cout << "string from t2 " << toStringJulianTAI_ISO(0x1f4c000000000c31); ENDL(cout);
+
+	  // Roundtrip
+	  ASSERT_EQUAL("2003-01-01T00:00:00.000 (12 12) (1)",
+		       toStringJulianTAI_ISO(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)")));
+
+	  ASSERT(scidbOverlap(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),
+			      fromStringJulianTAI_ISO("2004-01-01T00:00:00.000 (12 12) (1)")));
+
+	  ASSERT(!scidbOverlap(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),
+			       fromStringJulianTAI_ISO("2010-01-01T00:00:00.000 (12 12) (1)")));
+
+	  ASSERT(scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),
+				 fromStringJulianTAI_ISO("2004-01-01T00:00:00.000 (12 12) (1)")));
+
+	  ASSERT(!scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),
+				  fromStringJulianTAI_ISO("2010-01-01T00:00:00.000 (12 12) (1)")));
+
+
+#define FROM_SJ(str) fromStringJulianTAI_ISO(str)
+#define FMTNEWTIV(label,tL,t0,tU,flag) { \
+	    cout << "----" << label << "----" << endl << flush;\
+	    int64_t ttmp = scidbNewTemporalValue(tL,t0,tU,flag);\
+	    int64_t ttmpL=scidbLowerBoundMS(ttmp),ttmpU=scidbUpperBoundMS(ttmp);\
+	    FMT("L ",ttmpL); cout << " " << TemporalIndex(ttmpL).toStringJulianTAI_ISO() << " - " << TemporalIndex(tL).toStringJulianTAI_ISO() << endl << flush; \
+	    FMT("T ",ttmp);  cout << " " << TemporalIndex(ttmp).toStringJulianTAI_ISO()  << " - " << TemporalIndex(t0).toStringJulianTAI_ISO() << endl << flush; \
+	    FMT("U ",ttmpU); cout << " " << TemporalIndex(ttmpU).toStringJulianTAI_ISO() << " - " << TemporalIndex(tU).toStringJulianTAI_ISO() << endl << flush; \
+	    cout << "----" << endl << flush; }
+
+	  if(false)
+	  {
+	    cout << "ck-bug-000" << endl << flush;
+
+#if 0
+	    int64_t ti_value = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-18T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-19T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-26T12:00:00.000 (12 12) (1)"),
+					     false
+					     );
+#endif
+
+	    int64_t ti_value = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-18T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-19T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-27T12:00:00.000 (12 12) (1)"),
+					     true
+					     );
+	    
+#if 0
+	    int64_t ti_value = 0x1f4c180000001251;
+#endif
+	      
+	    TemporalIndex tmpIndex(ti_value);
+	    int64_t forward_resolution = tmpIndex.get_forward_resolution();
+
+	    //////////////////////////////////
+	    // Let's add an amount corresponding to the resolution.
+	    int64_t delta = tmpIndex.millisecondsAtResolution(forward_resolution);
+	    int64_t t0    = tmpIndex.toInt64Milliseconds();
+	    int64_t t1    = t0 + delta;
+	    tmpIndex.fromInt64Milliseconds(t1);
+
+	    cout << "ckb-001: ti_v    " << toStringJulianTAI_ISO(ti_value) << endl << flush;
+	    cout << "ckb-002: ti_v.ub " << toStringJulianTAI_ISO(scidbUpperBoundMS(ti_value)) << endl << flush;
+	    cout << "ckb-100: delta   " << delta << endl << flush;
+	    cout << "ckb-101: t0      " << t0 << endl << flush;
+	    cout << "ckb-102: t1      " << t1 << endl << flush;
+	    cout << "ckb-103: tmpSJT  " << tmpIndex.toStringJulianTAI() << endl << flush;
+	    cout << "ckb-104: tmpSJTi " << tmpIndex.toStringJulianTAI_ISO() << endl << flush;
+	    cout << "ckb-105: tivJT   " << toStringJulianTAI_ISO(scidbUpperBoundMS(ti_value)) << endl << flush;
+
+	    // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+	    tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
+	    tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask()); // Terminator doesn't care about the reverse resolution.
+  
+	    // int64_t idx_ = tmpIndex.scidbTemporalIndex();
+	  }
+
+	  if(false)
+	  {
+	  FMTNEWTIV("CASE-1 2003-01-10T12:00:00.000 (12 12) (1) - false",
+		    FROM_SJ("2003-01-09T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-10T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-11T12:00:00.000 (12 12) (1)"),
+		    false);
+
+	  FMTNEWTIV("CASE-2 2003-01-10T12:00:00.000 (12 12) (1) - true",
+		    FROM_SJ("2003-01-09T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-10T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-11T12:00:00.000 (12 12) (1)"),
+		    true);
+
+	  FMTNEWTIV("CASE-3 2003-01-10T12:00:00.000 (12 12) (1) - false",
+		    FROM_SJ("2003-01-09T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-10T12:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-17T12:00:00.000 (12 12) (1)"),
+		    false);
+
+	  FMTNEWTIV( "CASE-4 2003-01-10T00:00:00.000 (12 12) (1) - false",
+		    FROM_SJ("2003-01-09T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-10T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-17T00:00:00.000 (12 12) (1)"),
+		    false);
+
+	  FMTNEWTIV( "CASE-5 2003-01-10T00:00:00.000 (12 12) (1) - true",
+		    FROM_SJ("2003-01-09T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-10T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-17T00:00:00.000 (12 12) (1)"),
+		    true);
+
+	  FMTNEWTIV( "CASE-6 2003-01-12T00:00:00.000 (12 12) (1) - 19 or 20? - true",
+		    FROM_SJ("2003-01-10T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-12T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-20T00:00:00.000 (12 12) (1)"),
+		    true);
+	  
+	  FMTNEWTIV( "CASE-7 2003-01-12T00:00:00.000 (12 12) (1) - 19 or 20? - false",
+		    FROM_SJ("2003-01-10T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-12T00:00:00.000 (12 12) (1)"),
+		    FROM_SJ("2003-01-20T00:00:00.000 (12 12) (1)"),
+		    false);	  
+	  }
+	  
+	  if(false)
+	  {
+	    string check_date = "2003-01-20T00:00:00.000 (12 12) (1)";
+	    cout << "CHECK: " << check_date << endl << flush;
+	    int64_t ti_check = FROM_SJ(check_date);
+	    TemporalIndex tCheck(ti_check);
+	    FMT("ti_check",ti_check); cout << " " << TemporalIndex(ti_check).toStringJulianTAI_ISO() << endl << flush;	    
+	  }
+
+	  if(false)
+	  { // Res check
+	  cout << "---Res check--" << endl << flush;
+	  int64_t t2 = scidbNewTemporalValue(
+					     -1,
+					     fromStringJulianTAI_ISO("2003-01-12T12:00:00.000 (12 22) (1)"),
+					     -1,
+					     false
+					     );
+	  int64_t t2L = scidbLowerBoundMS(t2);
+	  int64_t t2U = scidbUpperBoundMS(t2);
+	  cout << "--false--" << endl << flush;
+	  FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	  ENDL(cout);
+	  }
+
+	  
+	  { // Asymetric test
+	    // cout << "---Asym check--" << endl << flush;
+	  int64_t t2 = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-10T00:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (12 12) (1)"),
+					     true
+					     );
+	  int64_t t2L = scidbLowerBoundMS(t2);
+	  int64_t t2U = scidbUpperBoundMS(t2);
+#if 0
+	  cout << "--true--" << endl << flush;
+	  FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	  ENDL(cout);
+#endif
+
+	  if(false)
+	  {
+	  int64_t t2 = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-10T00:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (12 12) (1)"),
+					     false
+					     );
+	  int64_t t2L = scidbLowerBoundMS(t2);
+	  int64_t t2U = scidbUpperBoundMS(t2);
+	  cout << "--false--" << endl << flush;
+	  FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	  FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	  ENDL(cout);
+	  }
+	  
+	  // cout << "finest_resolution " << tIndex2.data.maxResolutionLevel() << endl << flush; // finest res is 48 MLR 2021-0614
+
+	  ASSERT(scidbContainsInstant( fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (17 21) (1)")
+				      ,fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)")));
+
+	  ASSERT(scidbContainsInstant(0x1f4c180000001151,fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (17 20) (1)")));
+	  ASSERT(scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (18 20) (1)")));
+	  ASSERT(!scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)")));
+	  ASSERT(!scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2004-01-20T00:00:00.000 (22 22) (1)")));
+	  
+	  ASSERT(scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),t2));
+	  ASSERT(scidbOverlapTAI(!fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)"),t2));
+
+	  }
+
+	  ASSERT_EQUAL(20,reverse_resolution(0x1f4c180000001251));
+	  ASSERT_EQUAL(18,forward_resolution(0x1f4c180000001251));
+	  ASSERT_EQUAL(21,reverse_resolution(set_reverse_resolution(0x1f4c180000001251,21)));
+	  ASSERT_EQUAL(0x1f4c180000001255,set_reverse_resolution(0x1f4c180000001251,21));
+	  ASSERT_EQUAL(17,forward_resolution(set_forward_resolution(0x1f4c180000001251,17)));
+	  ASSERT_EQUAL(0x1f4c180000001151,set_forward_resolution(0x1f4c180000001251,17));
+	  ASSERT_EQUAL(0x1f4c180000001355,coarsen(0x1f4c180000001251,1,1));
+	  
 	  globalPrintFlag = false;
 	}
 

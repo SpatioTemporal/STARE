@@ -23,6 +23,7 @@
 #define INDEX_OUT(lbl,var)  if(globalPrintFlag) { cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << ", " << var.toStringJulianTAI() << flush << ", 0x" << setw(16) << setfill('0') << hex << var.scidbTemporalIndex() << dec << ", " << setfill(' ') << setw(22) << var.scidbTemporalIndex() << endl << flush; }
 #define INDEX_OUTNC(lbl,var)  if(globalPrintFlag) { cout << dec << lbl << " nat,trad,scidb: " << var.stringInNativeDate()	<< flush << ", " << var.toStringJulianTAI() << flush << ", 0x" << setw(16) << setfill('0') << hex << var.scidbTemporalIndex() << dec << ", " << setfill(' ') << setw(22) << var.scidbTemporalIndex(); }
 
+#undef FMTX
 #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
 #define FMTRES(r) " resolution: " << setw(2) << r << ", days: " << setw(16) << tIndex.daysAtResolution(r) << ", sec: " << setw(12) << ( tIndex.millisecondsAtResolution(r)/1000.0 ) << dec
@@ -342,7 +343,7 @@ void SpatioTemporalUsage_test() {
     /*
       resolution(time)
 
-      - coarsestResolutionFinerThanMilliseconds(milliseconds)
+      - coarsestResolutionFinerOrEqualMilliseconds(milliseconds)
 
       clear-below-resolution
 

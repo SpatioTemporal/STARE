@@ -615,7 +615,7 @@ public:
 
 	int64_t millisecondsAtResolution(int64_t resolution) const;
 	double daysAtResolution(int64_t resolution) const;
-	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
+	int64_t coarsestResolutionFinerOrEqualMilliseconds (int64_t milliseconds);
 	double getResolutionTimescaleDays() const {
 	  return daysAtResolution(max(get_forward_resolution(),get_reverse_resolution()));
 	}	
@@ -629,7 +629,7 @@ public:
 	 * Set resolution to the finest level coarser than the resolutionDays input.
 	 */
 	TemporalIndex& setResolutionFromTimescaleDays( double resolutionDays ) {
-		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerThanMilliseconds( resolutionDays*86400.0e3 )-1);
+		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerOrEqualMilliseconds( resolutionDays*86400.0e3 )-1);
 		set_forward_resolution(resolutionLevel);
 		set_reverse_resolution(resolutionLevel);
 		return *this;
@@ -943,6 +943,11 @@ bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1);
 bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1);
 
 /**
+   True if the instant in ti_value_query is in the segment of ti_value.
+ */
+bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query);
+
+/**
    Return forward resolution "level" of the temporal index value.
 
    TODO: Check on temporal format, if needed.
@@ -955,6 +960,10 @@ int64_t forward_resolution(int64_t ti_value);
    TODO: Check on temporal format, if needed.
  */
 int64_t reverse_resolution(int64_t ti_value);
+
+int64_t set_reverse_resolution(int64_t ti_value, int64_t resolution);
+int64_t set_forward_resolution(int64_t ti_value, int64_t resolution);
+int64_t coarsen(int64_t ti_value, int64_t reverse_increment, int64_t forward_increment);
 
 /**
    True if the temporal index value is a lower bound.
@@ -977,7 +986,11 @@ bool validResolutionP(int64_t resolution);
 
    A negative value for the "center" or tiv will be set to the mean of the lower and upper.
  */
-int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper);
+int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper, bool include_bounds=true);
+
+int64_t fromStringJulianTAI_ISO(string inputString);
+
+string toStringJulianTAI_ISO(int64_t tiv);
 
 // } /* namespace std */
 
