@@ -948,6 +948,11 @@ bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1);
 bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query);
 
 /**
+ Return a mask for extracting the temporal location (i.e. the instant)
+ */
+int64_t temporal_mask(int64_t ti_value);
+
+/**
    Return forward resolution "level" of the temporal index value.
 
    TODO: Check on temporal format, if needed.
@@ -992,6 +997,8 @@ int64_t fromStringJulianTAI_ISO(string inputString);
 
 string toStringJulianTAI_ISO(int64_t tiv);
 
+int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
+int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
 // } /* namespace std */
 
 void TemporalIndex_test();

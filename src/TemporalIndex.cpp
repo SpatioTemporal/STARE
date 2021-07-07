@@ -647,6 +647,8 @@ bool TemporalIndex::scidbTerminatorp() {
 
 /**
    Approximate the upper bound (terminator) of a temporal index value.
+
+   TODO: Consider an even more approximate approach that does not calculate the millisecond representation, working directly with the integer format.
  */
 int64_t scidbUpperBoundMS(int64_t ti_value) {
   TemporalIndex tmpIndex(ti_value);
@@ -1202,10 +1204,20 @@ int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution)
    True if temporal index values overlap using approximate millisecond calculations.
  */
 bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1) {
-  int64_t lower0 = scidbLowerBoundMS(ti_value_0);
-  int64_t upper0 = scidbUpperBoundMS(ti_value_0);
-  int64_t lower1 = scidbLowerBoundMS(ti_value_1);
-  int64_t upper1 = scidbUpperBoundMS(ti_value_1);
+
+  cout
+    << "sO:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+
+  int64_t tMask = temporal_mask(ti_value_0);
+  
+  // These are all start/term index values
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
 
 #if 0
   cout
@@ -1233,10 +1245,19 @@ bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1) {
    True if temporal index values overlap using more accurate but expensive TAI calculations.
  */
 bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1) {
-  int64_t lower0 = scidbLowerBoundTAI(ti_value_0);
-  int64_t upper0 = scidbUpperBoundTAI(ti_value_0);
-  int64_t lower1 = scidbLowerBoundTAI(ti_value_1);
-  int64_t upper1 = scidbUpperBoundTAI(ti_value_1);
+
+  cout
+    << "sOTAI:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;  
+
+  int64_t tMask = temporal_mask(ti_value_0);
+  
+  int64_t lower0 = scidbLowerBoundTAI(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundTAI(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundTAI(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundTAI(ti_value_1) & tMask;
   return (lower0 <= upper1) && (upper0 >= lower1);
 }
 
@@ -1262,6 +1283,25 @@ bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query) {
 #undef FMTX
 #endif
   return scidbOverlap(ti_value,tiv_instant);
+}
+
+/**
+  Return a mask for extracting the temporal location (i.e. the instant).
+*/
+int64_t temporal_mask(int64_t ti_value) {
+
+  cout
+    << "t_mask: "
+    << toStringJulianTAI_ISO(ti_value) << " "
+    << endl << flush;
+  
+  int64_t temporal_type = ti_value & 3;
+  if( temporal_type != 1 ) {
+    stringstream ss;
+    ss << "TemporalIndex.cpp-temporal_mask-temporal_type.eq." << temporal_type << ".ne.1_NotImplemented-ti=0x" << hex << setw(16) << setfill('0') << ti_value;
+    throw SpatialFailure(ss.str().c_str());
+  }
+  return ~((2ll^12)-1ll);
 }
 
 /**
@@ -1442,6 +1482,78 @@ int64_t fromStringJulianTAI_ISO(string inputString) {
 string toStringJulianTAI_ISO(int64_t tiv) {
   return TemporalIndex(tiv).toStringJulianTAI_ISO();
 }
+
+int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1) {
+
+  cout
+    << "sO:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+  
+  int64_t tMask = temporal_mask(ti_value_0);
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
+
+  if( !( (lower0 <= upper1) && (upper0 >= lower1) ) ) {
+    throw SpatialFailure("scidbTemporalValueUnionIfOverlap:NoOverlap");
+  }
+
+  return scidbNewTemporalValue(lower0 < lower1 ? lower0 : lower1,
+			       -1,
+			       upper0 > upper1 ? upper0 : upper1,
+			       true
+			       );
+  /*  
+  TemporalIndex tIndex;
+  int64_t lower = TemporalIndex( lower0 < lower1 ? lower0 : lower1 ).toInt64Milliseconds();
+  int64_t upper = TemporalIndex( upper0 > upper1 ? upper0 : upper1 ).toInt64Milliseconds();
+  int64_t mean  = (lower+upper)/2;
+  int64_t dup   = upper-mean;
+  int64_t dlo   = mean-lower;
+  int64_t resu  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dup);
+  int64_t resl  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dlo);
+  tIndex = tIndex.fromInt64Milliseconds(mean).set_reverse_resolution(resl).set_forward_resolution(resu);
+
+  return tIndex.scidbTemporalIndex();
+  */
+}
+
+int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_value_1) {
+  int64_t tMask = temporal_mask(ti_value_0);
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
+  if( !( (lower0 <= upper1) && (upper0 >= lower1) ) ) {
+    throw SpatialFailure("scidbTemporalValueIntersectionIfOverlap:NoOverlap");
+  }
+  return scidbNewTemporalValue(lower0 < lower1 ? lower1 : lower0,
+			       -1,
+			       upper0 > upper1 ? upper1 : upper0,
+			       true
+			       );
+
+  /*
+  TemporalIndex tIndex;
+  int64_t lower = TemporalIndex( lower0 < lower1 ? lower1 : lower0 ).Toint64milliseconds();
+  int64_t upper = TemporalIndex( upper0 > upper1 ? upper1 : upper0 ).toInt64Milliseconds();
+  int64_t mean  = (lower+upper)/2;
+  int64_t dup   = upper-mean;
+  int64_t dlo   = mean-lower;
+  cout << 2000 << endl << flush;
+  int64_t resu  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dup);
+  cout << 2010 << endl << flush;
+  int64_t resl  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dlo);
+  cout << 2020 << endl << flush;
+  tIndex = tIndex.fromInt64Milliseconds(mean).set_reverse_resolution(resl).set_forward_resolution(resu);
+
+  return tIndex.scidbTemporalIndex();  
+  */
+}
+
 
 
 

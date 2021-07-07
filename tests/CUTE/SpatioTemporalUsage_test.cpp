@@ -336,7 +336,7 @@ void SpatioTemporalUsage_test() {
       cout << "msk " << FMTX(tIndex.scidbResolutionAndTypeMask()) << endl << flush;
       cout << "t0k " << FMTX((scidbSetBitsFinerThanResolution(t0,21) & tIndex.scidbResolutionAndTypeMask())) << endl << flush;
       cout << "t0K " << FMTX((scidbSetBitsFinerThanResolution(t0,21) & ~tIndex.scidbResolutionAndTypeMask())) << endl << flush;
-    }        
+    }
     
 
     

@@ -2082,6 +2082,7 @@ max resolution ms:    1
 	}
 #endif
 
+
 	{
 	  TemporalIndex tIndex;
 	  int64_t forward_resolution = 48;
@@ -2311,6 +2312,7 @@ max resolution ms:    1
 
 	  FMT("t2 from string ",fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)")); ENDL(cout);
 	  // cout << "string from t2 " << toStringJulianTAI_ISO(0x1f4c000000000c31); ENDL(cout);
+	  
 
 	  // Roundtrip
 	  ASSERT_EQUAL("2003-01-01T00:00:00.000 (12 12) (1)",
@@ -2328,7 +2330,8 @@ max resolution ms:    1
 	  ASSERT(!scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),
 				  fromStringJulianTAI_ISO("2010-01-01T00:00:00.000 (12 12) (1)")));
 
-
+	  cout << "x1000" << endl << flush;
+	  
 #define FROM_SJ(str) fromStringJulianTAI_ISO(str)
 #define FMTNEWTIV(label,tL,t0,tU,flag) { \
 	    cout << "----" << label << "----" << endl << flush;\
@@ -2461,6 +2464,7 @@ max resolution ms:    1
 	  ENDL(cout);
 	  }
 
+	  cout << "x2000" << endl << flush;
 	  
 	  { // Asymetric test
 	    // cout << "---Asym check--" << endl << flush;
@@ -2498,7 +2502,10 @@ max resolution ms:    1
 	  }
 	  
 	  // cout << "finest_resolution " << tIndex2.data.maxResolutionLevel() << endl << flush; // finest res is 48 MLR 2021-0614
+	  
 
+	  cout << "x3000" << endl << flush;
+	  
 	  ASSERT(scidbContainsInstant( fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (17 21) (1)")
 				      ,fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)")));
 
@@ -2506,9 +2513,18 @@ max resolution ms:    1
 	  ASSERT(scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (18 20) (1)")));
 	  ASSERT(!scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)")));
 	  ASSERT(!scidbContainsInstant(0x1f4c180000001251,fromStringJulianTAI_ISO("2004-01-20T00:00:00.000 (22 22) (1)")));
+
+	  cout << "x4000" << endl << flush;	  
 	  
 	  ASSERT(scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-01T00:00:00.000 (12 12) (1)"),t2));
-	  ASSERT(scidbOverlapTAI(!fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (22 22) (1)"),t2));
+
+	  cout << "x4500" << endl << flush;	  
+	  
+	  ASSERT(scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-21T00:00:00.000 (22 22) (1)"),t2)); // The upper bound is sloppy because of factor of 2.
+	  ASSERT(!scidbOverlapTAI(fromStringJulianTAI_ISO("2003-01-27T00:00:00.000 (22 22) (1)"),t2));
+
+	  cout << "x5000" << endl << flush;
+	  
 
 	  }
 
@@ -2521,6 +2537,82 @@ max resolution ms:    1
 	  ASSERT_EQUAL(0x1f4c180000001355,coarsen(0x1f4c180000001251,1,1));
 	  
 	  globalPrintFlag = false;
+	}
+
+	
+
+	{
+
+	  globalPrintFlag = true;
+
+	    int64_t tiv0 = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-18T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-19T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-27T12:00:00.000 (12 12) (1)"),
+					     true
+					     );
+
+	    int64_t tiv1 = scidbNewTemporalValue(
+					     fromStringJulianTAI_ISO("2003-01-28T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-29T12:00:00.000 (12 12) (1)"),
+					     fromStringJulianTAI_ISO("2003-01-30T12:00:00.000 (12 12) (1)"),
+					     true
+					     );
+
+	    cout << 1000 << endl << flush;
+	    
+	    int64_t tiv0and1 = scidbTemporalValueIntersectionIfOverlap(tiv0,tiv1);
+	    int64_t tiv0or1 = scidbTemporalValueUnionIfOverlap(tiv0,tiv1);
+
+	    cout << 1100 << endl << flush;
+
+	    FMT("tiv0and1   ", tiv0and1); cout << " " << TemporalIndex(tiv0and1).toStringJulianTAI_ISO() << endl << flush;
+
+#if 1
+	    {
+	    int64_t t2 = tiv0;
+	    int64_t t2L = scidbLowerBoundMS(t2);
+	    int64_t t2U = scidbUpperBoundMS(t2);
+	    cout << "tiv0" << endl << flush;
+	    FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	    ENDL(cout);
+	    }
+	    {
+	    int64_t t2 = tiv1;
+	    int64_t t2L = scidbLowerBoundMS(t2);
+	    int64_t t2U = scidbUpperBoundMS(t2);
+	    cout << "tiv1" << endl << flush;
+	    FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	    ENDL(cout);
+	    }	    
+	    {
+	    int64_t t2 = tiv0and1;
+	    int64_t t2L = scidbLowerBoundMS(t2);
+	    int64_t t2U = scidbUpperBoundMS(t2);
+	    cout << "tiv0and1" << endl << flush;
+	    FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	    ENDL(cout);
+	    }
+	    {
+	    int64_t t2 = tiv0or1;
+	    int64_t t2L = scidbLowerBoundMS(t2);
+	    int64_t t2U = scidbUpperBoundMS(t2);
+	    cout << "tiv0or1" << endl << flush;
+	    FMT("t2L",t2L); cout << " " << TemporalIndex(t2L).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2 ", t2); cout << " " << TemporalIndex(t2).toStringJulianTAI_ISO() << endl << flush;
+	    FMT("t2U",t2U); cout << " " << TemporalIndex(t2U).toStringJulianTAI_ISO() << endl << flush;
+	    ENDL(cout);
+	    }
+	    
+#endif
+	    globalPrintFlag = false;
+
 	}
 
 //	if( true ) {
