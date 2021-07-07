@@ -33,7 +33,7 @@
 
 void SpatioTemporalUsage_test() {
 
-  bool globalPrintFlag = true; // false
+  bool globalPrintFlag = false; // true
   stringstream ss;
   string failureMessage = "'";
 
@@ -74,26 +74,32 @@ void SpatioTemporalUsage_test() {
     ENDL(cout);
     tI0.setZero();                                          INDEX_OUT("tI=-0:   ",tI0);
     tI1.setZero().set_BeforeAfterStartBit(1);               INDEX_OUT("tI=+0    ",tI1);
+#if 0
     cout << " tI0 == tI1 : " << ( tI0 == tI1 ) << endl << flush;
-    
     ENDL(cout);
+#endif
+    ASSERT_EQUAL(tI0,tI1);
 
     double d1,d2;
-
     dt.toJulianTAI(d1,d2);
+#if 0
     cout << "dt -> d1,d2:    " << d1 << " " << d2 << endl << flush;
     cout << "dt -> int64 ms: " << dt.toInt64Milliseconds() << endl << flush;
+    ENDL(cout);
+#endif
+    ASSERT_EQUAL( 1ll, dt.toInt64Milliseconds() );
 
     TemporalIndex tIndex;
-    
-    ENDL(cout);
-
     int64_t forward_resolution = 48;
     int64_t reverse_resolution = 48;
-
+#if 0
     cout << "max res: " << tIndex.data.maxResolutionLevel() << endl << flush;
     cout << "zero resolution    " << FMTRES(0) << endl << flush;
     ENDL(cout);
+#endif
+    ASSERT_EQUAL(48,tIndex.data.maxResolutionLevel());
+
+#if 0
     for( int r=0; r<64; ++r ) {
       ss.str("");
       ss << setw(2) << r;
@@ -102,37 +108,53 @@ void SpatioTemporalUsage_test() {
     ENDL(cout);
     cout << "forward_resolution " << FMTRES(forward_resolution) << endl << flush;
     cout << "reverse_resolution " << FMTRES(reverse_resolution) << endl << flush;
-
     ENDL(cout); ENDL(cout);
+#endif
 
     tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution);
+
+    globalPrintFlag = true;
+    
+#if 0
     INDEX_OUT("y=+2020:  ",tIndex);
     cout << "res: " << forward_resolution << " " << reverse_resolution << endl << flush;
     cout << "forward_resolution " << FMTRES(forward_resolution) << endl << flush;
     cout << "reverse_resolution " << FMTRES(reverse_resolution) << endl << flush;
     ENDL(cout);
+#endif
+    ASSERT_EQUAL(0.001,tIndex.millisecondsAtResolution(48)/1000.0);
 
     {
       int64_t tm = tIndex.scidbLowerBoundJulianTAI();
       int64_t t0 = tIndex.scidbTemporalIndex();
       int64_t tp = tIndex.scidbTerminatorJulianTAI();
 
-      ENDL(cout);
-
+      ASSERT_EQUAL(0x1f8f417efbf9f0c1,tm);
+      ASSERT_EQUAL(0x1f900000000030c1,t0);
+      ASSERT_EQUAL(0x1f90000000007ffd,tp);
+      
       tIndex.fromTemporalIndexValue(tm);
+
+#if 0
+      ENDL(cout);
       cout << "tm: " << FMTX(tm); INDEX_OUTNC(" tm",tIndex);
       ENDL(cout);
     
       tIndex.fromTemporalIndexValue(t0);
+
       cout << "t0: " << FMTX(t0); INDEX_OUTNC(" t0",tIndex);
       ENDL(cout);
     
       tIndex.fromTemporalIndexValue(tp);
+
       cout << "tp: " << FMTX(tp); INDEX_OUTNC(" tp",tIndex);
       ENDL(cout);
+#endif
     }
-
+    
+#if 0
     ENDL(cout); ENDL(cout);
+
     
     tIndex.set_BeforeAfterStartBit(1).set_year(2020).set_reverse_resolution(reverse_resolution).set_forward_resolution(forward_resolution); // reset
     INDEX_OUT("y=+2020:  ",tIndex);
@@ -338,25 +360,31 @@ void SpatioTemporalUsage_test() {
       cout << "t0K " << FMTX((scidbSetBitsFinerThanResolution(t0,21) & ~tIndex.scidbResolutionAndTypeMask())) << endl << flush;
     }
     
-
+#endif
     
     /*
-      resolution(time)
+      NOTES MLR 2021-0707-1241-1
 
+      Most moved to TemporalIndex.h/cpp.
+      - Provided lots of standalone functions
+
+      TODOs & Tests
+      - resolution(time) - See TemporalIndex: forward_resolution() and reverse_resolution()
       - coarsestResolutionFinerOrEqualMilliseconds(milliseconds)
-
-      clear-below-resolution
-
-      terminate-below-resolution
-
+      - clear-below-resolution 
+      -- See TemporalIndex: scidbClearBitsFinerThanResolution, etc.
+      - terminate-below-resolution
       // conflation of time and interval
-
-      logic, overlap, contains, 
-
+      logic
+      - overlap
+      -- scidbTemporalValueUnionIfOverlap
+      -- scidbTemporalValueIntersectionIfOverlap
+      - contains
+      -- scidbContainsInstant
       */
     
   }
   
-  FAIL();
+  // FAIL();
   
 }

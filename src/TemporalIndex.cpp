@@ -1205,12 +1205,14 @@ int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution)
  */
 bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1) {
 
+#if 0
   cout
     << "sO:lu0,lu1: "
     << toStringJulianTAI_ISO(ti_value_0) << " "
     << toStringJulianTAI_ISO(ti_value_1) << " "
     << endl << flush;
-
+#endif
+  
   int64_t tMask = temporal_mask(ti_value_0);
   
   // These are all start/term index values
@@ -1246,11 +1248,13 @@ bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1) {
  */
 bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1) {
 
+#if 0
   cout
     << "sOTAI:lu0,lu1: "
     << toStringJulianTAI_ISO(ti_value_0) << " "
     << toStringJulianTAI_ISO(ti_value_1) << " "
-    << endl << flush;  
+    << endl << flush;
+#endif
 
   int64_t tMask = temporal_mask(ti_value_0);
   
@@ -1290,10 +1294,12 @@ bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query) {
 */
 int64_t temporal_mask(int64_t ti_value) {
 
+#if 0
   cout
     << "t_mask: "
     << toStringJulianTAI_ISO(ti_value) << " "
     << endl << flush;
+#endif
   
   int64_t temporal_type = ti_value & 3;
   if( temporal_type != 1 ) {
@@ -1485,11 +1491,13 @@ string toStringJulianTAI_ISO(int64_t tiv) {
 
 int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1) {
 
+#if 0
   cout
     << "sO:lu0,lu1: "
     << toStringJulianTAI_ISO(ti_value_0) << " "
     << toStringJulianTAI_ISO(ti_value_1) << " "
     << endl << flush;
+#endif
   
   int64_t tMask = temporal_mask(ti_value_0);
   int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
