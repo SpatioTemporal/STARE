@@ -36,10 +36,10 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
     }
 }
 
-void HTMSubTree::addSTAREID(Key key){
+void HTMSubTree::addSTAREID(STARE_ENCODE key){
     HTMSubTreeNode* curNode = root;
-    unsigned long long level = key & 0x000000000000000f;
-    Key curCode = 0;
+    unsigned long long level = key & 0x000000000000001f;
+    STARE_ENCODE curCode = 0;
     for (int i = 0; i <= level; i++){
         curCode = getSTARELEVELCode(key, i);
         int loop = MAX_NUM_CHILD_II;
@@ -47,7 +47,8 @@ void HTMSubTree::addSTAREID(Key key){
             loop = MAX_NUM_CHILD;
         for(int j = 0; j < loop; j++){
             if(curNode->isLeaf)
-                break;//There are already a bigger leaf node in the subtree
+                //break;//There are already a bigger leaf node in the subtree
+                return;//Should return instead of going to the next level
             if(curCode == curNode->keys[j]){
                 if(curNode->children[j] == NULL){
                     HTMSubTreeNode* temp = new HTMSubTreeNode(curCode, true, i + 1, 0);
@@ -61,13 +62,19 @@ void HTMSubTree::addSTAREID(Key key){
                     curNode->count += 1;
                     curNode = temp;
                 }else{
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 1 " << key << std::endl;
                     if(i < level){
                         curNode->isLeaf = false;
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 2 " << key << std::endl;
                     }
                     else if(i == level){
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 3 \t key: " << key << "\tlevel: " << level << std::endl;
                         //Remove all children in level i+1 of the subtree
                         int loop1 = MAX_NUM_CHILD_II;
-                        if (i == 0)
+                        if ((i + 1) == 0) // never happen
                             loop1 = MAX_NUM_CHILD;
                         for (int t = 0; t < loop1; t++){
                             if(curNode->children[j]->children[t] != NULL){ 
@@ -75,12 +82,18 @@ void HTMSubTree::addSTAREID(Key key){
                                 curNode->children[j]->children[t] = NULL;
                             }   
                         }
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 4 " << key << std::endl;
                         curNode->children[j]->isLeaf = true;
                         curNode->children[j]->count = 0;
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 5 " << key << std::endl;
                     }
                     curNode = curNode->children[j];
+                    //if (key == 0x1f9b42f83cf45490)
+                    //    std::cout << "Still alive... 6 " << key << std::endl;
                 }
-                break;
+                break;//go to the next level
             }
         }
     }
@@ -104,12 +117,12 @@ HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, STARE_Array
     }
 }
 
-Key HTMSubTree::getSTARELEVELCode(Key key, int level){
+STARE_ENCODE HTMSubTree::getSTARELEVELCode(STARE_ENCODE key, int level){
     if (level == 0){
         return (key & 0x3800000000000000);
     }
     else if(level > 0 && level < 28){
-        Key mask = 0x3fffffffffffffe0;
+        STARE_ENCODE mask = 0x3fffffffffffffe0;
         mask = mask << ((27 - level)*2);
         mask = mask & 0x3fffffffffffffff; 
         return (key & mask);
@@ -141,7 +154,7 @@ int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, st
         return -1;
     }
     if((root_a->isLeaf)  || (root_b->isLeaf)){
-        Key res_key = root_a->key;
+        STARE_ENCODE res_key = root_a->key;
         if (root_b->isLeaf)
             res_key = root_b->key;
         result->push_back(res_key); //add key of a leaf
@@ -204,7 +217,7 @@ HTMSubTreeNode* HTMSubTree::getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTre
         int loop = MAX_NUM_CHILD_II;
         if (root_a->level == 0)
             loop = MAX_NUM_CHILD;
-        Key curCode = getSTARELEVELCode(root_b->key, root_a->level);
+        STARE_ENCODE curCode = getSTARELEVELCode(root_b->key, root_a->level);
         for (int i = 0; i < loop; i++){
             if(root_a->keys[i] == curCode){
                 if(root_a->children[i] != NULL)
@@ -254,4 +267,73 @@ void HTMSubTree::printFromNode(HTMSubTreeNode* current){
             }
         }
     }
+}
+
+/* ========== <Timer class> =========== */
+timer::timer()
+{
+    result = 0.0;
+    resultInSecond = 0.0;
+    resultInMilliSecond = 0.0;
+    resultInMicroSecond = 0.0;
+}
+
+//This function starts the timer. 
+void timer::start()
+{
+    startCounter = std::chrono::system_clock::now();
+}
+
+//This function stops the timer from running and records the time passed.
+void timer::end()
+{
+    endCounter = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed = endCounter - startCounter;
+    result += elapsed.count();
+    resultInSecond = result;
+    resultInMilliSecond = result * 1000.0;
+    resultInMicroSecond = result * 1000000.0;
+}
+
+//This function sets the timer to zero and restarts it again.
+void timer::reStart()
+{
+    startCounter = std::chrono::system_clock::now();
+    endCounter = startCounter;
+    result = 0.0;
+    resultInSecond = 0.0;
+    resultInMilliSecond = 0.0;
+    resultInMicroSecond = 0.0;
+}
+
+//This function is used to restarts the timer at a specific time.
+void timer::reStartValue(double value)
+{
+    startCounter = std::chrono::system_clock::now();
+    endCounter = startCounter;
+    result = value;
+    resultInSecond = value;
+    resultInMilliSecond = value * 1000.0;
+    resultInMicroSecond = value * 1000000.0;
+}
+
+
+double timer::getResult()
+{
+    return result;
+}
+
+double timer::getResultInSecond()
+{
+    return resultInSecond;
+}
+
+double timer::getResultInMilliSecond()
+{
+    return resultInMilliSecond;
+}
+
+double timer::getResultInMicroSecond()
+{
+    return resultInMicroSecond;
 }

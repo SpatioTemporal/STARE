@@ -13,6 +13,7 @@ set (
   SpatialVector_test.cpp
   STARE_test.cpp
   STARE_Covers_test.cpp
+  HTMSubTree_test.cpp
   TemporalIndex_test.cpp
   Test.cpp
   )

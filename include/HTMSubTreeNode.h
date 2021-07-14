@@ -7,9 +7,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
-//typedef unsigned long long uint64;
 
-typedef unsigned long long Key;      // STARE Encode - 64 bits    
+//TODO: These types should be combined with STARE.h 
+//  (i.e., Key == STARE_ENCODE == STARE_ArrayIndexSpatialValue)
+//  int64 and uint64 are defined in SpatialGeneral.h
+//typedef unsigned long long Key;      // STARE Encode - 64 bits    
 typedef unsigned long long STARE_ENCODE;     
 
 int const MAX_NUM_CHILD = 8;  // 8 children in the first level, and 4 children in other levels.
@@ -30,13 +32,13 @@ class HTMSubTreeNode{
 public:
     // Contructors
     HTMSubTreeNode();    
-    HTMSubTreeNode(Key _key, bool _isLeaf, int _level, int _count);
+    HTMSubTreeNode(STARE_ENCODE _key, bool _isLeaf, int _level, int _count);
 
     // Destructors
     ~HTMSubTreeNode();
 
     // Attributes
-    Key key;            // STARE Encode
+    STARE_ENCODE key;            // STARE Encode
     int level;          // 0 <= level <= 27, (0 is the highest level)
     bool isLeaf;        // True or False
     int count;          // Total number of children
@@ -44,11 +46,11 @@ public:
     
     //entries
     HTMSubTreeNode* children[MAX_NUM_CHILD];
-    Key keys[MAX_NUM_CHILD];
+    STARE_ENCODE keys[MAX_NUM_CHILD];
     // Methods
 
 
 private:
-    Key genSTARELEVELCode(Key key, unsigned int level, unsigned int pos);
+    STARE_ENCODE genSTARELEVELCode(STARE_ENCODE key, unsigned int level, unsigned int pos);
 };
 #endif /* INCLUDE_HTMSUBTREENODE_H_ */

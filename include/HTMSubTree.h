@@ -7,10 +7,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "STARE.h"
 
-typedef unsigned long long STARE_ArrayIndexSpatialValue;
+#include <cassert>
+#include <chrono>
+#include <cstdlib>
+
+//These types are already defined in STARE.h
+//typedef unsigned long long STARE_ArrayIndexSpatialValue;
 //typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_SpatialIntervals;
-typedef std::vector<STARE_ArrayIndexSpatialValue> STARE_SpatialIntervals;
 
 class HTMSubTree{
 public:
@@ -38,12 +43,61 @@ public:
     
 //private:
     HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level);
-    void                addSTAREID(Key key);
+    void                addSTAREID(STARE_ENCODE key);
     // Helper functions
-    Key                 getSTARELEVELCode(Key key, int level);
+    STARE_ENCODE                 getSTARELEVELCode(STARE_ENCODE key, int level);
     int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
+};
+
+void HTMSubTree_test_Create_Print();
+void HTMSubTree_test_HighestRoot();
+void HTMSubTree_test_GetPotentialBranch();
+void HTMSubTree_test_Intersect();
+void HTMSubTree_test_Create_Duplicate_Print();
+void HTMSubTree_vs_SpatialRange_Create_small();
+void HTMSubTree_vs_SpatialRange_Create_large();
+void HTMSubTree_vs_SpatialRange_Create_MOD05_1();
+void HTMSubTree_vs_SpatialRange_Create_MOD05_2();
+void HTMSubTree_vs_SpatialRange_Create_VNP03DNB_1();
+void HTMSubTree_vs_SpatialRange_Intersect_small();
+void HTMSubTree_vs_SpatialRange_Intersect_large();
+void HTMSubTree_vs_SpatialRange_Intersect_MOD05_1();
+void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2();
+void HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1();
+
+/* ========== <Timer class> =========== */
+class timer
+{
+
+	std::chrono::system_clock::time_point startCounter;
+	std::chrono::system_clock::time_point endCounter;
+	double  result = 0.0;
+	double  resultInSecond = 0.0;
+	double  resultInMilliSecond = 0.0;
+	double  resultInMicroSecond = 0.0;
+
+public:
+	timer();
+
+	void start();
+
+	void end();
+
+	void reStart();
+
+
+	void reStartValue(double value);
+
+
+	double getResult();
+
+	double getResultInSecond();
+
+	double getResultInMilliSecond();
+
+	double getResultInMicroSecond();
 };
 
 

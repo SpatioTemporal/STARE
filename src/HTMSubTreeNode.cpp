@@ -28,7 +28,7 @@ HTMSubTreeNode::HTMSubTreeNode(){
     }
 }
 
-HTMSubTreeNode::HTMSubTreeNode(Key _key, bool _isLeaf, int _level, int _count){
+HTMSubTreeNode::HTMSubTreeNode(STARE_ENCODE _key, bool _isLeaf, int _level, int _count){
     key = _key;
     isLeaf = _isLeaf;
     level = _level;
@@ -43,16 +43,16 @@ HTMSubTreeNode::HTMSubTreeNode(Key _key, bool _isLeaf, int _level, int _count){
     }
 }
 
-Key HTMSubTreeNode::genSTARELEVELCode(Key key, unsigned int level, unsigned int pos){
-    Key result = 0;
+STARE_ENCODE HTMSubTreeNode::genSTARELEVELCode(STARE_ENCODE key, unsigned int level, unsigned int pos){
+    STARE_ENCODE result = 0;
     pos = pos % 8;
-    Key temp = ((unsigned long long)pos);
+    STARE_ENCODE temp = ((unsigned long long)pos);
     if (level == 0){        
         result = temp << (5 + 27 * 2);
         return result;
     }
     else if(level > 0 && level < 28){
-        Key mask = 0x3fffffffffffffe0;
+        STARE_ENCODE mask = 0x3fffffffffffffe0;
         mask = mask << ((27 - (level - 1))*2);
         mask = mask & 0x3fffffffffffffff; 
         result = key & mask; 
