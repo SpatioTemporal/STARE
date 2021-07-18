@@ -351,6 +351,14 @@ void TemporalIndex::toJulianUTC( double& utc1, double &utc2 ) const {
   this->toJulianTAI(d1,d2); // Get the TAI encoded time.
   not_ok = eraTaiutc(d1, d2, &utc1, &utc2); // Convert to UTC's quasi JD.
 }
+TemporalIndex& TemporalIndex::fromJulianUTC( double utc1, double utc2 ) {
+  double d1,d2; int not_ok = eraUtctai(utc1,utc2,&d1,&d2);
+  if (not_ok == 1) {
+    throw SpatialException("In TemporalIndex::fromJulianUTC, eraUtctai(...) failure.");
+  }
+  this->fromJulianTAI(d1, d2);
+  return *this;
+}
 /**
  * Convert and store a UTC coordinate into the native TAI-based value.
  */
@@ -886,12 +894,12 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
-    if (not_ok_1 == 1)
-        throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
-
-	int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
-	double  days         = ((double) milliseconds) / 86400000.0;
-	d1 = d0_1; d2 = d0_2 + days;
+    if (not_ok_1 == 1) {
+      throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
+    }
+    int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
+    double  days         = ((double) milliseconds) / 86400000.0;
+    d1 = d0_1; d2 = d0_2 + days;
 };
 
 TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
@@ -922,6 +930,7 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 		FMT1(_second)
 		FMT1(_millisecond)
 #undef FMT1
+                  // cout << "fromJulianTAI: " << d1 << " " << d2 << " " << ss.str() << endl << flush;
 		// TODO add some way to tune sensitivity to poorly formed dates & times
 		if( not_ok < 0 ) {
 			throw SpatialFailure(ss.str().c_str());
@@ -1351,6 +1360,8 @@ int64_t set_reverse_resolution(int64_t ti_value, int64_t resolution) {
   int64_t offset = tIndex.data.get("reverse_resolution")->getOffset();
   return (ti_value & ~(mask << offset)) | (resolution << offset);
 }
+
+// TODO Make array versions of these.
 
 int64_t set_forward_resolution(int64_t ti_value, int64_t resolution) {
   TemporalIndex tIndex;

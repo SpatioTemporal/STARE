@@ -567,10 +567,11 @@ public:
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
 
-	void           toJulianUTC ( double& utc1, double& utc2 ) const;
+	void           toJulianUTC   ( double& utc1, double& utc2 ) const;
+        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2 );
 
-	void           toJulianTAI ( double& d1, double& d2) const;
-	TemporalIndex& fromJulianTAI( double  d1, double  d2);
+	void           toJulianTAI   ( double& d1, double& d2) const;
+	TemporalIndex& fromJulianTAI ( double  d1, double  d2);
 
 
 	void toFormattedJulianTAI(
