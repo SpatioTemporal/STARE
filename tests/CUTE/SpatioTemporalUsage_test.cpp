@@ -129,7 +129,14 @@ void SpatioTemporalUsage_test() {
       int64_t t0 = tIndex.scidbTemporalIndex();
       int64_t tp = tIndex.scidbTerminatorJulianTAI();
 
-      ASSERT_EQUAL(0x1f8f417efbf9f0c1,tm);
+      /*
+      cout << hex << setw(16) << setfill(' ') << tm << endl;
+      cout << hex << setw(16) << setfill(' ') << t0 << endl;
+      cout << hex << setw(16) << setfill(' ') << tp << endl;
+      cout << dec;
+      */
+
+      ASSERT_EQUAL(0x1f8f417efbf9c0fd,tm);
       ASSERT_EQUAL(0x1f900000000030c1,t0);
       ASSERT_EQUAL(0x1f90000000007ffd,tp);
       

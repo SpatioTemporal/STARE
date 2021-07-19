@@ -730,6 +730,10 @@ int64_t scidbLowerBoundTAI(int64_t ti_value) {
   int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
 
   // TODO What should the forward_resolution be for a lower_bound?
+
+  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+  tmpIndex.set_forward_resolution(0);
+  tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask());
 	
   //////////////////////////////////
   // Let's add an amount corresponding to the resolution.
@@ -1412,6 +1416,8 @@ bool validResolutionP(int64_t resolution) {
 int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper, bool include_bounds) {
   TemporalIndex ti0;
   int64_t reverse_resolution,forward_resolution;
+  int64_t finest_resolution = ti0.data.maxResolutionLevel();
+  
   if( tiv < 0 ) {
     TemporalIndex tiL(tiv_lower), tiU(tiv_upper);
 
@@ -1426,6 +1432,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
     forward_resolution = resolution;
   } else {
     ti0 = TemporalIndex(tiv);
+    ti0.set_reverse_resolution(finest_resolution).set_forward_resolution(finest_resolution);
     int64_t t0 = ti0.toInt64Milliseconds();
     if( tiv_lower < 0 ) {
       // Keep that passed in.
@@ -1472,16 +1479,25 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
   if( include_bounds ) {
     // cout << 1000 << endl << flush;
     // First lower
-    if( !scidbContainsInstant(tiv_return,tiv_lower) ) {
-      // cout << 2000 << endl << flush;    
-      tiv_return = set_reverse_resolution(tiv_return,max(reverse_resolution-1,0ll));
-    }
+    if( tiv_lower >= 0 ) {
+      if( !scidbContainsInstant(tiv_return,tiv_lower) ) {
+        // cout << 2000 << endl << flush;    
+        tiv_return = set_reverse_resolution(tiv_return,max(reverse_resolution-1,0ll));
+      }
+    } /* else {
+      tiv_return = set_reverse_resolution(tiv_return,finest_resolution);
+      } */
+    
     // Then upper
-    if( !scidbContainsInstant(tiv_return,tiv_upper) ) {
-      // cout << 3000 << endl << flush;    
-      tiv_return = set_forward_resolution(tiv_return,max(forward_resolution-1,0ll));
-    }
-    // cout << 4000 << endl << flush;
+    if( tiv_upper >= 0 ) {
+      if( !scidbContainsInstant(tiv_return,tiv_upper) ) {
+        // cout << 3000 << endl << flush;    
+        tiv_return = set_forward_resolution(tiv_return,max(forward_resolution-1,0ll));
+      }
+    } /* else {
+      // cout << 4000 << endl << flush;
+      tiv_return = set_forward_resolution(tiv_return,finest_resolution);      
+      } */
   }
   return tiv_return;
 }
@@ -1572,11 +1588,5 @@ int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_v
   return tIndex.scidbTemporalIndex();  
   */
 }
-
-
-
-
-
-
 
 // } /* namespace std */
