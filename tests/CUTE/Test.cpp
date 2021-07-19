@@ -4296,6 +4296,7 @@ void runSuite(int argc, char const *argv[]){
   s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_MOD05_1));
   s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_MOD05_2));
   s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1));
+  s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify));
 	/*s.push_back(CUTE(precisionTest));
 	s.push_back(CUTE(lookupID));
 	s.push_back(CUTE(pointById));

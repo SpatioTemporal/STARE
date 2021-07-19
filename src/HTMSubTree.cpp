@@ -40,38 +40,42 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
     HTMSubTreeNode* curNode = root;
     unsigned long long level = key & 0x000000000000001f;
     STARE_ENCODE curCode = 0;
+    std::list<HTMSubTreeNode*> path;
+    path.push_back(curNode);
     for (int i = 0; i <= level; i++){
         curCode = getSTARELEVELCode(key, i);
         int loop = MAX_NUM_CHILD_II;
         if (i == 0)
             loop = MAX_NUM_CHILD;
         for(int j = 0; j < loop; j++){
-            if(curNode->isLeaf)
-                //break;//There are already a bigger leaf node in the subtree
+            if(curNode->isLeaf){ //There are already a bigger leaf node in the subtree
+                path.clear();
                 return;//Should return instead of going to the next level
+            }
             if(curCode == curNode->keys[j]){
                 if(curNode->children[j] == NULL){
                     HTMSubTreeNode* temp = new HTMSubTreeNode(curCode, true, i + 1, 0);
-                    if((i + 1) <= level)
-                        temp->isLeaf = false;//Continue to go further
-                    if(i == level){ //Set the level for the key
-                        temp->key = temp->key | ((unsigned long long)level);
-                        //temp->key = key; // This can be faster
-                    }
                     curNode->children[j] = temp;
                     curNode->count += 1;
-                    curNode = temp;
+                    if(i < level){
+                        temp->isLeaf = false;//Continue to go further
+                        curNode = temp;
+                        path.push_back(curNode);
+                    }
+                    else if(i == level){ //Set the level for the key
+                        temp->key = temp->key | ((unsigned long long)level);
+                        //temp->key = key; // ---- This can be faster ----
+                        tryGroupLeaves(curNode, path);
+                        path.clear();
+                        return;
+                    }
                 }else{
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 1 " << key << std::endl;
                     if(i < level){
                         curNode->isLeaf = false;
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 2 " << key << std::endl;
+                        curNode = curNode->children[j];//go further
+                        path.push_back(curNode);
                     }
-                    else if(i == level){
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 3 \t key: " << key << "\tlevel: " << level << std::endl;
+                    else if(i == level){//final level of the key, going to insert the key as a leaf
                         //Remove all children in level i+1 of the subtree
                         int loop1 = MAX_NUM_CHILD_II;
                         if ((i + 1) == 0) // never happen
@@ -82,19 +86,49 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                                 curNode->children[j]->children[t] = NULL;
                             }   
                         }
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 4 " << key << std::endl;
                         curNode->children[j]->isLeaf = true;
                         curNode->children[j]->count = 0;
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 5 " << key << std::endl;
+                        curNode->children[j]->key = curNode->children[j]->key | ((unsigned long long)level);
+                        //curNode->children[j]->key = key; // ---- This can be faster ----
+                        tryGroupLeaves(curNode, path);
+                        path.clear();
+                        return;
                     }
-                    curNode = curNode->children[j];
-                    //if (key == 0x1f9b42f83cf45490)
-                    //    std::cout << "Still alive... 6 " << key << std::endl;
                 }
-                break;//go to the next level
+                break;//go to the next level of the key
             }
+        }
+    }
+    path.clear();
+    return;
+}
+
+void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> path){
+    if (curNode == NULL){
+        std::cout << "Input Error (tryGroupLeaves): The curNode is NULL!";
+        return;
+    }
+    int l = (curNode->level == 0) ? MAX_NUM_CHILD : MAX_NUM_CHILD_II;
+    if(curNode->count == l){
+        //Check all children to see if any of them is not a leaf
+        for(int i = 0; i < l; i++){
+            if (!curNode->children[i]->isLeaf)
+                return; //if there is a non-leaf child, then do nothing.
+        }
+        //ALl children are leaves --- remove all children
+        for (int t = 0; t < l; t++){
+            if(curNode->children[t]!= NULL){ 
+                delete curNode->children[t];
+                curNode->children[t] = NULL;
+            }   
+        }
+        curNode->isLeaf = true;
+        curNode->count = 0;
+        curNode->key = curNode->key | ((unsigned long long)curNode->level);
+        if(!path.empty()){
+            HTMSubTreeNode* temp = path.back();
+            path.pop_back();
+            tryGroupLeaves(temp, path);
         }
     }
 }
@@ -149,7 +183,9 @@ std::list<STARE_ENCODE>* HTMSubTree::intersect(HTMSubTreeNode* Ins_root){
 
 //root_a and root_b should have the same key and same level
 int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result){
-    if(root_a->key != root_b->key || root_a->level != root_b->level) {
+    STARE_ENCODE key_a = root_a->key & 0x3fffffffffffffe0; //clear level;
+    STARE_ENCODE key_b = root_b->key & 0x3fffffffffffffe0;
+    if(key_a != key_b || root_a->level != root_b->level) {
         std::cout << "Input Error (rec_intersect): two sub_roots are not match each other!";
         return -1;
     }
@@ -206,7 +242,9 @@ HTMSubTreeNode* HTMSubTree::getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTre
         return NULL;
     }
     else if(root_a->level == root_b->level){
-        if(root_a->key == root_b->key)
+        STARE_ENCODE key_a = root_a->key & 0x3fffffffffffffe0; //clear level;
+        STARE_ENCODE key_b = root_b->key & 0x3fffffffffffffe0;
+        if(key_a == key_b)
             return root_a;
         else {
             std::cout << "Keys are not the same!";
@@ -258,12 +296,64 @@ void HTMSubTree::printFromNode(HTMSubTreeNode* current){
                 std::cout << (current->level) << ":";
                 for(int j = 0; j < (current->level + 1); j++)
                     std::cout << "  ";
-                std::cout << current->keys[i] << "\tcount: "<< current->children[i]->count;
-                if(current->children[i]->isLeaf)
+                //std::cout << current->keys[i] << "\tcount: "<< current->children[i]->count;
+                if(current->children[i]->isLeaf){
+                    std::cout << current->children[i]->key << "\tcount: "<< current->children[i]->count;
                     std::cout << "\tLeaf \n";
-                else
+                }
+                else {
+                    std::cout << current->keys[i] << "\tcount: "<< current->children[i]->count;
                     std::cout << "\tNon-Leaf \n";
+                }
                 printFromNode(current->children[i]);
+            }
+        }
+    }
+}
+
+void HTMSubTree::printTree2File(char* filename){
+    if(root == NULL){
+        std::cout << "Error: The root is NULL!";
+    }
+    else{
+        if(filename == NULL){
+            std::cout << "Error: The output filename is NULL!";
+        }
+        else{
+            ofstream outputstream;
+            outputstream.open(filename);
+            printFromNode2File(root, outputstream);
+            outputstream.close();
+        }
+    }
+}
+void HTMSubTree::printFromNode2File(HTMSubTreeNode* current, ofstream& outstream){
+    if(current != NULL){
+        int loop = MAX_NUM_CHILD_II;
+        if(current->level == 0)
+            loop = MAX_NUM_CHILD;
+        if(current->level == 0){
+            outstream << std::hex << "Root:  " << current->key << "\tcount: " << current->count;
+            if(current->isLeaf) 
+                outstream << "\tLeaf \n";
+            else
+                outstream << "\tNon-Leaf \n";
+        }
+        for (int i = 0; i < loop; i++){
+            if(current->children[i] != NULL){
+                outstream << (current->level) << ":";
+                for(int j = 0; j < (current->level + 1); j++)
+                    outstream << "  ";
+                //outstream << current->keys[i] << "\tcount: "<< current->children[i]->count;
+                if(current->children[i]->isLeaf){
+                    outstream << current->children[i]->key << "\tcount: "<< current->children[i]->count;
+                    outstream << "\tLeaf \n";
+                }
+                else{
+                    outstream << current->keys[i] << "\tcount: "<< current->children[i]->count;
+                    outstream << "\tNon-Leaf \n";
+                }
+                printFromNode2File(current->children[i], outstream);
             }
         }
     }

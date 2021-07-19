@@ -5,6 +5,7 @@
 #include "HTMSubTreeNode.h"
 #include <list>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include "STARE.h"
@@ -40,6 +41,9 @@ public:
     void printTree();
 
     void printFromNode(HTMSubTreeNode* current);
+
+    void printTree2File(char* filename);
+    void printFromNode2File(HTMSubTreeNode* current, ofstream& outputstream);
     
 //private:
     HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level);
@@ -49,6 +53,7 @@ public:
     int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
+    void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> path);
 };
 
 void HTMSubTree_test_Create_Print();
@@ -66,7 +71,7 @@ void HTMSubTree_vs_SpatialRange_Intersect_large();
 void HTMSubTree_vs_SpatialRange_Intersect_MOD05_1();
 void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2();
 void HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1();
-
+void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify();
 /* ========== <Timer class> =========== */
 class timer
 {
