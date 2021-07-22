@@ -124,7 +124,8 @@ void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNod
         }
         curNode->isLeaf = true;
         curNode->count = 0;
-        curNode->key = curNode->key | ((unsigned long long)curNode->level);
+        if(curNode->level > 0)
+            curNode->key = curNode->key | ((unsigned long long)(curNode->level - 1));
         if(!path.empty()){
             HTMSubTreeNode* temp = path.back();
             path.pop_back();
