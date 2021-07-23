@@ -41,7 +41,7 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
     unsigned long long level = key & 0x000000000000001f;
     STARE_ENCODE curCode = 0;
     std::list<HTMSubTreeNode*> *path = new std::list<HTMSubTreeNode*>();
-    path->push_back(curNode);
+    //path->push_back(curNode); // we don't group leaves in the level 0
     for (int i = 0; i <= level; i++){
         curCode = getSTARELEVELCode(key, i);
         int loop = MAX_NUM_CHILD_II;
@@ -66,6 +66,8 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                     else if(i == level){ //Set the level for the key
                         temp->key = temp->key | ((unsigned long long)level);
                         //temp->key = key; // ---- This can be faster ----
+                        if(!path->empty())
+                            path->pop_back();
                         tryGroupLeaves(curNode, path);
                         path->clear();
                         delete path;
@@ -92,6 +94,8 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         curNode->children[j]->count = 0;
                         curNode->children[j]->key = curNode->children[j]->key | ((unsigned long long)level);
                         //curNode->children[j]->key = key; // ---- This can be faster ----
+                        if(!path->empty())
+                            path->pop_back();
                         tryGroupLeaves(curNode, path);
                         path->clear();
                         delete path;
