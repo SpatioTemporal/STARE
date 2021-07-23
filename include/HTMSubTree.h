@@ -53,7 +53,7 @@ public:
     int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
-    void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> path);
+    void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> *path);
 };
 
 void HTMSubTree_test_Create_Print();

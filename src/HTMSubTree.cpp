@@ -40,8 +40,8 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
     HTMSubTreeNode* curNode = root;
     unsigned long long level = key & 0x000000000000001f;
     STARE_ENCODE curCode = 0;
-    std::list<HTMSubTreeNode*> path;
-    path.push_back(curNode);
+    std::list<HTMSubTreeNode*> *path = new std::list<HTMSubTreeNode*>();
+    path->push_back(curNode);
     for (int i = 0; i <= level; i++){
         curCode = getSTARELEVELCode(key, i);
         int loop = MAX_NUM_CHILD_II;
@@ -49,7 +49,8 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
             loop = MAX_NUM_CHILD;
         for(int j = 0; j < loop; j++){
             if(curNode->isLeaf){ //There are already a bigger leaf node in the subtree
-                path.clear();
+                path->clear();
+                delete path;
                 return;//Should return instead of going to the next level
             }
             if(curCode == curNode->keys[j]){
@@ -60,20 +61,21 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                     if(i < level){
                         temp->isLeaf = false;//Continue to go further
                         curNode = temp;
-                        path.push_back(curNode);
+                        path->push_back(curNode);
                     }
                     else if(i == level){ //Set the level for the key
                         temp->key = temp->key | ((unsigned long long)level);
                         //temp->key = key; // ---- This can be faster ----
                         tryGroupLeaves(curNode, path);
-                        path.clear();
+                        path->clear();
+                        delete path;
                         return;
                     }
                 }else{
                     if(i < level){
                         curNode->isLeaf = false;
                         curNode = curNode->children[j];//go further
-                        path.push_back(curNode);
+                        path->push_back(curNode);
                     }
                     else if(i == level){//final level of the key, going to insert the key as a leaf
                         //Remove all children in level i+1 of the subtree
@@ -91,7 +93,8 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         curNode->children[j]->key = curNode->children[j]->key | ((unsigned long long)level);
                         //curNode->children[j]->key = key; // ---- This can be faster ----
                         tryGroupLeaves(curNode, path);
-                        path.clear();
+                        path->clear();
+                        delete path;
                         return;
                     }
                 }
@@ -99,11 +102,12 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
             }
         }
     }
-    path.clear();
+    path->clear();
+    delete path;
     return;
 }
 
-void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> path){
+void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> *path){
     if (curNode == NULL){
         std::cout << "Input Error (tryGroupLeaves): The curNode is NULL!";
         return;
@@ -126,9 +130,9 @@ void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNod
         curNode->count = 0;
         if(curNode->level > 0)
             curNode->key = curNode->key | ((unsigned long long)(curNode->level - 1));
-        if(!path.empty()){
-            HTMSubTreeNode* temp = path.back();
-            path.pop_back();
+        if(!path->empty()){
+            HTMSubTreeNode* temp = path->back();
+            path->pop_back();
             tryGroupLeaves(temp, path);
         }
     }
