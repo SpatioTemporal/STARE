@@ -2,7 +2,8 @@
  * TemporalWordFormat1.h
  *
  *  Created on: Apr 16, 2019
- *      Author: mrilee
+ *
+ *  Author: Michael Rilee, Rilee Systems Technologies LLC
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */

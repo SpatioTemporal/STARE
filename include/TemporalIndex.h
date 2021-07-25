@@ -2,7 +2,9 @@
  * TemporalIndex.h
  *
  *  Created on: Apr 10, 2017
- *      Author: mrilee
+ *
+ *  Author: Michael Rilee, Rilee Systems Technologies LLC
+ *
  */
 
 #ifndef SRC_TEMPORALINDEX_H_

@@ -1,4 +1,8 @@
 
+# CMakeLists.txt
+# Author: Michael Rilee, mike@rilee.net, Rilee Systems Technologies LLC
+# Date:   c.2019
+
 set (
   TestSrcFiles
   Test.h 
