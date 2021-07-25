@@ -1,3 +1,12 @@
+/**
+ * HtmRangeMultiLevel.h
+ *
+ * A heavily modified version of HtmRange.cpp to support left-justified spatial index values, intervals, from multiple levels.
+ *
+ * 2016 June - M. Rilee
+ *
+ */
+
 #ifndef _HtmRangeMultiLevelMULTILEVELITERATOR_H_
 #define _HtmRangeMultiLevelMULTILEVELITERATOR_H_
 

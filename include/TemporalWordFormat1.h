@@ -2,7 +2,8 @@
  * TemporalWordFormat1.h
  *
  *  Created on: Apr 16, 2019
- *      Author: mrilee
+ *
+ *  Author: Michael Rilee, Rilee Systems Technologies LLC
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
@@ -30,7 +31,7 @@ public:
 	int64_t maxCoResolutionLevelValue =  9;  // Would be const in a perfect universe.
 	int64_t minCoResolutionLevelValue = -1; // Corresponds to "Ma"
 	// int64_t resolutionLevelConstraint =  7;
-	int64_t nonDataLevels             =  3; // Was 2 when there was no type.
+	// Not needed. int64_t nonDataLevels             =  3; // Was 2 when there was no type.
 
 	TemporalWordFormat1(); // Overload this
 	virtual ~TemporalWordFormat1();
@@ -92,10 +93,19 @@ public:
 	int64_t getCoFieldId(string levelName) {
 		return bitFieldMap.at(levelName)->getCoFieldId();
 	}
+
+	/**
+	   Get the id (position in the bitFieldMap vector) from a field's name.
+	 */
 	int64_t getFieldId(string levelName) const {
 		return bitFieldMap.at(levelName)->getFieldId();
 	}
+	/**
+	   Get the bitfield from the bitFieldMap at location id.
+	   
+	   Thus one can get a mask for that field via data.getFieldId(i_year)->getMask(), where i_year = data.getFieldId("year");
 
+	 */
 	shared_ptr<BitField> getBitFieldAtId(int64_t id) const {
 		return bitFieldMap.at(bitFields[id]->getName());
 	}
@@ -104,6 +114,12 @@ public:
 		return bitFieldMap.at(bitFields[id]->getName())->getValue();
 	}
 
+	/**
+	   Increment the index value at the id'th bitfield by delta. Carry if the id'th maxvalue is exceeded.
+
+	   Note: Not verified, e.g., if carry exceeds 'one?'
+
+	 */
 	void incrementAtId(int64_t id,int64_t delta) {
 		if( (id < pos_CoarsestResolutionLevel)
 			|| (pos_FinestResolutionLevel < id) )

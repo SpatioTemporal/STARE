@@ -6,7 +6,7 @@
  *  Created on: Jan 31, 2019
  *      Author: mrilee
  *
- *  Copyright (C) 2019 Rilee Systems Technologies LLC
+ *  Copyright (C) 2019-2021 Rilee Systems Technologies LLC
  */
 
 #ifndef INCLUDE_STARE_H_
@@ -131,11 +131,11 @@ public:
 
 	double toJulianDayUTC()                   { double utc1,utc2; tIndex.toJulianUTC(utc1,utc2); return utc1+utc2; }
 
-	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
-	TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
+	TemporalIndex& setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type);
+	TemporalIndex& setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type);
 
-	void toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type);
-	void toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type);
+	void toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& forward_resolution, int& reverse_resolution, int& type);
+	void toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& forward_resolution, int& reverse_resolution, int& type);
 
 	double toJulianDayTAI()                   { double d1,d2; tIndex.toJulianTAI(d1, d2); return d1+d2; }
 	TemporalIndex& fromJulianDayTAI(double d) { tIndex.fromJulianTAI(d, 0.0); return tIndex; }
@@ -156,9 +156,9 @@ public:
     void adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValues &spatialStareIds);
     void adaptSpatialResolutionEstimatesInPlace(STARE_ArrayIndexSpatialValue *spatialStareIds, const int s_indices_size);    
 	
-    STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type);
-    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int resolution, int type);
-    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(struct tm& tm, int forward_resolution, int reverse_resolution, int type);
+    STARE_ArrayIndexTemporalValue ValueFromUTC(time_t& datetime, int forward_resolution, int reverse_resolution, int type);
     
     Datetime UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue);
 	
@@ -197,6 +197,7 @@ void STARE_test();
 void STARE_Covers_test();
 void STARE_Covers_Old_test();
 void AdaptSpatialResolutionEstimates_test();    // Added jhrg 4/20/20
+void SpatioTemporalUsage_test();
 
 // I added this to simplify finding the library with autoconf. jhrg 5/22/19
 extern "C" const char *STARE_version();

@@ -1,8 +1,10 @@
-/*
+/**
  * BitField.h
  *
  *  Created on: Apr 16, 2019
  *      Author: mrilee
+ *
+ *  Specifies and supports a single calendrical level.
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */

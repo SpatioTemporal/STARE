@@ -1,11 +1,11 @@
 //#     Filename:       SpatialConvex.hxx
 //#
-//#     H definitions for  SpatialConvex
+//#     H definitions for  SpatialConvex, a more rational naming of RangeConvex.
 //#
 //#
-//#     Author:         Peter Z. Kunszt, based on A. Szalay's code
+//#     Author:         Michael Rilee, based on Peter Z. Kunszt, based on A. Szalay's code
 //#     
-//#     Date:           October 16, 1998
+//#     Date:           2018-2021
 //#
 //#		Copyright (C) 2000  Peter Z. Kunszt, Alex S. Szalay, Aniruddha R. Thakar
 //#                     The Johns Hopkins University

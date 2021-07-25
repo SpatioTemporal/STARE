@@ -42,7 +42,9 @@ public:
 		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
 		Key lo = leftJustified.maskOffLevelBit();
 		Key hi = lo;
-		// KeyPair pr = KeyPair(lo,hi);
+#if 0
+		KeyPair pr = KeyPair(lo,hi);
+#endif
 		int rstat = range->range->contains(lo,hi);
 		bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
 		return intersectp;

@@ -1,6 +1,11 @@
 #ifndef _HTMHANGEITERATOR_H_
 #define _HTMHANGEITERATOR_H_
 
+/*
+ * HtmRangeIterator.h
+ *
+ */
+
 #include <HtmRange.h>
 
 using namespace HtmRange_NameSpace;

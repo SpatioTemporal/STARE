@@ -1,4 +1,8 @@
 
+# CMakeLists.txt
+# Author: Michael Rilee, mike@rilee.net, Rilee Systems Technologies LLC
+# Date:   c.2019
+
 set (
   TestSrcFiles
   Test.h 
@@ -11,6 +15,7 @@ set (
   SpatialRange_test.cpp
   SpatialRotation_test.cpp
   SpatialVector_test.cpp
+  SpatioTemporalUsage_test.cpp
   STARE_test.cpp
   STARE_Covers_test.cpp
   TemporalIndex_test.cpp

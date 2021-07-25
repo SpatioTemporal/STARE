@@ -1,3 +1,12 @@
+/**
+   TemporalGeneral.h
+
+   Author: Michael Rilee, Rilee Systems Technologies LLC
+
+   Created: c.2017
+
+ */
+
 #include <vector>
 
 struct Datetime {
