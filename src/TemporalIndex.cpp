@@ -1426,7 +1426,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
     int64_t tL = tiL.toInt64Milliseconds();
     int64_t tU = tiU.toInt64Milliseconds();
     ti0.fromInt64Milliseconds((tL+tU)/2); /// Approximate calculation
-    int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-tL)/2),0ll);
+    int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-tL)/2),(int64_t)0ll);
     ti0.set_reverse_resolution(resolution).set_forward_resolution(resolution);
     reverse_resolution = resolution;
     forward_resolution = resolution;
@@ -1442,7 +1442,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
     } else {
       TemporalIndex tiL(tiv_lower);
       int64_t tL = tiL.toInt64Milliseconds();
-      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((t0-tL)),0ll);
+      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((t0-tL)),(int64_t)0ll);
       ti0.set_reverse_resolution(resolution);
       reverse_resolution = resolution;
     }
@@ -1457,7 +1457,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
       // cout << "200:sntv: " << tiU.toStringJulianTAI_ISO() << " vs. " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
       
       int64_t tU = tiU.toInt64Milliseconds();
-      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-t0)),0ll);
+      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-t0)),(int64_t)0ll);
       ti0.set_forward_resolution(resolution);
 
       // cout << "201:sntv: " << tiU.toStringJulianTAI_ISO() << " vs. " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
@@ -1482,7 +1482,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
     if( tiv_lower >= 0 ) {
       if( !scidbContainsInstant(tiv_return,tiv_lower) ) {
         // cout << 2000 << endl << flush;    
-        tiv_return = set_reverse_resolution(tiv_return,max(reverse_resolution-1,0ll));
+        tiv_return = set_reverse_resolution(tiv_return,max(reverse_resolution-1,(int64_t)0ll));
       }
     } /* else {
       tiv_return = set_reverse_resolution(tiv_return,finest_resolution);
