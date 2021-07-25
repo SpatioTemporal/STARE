@@ -1492,7 +1492,7 @@ int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper,
     if( tiv_upper >= 0 ) {
       if( !scidbContainsInstant(tiv_return,tiv_upper) ) {
         // cout << 3000 << endl << flush;    
-        tiv_return = set_forward_resolution(tiv_return,max(forward_resolution-1,0ll));
+        tiv_return = set_forward_resolution(tiv_return,max(forward_resolution-1,(int64_t) 0ll));
       }
     } /* else {
       // cout << 4000 << endl << flush;

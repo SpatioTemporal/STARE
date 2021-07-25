@@ -513,7 +513,7 @@ RangeConvex::simplify0() {
 //
 //	}
 
-	uint64 iFuse = 256*1024*1024*1024;
+	uint64 iFuse = 256ull*1024ull*1024ull*1024ull;
 	while( currentCorner ) {
 
 #ifdef DIAG
