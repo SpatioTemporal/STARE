@@ -2633,6 +2633,40 @@ max resolution ms:    1
 
 	}
 
+
+	if( true ) {
+	  int n = 4;
+	  int64_t t_index[4] = {
+	    fromStringJulianTAI_ISO("2003-02-13T12:00:00.000 (12 12) (1)"),
+	    fromStringJulianTAI_ISO("2004-02-13T12:00:00.000 (12 12) (1)"),
+	    fromStringJulianTAI_ISO("2004-03-13T12:00:00.000"),
+	    fromStringJulianTAI_ISO("2004-04-13T12:00:00")
+	  };
+
+	  set_temporal_resolutions_from_sorted_inplace(t_index,n);
+	    
+	    
+	    index_with_variable_res = pystare.set_temporal_resolutions_from_sorted(index);
+	    
+	 
+        i_varres_str = []
+        ni = len(index)
+        for i in range(ni):
+             i_varres_str = i_varres_str + [pystare.to_tai_iso_strings( numpy.concatenate(pystare.to_temporal_triple_tai(index_with_variable_res[i:i+1]) ))]
+
+        expected = [
+            ["2003-02-13T11:59:59.999 (00 63) (1)", "2003-02-13T12:00:00.000 (12 48) (1)", "2004-02-13T12:00:00.000 (63 63) (1)"]
+            ,["2003-02-13T12:00:00.000 (00 63) (1)", "2004-02-13T12:00:00.000 (15 12) (1)", "2004-04-09T12:00:00.000 (63 63) (1)"]
+            ,["2004-01-17T12:00:00.000 (00 63) (1)", "2004-03-13T12:00:00.000 (15 15) (1)", "2004-05-08T12:00:00.000 (63 63) (1)"]
+            ,["2004-02-17T12:00:00.000 (00 63) (1)", "2004-04-13T12:00:00.000 (48 15) (1)", "2004-04-13T12:00:00.001 (63 63) (1)"]
+        ]
+        self.assertEqual(ni,len(expected))
+        for i in range(ni):
+            for j in range(3):
+                self.assertEqual(expected[i][j],i_varres_str[i][j])
+	  
+	}
+
 //	if( true ) {
 //
 //

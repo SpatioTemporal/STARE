@@ -1002,6 +1002,9 @@ string toStringJulianTAI_ISO(int64_t tiv);
 
 int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
 int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
+
+void set_temporal_resolutions_from_sorted_inplace(const int64_t* ti_sorted, const int64_t len, bool include_bounds = true);
+
 // } /* namespace std */
 
 void TemporalIndex_test();

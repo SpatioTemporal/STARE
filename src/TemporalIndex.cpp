@@ -1589,4 +1589,19 @@ int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_v
   */
 }
 
+/**
+   Change the resolutions of a sequence of temporal index values according to the distance to prior and future points.
+
+   Set include_bounds to true to include the reverse and future points in the resolution covered (the default).
+ */
+void set_temporal_resolutions_from_sorted_inplace(const int64_t* ti_sorted, const int64_t len, bool include_bounds) {
+  int64_t tm, t0, tp;
+  for(int i = 0; i < len; ++i) {
+    // There are more idiomatic ways to do the following.
+    tm = -1 if i-1 < 0 else ti_sorted[i-1];
+    t0 = sorted_indices[i];
+    tp = -1 if i+1 >= ni else ti_sorted[i+1];
+    ti_sorted[i] = scidbNewTemporalValue(tm,t0,tp,include_bounds);
+}
+
 // } /* namespace std */
