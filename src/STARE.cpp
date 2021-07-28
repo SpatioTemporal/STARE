@@ -1599,13 +1599,12 @@ STARE_Stash::STARE_Stash(
 }
 */
 void stash_spatial(const string& filename, STARE_SpatialIntervals intervals) {
-
+  throw SpatialException("STARE stash_spatial not implemented");
 }
 
 void fetch_spatial(const string& filename, STARE_SpatialIntervals& intervals) {
-
+  throw SpatialException("STARE fetch_spatial not implemented");
 }
-
 
 #undef CMP_MODE
 

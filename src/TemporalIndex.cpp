@@ -286,19 +286,35 @@ string TemporalIndex::toStringJulianTAI_ISO() {
 	return ss.str();
 }
 
+/**
+     Version 2021-0728-1
+     The format: "2004-02-13T12:00:00.000 (12 12) (1)"
+                 0123456789012345678901234567890123456789
+                 0         1         2         3
+                                   | 18 Start of seconds
+                                      | 21 Start of milliseconds
+                                         | 24 Start of info fields
+ */
 TemporalIndex& TemporalIndex::fromStringJulianTAI_ISO(string inputString) {
 	int pos = 0;
 #define PARSE_INT(field,width) \
 		int64_t field = atoi(inputString.substr(pos,width).c_str()); pos += width + 1;
 	// cout << endl << "pi: " << inputString.substr(pos,width).c_str() << endl;
-	
+
+	string default_format = "1999-01-01T12:00:00.000 (48 48) (1)";
+
+	int test_len = inputString.length();
+	if( 17 <  test_len && test_len < 35 ) {
+	  inputString.append(default_format.substr(test_len,35-test_len));
+	}
+
 	this->set_BeforeAfterStartBit(1); // PARSE_INT(CE,1)
 	PARSE_INT(year,inputString.find("-"));
 	PARSE_INT(month,2);
 	PARSE_INT(day_of_month,2);
 	PARSE_INT(hour,2);
 	PARSE_INT(minute,2);
-	PARSE_INT(second,2);
+	PARSE_INT(second,2);  
 	PARSE_INT(millisecond,3);
 	++pos; // 2020-1112 mlr why? To match toString format... See above.
 	PARSE_INT(forward_resolution,2);
@@ -1587,6 +1603,23 @@ int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_v
 
   return tIndex.scidbTemporalIndex();  
   */
+}
+
+/**
+   Change the resolutions of a sequence of temporal index values according to the distance to prior and future points.
+
+   Set include_bounds to true to include the reverse and future points in the resolution covered (the default).
+ */
+void set_temporal_resolutions_from_sorted_inplace(int64_t* ti_sorted, const int64_t len, bool include_bounds) {
+  int64_t tm, t0, tp;
+  
+  for(int i = 0; i < len; ++i) {
+    // There are more idiomatic ways to do the following.
+    tm = i-1 <    0 ? -1 : ti_sorted[i-1];
+    t0 =                   ti_sorted[i  ];
+    tp = i+1 >= len ? -1 : ti_sorted[i+1];
+    ti_sorted[i] = scidbNewTemporalValue(tm,t0,tp,include_bounds);
+  }
 }
 
 // } /* namespace std */

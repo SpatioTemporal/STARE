@@ -17,6 +17,9 @@
 #define TAGNC(x) {}
 // #define ENDL(out) {}
 
+#include <vector>
+#include <string>
+
 void TemporalIndex_test() {
 
   bool globalPrintFlag = false; // true
@@ -2468,7 +2471,8 @@ max resolution ms:    1
 	  
 	  { // Asymetric test
 	    // cout << "---Asym check--" << endl << flush;
-	  int64_t t2 = scidbNewTemporalValue(
+	    
+	    int64_t t2 = scidbNewTemporalValue(
 					     fromStringJulianTAI_ISO("2003-01-10T00:00:00.000 (12 12) (1)"),
 					     fromStringJulianTAI_ISO("2003-01-12T00:00:00.000 (12 12) (1)"),
 					     fromStringJulianTAI_ISO("2003-01-20T00:00:00.000 (12 12) (1)"),
@@ -2633,6 +2637,45 @@ max resolution ms:    1
 
 	}
 
+	if( true ) {
+	  int n = 4;
+	  int64_t t_index[4];
+	  {
+	    int i = 0;
+	    t_index[i++] = fromStringJulianTAI_ISO("2003-02-13T12:00:00.000 (12 12) (1)");
+	    t_index[i++] = fromStringJulianTAI_ISO("2004-02-13T12:00:00.000 (12 12) (1)");
+	    t_index[i++] = fromStringJulianTAI_ISO("2004-03-13T12:00:00.000");
+	    t_index[i++] = fromStringJulianTAI_ISO("2004-04-13T12:00:00");
+	  }
+
+	  set_temporal_resolutions_from_sorted_inplace(t_index,n);
+
+	  vector< vector< string > > expected_
+	    = {
+             {"2003-02-13T11:59:59.999 (00 63) (1)", "2003-02-13T12:00:00.000 (12 48) (1)", "2004-02-13T12:00:00.000 (63 63) (1)"}
+            ,{"2003-02-13T12:00:00.000 (00 63) (1)", "2004-02-13T12:00:00.000 (15 12) (1)", "2004-04-09T12:00:00.000 (63 63) (1)"}
+            ,{"2004-01-17T12:00:00.000 (00 63) (1)", "2004-03-13T12:00:00.000 (15 15) (1)", "2004-05-08T12:00:00.000 (63 63) (1)"}
+            ,{"2004-02-17T12:00:00.000 (00 63) (1)", "2004-04-13T12:00:00.000 (48 15) (1)", "2004-04-13T12:00:00.001 (63 63) (1)"}
+	  };
+
+	  vector< vector< string > > results_;
+	  
+	  for( int k=0; k<n; ++k ) {
+	    vector< string > r_;
+	    int64_t tiv = t_index[k];
+	    r_.push_back( toStringJulianTAI_ISO( scidbLowerBoundTAI(tiv) ));
+	    r_.push_back( toStringJulianTAI_ISO( tiv )); 
+	    r_.push_back( toStringJulianTAI_ISO( scidbUpperBoundTAI(tiv) ));
+	    results_.push_back(r_);
+	  }
+
+	  for( int k=0; k<n; ++k ) {
+	    for( int j=0; j<3; ++j ) {
+	      ASSERT_EQUAL(expected_[k][j],results_[k][j]);
+	    }
+	  }
+	}
+	
 //	if( true ) {
 //
 //
