@@ -40,15 +40,15 @@ public:
     // Attributes
     STARE_ENCODE key;            // STARE Encode
     int level;          // 0 <= level <= 27, (0 is the highest level)
+                        //      Tree Hierachical level (node coverage)
     bool isLeaf;        // True or False
     int count;          // Total number of children
-    //HTMSubTreeNodeEntry* entries[MAX_NUM_CHILD];   // List of children if it is not a leaf
+    //int dataResolution; // 0 <= level <= 27, (leaf level) 
+    //                    //      Resolution level
     
     //entries
     HTMSubTreeNode* children[MAX_NUM_CHILD];
     STARE_ENCODE keys[MAX_NUM_CHILD];
-    // Methods
-
 
 private:
     STARE_ENCODE genSTARELEVELCode(STARE_ENCODE key, unsigned int level, unsigned int pos);

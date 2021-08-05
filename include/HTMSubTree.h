@@ -24,17 +24,35 @@ public:
     HTMSubTree();    
     HTMSubTree(char* sidecar);//Load HTMSubTree from sidecar file
     HTMSubTree(STARE_SpatialIntervals sids);//Load HTMSubTree from list of STARE values
+    //TODO:
+    // - HTMSubTree(HstmRange *range);
+    // - Convert HstmRange to STARE_SpatialInterval: HstmRange2STARE_SpatialInterval
+    //      Perhaps there is already a function to do this (i.e., toSpatialInterval())
 
     // Destructors
     ~HTMSubTree();
 
     // Attributes
     HTMSubTreeNode* root;
-    //HTMSubTreeNodeEntry* root[MAX_NUM_CHILD];
-
+    
     // Methods
-    bool isIntersect(HTMSubTreeNode* Ins_root);
-    bool isContain(STARE_ArrayIndexSpatialValue siv);
+    bool isIntersect(HTMSubTreeNode* Ins_root); // return if there is any overlapping
+    bool isContain(STARE_ArrayIndexSpatialValue siv); //return if siv is contained in HTMSubTree
+    //TODO:
+    // void addSpatialIntervals(STARE_SpatialIntervals interval);
+    // void addSpatialRange(const SpatialRange& r);
+    // STARE_SpatialIntervals toSpatialInterval();
+    // int getNextSpatialInterval(STARE_SpatialIntervals &interval)
+    //Option:
+        // int getNext (KeyPair &kp);
+        // void reset();
+        // void pure();
+        // void degrag();
+        // void compress();
+    
+    std::list<list<STARE_ENCODE>>* leftJoin(HTMSubTree* Ins_root);
+    std::list<list<STARE_ENCODE>>* innerJoin(HTMSubTree* Ins_root);
+    std::list<list<STARE_ENCODE>>* fullJoin(HTMSubTree* Ins_root);
 
     std::list<STARE_ENCODE>* intersect(HTMSubTreeNode* Ins_root); // Return a list of STARE_ENCODE
 
@@ -50,10 +68,14 @@ public:
     void                addSTAREID(STARE_ENCODE key);
     // Helper functions
     STARE_ENCODE                 getSTARELEVELCode(STARE_ENCODE key, int level);
-    int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
     void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> *path);
+    bool                check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b);
+    
+    int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
+    bool                rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatialValue siv);
+    bool                rec_isIntersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
 };
 
 void HTMSubTree_test_Create_Print();

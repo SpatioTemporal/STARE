@@ -221,6 +221,112 @@ int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, st
     }
 }
 
+bool HTMSubTree::isIntersect(HTMSubTreeNode* Ins_root){ // return if there is any overlapping
+    bool result = false;
+    HTMSubTreeNode* sub_Ins_root = getHighestRoot(Ins_root);            // sub_Ins_root: the highest root of a given tree.
+    HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);  //sub_root: the potential branch from root
+                                                                        //sub_Ins_root and sub_root have the same level. 
+    if (sub_root == NULL || sub_Ins_root == NULL)
+        return result; //There is no intersection
+    
+    result = rec_isIntersect(sub_root, sub_Ins_root);
+    return result;
+}
+
+bool HTMSubTree::rec_isIntersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b){
+    bool result = false;
+    STARE_ENCODE key_a = root_a->key & 0x3fffffffffffffe0; //clear level;
+    STARE_ENCODE key_b = root_b->key & 0x3fffffffffffffe0;
+    if(key_a != key_b || root_a->level != root_b->level) {
+        std::cout << "Input Error (rec_isIntersect): two sub_roots are not match each other!";
+        return false;
+    }
+    if((root_a->isLeaf)  || (root_b->isLeaf)){
+        STARE_ENCODE res_key = root_a->key;
+        if (root_b->isLeaf)
+            res_key = root_b->key;
+        //result->push_back(res_key); //add key of a leaf
+        return true; // found an overlapping leaf
+    }
+    else{//Both root_a and root_b are Non-Leaf nodes
+        int loop = MAX_NUM_CHILD_II;
+        if (root_a->level == 0)
+            loop = MAX_NUM_CHILD;
+        for (int i = 0; i < loop; i++){
+            if((root_a->children[i] != NULL) && (root_b->children[i] != NULL)){
+                result = rec_intersect(root_a->children[i], root_b->children[i], result);
+                if(result) 
+                    return result; //Stop if find any overlapping leaf
+            }                
+        }
+        return result;
+    }
+}
+
+bool HTMSubTree::isContain(STARE_ArrayIndexSpatialValue siv){ //return if siv is contained in HTMSubTree
+    bool result = false;
+    HTMSubTreeNode* sub_root = getHighestRoot(root);            // sub_root: the highest root of a given tree.
+    if (sub_root == NULL)
+        return result; //siv is not contained in the tree
+    
+    result = rec_isContain(sub_root, siv);
+    
+    return result;
+}
+
+bool HTMSubTree::rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatialValue siv){
+    if(sub_root == NULL){
+        std::cout << "Input Error (rec_isContain): The input is NULL!";
+        return false;
+    }
+    if(sub_root->isLeaf){
+        return check_Contain(sub_root->key, siv);
+    }
+    else{//Both sub_root is Non-Leaf nodes
+        unsigned long long level_r = sub_root->key & 0x000000000000001f;
+        unsigned long long level_siv = siv & 0x000000000000001f;
+        if(level_siv <= level_r)//siv's coverage is larger (or equal) than sub_root's coverage
+            return false;
+        else{ // level_siv > level_r: siv's coverage is smaller than sub_root's coverage
+            STARE_ENCODE code_sid_adjust = getSTARELEVELCode(siv, level_r + 1);
+            int loop = MAX_NUM_CHILD_II;
+            if (sub_root->level == 0)
+                loop = MAX_NUM_CHILD;
+            
+            for (int i = 0; i < loop; i++){
+                if((sub_root->keys[i] == code_sid_adjust) && (root_b->children[i] != NULL)){
+                    result = rec_isContain(sub_root->children[i], siv);
+                    return result; //return the result from the only one potential child that may cover siv
+                }                
+            }
+            return false; //Cannot find any potential child.    
+        }
+    }
+}
+
+//Check if STARE_ID_b is contained in STARE_ID_a
+bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
+    unsigned long long level_a = key_a & 0x000000000000001f;
+    unsigned long long level_b = key_b & 0x000000000000001f;
+    if(level_b < level_a)//b's coverage is larger than a's coverage
+        return false;
+    else {// level_b >= level_a: b's coverage is smaller than a's coverage
+        STARE_ENCODE sid_a = getSTARELEVELCode(key_a, level_a);
+        STARE_ENCODE sid_b_adjust = getSTARELEVELCode(key_b, level_a);
+        if(sid_b_adjust == sid_a) // b in the region covered by a.
+            return true;
+        return false;
+    }
+}
+std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTree* Ins_root){
+    return NULL;
+}
+std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTree* Ins_root){
+    return NULL;
+}
+std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTree* Ins_root){
+    return NULL;
+}
 HTMSubTreeNode* HTMSubTree::getHighestRoot(HTMSubTreeNode* Ins_root){
     if(Ins_root == NULL){
         std::cout << "Input Error (getHighestRoot): The input is NULL!";
