@@ -319,13 +319,246 @@ bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
     }
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTree* Ins_root){
+    std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
+    HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
+    if (root == NULL) {
+        std::cout << "NULL input!";
+        return NULL; 
+    }
+    if (sub_Ins_root == NULL){
+        if (getAllLeaves(root, result)) return result;
+        return NULL;
+    }
+    if(rec_LeftJoin(root, sub_Ins_root, result)) return result;
     return NULL;
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTree* Ins_root){
+    std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
+    HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
+    HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
+    if (sub_root == NULL | sub_Ins_root == NULL) 
+        return NULL; 
+    if(rec_InnerJoin(sub_root, sub_Ins_root, result)) return result;
     return NULL;
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTree* Ins_root){
+    std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
+    //HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
+    if (root == NULL) {
+        getAllLeaves(Ins_root, result);
+        return result; 
+    }
+    if (Ins_root == NULL){
+        getAllLeaves(root, result) 
+        return result;
+    }
+    if(rec_FullJoin(root, Ins_root, result)) return result;
     return NULL;
+
+}
+int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result){
+    //Conditions: Root_a and root_b are not NULL, level_a == level_b
+    if(root_a == NULL || root_b == NULL){
+        std::cout << "Error (rec_FullJoin): input is NULL!";
+        return 0;
+    }
+    unsigned long long level_a = root_a->key & 0x000000000000001f;
+    unsigned long long level_b = root_b->key & 0x000000000000001f;
+    if(level_a != level_b){
+        std::cout << "Error (rec_FullJoin): levels are different in rec_FullJoin!";
+        return 0;
+    }
+    //Level_a == Level_b
+    if(root_a->isLeaf){//get all leaves of b and add to a tuple of root_a.
+        std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE> ();
+        res->push_back(root_a->key);
+        if(!getAllLeaves(root_b, res)) 
+            return 0;
+        result->push_back(*res);
+    }
+    else if(root_b->isLeaf)){//add b to all leaves of a.
+        std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE>();
+        if(!getAllLeaves(root_a, res)) return 0;
+        std::list<STARE_ENCODE>::iterator it;
+        for (it = res->begin(); it != res->end(); ++it){
+            std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+            temp->push_back(*it);
+            temp->push_back(root_b->key);
+            result->push_back(*temp);
+        }
+        res->clear();
+        delete res;
+    }
+    else{//Both root_a and root_b are Non-Leaf nodes
+        int loop = MAX_NUM_CHILD_II;
+        if (root_a->level == 0)
+            loop = MAX_NUM_CHILD;
+        for(int i = 0; i < loop; i++){
+            if(root_a->children[i] == NULL && root_b->children[i] != NULL){//add all leaves of b->children[i]
+                getAllLeaves(root_b->children[i]);
+            }
+            else if(root_a->children[i] != NULL && root_b->children[i] == NULL){//add all leaves of a->children[i]
+                getAllLeaves(root_a->children[i]);
+            }
+            if ((root_a->children[i] != NULL) && (root_b->children[i]) != NULL){
+                if(!rec_InnerJoin(root_a->children[i], root_b->children[i], result)) 
+                    return 0;//Stop if any error
+            }          
+        }
+    }
+    return 1;
+}
+int HTMSubTree::rec_InnerJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result){
+    STARE_ENCODE key_a = root_a->key & 0x3fffffffffffffe0; //clear level;
+    STARE_ENCODE key_b = root_b->key & 0x3fffffffffffffe0;
+    if(key_a != key_b || root_a->level != root_b->level) {
+        std::cout << "Input Error (rec_intersect): two sub_roots are not match each other!";
+        return -1;
+    }
+    if(root_a->isLeaf){//get all leaves of b and add to a tuple of root_a.
+        std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE> ();
+        res->push_back(root_a->key);
+        if(!getAllLeaves(root_b, res)) 
+            return 0;
+        result->push_back(*res);
+    }
+    else if(root_b->isLeaf)){//add b to all leaves of a.
+        std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE>();
+        if(!getAllLeaves(root_a, res)) return 0;
+        std::list<STARE_ENCODE>::iterator it;
+        for (it = res->begin(); it != res->end(); ++it){
+            std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+            temp->push_back(*it);
+            temp->push_back(root_b->key);
+            result->push_back(*temp);
+        }
+        res->clear();
+        delete res;
+    }
+    else{//Both root_a and root_b are Non-Leaf nodes
+        int loop = MAX_NUM_CHILD_II;
+        if (root_a->level == 0)
+            loop = MAX_NUM_CHILD;
+        for(int i = 0; i < loop; i++){
+            if ((root_a->children[i] != NULL) && (root_b->children[i]) != NULL){
+                if(!rec_InnerJoin(root_a->children[i], root_b->children[i], result)) 
+                    return 0;//Stop if any error
+            }          
+        }
+    }
+    return 1;
+}
+int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result){
+    //Conditions: Root_a and root_b are not NULL and root_a covers root_b (level_a <= level_b)
+    if(root_a == NULL || root_b == NULL){
+        std::cout << "Error (rec_LeftJoin): input is NULL!";
+        return 0;
+    }
+    unsigned long long level_a = root_a->key & 0x000000000000001f;
+    unsigned long long level_b = root_b->key & 0x000000000000001f;
+    if(level_a > level_b){
+        std::cout << "Error (rec_LeftJoin): level_a is larger level_b!";
+        return 0;
+    }
+    int loop = MAX_NUM_CHILD_II;
+    if (root_a->level == 0)
+        loop = MAX_NUM_CHILD;
+    if(level_a == level_b){
+        if(root_a->isLeaf){//get all leaves of b and add to a tuple of root_a.
+            std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE> ();
+            res->push_back(root_a->key);
+            if(!getAllLeaves(root_b, res)) return 0;
+            result->push_back(*res);
+        }
+        else if(root_b->isLeaf){//add b to all leaves of a.
+            std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE>();
+            if(!getAllLeaves(root_a, res)) return 0;
+            std::list<STARE_ENCODE>::iterator it;
+            for (it = res->begin(); it != res->end(); ++it){
+                std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+                temp->push_back(*it);
+                temp->push_back(root_b->key);
+                result->push_back(*temp);
+            }
+            res->clear();
+            delete res;
+        }
+        else{//both root_a and root_b are non-leaf nodes
+            for(int i = 0; i < loop; i++){
+                if(root_a->children[i] == NULL) continue;
+                else if(root_b->children[i] == NULL){
+                    if(!getAllLeaves(root_a->children[i], result)) return 0;//stop if any error
+                }
+                else{
+                    if(!rec_LeftJoin(root_a->children[i], root_b->children[i], result))
+                        return 0;//Stop if any error
+                }
+            }
+        }
+    }
+    else{//level_a < level_b (root_a covers root_b)
+        for(int i = 0; i < loop; i++){
+            STARE_ENCODE sid_b_adjust = getSTARELEVELCode(root_b->key, i + 1);
+            if(root_a->children[i] != NULL){
+                if(root_a->keys[i] != sid_b_adjust){
+                    //Stop if getting any error
+                    if(!getAllLeaves(root_a->children[i], result)) return 0;
+                }
+                else{
+                    rec_LeftJoin(root_a->children[i], root_b, result);//go further
+                }
+            }
+        }
+    }
+    return 1;
+}
+int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result){
+    if(current != NULL){
+        int loop = MAX_NUM_CHILD_II;
+        if(current->level == 0)
+            loop = MAX_NUM_CHILD;
+        if(current->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
+            std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+            temp->push_back(current->children[i]->key);
+            result->push_back(*temp);
+            return 1;
+        }
+        for (int i = 0; i < loop; i++){
+            if(current->children[i] != NULL){
+                if(current->children[i]->isLeaf){//Add leaf
+                    std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+                    temp->push_back(current->children[i]->key);
+                    result->push_back(*temp);
+                }
+                else
+                    printFromNode(current->children[i]);
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result){
+    if(current != NULL){
+        int loop = MAX_NUM_CHILD_II;
+        if(current->level == 0)
+            loop = MAX_NUM_CHILD;
+        if(current->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
+            result->push_back(current->children[i]->key);
+            return 1;
+        }
+        for (int i = 0; i < loop; i++){
+            if(current->children[i] != NULL){
+                if(current->children[i]->isLeaf)//Add leaf
+                    result->push_back(current->children[i]->key);
+                else
+                    printFromNode(current->children[i]);
+            }
+        }
+        return 1;
+    }
+    return 0;
 }
 HTMSubTreeNode* HTMSubTree::getHighestRoot(HTMSubTreeNode* Ins_root){
     if(Ins_root == NULL){

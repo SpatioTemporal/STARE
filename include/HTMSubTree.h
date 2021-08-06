@@ -67,7 +67,7 @@ public:
     HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level);
     void                addSTAREID(STARE_ENCODE key);
     // Helper functions
-    STARE_ENCODE                 getSTARELEVELCode(STARE_ENCODE key, int level);
+    STARE_ENCODE        getSTARELEVELCode(STARE_ENCODE key, int level);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
     void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> *path);
@@ -76,6 +76,12 @@ public:
     int                 rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, std::list<STARE_ENCODE> * result);
     bool                rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatialValue siv);
     bool                rec_isIntersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
+    int                 rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result);
+    int                 rec_InnerJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result);
+    int                 rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result);
+
+    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result);
+    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result);
 };
 
 void HTMSubTree_test_Create_Print();
