@@ -13,22 +13,40 @@
 
 
 SpatialRange::SpatialRange() {
-	this->range = new HstmRange;
+	//this->range = new HstmRange;
+	tree = new HTMSubTree();
 }
 
 SpatialRange::SpatialRange(STARE_SpatialIntervals intervals) {
-	this->range = new HstmRange;
-	this->addSpatialIntervals(intervals);
+	//this->range = new HstmRange;
+	//this->addSpatialIntervals(intervals);
+	tree = new HTMSubTree(intervals);
 }
 
+SpatialRange::SpatialRange(std::list<STARE_ENCODE> * sids) {
+	//this->range = new HstmRange;
+	//this->addSpatialIntervals(intervals);
+	tree = new HTMSubTree(sids);
+}
 SpatialRange::~SpatialRange() {
-  if( this->range != NULL ) {
-	  delete this->range; // TODO mlr. Um. Dangerous if range is from elsewhere? Maybe use some sort of smart pointer?
-  }
+  //if( this->range != NULL ) {
+  //	  delete this->range; // TODO mlr. Um. Dangerous if range is from elsewhere? Maybe use some sort of smart pointer?
+  //}
+  if(tree != NULL)
+	delete tree;
 }
 
 void SpatialRange::addSpatialRange(const SpatialRange& range) {
-	this->range->addRange(range.range);
+	//this->range->addRange(range.range);
+	std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+	if(tree->getAllLeaves(range.tree->root, temp)){
+        std::list<STARE_ENCODE>::iterator it;
+        for (it = temp->begin(); it != temp->end(); ++it){
+            tree->addSTAREID(*it);
+        }
+	}
+	temp->clear();
+	delte temp;
 }
 
 /**
@@ -37,9 +55,9 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
  * TODO: Have a SpatialRange class instead of an HstmRange?
  */
 // #define DIAG
-#undef DIAG
+//#undef DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
-	EmbeddedLevelNameEncoding leftJustified, lj_cleared;
+	/* EmbeddedLevelNameEncoding leftJustified, lj_cleared;
 #ifdef DIAG
   int count = 0;
 #endif  
@@ -53,6 +71,14 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
     lj_cleared       = leftJustified.clearDeeperThanLevel(a_level);
     uint64 a_cleared = lj_cleared.getId();
 		auto i1 = (i0+1);
+#ifdef DIAG
+		cout << "sr::addsi i0: 0x"
+			 << setw(16) << setfill('0') << hex << (*i0);
+		if( i1 != intervals.end() ) {		
+			cout << " i1: 0x" << setw(16) << setfill('0') << hex << (*i1);
+		}
+		cout << dec << endl << flush;
+#endif
 		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
 		if( i1 != intervals.end() ) {
 			if(terminatorp(*i1)) {
@@ -64,11 +90,11 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 
 #ifdef DIAG
 		cout << "sr::addsi "
-				<< setw(16) << setfill('0') << hex << a << " "
-				<< setw(20) << dec << a << " "
-				<< setw(16) << setfill('0') << hex << b << " "
-				<< setw(20) << dec << b << " "
-				<< endl << flush;
+			 << setw(16) << setfill('0') << hex << a << " "
+			 << setw(20) << dec << a << " "
+			 << setw(16) << setfill('0') << hex << b << " "
+			 << setw(20) << dec << b << " "
+			 << endl << flush;
 #endif
 		// old this->range->addRange(a,b);
 		this->range->addRange(a_cleared,b);
@@ -76,9 +102,21 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
     cout << "sr::addsi addRange done" << endl << flush;    
 		cout << "sr::addsi nr = " << this->range->range->nranges() << endl << flush;
 #endif
-	}
+	}*/
+	if(!intervals.empty()){
+        int size = intervals.size();
+        unsigned long long curSID = 0;
+        tree->root->isLeaf = false;//start to insert
+        for (int i = 0; i < size; i++){
+            curSID = intervals[i];
+            tree->addSTAREID(curSID);
+        }
+    }
+    else{
+        std::cout << "Input Error: The list of STARE values is empty!";
+    }
 }
-#undef DIAG
+//#undef DIAG
 
 // #define DIAG
 int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
@@ -123,12 +161,26 @@ int SpatialRange::getNextSpatialInterval(STARE_SpatialIntervals &interval) {
 #undef DIAG
 
 STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
-	STARE_SpatialIntervals intervals;
-	if(this->range) {
-		this->range->reset();
-		while( this->getNextSpatialInterval(intervals) > 0 );
+	//STARE_SpatialIntervals intervals;
+	//if(this->range) {
+	//	this->range->reset();
+	//	while( this->getNextSpatialInterval(intervals) > 0 );
+	//}
+	//return intervals;
+
+	//Return the a vector of stare_ID
+	std::list<STARE_ENCODE> *temp = new std::list<STARE_ENCODE>();
+	if(tree->getAllLeaves(tree->root, temp)){
+		std::list<STARE_ENCODE>::iterator it;
+		STARE_SpatialIntervals intervals;
+		for(it = temp->begin(); it != temp->end(); it++){
+			intervals->push_back(*it);
+		}
+		return intervals;
 	}
-	return intervals;
+	return NULL;
+	//Return a list of intervals
+	//Would need a function in tree->getAllIntervals(tree->root, temp)
 }
 
 /*
@@ -136,6 +188,7 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
+	/*
 	// cout << endl << flush << "**sr_intersect**" << endl << flush;
 	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 // #define DIAG
@@ -165,6 +218,17 @@ SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool co
 	return sr;
 
 //	return SpatialRange(range);
+*/
+	if(a == NULL || b == NULL){
+        std::cout << "Error (sr_intersect): input is NULL!";
+		return NULL;
+	}
+
+	std::list<STARE_ENCODE> *temp = a.tree.intersect(b.tree->root);
+	SpatialRange *result = SpatialRange(temp);
+	temp->clear();
+	delete temp;
+	return result;
 }
 
 

@@ -12,6 +12,7 @@
 
 #include "STARE.h"
 #include "HstmRange.h"
+#include "HTMSubTree.h"
 
 /**
  * A wrapper for an HstmRange that knows about STARE to provide htm-range-like functions.
@@ -19,36 +20,47 @@
  */
 class SpatialRange {
 public:
-	SpatialRange();
-	SpatialRange(STARE_SpatialIntervals intervals);
-	SpatialRange(HstmRange *range) { this->range = range; }
-	virtual ~SpatialRange();
+	SpatialRange(); //Done
+	SpatialRange(STARE_SpatialIntervals intervals); //Done
+	//SpatialRange(HstmRange *range) { this->range = range; }
+	SpatialRange(HTMSubTree *tree){ this->tree = tree;} //Done
+	SpatialRange(std::list<STARE_ENCODE> *sids);
+	virtual ~SpatialRange(); //Done
 
-	void addSpatialIntervals(STARE_SpatialIntervals intervals);
-	void addSpatialRange(const SpatialRange& r);
+	void addSpatialIntervals(STARE_SpatialIntervals intervals); //Done
+	void addSpatialRange(const SpatialRange& r);//Done
 
-	STARE_SpatialIntervals toSpatialIntervals();
-	int getNextSpatialInterval(STARE_SpatialIntervals &interval);
+	STARE_SpatialIntervals toSpatialIntervals();//Done - return a list of stare_ID
+	int getNextSpatialInterval(STARE_SpatialIntervals &interval);//Don't need this
 
-	bool contains(STARE_ArrayIndexSpatialValue siv) {
-	  // cout << "sr::c " << flush;
-	  EmbeddedLevelNameEncoding leftJustified;
-	  leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
-	  return range->range->isIn(leftJustified.maskOffLevelBit());
+	//bool contains(STARE_ArrayIndexSpatialValue siv) {
+	//  // cout << "sr::c " << flush;
+	//  EmbeddedLevelNameEncoding leftJustified;
+	//  leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+	//  return range->range->isIn(leftJustified.maskOffLevelBit());
+	//}
+
+	bool contains(STARE_ArrayIndexSpatialValue siv) { //Done
+		return tree->isContain(siv);
 	}
 
-	bool intersects(STARE_ArrayIndexSpatialValue siv) {
-		EmbeddedLevelNameEncoding leftJustified;
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
-		Key lo = leftJustified.maskOffLevelBit();
-		Key hi = lo;
-		// KeyPair pr = KeyPair(lo,hi);
-		int rstat = range->range->contains(lo,hi);
-		bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
-		return intersectp;
+	//bool intersects(STARE_ArrayIndexSpatialValue siv) {
+	//	EmbeddedLevelNameEncoding leftJustified;
+	//	leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
+	//	Key lo = leftJustified.maskOffLevelBit();
+	//	Key hi = lo;
+	//	// KeyPair pr = KeyPair(lo,hi);
+	//	int rstat = range->range->contains(lo,hi);
+	//	bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
+	//	return intersectp;
+	//}
+
+	bool intersects(STARE_ArrayIndexSpatialValue siv) { //Done
+		return tree->isIntersect(siv);
 	}
 
-	HstmRange *range;
+	//HstmRange *range;
+	HTMSubTree *tree;
 
 	/////////// private: Maybe? ////////////
 
@@ -58,7 +70,9 @@ public:
 		int istat = range->getNext(kp);
 //		cout << "<istat=" << istat << ">" << flush;
 		return istat;
-	};
+	};//?
+
+	//Mike suggested to remove these functions
 	void reset() { range->reset(); } // range not null?
 	void purge() { range->purge(); } // what if range null?
 	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
@@ -116,9 +130,9 @@ public:
 	}
 };
 
-SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);
+SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false); //Done
 
-inline SpatialRange* operator& ( const SpatialRange& a,  const SpatialRange& b) {
+inline SpatialRange* operator& ( const SpatialRange& a,  const SpatialRange& b) {//Done
 	return sr_intersect(a,b);
 	// return new SpatialRange(new HstmRange(a.range->range->RangeFromIntersection(b.range->range))); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 }

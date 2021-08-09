@@ -36,6 +36,20 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
     }
 }
 
+HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids){
+    if(sids != NULL){
+        root = new HTMSubTreeNode();
+        std::list<STARE_ENCODE>::iterator it;
+        unsigned long long curSID = 0;
+        for (it = sids->begin(); it != sids->end(); it++){
+            addSTAREID(*it);
+        }
+    }
+    else{
+        std::cout << "Input Error: The list of STARE values is empty!";
+    }
+}
+
 void HTMSubTree::addSTAREID(STARE_ENCODE key){
     HTMSubTreeNode* curNode = root;
     unsigned long long level = key & 0x000000000000001f;

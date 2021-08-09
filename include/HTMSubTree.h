@@ -24,6 +24,7 @@ public:
     HTMSubTree();    
     HTMSubTree(char* sidecar);//Load HTMSubTree from sidecar file
     HTMSubTree(STARE_SpatialIntervals sids);//Load HTMSubTree from list of STARE values
+    HTMSubTree(std::list<STARE_ENCODE> *sids);
     //TODO:
     // - HTMSubTree(HstmRange *range);
     // - Convert HstmRange to STARE_SpatialInterval: HstmRange2STARE_SpatialInterval
@@ -62,10 +63,14 @@ public:
 
     void printTree2File(char* filename);
     void printFromNode2File(HTMSubTreeNode* current, ofstream& outputstream);
+
+protected:
+    void                addSTAREID(STARE_ENCODE key);
+    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result);
+    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result);
     
 //private:
     HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level);
-    void                addSTAREID(STARE_ENCODE key);
     // Helper functions
     STARE_ENCODE        getSTARELEVELCode(STARE_ENCODE key, int level);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
@@ -80,8 +85,6 @@ public:
     int                 rec_InnerJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result);
     int                 rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result);
 
-    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result);
-    int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result);
 };
 
 void HTMSubTree_test_Create_Print();
