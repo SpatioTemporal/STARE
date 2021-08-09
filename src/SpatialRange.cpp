@@ -232,3 +232,12 @@ SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool co
 }
 
 
+std::list<list<STARE_ENCODE>>* SpatialRange::leftJoin(SpatialRange* sp){
+	return tree->leftJoin(sp->tree->root);
+}
+std::list<list<STARE_ENCODE>>* SpatialRange::innerJoin(SpatialRange* sp){
+	return tree->innerJoin(sp->tree->root);
+}
+std::list<list<STARE_ENCODE>>* SpatialRange::fullJoin(SpatialRange* sp){
+	return tree->fullJoin(sp->tree->root);
+}

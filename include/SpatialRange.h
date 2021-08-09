@@ -62,6 +62,9 @@ public:
 	//HstmRange *range;
 	HTMSubTree *tree;
 
+    std::list<list<STARE_ENCODE>>* leftJoin(SpatialRange* sp);
+    std::list<list<STARE_ENCODE>>* innerJoin(SpatialRange* sp);
+    std::list<list<STARE_ENCODE>>* fullJoin(SpatialRange* sp);
 	/////////// private: Maybe? ////////////
 
 	// Maybe inherit these?
