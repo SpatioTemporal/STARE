@@ -64,7 +64,7 @@ public:
     void printTree2File(char* filename);
     void printFromNode2File(HTMSubTreeNode* current, ofstream& outputstream);
 
-protected:
+//protected:
     void                addSTAREID(STARE_ENCODE key);
     int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result);
     int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result);

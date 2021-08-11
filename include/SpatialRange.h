@@ -59,7 +59,7 @@ public:
 		//return tree->isIntersect(sids); TODO: some parameter conversions need to be taken care of
 	}
 
-	//HstmRange *range;
+	HstmRange *range;//Should remove and remove any relevant code in SpatialRange_test.cpp
 	HTMSubTree *tree;
 
     std::list<list<STARE_ENCODE>>* leftJoin(SpatialRange* sp);

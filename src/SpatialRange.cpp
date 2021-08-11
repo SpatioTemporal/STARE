@@ -46,7 +46,7 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
         }
 	}
 	temp->clear();
-	delte temp;
+	delete temp;
 }
 
 /**
@@ -170,15 +170,14 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
 
 	//Return the a vector of stare_ID
 	std::list<STARE_ENCODE> *temp = new std::list<STARE_ENCODE>();
+	STARE_SpatialIntervals intervals;
 	if(tree->getAllLeaves(tree->root, temp)){
 		std::list<STARE_ENCODE>::iterator it;
-		STARE_SpatialIntervals intervals;
 		for(it = temp->begin(); it != temp->end(); it++){
-			intervals->push_back(*it);
+			intervals.push_back(*it);
 		}
-		return intervals;
 	}
-	return NULL;
+	return intervals;
 	//Return a list of intervals
 	//Would need a function in tree->getAllIntervals(tree->root, temp)
 }
@@ -219,13 +218,13 @@ SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool co
 
 //	return SpatialRange(range);
 */
-	if(a == NULL || b == NULL){
+	/*if(a == NULL || b == NULL){
         std::cout << "Error (sr_intersect): input is NULL!";
 		return NULL;
-	}
+	}*/
 
-	std::list<STARE_ENCODE> *temp = a.tree.intersect(b.tree->root);
-	SpatialRange *result = SpatialRange(temp);
+	std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
+	SpatialRange *result = new SpatialRange(temp);
 	temp->clear();
 	delete temp;
 	return result;
