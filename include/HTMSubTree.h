@@ -51,9 +51,9 @@ public:
         // void degrag();
         // void compress();
     
-    std::list<list<STARE_ENCODE>>* leftJoin(HTMSubTree* Ins_root);
-    std::list<list<STARE_ENCODE>>* innerJoin(HTMSubTree* Ins_root);
-    std::list<list<STARE_ENCODE>>* fullJoin(HTMSubTree* Ins_root);
+    std::list<list<STARE_ENCODE>>* leftJoin(HTMSubTreeNode* Ins_root);
+    std::list<list<STARE_ENCODE>>* innerJoin(HTMSubTreeNode* Ins_root);
+    std::list<list<STARE_ENCODE>>* fullJoin(HTMSubTreeNode* Ins_root);
 
     std::list<STARE_ENCODE>* intersect(HTMSubTreeNode* Ins_root); // Return a list of STARE_ENCODE
 
