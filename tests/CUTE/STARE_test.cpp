@@ -608,7 +608,7 @@ void STARE_test() {
 		ASSERT_EQUAL("1 000002001-05-30 12:59:59.999 (22 22) (2)",index.tIndex.toStringJulianTAI());
 
 		double jd1 = jd0 + 1.0;
-		index.fromJulianDayTAI(jd1);
+		index.fromJulianDayTAI(jd1,22,22,2);
 		if(printFlag) {
 			cout << index.tIndex.toStringJulianTAI() << endl << flush;
 		}

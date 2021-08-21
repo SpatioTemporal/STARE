@@ -388,6 +388,7 @@ public:
 	TemporalIndex(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
+
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
 		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
 		int64_t babit = 1;
@@ -420,7 +421,26 @@ public:
 			REVERT(millisecond);
 		}
 		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
-			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+
+		  cout
+		    << endl << "TI input: " << "0x" << setw(16) << setfill('0') << hex << scidbTemporalIndex << dec << endl << flush;
+#define FMTtii(a) a << " " << data.getValue(a) << endl << flush
+		  cout
+		    << FMTtii("year")
+		    << FMTtii("month")
+		    << FMTtii("week")
+		    << FMTtii("day")
+		    << FMTtii("hour")
+		    << FMTtii("minute")
+		    << FMTtii("second")
+		    << FMTtii("millisecond")
+		    << FMTtii("forward_resolution")
+		    << FMTtii("reverse_resolution")
+		    << FMTtii("type")
+		    << FMTtii("BeforeAfterStartBit")
+		    ;
+#undef FMTtii
+			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE-A");
 		}
 	}
 
@@ -493,7 +513,7 @@ public:
 
 		// TODO Construct an index validity checker...
 		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
-			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE");
+			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE-B");
 		}
 		return *this;
 	};
@@ -569,11 +589,11 @@ public:
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
 
-	void           toJulianUTC   ( double& utc1, double& utc2 ) const;
-        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2 );
+	void           toJulianUTC   ( double& utc1, double& utc2)const ;
+        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
 
 	void           toJulianTAI   ( double& d1, double& d2) const;
-	TemporalIndex& fromJulianTAI ( double  d1, double  d2);
+	TemporalIndex& fromJulianTAI ( double  d1, double  d2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
 
 
 	void toFormattedJulianTAI(

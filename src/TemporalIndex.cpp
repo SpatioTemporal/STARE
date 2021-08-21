@@ -367,12 +367,21 @@ void TemporalIndex::toJulianUTC( double& utc1, double &utc2 ) const {
   this->toJulianTAI(d1,d2); // Get the TAI encoded time.
   not_ok = eraTaiutc(d1, d2, &utc1, &utc2); // Convert to UTC's quasi JD.
 }
-TemporalIndex& TemporalIndex::fromJulianUTC( double utc1, double utc2 ) {
+TemporalIndex& TemporalIndex::fromJulianUTC( double utc1, double utc2,
+					     int forward_resolution,
+					     int reverse_resolution,
+					     int type
+					     ) {
   double d1,d2; int not_ok = eraUtctai(utc1,utc2,&d1,&d2);
   if (not_ok == 1) {
     throw SpatialException("In TemporalIndex::fromJulianUTC, eraUtctai(...) failure.");
   }
   this->fromJulianTAI(d1, d2);
+
+  data.setValue("forward_resolution",forward_resolution);
+  data.setValue("reverse_resolution",reverse_resolution);
+  data.setValue("type",type);
+  
   return *this;
 }
 /**
@@ -683,6 +692,10 @@ int64_t scidbUpperBoundMS(int64_t ti_value) {
   int64_t delta = tmpIndex.millisecondsAtResolution(forward_resolution);
   int64_t t0    = tmpIndex.toInt64Milliseconds();
   int64_t t1    = t0 + delta;
+
+  // MLR Hack.
+  // Assume type == 1. Then max time is 8191.eoy.toInt64Milliseconds 258342911999999.
+  // cout << "subms: d,t0,t1: " << delta << " " << t0 << " " << t1 << endl << flush;
   tmpIndex.fromInt64Milliseconds(t1);
 
   // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
@@ -710,6 +723,11 @@ int64_t scidbLowerBoundMS(int64_t ti_value) {
   int64_t delta = -tmpIndex.millisecondsAtResolution(reverse_resolution);
   int64_t t0    = tmpIndex.toInt64Milliseconds();
   int64_t t1    = t0 + delta;
+
+  // MLR Hack.
+  // Assume type == 1. Then max time is 8191.eoy.toInt64Milliseconds 258342911999999.
+  // cout << "slbms: d,t0,t1: " << delta << " " << t0 << " " << t1 << endl << flush;
+  
   tmpIndex.fromInt64Milliseconds(t1);
   int64_t idx_ = tmpIndex.scidbTemporalIndex();
   return idx_;
@@ -723,16 +741,16 @@ int64_t scidbUpperBoundTAI(int64_t ti_value) {
 	TemporalIndex tmpIndex(ti_value);
 	int64_t forward_resolution = tmpIndex.get_forward_resolution();
 
-	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-	tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
-	tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask());
-
 	//////////////////////////////////
 	// Let's add an amount corresponding to the resolution.
 	double delta = tmpIndex.daysAtResolution(forward_resolution);
 	double d1, d2;
 	tmpIndex.toJulianTAI(d1,d2);
-	tmpIndex.fromJulianTAI(d1,d2+delta);
+	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+	tmpIndex.fromJulianTAI(d1,d2+delta,
+			       tmpIndex.data.get("forward_resolution")->getMask(),
+			       tmpIndex.data.get("reverse_resolution")->getMask()
+			       );
 	idx_ = tmpIndex.scidbTemporalIndex();
 	return idx_;
 }
@@ -746,17 +764,19 @@ int64_t scidbLowerBoundTAI(int64_t ti_value) {
   int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
 
   // TODO What should the forward_resolution be for a lower_bound?
-
-  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-  tmpIndex.set_forward_resolution(0);
-  tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask());
 	
   //////////////////////////////////
   // Let's add an amount corresponding to the resolution.
   double delta = -tmpIndex.daysAtResolution(reverse_resolution);
   double d1, d2;
   tmpIndex.toJulianTAI(d1,d2);
-  tmpIndex.fromJulianTAI(d1,d2+delta);
+  
+  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+  tmpIndex.fromJulianTAI(d1,d2+delta,
+			 0,
+			 tmpIndex.data.get("reverse_resolution")->getMask()
+			 );
+  
   idx_ = tmpIndex.scidbTemporalIndex();
   return idx_;
 }
@@ -922,7 +942,11 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
     d1 = d0_1; d2 = d0_2 + days;
 };
 
-TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
+TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2,
+					     int forward_resolution,
+					     int reverse_resolution,
+					     int type
+					     ) {
 	int not_ok, iy, im, id,_hour, _minute, _second, _millisecond, ihmsf[4];
 	int64_t CE = 1;
 	not_ok = eraD2dtf ( TimeStandard, 3, d1, d2, &iy, &im, &id, ihmsf );
@@ -970,6 +994,11 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 //	cout << ", " << milliseconds << endl << flush;
 	if( iy < 1) { CE = 0; iy = -iy;	}
 	this->fromNativeCEYearAndMilliseconds(CE, (int64_t)iy, milliseconds);
+	
+	data.setValue("forward_resolution",forward_resolution);
+	data.setValue("reverse_resolution",reverse_resolution);
+	data.setValue("type",type);
+	
 	return *this;
 };
 
@@ -1034,6 +1063,26 @@ int64_t TemporalIndex::toInt64Milliseconds() const {
  */
 TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
 
+  // MLR Hack. Assume type==1. 2021-0821
+  // TODO Do the same for underflow.
+  int64_t type1_max_8191_eoy_toInt64Milliseconds = 258342911999999;
+  if( milliseconds > type1_max_8191_eoy_toInt64Milliseconds ) {
+    stringstream ss;
+    ss << "TemporalIndex.fromInt64Milliseconds::Overflow for type==1. Max="
+      << type1_max_8191_eoy_toInt64Milliseconds
+      << " Input=" << milliseconds;
+    throw SpatialFailure(ss.str().c_str());
+  }
+
+  int64_t type1_min_8191_eoy_toInt64Milliseconds = -258311376000000;
+  if( milliseconds < type1_min_8191_eoy_toInt64Milliseconds ) {
+    stringstream ss;
+    ss << "TemporalIndex.fromInt64Milliseconds::Underflow for type==1. Min="
+      << type1_min_8191_eoy_toInt64Milliseconds
+      << " Input=" << milliseconds;
+    throw SpatialFailure(ss.str().c_str());
+  }
+      
     int64_t /*sum = 0,*/ total_left = milliseconds, CE = -1, year;
 
 
