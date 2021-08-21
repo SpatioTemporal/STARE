@@ -138,7 +138,8 @@ public:
 	void toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& forward_resolution, int& reverse_resolution, int& type);
 
 	double toJulianDayTAI()                   { double d1,d2; tIndex.toJulianTAI(d1, d2); return d1+d2; }
-	TemporalIndex& fromJulianDayTAI(double d) { tIndex.fromJulianTAI(d, 0.0); return tIndex; }
+	TemporalIndex& fromJulianDayTAI(double d, int forward_resolution, int reverse_resolution, int type)
+	  { tIndex.fromJulianTAI(d, 0.0, forward_resolution, reverse_resolution, type); return tIndex; }
 
 	TemporalIndex& getTIndex() { return tIndex; }
 

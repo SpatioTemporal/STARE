@@ -45,7 +45,7 @@ void SpatioTemporalUsage_test() {
 
     d1 = d2 = 0;
     
-    tIndex.setZero().fromJulianTAI(d1,d2);                     INDEX_OUT("jd=0:    ",tIndex);
+    tIndex.setZero().fromJulianTAI(d1,d2,0,0,1);               INDEX_OUT("jd=0:    ",tIndex);
     tIndex.set_year(2020);                                     INDEX_OUT("y=2020:  ",tIndex);
     tIndex.setZero().set_year(1);                              INDEX_OUT("ti=-1:   ",tIndex);
     tIndex.setZero();                                          INDEX_OUT("ti=-0:   ",tIndex);
