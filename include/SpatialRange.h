@@ -41,6 +41,8 @@ public:
 	//}
 
 	bool contains(STARE_ArrayIndexSpatialValue siv) { //Done
+		std::cout << "Contains\n";
+		return true;
 		return tree->isContain(siv);
 	}
 
@@ -55,11 +57,12 @@ public:
 	//	return intersectp;
 	//}
 
-	bool intersects(STARE_ArrayIndexSpatialValue siv) { //Done
-		return tree->isIntersect(siv);
+	bool intersects(STARE_SpatialIntervals sids) { //Done
+		HTMSubTree* temp = new HTMSubTree(sids);
+		return tree->isIntersect(temp->root); //TODO: some parameter conversions need to be taken care of
 	}
 
-	//HstmRange *range;
+	HstmRange *range;//Should remove and remove any relevant code in SpatialRange_test.cpp
 	HTMSubTree *tree;
 
     std::list<list<STARE_ENCODE>>* leftJoin(SpatialRange* sp);
@@ -70,16 +73,26 @@ public:
 	// Maybe inherit these?
 	// TODO Note the int in the following is a return code, not an index.
 	int  getNext(KeyPair &kp) {
-		int istat = range->getNext(kp);
+//		int istat = range->getNext(kp);
 //		cout << "<istat=" << istat << ">" << flush;
-		return istat;
+//		return istat;
 	};//?
 
 	//Mike suggested to remove these functions
-	void reset() { range->reset(); } // range not null?
-	void purge() { range->purge(); } // what if range null?
-	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
-	void compress() { range->range->CompressionPass(); } // Defragment and coarsen resolution where possible
+	void reset() { 
+		//range->reset(); 
+		std::cout << "Reset called!";
+		} // range not null?
+	void purge() { 
+		//range->purge(); 
+		tree->printTree();
+		} // what if range null?
+	void defrag() { 
+		//range->range->defrag(); 
+		} // Defragment intervals without changing resolution
+	void compress() { 
+		//range->range->CompressionPass(); 
+		} // Defragment and coarsen resolution where possible
 
 #define FMTX(x) " 0x" << setw(16) << hex << x << dec	
 	void dump() {
