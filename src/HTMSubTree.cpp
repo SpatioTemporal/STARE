@@ -268,7 +268,7 @@ bool HTMSubTree::rec_isIntersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b)
             loop = MAX_NUM_CHILD;
         for (int i = 0; i < loop; i++){
             if((root_a->children[i] != NULL) && (root_b->children[i] != NULL)){
-                bool result = rec_isIntersect(root_a->children[i], root_b->children[i]);
+                result = rec_intersect(root_a->children[i], root_b->children[i], result);
                 if(result) 
                     return result; //Stop if find any overlapping leaf
             }                
@@ -308,8 +308,8 @@ bool HTMSubTree::rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatial
                 loop = MAX_NUM_CHILD;
             
             for (int i = 0; i < loop; i++){
-                if((sub_root->keys[i] == code_sid_adjust) && (sub_root->children[i] != NULL)){
-                    bool result = rec_isContain(sub_root->children[i], siv);
+                if((sub_root->keys[i] == code_sid_adjust) && (root_b->children[i] != NULL)){
+                    result = rec_isContain(sub_root->children[i], siv);
                     return result; //return the result from the only one potential child that may cover siv
                 }                
             }
@@ -332,7 +332,7 @@ bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
         return false;
     }
 }
-std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
+std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTree* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
     if (root == NULL) {
@@ -346,7 +346,7 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
     if(rec_LeftJoin(root, sub_Ins_root, result)) return result;
     return NULL;
 }
-std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTreeNode* Ins_root){
+std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTree* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
     HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
@@ -355,7 +355,7 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTreeNode* Ins_root){
     if(rec_InnerJoin(sub_root, sub_Ins_root, result)) return result;
     return NULL;
 }
-std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTreeNode* Ins_root){
+std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTree* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     //HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
     if (root == NULL) {
@@ -363,7 +363,7 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTreeNode* Ins_root){
         return result; 
     }
     if (Ins_root == NULL){
-        getAllLeaves(root, result); 
+        getAllLeaves(root, result) 
         return result;
     }
     if(rec_FullJoin(root, Ins_root, result)) return result;
@@ -390,7 +390,7 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
             return 0;
         result->push_back(*res);
     }
-    else if(root_b->isLeaf){//add b to all leaves of a.
+    else if(root_b->isLeaf)){//add b to all leaves of a.
         std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE>();
         if(!getAllLeaves(root_a, res)) return 0;
         std::list<STARE_ENCODE>::iterator it;
@@ -409,10 +409,10 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
             loop = MAX_NUM_CHILD;
         for(int i = 0; i < loop; i++){
             if(root_a->children[i] == NULL && root_b->children[i] != NULL){//add all leaves of b->children[i]
-                getAllLeaves(root_b->children[i], result);
+                getAllLeaves(root_b->children[i]);
             }
             else if(root_a->children[i] != NULL && root_b->children[i] == NULL){//add all leaves of a->children[i]
-                getAllLeaves(root_a->children[i], result);
+                getAllLeaves(root_a->children[i]);
             }
             if ((root_a->children[i] != NULL) && (root_b->children[i]) != NULL){
                 if(!rec_InnerJoin(root_a->children[i], root_b->children[i], result)) 
@@ -436,7 +436,7 @@ int HTMSubTree::rec_InnerJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, st
             return 0;
         result->push_back(*res);
     }
-    else if(root_b->isLeaf){//add b to all leaves of a.
+    else if(root_b->isLeaf)){//add b to all leaves of a.
         std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE>();
         if(!getAllLeaves(root_a, res)) return 0;
         std::list<STARE_ENCODE>::iterator it;
@@ -527,25 +527,25 @@ int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
     return 1;
 }
 int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENCODE>>* result){
-    if(sub_root != NULL){
+    if(current != NULL){
         int loop = MAX_NUM_CHILD_II;
-        if(sub_root->level == 0)
+        if(current->level == 0)
             loop = MAX_NUM_CHILD;
-        if(sub_root->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
+        if(current->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
             std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
-            temp->push_back(sub_root->key);
+            temp->push_back(current->children[i]->key);
             result->push_back(*temp);
             return 1;
         }
         for (int i = 0; i < loop; i++){
-            if(sub_root->children[i] != NULL){
-                if(sub_root->children[i]->isLeaf){//Add leaf
+            if(current->children[i] != NULL){
+                if(current->children[i]->isLeaf){//Add leaf
                     std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
-                    temp->push_back(sub_root->children[i]->key);
+                    temp->push_back(current->children[i]->key);
                     result->push_back(*temp);
                 }
                 else
-                    printFromNode(sub_root->children[i]);
+                    printFromNode(current->children[i]);
             }
         }
         return 1;
@@ -554,20 +554,20 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENC
 }
 
 int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result){
-    if(sub_root != NULL){
+    if(current != NULL){
         int loop = MAX_NUM_CHILD_II;
-        if(sub_root->level == 0)
+        if(current->level == 0)
             loop = MAX_NUM_CHILD;
-        if(sub_root->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
-            result->push_back(sub_root->key);
+        if(current->isLeaf){//Add leaf - should not go to this case, but function call be parameterized with a leaf node.
+            result->push_back(current->children[i]->key);
             return 1;
         }
         for (int i = 0; i < loop; i++){
-            if(sub_root->children[i] != NULL){
-                if(sub_root->children[i]->isLeaf)//Add leaf
-                    result->push_back(sub_root->children[i]->key);
+            if(current->children[i] != NULL){
+                if(current->children[i]->isLeaf)//Add leaf
+                    result->push_back(current->children[i]->key);
                 else
-                    printFromNode(sub_root->children[i]);
+                    printFromNode(current->children[i]);
             }
         }
         return 1;
