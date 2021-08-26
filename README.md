@@ -96,8 +96,8 @@ The default partitioning of an HCE word follows. See TemporalIndex for more info
    Year=0 and Before/After=1 is an error. See TemporalIndex for more detail.
 
 \*\*A resolution of zero corresponds to the coarsest bit, e.g. the top of the
-   year field (bit position 62). A resolution of 54 corresponds to the finest
-   resolution, 1 ms (bit position 8). These are for the default encoding,
+   year field (bit position 62). A resolution of 48 corresponds to the finest
+   resolution, 1 ms (bit position 14). These are for the default encoding,
    type = 1. Forward and reverse resolution indicate direction in time
    away from encoded temporal position.
 
