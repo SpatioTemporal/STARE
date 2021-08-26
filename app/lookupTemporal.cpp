@@ -17,7 +17,8 @@ void usage(char *name) {
     << "  " << " -v, --verbose                                   : verbose: print all" << std::endl			
     << "  " << " -q, --quiet                                     : don't chat, just give back index" << std::endl			
     << "  " << " -z, --timezone=UTC|TOI                          : Timezone to UTC or TOI. (Default: UTC)" << std::endl		
-    << "  " << " -r, --resolution=RESOLUTION                     : Resolution of index to return (Default: 23)" << std::endl
+    << "  " << " -f, --forward_resolution=RESOLUTION             : Forward resolution of index to return (Default: 48 [millisec] )" << std::endl
+    << "  " << " -r, --reverse_resolution=RESOLUTION             : Reverse resolution of index to return (Default: 48 [millisec] )" << std::endl
     << "  " << " -t, --timestamp=YYYYYYYYY-MM-DDThh:mm:ss.sss    : Datetime passed as extended ISO 8601 date and time representation (signed 9 digits year)" << std::endl
     << "  " << " year month date hour minute second millisecond  : Time representation" << std::endl
     << std::endl;
@@ -31,7 +32,8 @@ struct Arguments {
   bool utc = true;
   bool toi = false;    
   string timestamp;
-  int resolution = 23;    
+  int forward_resolution = 23;
+  int reverse_resolution = 23;
   int datetime[7] = {0, 1, 1, 0, 0, 0, 0}; 
 };
 
@@ -40,13 +42,14 @@ Arguments parseArguments(int argc, char *argv[]) {
   if (argc == 1)  usage(argv[0]);
   Arguments arguments;        
   static struct option long_options[] = {
-					 {"help",        no_argument,       0,  'h' },
-					 {"verbose",     no_argument,       0,  'v' },
-					 {"quiet",       no_argument,       0,  'q' },
-					 {"timezone",    required_argument, 0,  'z' },
-					 {"resolution",  required_argument, 0,  'r' },
-					 {"timestamp",   required_argument, 0,  't' },
-					 {0,             0,                 0,  0   }
+					 {"help",        no_argument,               0,  'h' },
+					 {"verbose",     no_argument,               0,  'v' },
+					 {"quiet",       no_argument,               0,  'q' },
+					 {"timezone",    required_argument,         0,  'z' },
+					 {"forward_resolution",  required_argument, 0,  'f' },
+					 {"reverse_resolution",  required_argument, 0,  'r' },
+					 {"timestamp",   required_argument,         0,  't' },
+					 {0,             0,                         0,  0   }
   };
   int long_index = 0;
   int opt = 0;
@@ -63,9 +66,12 @@ Arguments parseArguments(int argc, char *argv[]) {
       else if (strcmp(optarg, "TOI")==0) { 
 	arguments.utc = false; 
 	arguments.toi = true;
-      }                
+      }
+    case 'f': {
+      arguments.forward_resolution = atoi(optarg); break;                
+    }
     case 'r': {
-      arguments.resolution = atoi(optarg); break;                
+      arguments.reverse_resolution = atoi(optarg); break;                
     }
     case 't': arguments.timestamp = optarg; break;
             
@@ -86,16 +92,16 @@ Arguments parseArguments(int argc, char *argv[]) {
 
 STARE stare;
 
-STARE_ArrayIndexTemporalValue makeIndexValue(string timestamp, int resolution) {        
-  struct tm tm;    
+STARE_ArrayIndexTemporalValue makeIndexValue(string timestamp, int forward_resolution, int reverse_resolution) {
+  struct tm tm;
   int type = 2;
   strptime(timestamp.data(), "%Y-%m-%dT%H:%M:%S", &tm);
-  return stare.ValueFromUTC(tm, resolution, type);
+  return stare.ValueFromUTC(tm, forward_resolution, reverse_resolution, type);
 }
 
-STARE_ArrayIndexTemporalValue makeIndexValue(int dt[7], int resolution) {
+STARE_ArrayIndexTemporalValue makeIndexValue(int dt[7], int forward_resolution, int reverse_resolution) {
   int type = 2;
-  return stare.ValueFromUTC(dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], resolution, type);            
+  return stare.ValueFromUTC(dt[0], dt[1], dt[2], dt[3], dt[4], dt[5], dt[6], forward_resolution, reverse_resolution, type);            
 }
 
 
@@ -103,9 +109,9 @@ int main(int argc, char *argv[]) {
   Arguments arguments = parseArguments(argc, argv);        
   STARE_ArrayIndexTemporalValue indexValue;
   if (arguments.timestamp.length() > 0) {        
-    indexValue = makeIndexValue(arguments.timestamp, arguments.resolution);        
+    indexValue = makeIndexValue(arguments.timestamp, arguments.forward_resolution, arguments.reverse_resolution);
   } else { 
-    indexValue = makeIndexValue(arguments.datetime, arguments.resolution);   
+    indexValue = makeIndexValue(arguments.datetime, arguments.forward_resolution, arguments.reverse_resolution);
   }
   std::cout << " " << indexValue << std::endl;    
 }

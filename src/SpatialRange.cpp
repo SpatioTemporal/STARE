@@ -73,12 +73,13 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 		auto i1 = (i0+1);
 #ifdef DIAG
 		cout << "sr::addsi i0: 0x"
-			 << setw(16) << setfill('0') << hex << (*i0);
+		     << setw(16) << setfill('0') << hex << (*i0);
 		if( i1 != intervals.end() ) {		
-			cout << " i1: 0x" << setw(16) << setfill('0') << hex << (*i1);
+		  cout << " i1: 0x" << setw(16) << setfill('0') << hex << (*i1);
 		}
 		cout << dec << endl << flush;
 #endif
+		
 		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
 		if( i1 != intervals.end() ) {
 			if(terminatorp(*i1)) {
@@ -90,11 +91,11 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 
 #ifdef DIAG
 		cout << "sr::addsi "
-			 << setw(16) << setfill('0') << hex << a << " "
-			 << setw(20) << dec << a << " "
-			 << setw(16) << setfill('0') << hex << b << " "
-			 << setw(20) << dec << b << " "
-			 << endl << flush;
+		     << setw(16) << setfill('0') << hex << a << " "
+		     << setw(20) << dec << a << " "
+		     << setw(16) << setfill('0') << hex << b << " "
+		     << setw(20) << dec << b << " "
+		     << endl << flush;
 #endif
 		// old this->range->addRange(a,b);
 		this->range->addRange(a_cleared,b);

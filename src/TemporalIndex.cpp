@@ -37,6 +37,7 @@ TemporalIndex::~TemporalIndex() {
 		<< setw(4) << dec << data.get(#field)->getCoFieldId() << hex \
 		<< endl << flush;
 void TemporalIndex::checkBitFormat() {
+  cout << "TemporalIndex::checkBitFormat()" << endl << flush;
 	cout << hex;
 	OUTPUT(BeforeAfterStartBit);
 	OUTPUT(year);
@@ -47,7 +48,8 @@ void TemporalIndex::checkBitFormat() {
 	OUTPUT(minute);
 	OUTPUT(second);
 	OUTPUT(millisecond);
-	OUTPUT(resolution);
+	OUTPUT(forward_resolution);
+	OUTPUT(reverse_resolution);
 	OUTPUT(type);
 	// OUTPUT(coResolutionLevel);
 	cout << dec;
@@ -175,7 +177,8 @@ string TemporalIndex::toStringJulianTAI() {
 	<< setw(2) << minute << ":"
 	<< setw(2) << second << "."
 	<< setw(3) << millisecond
-	<< " (" << setw(2) << data.getValue("resolution") << ")"
+	<< " (" << setw(2) << data.getValue("forward_resolution") << " "
+	<<         setw(2) << data.getValue("reverse_resolution") << ")"
 	<< " (" << setw(1) << data.getValue("type") << ")"
 	;
 	return ss.str();
@@ -210,8 +213,9 @@ TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	PARSE_INT(minute,2);
 	PARSE_INT(second,2);
 	PARSE_INT(millisecond,3);
-	++pos;
-	PARSE_INT(resolution,2);
+	++pos; // 2020-1112 mlr why? To match toString format... See above.
+	PARSE_INT(forward_resolution,2);
+	PARSE_INT(reverse_resolution,2);
 	++pos; ++pos;
 	PARSE_INT(type,1);
 #undef PARSE_INT
@@ -220,10 +224,115 @@ TemporalIndex& TemporalIndex::fromStringJulianTAI(string inputString) {
 	}
 	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
 	this->fromFormattedJulianTAI(year, month, day_of_month, hour, minute, second, millisecond);
-	data.setValue("resolution",resolution);
+	data.setValue("forward_resolution",forward_resolution);
+	data.setValue("reverse_resolution",reverse_resolution);
 	data.setValue("type",type);
 	return *this;
 }
+
+// TemporalIndex& TemporalIndex::fromStringISO(string inputString) {
+// 	int pos = 0;
+// #define PARSE_INT(field,width) \
+// 		int64_t field = atoi(inputString.substr(pos,width).c_str()); pos += width + 1;
+// 	// cout << endl << "pi: " << inputString.substr(pos,width).c_str() << endl;
+// 	//???? PARSE_INT(CE,1);
+// 	PARSE_INT(year,inputString.find("-")-2);
+// 	PARSE_INT(month,2); pos++; // Go past "-"
+// 	PARSE_INT(day_of_month,2); pos++; // Go past "T"
+// 	PARSE_INT(hour,2); pos++; // Skip :
+// 	PARSE_INT(minute,2); pos++; // Skip :
+// 	PARSE_INT(second,2); pos++; // Skip .
+// 	PARSE_INT(millisecond,3); // Done
+// 	//??? ++pos; // 2020-1112 mlr why? To match toString format... See above.
+// 	//??? PARSE_INT(forward_resolution,2);
+// 	//??? PARSE_INT(reverse_resolution,2);
+// 	++pos; ++pos; //Skipping? What?
+// 	PARSE_INT(type,1);
+// #undef PARSE_INT
+// 	if( CE < 1 ) {
+// 		year = 1 - year;
+// 	}
+// 	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
+// 	this->fromFormattedJulianTAI(year, month, day_of_month, hour, minute, second, millisecond);
+// 	data.setValue("forward_resolution",forward_resolution);
+// 	data.setValue("reverse_resolution",reverse_resolution);
+// 	data.setValue("type",type);
+// 	return *this;
+// }
+
+string TemporalIndex::toStringJulianTAI_ISO() {
+	double d1, d2; 
+    this->toJulianTAI(d1, d2);
+	int not_ok, /* iy, im, id,*/  year, month, day_of_month, hour, minute, second, millisecond, ihmsf[4];
+	not_ok      = eraD2dtf ( TimeStandard, 3, d1, d2, &year, &month, &day_of_month, ihmsf );
+	hour        = ihmsf[0];
+	minute      = ihmsf[1];
+	second      = ihmsf[2];
+	millisecond = ihmsf[3];
+	// int64_t	CE = this->get_BeforeAfterStartBit();
+	stringstream ss;
+	ss
+	<< year << "-"
+	<< setw(2) << setfill('0') << month << "-"
+	<< setw(2) << setfill('0') << day_of_month << "T"
+	<< setw(2) << setfill('0') << hour << ":"
+	<< setw(2) << setfill('0') << minute << ":"
+	<< setw(2) << setfill('0') << second << "."
+	<< setw(3) << setfill('0') << millisecond
+	<< " (" << setw(2) << data.getValue("forward_resolution") << " "
+	<<         setw(2) << data.getValue("reverse_resolution") << ")"
+	<< " (" << setw(1) << data.getValue("type") << ")"
+	;
+	return ss.str();
+}
+
+/**
+     Version 2021-0728-1
+     The format: "2004-02-13T12:00:00.000 (12 12) (1)"
+                 0123456789012345678901234567890123456789
+                 0         1         2         3
+                                   | 18 Start of seconds
+                                      | 21 Start of milliseconds
+                                         | 24 Start of info fields
+ */
+TemporalIndex& TemporalIndex::fromStringJulianTAI_ISO(string inputString) {
+	int pos = 0;
+#define PARSE_INT(field,width) \
+		int64_t field = atoi(inputString.substr(pos,width).c_str()); pos += width + 1;
+	// cout << endl << "pi: " << inputString.substr(pos,width).c_str() << endl;
+
+	string default_format = "1999-01-01T12:00:00.000 (48 48) (1)";
+
+	int test_len = inputString.length();
+	if( 17 <  test_len && test_len < 35 ) {
+	  inputString.append(default_format.substr(test_len,35-test_len));
+	}
+
+	this->set_BeforeAfterStartBit(1); // PARSE_INT(CE,1)
+	PARSE_INT(year,inputString.find("-"));
+	PARSE_INT(month,2);
+	PARSE_INT(day_of_month,2);
+	PARSE_INT(hour,2);
+	PARSE_INT(minute,2);
+	PARSE_INT(second,2);  
+	PARSE_INT(millisecond,3);
+	++pos; // 2020-1112 mlr why? To match toString format... See above.
+	PARSE_INT(forward_resolution,2);
+	PARSE_INT(reverse_resolution,2);
+	++pos; ++pos;
+	PARSE_INT(type,1);
+#undef PARSE_INT
+	//if( CE < 1 ) {
+	//	year = 1 - year;
+	//}
+	// this->setJulianFromFormattedTAI(CE, year, month, day_of_month, hour, minute, second, millisecond);
+	this->fromFormattedJulianTAI(year, month, day_of_month, hour, minute, second, millisecond);
+	data.setValue("forward_resolution",forward_resolution);
+	data.setValue("reverse_resolution",reverse_resolution);
+	data.setValue("type",type);
+	return *this;
+}
+
 
 /**
  * Retrieve the UTC version of the stored TAI-based index value.
@@ -257,6 +366,23 @@ void TemporalIndex::toJulianUTC( double& utc1, double &utc2 ) const {
   double d1,d2;
   this->toJulianTAI(d1,d2); // Get the TAI encoded time.
   not_ok = eraTaiutc(d1, d2, &utc1, &utc2); // Convert to UTC's quasi JD.
+}
+TemporalIndex& TemporalIndex::fromJulianUTC( double utc1, double utc2,
+					     int forward_resolution,
+					     int reverse_resolution,
+					     int type
+					     ) {
+  double d1,d2; int not_ok = eraUtctai(utc1,utc2,&d1,&d2);
+  if (not_ok == 1) {
+    throw SpatialException("In TemporalIndex::fromJulianUTC, eraUtctai(...) failure.");
+  }
+  this->fromJulianTAI(d1, d2);
+
+  data.setValue("forward_resolution",forward_resolution);
+  data.setValue("reverse_resolution",reverse_resolution);
+  data.setValue("type",type);
+  
+  return *this;
 }
 /**
  * Convert and store a UTC coordinate into the native TAI-based value.
@@ -300,7 +426,8 @@ string TemporalIndex::stringInNativeDate() {
 	<< setw(2) << setfill('0') << data.getValue("minute") << ":"
 	<< setw(2) << setfill('0') << data.getValue("second") << "."
 	<< setw(3) << setfill('0') << data.getValue("millisecond")
-	<< " (" << setw(2) << data.getValue("resolution") << ")"
+	<< " (" << setw(2) << data.getValue("forward_resolution") << " "
+	<<         setw(2) << data.getValue("reverse_resolution") << ")"
 	<< " (" << setw(1) << data.getValue("type") << ")"
 	;
 
@@ -330,7 +457,9 @@ void TemporalIndex::fromNativeString(string nativeString) {
 	PARSE_INT(minute,2); ++pos;
 	PARSE_INT(second,2); ++pos;
 	PARSE_INT(millisecond,3); pos += 2;
-	PARSE_INT(resolutionLevel,2);
+	PARSE_INT(forward_resolution,2);
+	PARSE_INT(reverse_resolution,2);
+	// PARSE_INT(resolutionLevel,2);
 #undef PARSE_INT
 	data.setValue("BeforeAfterStartBit",1);
 }
@@ -367,6 +496,13 @@ int TemporalIndex::eraTest() {
 // TODO Check for errors/integrity of data value.
 // #define MASK_AND_SHIFT(field) ((( mask_##field & field ) << offset_##field ))
 
+/**
+   MASK_AND_SHIFT_REVERSE retrieves the value, reverses sub-year calendrial values for negative years.
+   This is because those terms, like month and day, always count forward in the calendar, even when they year
+   is negative. So, while -0.1 and +0.1 are neighbors, Year 0 December is not a neighbor of Year+1 December.
+
+   babit=1 corresponds to positive years in the epoch, while babit=0 is for negative years.
+ */
 #define MASK_AND_SHIFT_REVERSE(babit,field) (( data.get(#field)->getMask() \
 		& ( babit*data.getValue(#field)   + (1-babit)*(data.get(#field)->getMaxValue()-data.getValue(#field)))  ) \
 		<< data.get(#field)->getOffset() )
@@ -406,7 +542,8 @@ int64_t TemporalIndex::scidbTemporalIndex() {
 			MASK_AND_SHIFT_REVERSE(babit,minute) |
 			MASK_AND_SHIFT_REVERSE(babit,second) |
 			MASK_AND_SHIFT_REVERSE(babit,millisecond) |
-			MASK_AND_SHIFT(1,resolution) |
+			MASK_AND_SHIFT(1,forward_resolution) |
+			MASK_AND_SHIFT(1,reverse_resolution) |
 			MASK_AND_SHIFT(1,type)
 			;
 	/*
@@ -434,22 +571,33 @@ int64_t TemporalIndex::scidbTemporalIndex() {
 // #undef MASK_AND_SHIFT_RESOLUTION
 
 
+/**
+   Return bit offset (bit location in word) for the finest resolution.
+ */
 int64_t TemporalIndex::bitOffsetFinest() const {
 	int64_t offsetBottom = data.bitFields[data.pos_FinestResolutionLevel]->getOffset();
 	return offsetBottom;
 }
 
+/**
+   Return bit offset (bit location in word) for the coarsest resolution.
+ */
 int64_t TemporalIndex::bitOffsetCoarsest() const {
 	int64_t offsetTop =
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getOffset() +
 			data.bitFields[data.pos_CoarsestResolutionLevel]->getWidth()-1;
 	return offsetTop;
 }
-
+/**
+   Return the bit offset (location) of a given resolution.
+ */
 int64_t TemporalIndex::bitOffsetResolution(int64_t resolution) const {
 	return bitOffsetCoarsest() - resolution;
 }
 
+/**
+   Return the id of the bitfield associated with a resolution level.
+ */
 int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
     // Note: int offsetTop = bitOffsetCoarsest(); // If needed.
 	int offsetResolution = bitOffsetResolution(resolution);
@@ -469,7 +617,7 @@ int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
 	//	return iPos+1;
 }
 
-/*
+/**
  *
  * Use native milliseconds to set the terminator. A terminator is an upper bound to a temporal interval. It corresponds
  * to a particular time, but has a special resolution encoding marking it as a terminator.
@@ -486,21 +634,25 @@ int64_t TemporalIndex::bitfieldIdFromResolution(int64_t resolution) const {
  *
  */
 int64_t TemporalIndex::scidbTerminator() {
-	//		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
-	TemporalIndex tmpIndex(this->scidbTemporalIndex());
-	int64_t resolution = tmpIndex.get_resolution();
+  return scidbUpperBoundMS(this->scidbTemporalIndex());
+}
 
-	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-	tmpIndex.set_resolution(tmpIndex.data.get("resolution")->getMask());
+/**
+   Use native milliseconds to set the lower bound from the temporal index. Note this doesn't respect leap year or second corrections.
+ */
+int64_t TemporalIndex::scidbLowerBound() {
+  return scidbLowerBoundMS(this->scidbTemporalIndex());
+}
 
-	//////////////////////////////////
-	// Let's add an amount corresponding to the resolution.
-	int64_t delta = tmpIndex.millisecondsAtResolution(resolution);
-	int64_t t0    = tmpIndex.toInt64Milliseconds();
-	int64_t t1    = t0 + delta;
-	tmpIndex.fromInt64Milliseconds(t1);
-	int64_t idx_ = tmpIndex.scidbTemporalIndex();
-	return idx_;
+/**
+   Use IAU TAI to set the lower bound of an interval. It is the converse of a terminator.
+
+   The calculation is similar to that for scidbTerminator(), except using IAU standards (ERFA), instead
+   of the native encoding.
+
+ */
+int64_t TemporalIndex::scidbLowerBoundJulianTAI() {
+  return scidbLowerBoundTAI(this->scidbTemporalIndex());
 }
 
 /**
@@ -512,37 +664,136 @@ int64_t TemporalIndex::scidbTerminator() {
  *
  */
 int64_t TemporalIndex::scidbTerminatorJulianTAI() {
-	int64_t idx_ = 0;
-	TemporalIndex tmpIndex(this->scidbTemporalIndex());
-	int64_t resolution = tmpIndex.get_resolution();
-
-	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
-	tmpIndex.set_resolution(tmpIndex.data.get("resolution")->getMask());
-
-	//////////////////////////////////
-	// Let's add an amount corresponding to the resolution.
-	double delta = tmpIndex.daysAtResolution(resolution);
-	double d1, d2;
-	tmpIndex.toJulianTAI(d1,d2);
-	tmpIndex.fromJulianTAI(d1,d2+delta);
-	idx_ = tmpIndex.scidbTemporalIndex();
-	return idx_;
+  return scidbUpperBoundTAI(this->scidbTemporalIndex());
 }
 
 /**
  * Determine if the stored index value is a terminator.
  */
 bool TemporalIndex::scidbTerminatorp() {
-	int64_t resolution = this->data.getValue("resolution");
-	// return resolution == 63;
-	return resolution == this->data.get("resolution")->getMask();
+	int64_t forward_resolution = this->data.getValue("forward_resolution");
+	// return forward_resolution == 63;
+	return forward_resolution == this->data.get("forward_resolution")->getMask();
+	// reverse_resolution is also set to its mask.
 }
 
+
+/**
+   Approximate the upper bound (terminator) of a temporal index value.
+
+   TODO: Consider an even more approximate approach that does not calculate the millisecond representation, working directly with the integer format.
+ */
+int64_t scidbUpperBoundMS(int64_t ti_value) {
+  TemporalIndex tmpIndex(ti_value);
+  int64_t forward_resolution = tmpIndex.get_forward_resolution();
+
+  //////////////////////////////////
+  // Let's add an amount corresponding to the resolution.
+  int64_t delta = tmpIndex.millisecondsAtResolution(forward_resolution);
+  int64_t t0    = tmpIndex.toInt64Milliseconds();
+  int64_t t1    = t0 + delta;
+
+  // MLR Hack.
+  // Assume type == 1. Then max time is 8191.eoy.toInt64Milliseconds 258342911999999.
+  // cout << "subms: d,t0,t1: " << delta << " " << t0 << " " << t1 << endl << flush;
+  tmpIndex.fromInt64Milliseconds(t1);
+
+  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+  tmpIndex.set_forward_resolution(tmpIndex.data.get("forward_resolution")->getMask());
+  tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask()); // Terminator doesn't care about the reverse resolution.
+  
+  int64_t idx_ = tmpIndex.scidbTemporalIndex();
+  return idx_;
+}
+
+/**
+   Approximate the lower bound of a temporal index value.
+ */
+int64_t scidbLowerBoundMS(int64_t ti_value) {
+  //		cout << "TemporalIndex::scidbTerminator not implemented!!" << endl << flush;
+  TemporalIndex tmpIndex(ti_value);
+  int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
+
+  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+  tmpIndex.set_forward_resolution(0);
+  tmpIndex.set_reverse_resolution(tmpIndex.data.get("reverse_resolution")->getMask()); // Terminator doesn't care about the reverse resolution.
+
+  //////////////////////////////////
+  // Let's add an amount corresponding to the resolution.
+  int64_t delta = -tmpIndex.millisecondsAtResolution(reverse_resolution);
+  int64_t t0    = tmpIndex.toInt64Milliseconds();
+  int64_t t1    = t0 + delta;
+
+  // MLR Hack.
+  // Assume type == 1. Then max time is 8191.eoy.toInt64Milliseconds 258342911999999.
+  // cout << "slbms: d,t0,t1: " << delta << " " << t0 << " " << t1 << endl << flush;
+  
+  tmpIndex.fromInt64Milliseconds(t1);
+  int64_t idx_ = tmpIndex.scidbTemporalIndex();
+  return idx_;
+}
+
+/**
+   A more accurate the upper bound (terminator) of a temporal index value, based on TAI.
+ */
+int64_t scidbUpperBoundTAI(int64_t ti_value) {
+	int64_t idx_ = 0;
+	TemporalIndex tmpIndex(ti_value);
+	int64_t forward_resolution = tmpIndex.get_forward_resolution();
+
+	//////////////////////////////////
+	// Let's add an amount corresponding to the resolution.
+	double delta = tmpIndex.daysAtResolution(forward_resolution);
+	double d1, d2;
+	tmpIndex.toJulianTAI(d1,d2);
+	// Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+	tmpIndex.fromJulianTAI(d1,d2+delta,
+			       tmpIndex.data.get("forward_resolution")->getMask(),
+			       tmpIndex.data.get("reverse_resolution")->getMask()
+			       );
+	idx_ = tmpIndex.scidbTemporalIndex();
+	return idx_;
+}
+
+/**
+   A more accurate the lower bound of a temporal index value, based on TAI.
+ */
+int64_t scidbLowerBoundTAI(int64_t ti_value) {
+  int64_t idx_ = 0;
+  TemporalIndex tmpIndex(ti_value);
+  int64_t reverse_resolution = tmpIndex.get_reverse_resolution();
+
+  // TODO What should the forward_resolution be for a lower_bound?
+	
+  //////////////////////////////////
+  // Let's add an amount corresponding to the resolution.
+  double delta = -tmpIndex.daysAtResolution(reverse_resolution);
+  double d1, d2;
+  tmpIndex.toJulianTAI(d1,d2);
+  
+  // Set the terminator type. Elsewhere we hard code this to 63... The following is correct.
+  tmpIndex.fromJulianTAI(d1,d2+delta,
+			 0,
+			 tmpIndex.data.get("reverse_resolution")->getMask()
+			 );
+  
+  idx_ = tmpIndex.scidbTemporalIndex();
+  return idx_;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+/**
+   Set the fields of the TemporalIndex object to zero.
+ */
 TemporalIndex& TemporalIndex::set_zero() {
 	data.setZero();
 	return *this;
 }
 
+/**
+   Set the fields of the TemporalIndex object to zero.
+ */
 TemporalIndex& TemporalIndex::setZero() {
 	data.setZero();
 	return *this;
@@ -683,15 +934,19 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
-    if (not_ok_1 == 1)
-        throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
-
-	int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
-	double  days         = ((double) milliseconds) / 86400000.0;
-	d1 = d0_1; d2 = d0_2 + days;
+    if (not_ok_1 == 1) {
+      throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
+    }
+    int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
+    double  days         = ((double) milliseconds) / 86400000.0;
+    d1 = d0_1; d2 = d0_2 + days;
 };
 
-TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
+TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2,
+					     int forward_resolution,
+					     int reverse_resolution,
+					     int type
+					     ) {
 	int not_ok, iy, im, id,_hour, _minute, _second, _millisecond, ihmsf[4];
 	int64_t CE = 1;
 	not_ok = eraD2dtf ( TimeStandard, 3, d1, d2, &iy, &im, &id, ihmsf );
@@ -719,6 +974,7 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 		FMT1(_second)
 		FMT1(_millisecond)
 #undef FMT1
+                  // cout << "fromJulianTAI: " << d1 << " " << d2 << " " << ss.str() << endl << flush;
 		// TODO add some way to tune sensitivity to poorly formed dates & times
 		if( not_ok < 0 ) {
 			throw SpatialFailure(ss.str().c_str());
@@ -738,6 +994,11 @@ TemporalIndex& TemporalIndex::fromJulianTAI( double d1, double d2) {
 //	cout << ", " << milliseconds << endl << flush;
 	if( iy < 1) { CE = 0; iy = -iy;	}
 	this->fromNativeCEYearAndMilliseconds(CE, (int64_t)iy, milliseconds);
+	
+	data.setValue("forward_resolution",forward_resolution);
+	data.setValue("reverse_resolution",reverse_resolution);
+	data.setValue("type",type);
+	
 	return *this;
 };
 
@@ -778,7 +1039,11 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
 	// return (int64_t) (delta * 86400000.0); // Convert to milliseconds
 	return rint(delta * 86400000.0); // Convert to milliseconds
 }
-/// Note: for indexing, not astronomy. Support a kind of "addition".
+/**
+   Convert the (already stored) temporal index value to milliseconds.
+
+   Note: for indexing, not astronomy. Support a kind of "addition".
+*/
 int64_t TemporalIndex::toInt64Milliseconds() const {
 	int i = data.pos_CoarsestResolutionLevel; // Should be for the 'year' field
 	int64_t sum = (data.getBitFieldAtId(i)->getValue()) * data.getBitFieldAtId(i)->getScale();
@@ -793,8 +1058,31 @@ int64_t TemporalIndex::toInt64Milliseconds() const {
 	return sum;
 }
 
+/**
+   Construct a temporal index value from milliseconds.
+ */
 TemporalIndex& TemporalIndex::fromInt64Milliseconds(int64_t milliseconds) {
 
+  // MLR Hack. Assume type==1. 2021-0821
+  // TODO Do the same for underflow.
+  int64_t type1_max_8191_eoy_toInt64Milliseconds = 258342911999999;
+  if( milliseconds > type1_max_8191_eoy_toInt64Milliseconds ) {
+    stringstream ss;
+    ss << "TemporalIndex.fromInt64Milliseconds::Overflow for type==1. Max="
+      << type1_max_8191_eoy_toInt64Milliseconds
+      << " Input=" << milliseconds;
+    throw SpatialFailure(ss.str().c_str());
+  }
+
+  int64_t type1_min_8191_eoy_toInt64Milliseconds = -258311376000000;
+  if( milliseconds < type1_min_8191_eoy_toInt64Milliseconds ) {
+    stringstream ss;
+    ss << "TemporalIndex.fromInt64Milliseconds::Underflow for type==1. Min="
+      << type1_min_8191_eoy_toInt64Milliseconds
+      << " Input=" << milliseconds;
+    throw SpatialFailure(ss.str().c_str());
+  }
+      
     int64_t /*sum = 0,*/ total_left = milliseconds, CE = -1, year;
 
 
@@ -843,7 +1131,7 @@ int64_t TemporalIndex::millisecondsAtResolution(const int64_t resolution) const 
 	/*
 	 * If needed...
 	int64_t bitPosition;
-    int64_t offsetTop = bitOffsetCoarsest();
+        int64_t offsetTop = bitOffsetCoarsest();
 	*/
 
 	int64_t offsetResolution = bitOffsetResolution(resolution);
@@ -877,13 +1165,12 @@ double TemporalIndex::daysAtResolution(const int64_t resolution) const {
 	return millisecondsAtResolution(resolution) / 86400.0e3;
 }
 
-
 /**
  * Determine the resolution level immediately finer than the resolution given in milliseconds.
  *
  * TODO Consider there might be a faster (formulaic) way to do this based on the bit position.
  */
-int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseconds) {
+int64_t TemporalIndex::coarsestResolutionFinerOrEqualMilliseconds(int64_t milliseconds) {
 	int64_t resolution = this->data.maxResolutionLevel();
 	bool done = false;
 	while(  resolution >= 0 && !done ) {
@@ -905,7 +1192,8 @@ int64_t TemporalIndex::coarsestResolutionFinerThanMilliseconds(int64_t milliseco
  */
 int64_t scidbMinimumTemporalIndex() {
 	TemporalIndex tIndex;
-	tIndex.setZero().set_year(262143).set_type(2);
+	tIndex.setZero().set_year(8192/2).set_type(1);
+	// tIndex.setZero().set_year(262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
 }
 
@@ -914,8 +1202,473 @@ int64_t scidbMinimumTemporalIndex() {
  */
 int64_t scidbMaximumTemporalIndex() {
 	TemporalIndex tIndex;
-	tIndex.setZero().setEOY(1,262143).set_type(2);
+	tIndex.setZero().setEOY(1,8192/2).set_type(1);
+	// tIndex.setZero().setEOY(1,262143).set_type(2);
 	return tIndex.scidbTemporalIndex();
+}
+
+
+/**
+   Set bits at finer resolutions to zero.
+
+   Note, calling with res=48 when max_res=48 has no effect.
+ */
+int64_t scidbClearBitsFinerThanResolution(int64_t ti_value, int resolution) {
+  // throw SpatialFailure("TemporalIndex.scidbClearBitsFinerOrEqualResolution::NotImplemented!!");
+  // 1. Get ti_value type and find finest bit
+  // 2. Make mask
+  // 3. And it into the result
+
+  TemporalIndex tIndex = TemporalIndex(ti_value);
+  
+  // int64_t offsetBottom = tIndex.data.bitFields[tIndex.data.pos_FinestResolutionLevel]->getOffset();
+  int64_t offsetBottom = tIndex.bitOffsetFinest();
+  int64_t offsetTop    = tIndex.bitOffsetResolution(resolution);
+
+  int64_t mask = ~(((1ll << offsetTop)-1) & ~((1ll << offsetBottom)-1));
+  return ti_value & mask;
+}
+
+/**
+   Set bits at finer resolutions to one.
+
+   Setting the bits corresponding to finer resolutions yields a
+   "terminator" of sorts with the bits corresponding to ~1ms less than
+   the nominal scale of the resolution. I.e. if a resolution
+   corresponds to 2 days, then setting the bits finer than that
+   corresponds to 2 days minus ~1ms, or whatever is the finest
+   temporal increments.
+
+   This routine might be helpful in constructing terminators to
+   intervals.  Terminators are index values that are >= to any encoded
+   time in the preceding interval, but < any time in the next
+   interval.
+
+   Note, calling with res=48 when max_res=48 has no effect.
+ */
+int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution) {
+  // throw SpatialFailure("TemporalIndex.scidbSetBitsFinerThanResolution::NotImplemented!!");
+  // 1. Get ti_value type and find finest bit
+  // 2. Make mask
+  // 3. Or it into the result
+
+  TemporalIndex tIndex = TemporalIndex(ti_value);
+  
+  // int64_t offsetBottom = tIndex.data.bitFields[tIndex.data.pos_FinestResolutionLevel]->getOffset();
+  int64_t offsetBottom = tIndex.bitOffsetFinest();
+  int64_t offsetTop    = tIndex.bitOffsetResolution(resolution);
+
+  int64_t mask = (((1ll << offsetTop)-1) & ~((1ll << offsetBottom)-1));
+  return ti_value | mask;
+}
+/**
+   The same as scidbSetBitsFinerThanResolution, except limited to valid temporal scales.
+ */
+int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution) {
+  int64_t idx = scidbSetBitsFinerThanResolution(ti_value,resolution);
+  TemporalIndex tIndex(idx);
+  int iPos = tIndex.data.pos_FinestResolutionLevel;
+  while( iPos >= tIndex.data.pos_CoarsestResolutionLevel ) {
+    if( tIndex.data.getValueAtId(iPos) > tIndex.data.getBitFieldAtId(iPos)->getMaxValue() ) {
+      tIndex.data.getBitFieldAtId(iPos)->setValue(tIndex.data.getBitFieldAtId(iPos)->getMaxValue());
+    }
+    --iPos;
+  }
+  return tIndex.scidbTemporalIndex();
+}
+
+
+/**
+   True if temporal index values overlap using approximate millisecond calculations.
+ */
+bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1) {
+
+#if 0
+  cout
+    << "sO:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+#endif
+  
+  int64_t tMask = temporal_mask(ti_value_0);
+  
+  // These are all start/term index values
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
+
+#if 0
+  cout
+    << "sO:lu0,lu1: "
+    << toStringJulianTAI_ISO(lower0) << " "
+    << toStringJulianTAI_ISO(upper0) << " "
+    << toStringJulianTAI_ISO(lower1) << " "
+    << toStringJulianTAI_ISO(upper1) << " "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+
+  cout
+    << "s0 " << (lower0 <= upper1) << " " << (upper0 >= lower1) << endl << flush;
+
+  int64_t mask = ~((2ll^12)-1ll);
+  cout
+    << "s0 " << ((lower0 & mask) <= (upper1 & mask)) << " " << ((upper0 & mask) >= (lower1 & mask)) << endl << flush;
+#endif
+  
+  return (lower0 <= upper1) && (upper0 >= lower1);
+}
+
+/**
+   True if temporal index values overlap using more accurate but expensive TAI calculations.
+ */
+bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1) {
+
+#if 0
+  cout
+    << "sOTAI:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+#endif
+
+  int64_t tMask = temporal_mask(ti_value_0);
+  
+  int64_t lower0 = scidbLowerBoundTAI(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundTAI(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundTAI(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundTAI(ti_value_1) & tMask;
+  return (lower0 <= upper1) && (upper0 >= lower1);
+}
+
+/**
+   True if the instant of ti_value_query is in the span of ti_value.
+
+   Note: Probably approximate, using MS-type functions.
+
+   TODO: Redo this using the ti_values themselves.
+*/
+bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query) {
+  TemporalIndex tIndex;
+  int64_t finest_resolution = tIndex.data.maxResolutionLevel();  
+  int64_t tiv_instant = set_forward_resolution(set_reverse_resolution(ti_value_query,finest_resolution),finest_resolution);
+
+#if 0
+#undef FMTX
+#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+  cout << "ti_value   " << FMTX(ti_value)       << " " << toStringJulianTAI_ISO(ti_value) << endl << flush;
+  cout << "ti_valueq  " << FMTX(ti_value_query) << " " << toStringJulianTAI_ISO(ti_value_query) << endl << flush;
+  cout << "ti_inst    " << FMTX(tiv_instant)    << " " << toStringJulianTAI_ISO(tiv_instant) << endl << flush;
+  cout << endl << flush;
+#undef FMTX
+#endif
+  return scidbOverlap(ti_value,tiv_instant);
+}
+
+/**
+  Return a mask for extracting the temporal location (i.e. the instant).
+*/
+int64_t temporal_mask(int64_t ti_value) {
+
+#if 0
+  cout
+    << "t_mask: "
+    << toStringJulianTAI_ISO(ti_value) << " "
+    << endl << flush;
+#endif
+  
+  int64_t temporal_type = ti_value & 3;
+  if( temporal_type != 1 ) {
+    stringstream ss;
+    ss << "TemporalIndex.cpp-temporal_mask-temporal_type.eq." << temporal_type << ".ne.1_NotImplemented-ti=0x" << hex << setw(16) << setfill('0') << ti_value;
+    throw SpatialFailure(ss.str().c_str());
+  }
+  return ~((2ll^12)-1ll);
+}
+
+/**
+   Return forward resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t forward_resolution(int64_t ti_value) {
+  TemporalIndex tIndex;
+  return (ti_value 
+	  >> tIndex.data.get("forward_resolution")->getOffset())
+    & tIndex.data.get("forward_resolution")->getMask();
+}
+
+/**
+   Return reverse resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t reverse_resolution(int64_t ti_value) {
+  TemporalIndex tIndex;  
+  return (ti_value
+	  >> tIndex.data.get("reverse_resolution")->getOffset())
+    & tIndex.data.get("reverse_resolution")->getMask();
+// #undef FMTX
+// #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+//   TemporalIndex tIndex;
+//   int64_t mask   = 
+//   int64_t offset = tIndex.data.get("reverse_resolution")->getOffset();
+//   cout << "ti_val   " << FMTX(ti_value) << endl << flush;
+//   cout << "mask     " << FMTX(mask) << endl << flush;
+//   cout << "offset   " << FMTX(offset) << endl << flush;
+//   cout << "t>>o     " << FMTX((ti_value >> offset)) << endl << flush;
+//   cout << "(t>>o)&m " << FMTX(((ti_value >> offset) & mask)) << endl << flush;
+//   return ((ti_value >> offset) & mask);							   
+}
+
+int64_t set_reverse_resolution(int64_t ti_value, int64_t resolution) {
+  TemporalIndex tIndex;
+  int64_t mask   = tIndex.data.get("reverse_resolution")->getMask();
+  int64_t offset = tIndex.data.get("reverse_resolution")->getOffset();
+  return (ti_value & ~(mask << offset)) | (resolution << offset);
+}
+
+// TODO Make array versions of these.
+
+int64_t set_forward_resolution(int64_t ti_value, int64_t resolution) {
+  TemporalIndex tIndex;
+  int64_t mask   = tIndex.data.get("forward_resolution")->getMask();
+  int64_t offset = tIndex.data.get("forward_resolution")->getOffset();
+  return (ti_value & ~(mask << offset)) | (resolution << offset);
+}
+
+int64_t coarsen(int64_t ti_value,int64_t reverse_increment,int64_t forward_increment) {
+  return set_forward_resolution(
+				set_reverse_resolution(ti_value,
+						       reverse_resolution(ti_value)+reverse_increment),
+				forward_resolution(ti_value)+forward_increment);
+}
+
+/**
+   True if the temporal index value is a lower bound.
+ */
+bool lowerBoundP(int64_t ti_value) {
+  return (forward_resolution(ti_value) == 0) && (reverse_resolution(ti_value) == 63);
+};
+
+/**
+   True if the temporal index value is an upper bound.
+ */
+bool upperBoundP(int64_t ti_value) {
+  return (forward_resolution(ti_value) == 63) && (reverse_resolution(ti_value) == 63);
+};
+
+bool validBoundP(int64_t ti_value) {
+  int64_t fr = forward_resolution(ti_value);
+  int64_t rr = reverse_resolution(ti_value);
+  return (rr == 63) && ( (fr == 0) || (fr == 63) );
+}
+
+bool validResolutionP(int64_t resolution) {
+  TemporalIndex tIndex;
+  return ( 0 <= resolution ) && ( resolution <= tIndex.data.maxResolutionLevel() );
+}
+
+/**
+   Make a new temporal index value from a triple of values (lower, t0, upper).
+
+   A negative value for lower or upper will cause that resolution to be set to the finest resolution (i.e. maximum resolution).
+
+   A negative value for the "center" or tiv will be set to the mean of the lower and upper.
+ */
+int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper, bool include_bounds) {
+  TemporalIndex ti0;
+  int64_t reverse_resolution,forward_resolution;
+  int64_t finest_resolution = ti0.data.maxResolutionLevel();
+  
+  if( tiv < 0 ) {
+    TemporalIndex tiL(tiv_lower), tiU(tiv_upper);
+
+    // cout << "100:sntv: " << tiU.toStringJulianTAI_ISO() << " vs. " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
+    
+    int64_t tL = tiL.toInt64Milliseconds();
+    int64_t tU = tiU.toInt64Milliseconds();
+    ti0.fromInt64Milliseconds((tL+tU)/2); /// Approximate calculation
+    int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-tL)/2),(int64_t)0ll);
+    ti0.set_reverse_resolution(resolution).set_forward_resolution(resolution);
+    reverse_resolution = resolution;
+    forward_resolution = resolution;
+  } else {
+    ti0 = TemporalIndex(tiv);
+    ti0.set_reverse_resolution(finest_resolution).set_forward_resolution(finest_resolution);
+    int64_t t0 = ti0.toInt64Milliseconds();
+    if( tiv_lower < 0 ) {
+      // Keep that passed in.
+      // Following is in error.
+      // ti0.set_reverse_resolution(63);
+      // reverse_resolution = 63;      
+    } else {
+      TemporalIndex tiL(tiv_lower);
+      int64_t tL = tiL.toInt64Milliseconds();
+      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((t0-tL)),(int64_t)0ll);
+      ti0.set_reverse_resolution(resolution);
+      reverse_resolution = resolution;
+    }
+    if( tiv_upper < 0 ) {
+      // Keep that passed in.
+      // Following is in error.
+      // ti0.set_forward_resolution(63);
+      // forward_resolution = 63;      
+    } else {
+      TemporalIndex tiU(tiv_upper);
+
+      // cout << "200:sntv: " << tiU.toStringJulianTAI_ISO() << " vs. " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
+      
+      int64_t tU = tiU.toInt64Milliseconds();
+      int64_t resolution = max(ti0.coarsestResolutionFinerOrEqualMilliseconds((tU-t0)),(int64_t)0ll);
+      ti0.set_forward_resolution(resolution);
+
+      // cout << "201:sntv: " << tiU.toStringJulianTAI_ISO() << " vs. " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
+      
+      forward_resolution = resolution;      
+    }
+  }
+
+  int64_t tiv_return = ti0.scidbTemporalIndex();
+  TemporalIndex tI(tiv_return);
+  
+#if 0
+  cout << "900:sntv: tI " << TemporalIndex(tI.scidbTerminator()).toStringJulianTAI_ISO()
+       << " vs. ti0 " << TemporalIndex(ti0.scidbTerminator()).toStringJulianTAI_ISO()
+       << " vs. toS " << toStringJulianTAI_ISO(scidbUpperBoundMS(tiv_return))
+       << " vs. iU " << toStringJulianTAI_ISO(tiv_upper) << endl << flush;
+#endif
+  
+  if( include_bounds ) {
+    // cout << 1000 << endl << flush;
+    // First lower
+    if( tiv_lower >= 0 ) {
+      if( !scidbContainsInstant(tiv_return,tiv_lower) ) {
+        // cout << 2000 << endl << flush;    
+        tiv_return = set_reverse_resolution(tiv_return,max(reverse_resolution-1,(int64_t)0ll));
+      }
+    } /* else {
+      tiv_return = set_reverse_resolution(tiv_return,finest_resolution);
+      } */
+    
+    // Then upper
+    if( tiv_upper >= 0 ) {
+      if( !scidbContainsInstant(tiv_return,tiv_upper) ) {
+        // cout << 3000 << endl << flush;    
+        tiv_return = set_forward_resolution(tiv_return,max(forward_resolution-1,(int64_t) 0ll));
+      }
+    } /* else {
+      // cout << 4000 << endl << flush;
+      tiv_return = set_forward_resolution(tiv_return,finest_resolution);      
+      } */
+  }
+  return tiv_return;
+}
+
+/**
+   Return a temporal index value from a TAI-based ISO string representation 
+ */
+int64_t fromStringJulianTAI_ISO(string inputString) {
+  return TemporalIndex().fromStringJulianTAI_ISO(inputString).scidbTemporalIndex();
+}
+
+/**
+   Return a TAI-based ISO string representation from a temporal index value
+ */
+string toStringJulianTAI_ISO(int64_t tiv) {
+  return TemporalIndex(tiv).toStringJulianTAI_ISO();
+}
+
+int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1) {
+
+#if 0
+  cout
+    << "sO:lu0,lu1: "
+    << toStringJulianTAI_ISO(ti_value_0) << " "
+    << toStringJulianTAI_ISO(ti_value_1) << " "
+    << endl << flush;
+#endif
+  
+  int64_t tMask = temporal_mask(ti_value_0);
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
+
+  if( !( (lower0 <= upper1) && (upper0 >= lower1) ) ) {
+    throw SpatialFailure("scidbTemporalValueUnionIfOverlap:NoOverlap");
+  }
+
+  return scidbNewTemporalValue(lower0 < lower1 ? lower0 : lower1,
+			       -1,
+			       upper0 > upper1 ? upper0 : upper1,
+			       true
+			       );
+  /*  
+  TemporalIndex tIndex;
+  int64_t lower = TemporalIndex( lower0 < lower1 ? lower0 : lower1 ).toInt64Milliseconds();
+  int64_t upper = TemporalIndex( upper0 > upper1 ? upper0 : upper1 ).toInt64Milliseconds();
+  int64_t mean  = (lower+upper)/2;
+  int64_t dup   = upper-mean;
+  int64_t dlo   = mean-lower;
+  int64_t resu  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dup);
+  int64_t resl  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dlo);
+  tIndex = tIndex.fromInt64Milliseconds(mean).set_reverse_resolution(resl).set_forward_resolution(resu);
+
+  return tIndex.scidbTemporalIndex();
+  */
+}
+
+int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_value_1) {
+  int64_t tMask = temporal_mask(ti_value_0);
+  int64_t lower0 = scidbLowerBoundMS(ti_value_0) & tMask;
+  int64_t upper0 = scidbUpperBoundMS(ti_value_0) & tMask;
+  int64_t lower1 = scidbLowerBoundMS(ti_value_1) & tMask;
+  int64_t upper1 = scidbUpperBoundMS(ti_value_1) & tMask;
+  if( !( (lower0 <= upper1) && (upper0 >= lower1) ) ) {
+    throw SpatialFailure("scidbTemporalValueIntersectionIfOverlap:NoOverlap");
+  }
+  return scidbNewTemporalValue(lower0 < lower1 ? lower1 : lower0,
+			       -1,
+			       upper0 > upper1 ? upper1 : upper0,
+			       true
+			       );
+
+  /*
+  TemporalIndex tIndex;
+  int64_t lower = TemporalIndex( lower0 < lower1 ? lower1 : lower0 ).Toint64milliseconds();
+  int64_t upper = TemporalIndex( upper0 > upper1 ? upper1 : upper0 ).toInt64Milliseconds();
+  int64_t mean  = (lower+upper)/2;
+  int64_t dup   = upper-mean;
+  int64_t dlo   = mean-lower;
+  cout << 2000 << endl << flush;
+  int64_t resu  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dup);
+  cout << 2010 << endl << flush;
+  int64_t resl  = tIndex.coarsestResolutionFinerOrEqualMilliseconds(dlo);
+  cout << 2020 << endl << flush;
+  tIndex = tIndex.fromInt64Milliseconds(mean).set_reverse_resolution(resl).set_forward_resolution(resu);
+
+  return tIndex.scidbTemporalIndex();  
+  */
+}
+
+/**
+   Change the resolutions of a sequence of temporal index values according to the distance to prior and future points.
+
+   Set include_bounds to true to include the reverse and future points in the resolution covered (the default).
+ */
+void set_temporal_resolutions_from_sorted_inplace(int64_t* ti_sorted, const int64_t len, bool include_bounds) {
+  int64_t tm, t0, tp;
+  
+  for(int i = 0; i < len; ++i) {
+    // There are more idiomatic ways to do the following.
+    tm = i-1 <    0 ? -1 : ti_sorted[i-1];
+    t0 =                   ti_sorted[i  ];
+    tp = i+1 >= len ? -1 : ti_sorted[i+1];
+    ti_sorted[i] = scidbNewTemporalValue(tm,t0,tp,include_bounds);
+  }
 }
 
 // } /* namespace std */

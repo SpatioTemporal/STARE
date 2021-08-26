@@ -4,7 +4,7 @@
  *  The API to the STARE index functions.
  *
  *  Created on: Jan 31, 2019
- *      Author: mrilee
+ *      Author: Michael Lee Rilee
  *
  *  Copyright (C) 2019 Rilee Systems Technologies LLC
  */
@@ -1096,59 +1096,67 @@ STARE_ArrayIndexSpatialValues STARE::NeighborsOfValue(
 	return STARE_ArrayIndexSpatialValues(begin(neighbors),end(neighbors));
 }
 
-TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int resolution,int type) {
-	if( type != 2 ) {
-		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+TemporalIndex& STARE::setTIndexTAI(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type) {
+	if( type != 1 ) {
+	  stringstream ss; ss << "STARE::setTIndexTAI::type = " << dec << type << flush;  
+	  throw SpatialFailure(ss.str().c_str());
 	}
 	tIndex.fromFormattedJulianTAI(year, month, day, hour, minute, second, ms);
-	tIndex.set_resolution(resolution);
+	tIndex.set_forward_resolution(forward_resolution);
+	tIndex.set_reverse_resolution(reverse_resolution);
 	return tIndex;
 }
 
-TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
-	if( type != 2 ) {
-		throw SpatialFailure("STARE::setTIndexTAI::type != 2 NOT IMPLEMENTED");
+TemporalIndex& STARE::setTIndexUTC(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type) {
+	if( type != 1 ) {
+	  stringstream ss; ss << "STARE::setTIndexUTC::type = " << dec << type << flush;
+	  throw SpatialFailure(ss.str().c_str());
 	}
 	tIndex.fromUTC(year, month, day, hour, minute, second, ms);
-	tIndex.set_resolution(resolution);
+	tIndex.set_forward_resolution(forward_resolution);
+	tIndex.set_reverse_resolution(reverse_resolution);
 	return tIndex;
 }
 
-void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+void STARE::toTAI(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& forward_resolution, int& reverse_resolution, int& type) {
 	tIndex.toFormattedJulianTAI(year, month, day, hour, minute, second, ms);
-	resolution = tIndex.get_resolution();
+	forward_resolution = tIndex.get_forward_resolution();
+	reverse_resolution = tIndex.get_reverse_resolution();
 	type       = tIndex.get_type();
 }
 
-void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& resolution, int& type) {
+void STARE::toUTC(int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms, int& forward_resolution, int& reverse_resolution, int& type) {
 	tIndex.toUTC(year, month, day, hour, minute, second, ms);
-	resolution = tIndex.get_resolution();
+	forward_resolution = tIndex.get_forward_resolution();
+	reverse_resolution = tIndex.get_reverse_resolution();
 	type       = tIndex.get_type();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int resolution, int type) {
-    setTIndexUTC(year, month, day, hour, minute, second, ms, resolution, type);
-    return getArrayIndexTemporalValue();
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(int year, int month, int day, int hour, int minute, int second, int ms, int forward_resolution, int reverse_resolution, int type) {
+  setTIndexUTC(year, month, day, hour, minute, second, ms, forward_resolution, reverse_resolution, type);
+  return getArrayIndexTemporalValue();
 }
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int resolution, int type) {
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(struct tm& tm, int forward_resolution, int reverse_resolution, int type) {
     tm.tm_year += 1900;         // tm stores years since 1900 ...
     tm.tm_mon += 1;             // and months 0-based, while STARE stores months 1-based
-    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, resolution, 2);
+    // type should be 1...
+    return ValueFromUTC(tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, 0, forward_resolution, reverse_resolution, type);
 }    
 
-STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int resolution, int type) {
+STARE_ArrayIndexTemporalValue STARE::ValueFromUTC(time_t& datetime, int forward_resolution, int reverse_resolution, int type) {
     struct tm tm;                       // time_t as seconds since UNIX epoch
     gmtime_r(&datetime, &tm);	        // gmtime_r converts to tm struct
-    return ValueFromUTC(tm, resolution, type);
+    return ValueFromUTC(tm, forward_resolution, reverse_resolution, type);
 }
 
 Datetime STARE::UTCFromValue(STARE_ArrayIndexTemporalValue temporalValue) {
     tIndex.fromTemporalIndexValue(temporalValue);
     Datetime datetime;
-    int resolution;
+    int forward_resolution;
+    int reverse_resolution;
     int type;
-    toUTC(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, datetime.ms, resolution, type);
+    toUTC(datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute, datetime.second, datetime.ms, forward_resolution, reverse_resolution, type);
     return datetime;
 }
 
@@ -1335,6 +1343,7 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	working_interval.push_back(remaining_interval[0]);
 	working_interval.push_back(remaining_interval[1]);
 
+#undef FMTX
 #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec 	
 
 	while( working_interval.size() > 0 ) {
@@ -1590,13 +1599,12 @@ STARE_Stash::STARE_Stash(
 }
 */
 void stash_spatial(const string& filename, STARE_SpatialIntervals intervals) {
-
+  throw SpatialException("STARE stash_spatial not implemented");
 }
 
 void fetch_spatial(const string& filename, STARE_SpatialIntervals& intervals) {
-
+  throw SpatialException("STARE fetch_spatial not implemented");
 }
-
 
 #undef CMP_MODE
 

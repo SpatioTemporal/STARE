@@ -91,8 +91,7 @@ void HstmRange::addRange(Key a_, Key b_) {
 	*/
 
 // #define DIAG
-// #undef DIAG
-
+#undef DIAG
 #define IDOUT(p,m,s) p << m << " " << setw(16) << setfill('0') << hex << s << dec << " " << s << endl << flush;
 #ifdef DIAG
 	IDOUT(cout,"hr::ar a_: ",a_)
@@ -100,6 +99,7 @@ void HstmRange::addRange(Key a_, Key b_) {
 	IDOUT(cout,"hr::ar b_: ",b_)
 	IDOUT(cout,"hr::ar b : ",b)
 #endif
+#undef DIAG
 
 //	cout << dec << 1000 << " : " << hex << "0x" << a_ << " 0x" << bSave << endl << flush;
 

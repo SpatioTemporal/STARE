@@ -2,7 +2,9 @@
  * TemporalIndex.h
  *
  *  Created on: Apr 10, 2017
- *      Author: mrilee
+ *
+ *  Author: Michael Rilee, Rilee Systems Technologies LLC
+ *
  */
 
 #ifndef SRC_TEMPORALINDEX_H_
@@ -20,6 +22,8 @@
 
 #include <ctime>
 #include <cmath>
+
+#include <algorithm>
 
 #include "BitField.h"
 #include "TemporalWordFormat1.h"
@@ -40,7 +44,7 @@ public:
 	 */
 	TemporalWordFormat() {
 		// resolutionLevelConstraint =  7; // Counts the number of levels, including
-		nonDataLevels             =  3;
+		// Not needed. nonDataLevels             =  3;
 
 		// maxCoResolutionLevelValue = 9; // Is actually more than we count in resLevel.
 		int64_t offset_base = 64;
@@ -71,13 +75,23 @@ public:
 		pos_CoarsestResolutionLevel = fieldId;
 		bitFields.push_back(
 				    make_shared<BitField>("year",
-						pow(2,19)-1, // maxValue
-						19, // width
-						offset_base,
-						(13ll*28+1)*24*3600*1000,
-						fieldId++
-							 )
-		);
+// <<<<<<< HEAD
+							  pow(2,13)-1, // maxValue
+							  13, // width
+							  offset_base,
+							  (13ll*28+1)*24*3600*1000, // months times millisec in  a regularized (24-day) month, plus one day for leap stuff
+							  fieldId++
+							  )
+				    );
+// =======
+//                                   pow(2,13)-1, // maxValue
+//                                   13, // width
+//                                   offset_base,
+//                                   (13ll*(13-1)+1)*24*3600*1000, // millisec in  a regularized (24-day) month
+//                                   fieldId++
+//                                   )
+//                         );
+// >>>>>>> f80cd105998be058c49e1f2441bd4d00fe06b16f
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
@@ -159,7 +173,7 @@ public:
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
 
 		bitFields.push_back(
-				make_shared<BitField>("resolution",
+				make_shared<BitField>("forward_resolution",
 						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
 						pow(2,6)-1, // maxValue
 						6, // width
@@ -169,6 +183,19 @@ public:
 						     )
 		);
 		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
+
+		bitFields.push_back(
+				make_shared<BitField>("reverse_resolution",
+						// pow(2,6)-1, // maxValue 63 -- takes the max resolution of 63, but we have only 64 bits
+						pow(2,6)-1, // maxValue
+						6, // width
+						offset_base,
+						-1, // time unit, not applicable
+						fieldId++ // coResolutionLevel-- // -1, i.e. N/A
+						     )
+		);
+		bitFieldMap.insert(pair<string,shared_ptr<BitField> >(bitFields.back()->getName(),bitFields.back()));
+		
 
 		bitFields.push_back(
 				make_shared<BitField>("type",
@@ -184,7 +211,7 @@ public:
 
 		// setValue("BeforeAfterStartBit",1); // Default to "positive" dates.
 		setFieldMaxId(fieldId-1);
-		setValue("type",2); //
+		setValue("type",1); //
 
 		/*
 		bitFields.push_back(
@@ -231,7 +258,7 @@ static const int64_t YearNativeCanonicalInMS_i64 = 31536000000; // 365  *86400  
 
 // TODO Question: Am I working myself towards an n-adic template?
 /**
- * TemporalIndex defines a particular temporal index, in this case type=2.
+ * TemporalIndex defines a particular temporal index, in this case type=1.
  * The constructor and the set_* methods are low level methods and do not
  * check bounds. Other methods can be defined that provide a higher level
  * API that includes such checks. We need at least one set of low-level
@@ -253,7 +280,8 @@ public:
 		// data = temporalWordFormat; // Copy the format
 		TemporalWordFormat data;
 		// data.setValue("coResolutionLevel",maxValue_coResolutionLevel); // default
-		data.setValue("resolution",63);
+		data.setValue("forward_resolution",63);
+		data.setValue("reverse_resolution",63);
 	};
 	virtual ~TemporalIndex();
 	/**
@@ -269,7 +297,8 @@ public:
 			int64_t minute,
 			int64_t second,
 			int64_t millisecond,
-			int64_t resolution,
+			int64_t forward_resolution,
+			int64_t reverse_resolution,
 			int64_t type
 			)
 //	:
@@ -309,7 +338,8 @@ public:
 		SET_VALUE( minute );
 		SET_VALUE( second );
 		SET_VALUE( millisecond );
-		SET_VALUE( resolution );
+		SET_VALUE( forward_resolution );
+		SET_VALUE( reverse_resolution );
 		SET_VALUE( type );
 		// SET_VALUE( coResolutionLevel );
 #undef SET_VALUE
@@ -358,6 +388,7 @@ public:
 	TemporalIndex(int64_t scidbTemporalIndex) {
 		int64_t idx_ = scidbTemporalIndex;
 
+
 		data.setValue("BeforeAfterStartBit",idx_ > 0 ? 1 : 0);
 		// SHIFT_AND_MASK_RESOLUTION(coResolutionLevel)
 		int64_t babit = 1;
@@ -374,7 +405,8 @@ public:
 		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
-		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(forward_resolution)
+		SHIFT_AND_MASK(reverse_resolution)
 		SHIFT_AND_MASK(type)
 
 		// if(false) {
@@ -389,7 +421,26 @@ public:
 			REVERT(millisecond);
 		}
 		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
-			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE");
+
+		  cout
+		    << endl << "TI input: " << "0x" << setw(16) << setfill('0') << hex << scidbTemporalIndex << dec << endl << flush;
+#define FMTtii(a) a << " " << data.getValue(a) << endl << flush
+		  cout
+		    << FMTtii("year")
+		    << FMTtii("month")
+		    << FMTtii("week")
+		    << FMTtii("day")
+		    << FMTtii("hour")
+		    << FMTtii("minute")
+		    << FMTtii("second")
+		    << FMTtii("millisecond")
+		    << FMTtii("forward_resolution")
+		    << FMTtii("reverse_resolution")
+		    << FMTtii("type")
+		    << FMTtii("BeforeAfterStartBit")
+		    ;
+#undef FMTtii
+			throw SpatialFailure("TemporalIndex:TemporalIndex(SciDBIndex):InvalidIndexYearZeroCE-A");
 		}
 	}
 
@@ -412,7 +463,8 @@ public:
 		SHIFT_AND_MASK(minute)
 		SHIFT_AND_MASK(second)
 		SHIFT_AND_MASK(millisecond)
-		SHIFT_AND_MASK(resolution)
+		SHIFT_AND_MASK(forward_resolution)
+		SHIFT_AND_MASK(reverse_resolution)
 		SHIFT_AND_MASK(type)
 
 		// if(false) {
@@ -461,7 +513,7 @@ public:
 
 		// TODO Construct an index validity checker...
 		if( data.getValue("year") == 0 && data.getValue("BeforeAfterStartBit") == 1 ) {
-			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE");
+			throw SpatialFailure("TemporalIndex:fromTemporalIndexValue(SciDBIndex):InvalidIndexYearZeroCE-B");
 		}
 		return *this;
 	};
@@ -480,7 +532,8 @@ public:
 		SET(minute)
 		SET(second)
 		SET(millisecond)
-		SET(resolution)
+		SET(forward_resolution)
+		SET(reverse_resolution)
 		SET(type)
 #undef SET
 	}
@@ -522,17 +575,25 @@ public:
 
 	int64_t scidbTemporalIndex();
 	int64_t scidbTerminator();
+	int64_t scidbLowerBound();
+	int64_t scidbLowerBoundJulianTAI();
 	int64_t scidbTerminatorJulianTAI();
 	bool    scidbTerminatorp();
+
+	/**
+	   Get a mask that is ones for bits to the right of the temporal bits.
+	 */
+	uint64_t scidbResolutionAndTypeMask() { return (1llu << bitOffsetFinest()) - 1; }
 
 	TemporalIndex& set_zero();
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
 
-	void           toJulianUTC ( double& utc1, double& utc2 ) const;
+	void           toJulianUTC   ( double& utc1, double& utc2)const ;
+        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
 
-	void           toJulianTAI ( double& d1, double& d2) const;
-	TemporalIndex& fromJulianTAI( double  d1, double  d2);
+	void           toJulianTAI   ( double& d1, double& d2) const;
+	TemporalIndex& fromJulianTAI ( double  d1, double  d2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
 
 
 	void toFormattedJulianTAI(
@@ -571,20 +632,29 @@ public:
 			);
 
 	string toStringJulianTAI();
+	string toStringJulianTAI_ISO();
 	TemporalIndex& fromStringJulianTAI(string inputString);
+	TemporalIndex& fromStringJulianTAI_ISO(string inputString);
 
 	int64_t millisecondsAtResolution(int64_t resolution) const;
 	double daysAtResolution(int64_t resolution) const;
-	int64_t coarsestResolutionFinerThanMilliseconds (int64_t milliseconds);
+	int64_t coarsestResolutionFinerOrEqualMilliseconds (int64_t milliseconds);
 	double getResolutionTimescaleDays() const {
-		return daysAtResolution(get_resolution());
+	  return daysAtResolution(max(get_forward_resolution(),get_reverse_resolution()));
+	}	
+	double getForwardResolutionTimescaleDays() const {
+		return daysAtResolution(get_forward_resolution());
+	}
+	double getReverseResolutionTimescaleDays() const {
+		return daysAtResolution(get_reverse_resolution());
 	}
 	/**
 	 * Set resolution to the finest level coarser than the resolutionDays input.
 	 */
 	TemporalIndex& setResolutionFromTimescaleDays( double resolutionDays ) {
-		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerThanMilliseconds( resolutionDays*86400.0e3 )-1);
-		set_resolution(resolutionLevel);
+		int64_t resolutionLevel = max((int64_t)0,coarsestResolutionFinerOrEqualMilliseconds( resolutionDays*86400.0e3 )-1);
+		set_forward_resolution(resolutionLevel);
+		set_reverse_resolution(resolutionLevel);
 		return *this;
 	}
 
@@ -593,7 +663,7 @@ public:
 // #define SET(field) TemporalIndex &set_##field(int64_t x) { field = x; if( (x < 0) || (x > maxValue_##field)) throw SpatialFailure("TemporalIndex:DomainFailure in ",name_##field.c_str()); return *this;}
 #define SET(field) TemporalIndex &set_##field(int64_t x) { data.setValue(#field, x ); \
 	if( (x < 0) || (x > data.get(#field)->getMaxValue()))\
-	throw SpatialFailure("TemporalIndex:DomainFailure in ",data.get(#field)->getName().c_str()); return *this;}
+    {stringstream ss; ss << data.get(#field)->getName().c_str() << " = " << x << " upper: " << data.get(#field)->getMaxValue(); throw SpatialFailure("TemporalIndex:DomainFailure in ",ss.str().c_str());} return *this;}
 	SET(BeforeAfterStartBit)
 	SET(year)
 	SET(month)
@@ -603,7 +673,8 @@ public:
 	SET(minute)
 	SET(second)
 	SET(millisecond)
-	SET(resolution)
+	SET(forward_resolution)
+	SET(reverse_resolution)
 	SET(type)
 	// SET(coResolutionLevel)
 #undef  SET
@@ -623,7 +694,8 @@ public:
 	GET(minute)
 	GET(second)
 	GET(millisecond)
-	GET(resolution)
+	GET(forward_resolution)
+	GET(reverse_resolution)
 	GET(type)
 	// GET(coResolutionLevel)
 #undef GET
@@ -662,6 +734,11 @@ public:
 void fractionalDayToHMSM   (double  fd, int& hour, int& minute, int& second, int& ms);
 void fractionalDayFromHMSM (double& fd, int  hour, int  minute, int  second, int  ms);
 
+/**
+   Numerical compare (if) of the bits associated with two TemporalIndex objects.
+
+   Question: might this have problems in edge cases involving leap years or seconds?
+ */
 inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
@@ -678,6 +755,9 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 		}
 	}
 
+	/*
+	  Start at the coarsest field and compare successively finer fields.
+	 */
 	do {
 		int64_t lhs = a.data.getValueAtId(iField);
 		int64_t rhs = b.data.getValueAtId(iField);
@@ -689,13 +769,21 @@ inline int cmp(const TemporalIndex& a, const TemporalIndex& b) {
 			ret =  1*CE_factor; done = true;
 		}
 		++iField;
-		 if( iField >= a.data.getFieldId("resolution") ){
+		 if( iField >= a.data.getFieldId("forward_resolution") ){
+			 done = true;
+		 }
+		++iField;
+		 if( iField >= a.data.getFieldId("reverse_resolution") ){
+		   // TODO this code should be unnecessary.
 			 done = true;
 		 }
 	} while (!done);
 	return ret;
 }
 
+/**
+   Add two TemporalIndex values by adding their Int64Milliseconds representations.
+ */
 // inline TemporalIndex& add(const TemporalIndex& a, const TemporalIndex& b) {
 inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
@@ -709,10 +797,13 @@ inline TemporalIndex add(const TemporalIndex& a, const TemporalIndex& b) {
 	// TemporalIndex* c = new TemporalIndex;
 	TemporalIndex c;
 	c.fromInt64Milliseconds(ab);
-	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	c.set_forward_resolution(min(a.get_forward_resolution(),b.get_forward_resolution()));
+	c.set_reverse_resolution(min(a.get_reverse_resolution(),b.get_reverse_resolution()));
 	return c;
 }
-
+/**
+   Compare TemporalIndex objects according to their Julian TAI values.
+ */
 inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
 		throw SpatialFailure("TemporalIndex:cmp(a,b):TypeMismatch");
@@ -733,6 +824,9 @@ inline int cmpJ(const TemporalIndex& a, const TemporalIndex& b) {
 	return ret;
 }
 
+/**
+   Add two TemporalIndex values by adding their Julian TAI representations.
+ */
 // inline TemporalIndex& addJ(const TemporalIndex& a, const TemporalIndex& b) {
 inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	if( a.get_type() != b.get_type() ) {
@@ -752,7 +846,8 @@ inline TemporalIndex addJ(const TemporalIndex& a, const TemporalIndex& b) {
 	// TemporalIndex* c = new TemporalIndex;
 	TemporalIndex c;
 	c.fromJulianTAI(cd1, cd2);
-	c.set_resolution(min(a.get_resolution(),b.get_resolution()));
+	c.set_forward_resolution(min(a.get_forward_resolution(),b.get_forward_resolution()));
+	c.set_reverse_resolution(min(a.get_reverse_resolution(),b.get_reverse_resolution()));
 	return c;
 }
 
@@ -818,6 +913,117 @@ int64_t scidbMinimumTemporalIndex();
 int64_t scidbMaximumTemporalIndex();
 
 int64_t millisecondsInYear(int64_t CE, int64_t year);
+
+/**
+   Set bits at finer resolutions to zero.
+ */
+int64_t scidbClearBitsFinerThanResolution(int64_t ti_value, int resolution);
+
+/**
+   Set bits at finer resolutions to one.
+ */
+int64_t scidbSetBitsFinerThanResolution(int64_t ti_value, int resolution);
+
+/**
+   Set bits at finer resolutions to one, but limit values to calendrical maxes. I.e. 60 seconds per minute, not 63.
+ */
+int64_t scidbSetBitsFinerThanResolutionLimited(int64_t ti_value, int resolution);
+
+/**
+   Approximate the upper bound (terminator) of a temporal index value.
+ */
+int64_t scidbUpperBoundMS(int64_t ti_value);
+
+/**
+   Approximate the lower bound (terminator) of a temporal index value.
+ */
+int64_t scidbLowerBoundMS(int64_t ti_value);
+
+/**
+   A more accurate the upper bound (terminator) of a temporal index value, based on TAI.
+ */
+int64_t scidbUpperBoundTAI(int64_t ti_value);
+
+/**
+   A more accurate the lower bound of a temporal index value, based on TAI.
+ */
+int64_t scidbLowerBoundTAI(int64_t ti_value);
+
+/*
+overlap
+segment
+gt, lt, eq, contains
+*/
+
+/**
+   True if temporal index values overlap using approximate millisecond calculations.
+ */
+bool scidbOverlap(int64_t ti_value_0, int64_t ti_value_1);
+
+/**
+   True if temporal index values overlap using more accurate but expensive TAI calculations.
+ */
+bool scidbOverlapTAI(int64_t ti_value_0, int64_t ti_value_1);
+
+/**
+   True if the instant in ti_value_query is in the segment of ti_value.
+ */
+bool scidbContainsInstant(int64_t ti_value, int64_t ti_value_query);
+
+/**
+ Return a mask for extracting the temporal location (i.e. the instant)
+ */
+int64_t temporal_mask(int64_t ti_value);
+
+/**
+   Return forward resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t forward_resolution(int64_t ti_value);
+
+/**
+   Return reverse resolution "level" of the temporal index value.
+
+   TODO: Check on temporal format, if needed.
+ */
+int64_t reverse_resolution(int64_t ti_value);
+
+int64_t set_reverse_resolution(int64_t ti_value, int64_t resolution);
+int64_t set_forward_resolution(int64_t ti_value, int64_t resolution);
+int64_t coarsen(int64_t ti_value, int64_t reverse_increment, int64_t forward_increment);
+
+/**
+   True if the temporal index value is a lower bound.
+ */
+bool lowerBoundP(int64_t ti_value);
+
+/**
+   True if the temporal index value is an upper bound.
+ */
+bool upperBoundP(int64_t ti_value);
+
+bool validBoundP(int64_t ti_value);
+
+bool validResolutionP(int64_t resolution);
+
+/**
+   Make a new temporal index value from a triple of values (lower, t0, upper).
+
+   A negative value for lower or upper will cause that resolution to be set to the finest resolution (i.e. maximum resolution).
+
+   A negative value for the "center" or tiv will be set to the mean of the lower and upper.
+ */
+int64_t scidbNewTemporalValue(int64_t tiv_lower, int64_t tiv, int64_t tiv_upper, bool include_bounds=true);
+
+int64_t fromStringJulianTAI_ISO(string inputString);
+
+string toStringJulianTAI_ISO(int64_t tiv);
+
+int64_t scidbTemporalValueUnionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
+int64_t scidbTemporalValueIntersectionIfOverlap(int64_t ti_value_0, int64_t ti_value_1);
+
+void set_temporal_resolutions_from_sorted_inplace(int64_t* ti_sorted, const int64_t len, bool include_bounds = true);
 
 // } /* namespace std */
 

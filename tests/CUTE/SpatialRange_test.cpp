@@ -44,6 +44,79 @@ public:
   }
 };
 
+// #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+
+void HRML_LowLevelDiagnostic(int64 siv, int64 term)
+      {
+
+	cout << "HRML_LowLevelDiagnostic----" << endl << flush;
+	cout << "siv: " << FMTX(siv) << endl << flush;
+	cout << "trm: " << FMTX(term) << endl << flush;
+	
+	EmbeddedLevelNameEncoding lj;
+
+	// From HstmRange.h addRange
+	lj.setIdFromSciDBLeftJustifiedFormat(siv); // Lower bound of interval
+	// uint64 bareLo  = lj.bareId();
+	// uint32 levelLo = lj.getLevel();
+	
+	int64 siv_hstm = lj.getId();
+	Key   siv_htm  = lj.maskOffLevelBit(siv_hstm);
+	Key a          = siv_htm;
+	// int aLevel = lj.levelById(siv_hstm);
+	
+
+	lj.setIdFromSciDBLeftJustifiedFormat(term); // Terminator	
+	int64 term_hstm = lj.getId();
+	Key   term_htm  = lj.maskOffLevelBit(term_hstm);
+	Key b           = term_htm;
+	
+	cout << "a,b: " << FMTX(a) << " " << FMTX(b) << endl << flush;
+
+//	EmbeddedLevelNameEncoding lj_hi_last_value = lj.atLevel(levelLo);
+//	uint64 bareHi = lj_hi_last_value.bareId();
+//	uint64 delta = bareHi-bareLo+1; // Number of triangles at levelLo in the interval
+//
+//	uint64 one_mask_to_level, one_at_level;
+//	lj.SciDBincrement_LevelToMaskDelta(levelLo,one_mask_to_level, one_at_level);
+// 
+// #if 1
+// 	cout << "levelLo " << levelLo << endl << flush;
+// 	cout << "delta   " << delta << endl << flush;
+// #endif
+// 
+// 	uint64 si  = siv; // sis[0];
+// 	lj.setIdFromSciDBLeftJustifiedFormat(si);
+// 	uint64 si_ = lj.getId();
+// 	for(int k=0; k<delta; ++k) {
+// 	  uint64 bareId = lj.bareId();
+// #if 1
+// 	  cout << k << " " << FMTX(lj.getSciDBLeftJustifiedFormat()) << " " << FMTX(bareId) << " ltn: " << lj.getLocalTriangleNumber() << " " << FMTX(lj.getId()) << " " << FMTX(lj.increment(lj.getId(),levelLo)) << " si_: " << FMTX(si_) << endl << flush;
+// #endif
+// 	  si_ = lj.increment(si_,levelLo); // Note no change in level // Question -- how to put si into a new lj?
+// 	  lj.setId(si_);
+// 	  si += one_at_level;
+// 	}
+// 
+// 	si = siv; // sis[0];
+// 	lj.setIdFromSciDBLeftJustifiedFormat(si);
+// 	uint64 lj_id0 = lj.getId();
+// 	lj.setId(lj_id0);
+// 	uint64 lj_id1 = lj.getId();
+// #if 1
+// 	cout << "check 0: " << FMTX(si) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+// #endif
+// 	lj.setIdFromSciDBLeftJustifiedFormat(si+one_at_level);
+// 	lj_id0 = lj.getId();
+// 	lj_id1 = lj.increment(lj_id1,levelLo);
+// #if 1
+// 	cout << "check 1: " << FMTX((si+one_at_level)) << " " << FMTX(lj_id0) << " " << FMTX(lj_id1) << endl << flush;
+// #endif
+
+	cout << "----HRML_LowLevelDiagnostic----" << endl << endl << flush;
+	
+      }
+
 // #define DIAG
 #undef DIAG
 
@@ -52,7 +125,187 @@ public:
 
 void SpatialRange_test () {
 
-#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+  // #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+
+
+  if(true) { // pystare bug#27-3
+
+    STARE_SpatialIntervals sids = {
+      0x3f88000000000006,
+      0x3f88800000000006,
+      0x3f89000000000006,
+      0x3f89800000000006,
+      0x3f8a000000000006,
+      0x3f8a000000000006,
+      0x3f8a800000000006,
+      0x3f8a800000000006,
+      0x3f8b000000000006,
+      0x3f8b800000000006,
+      0x3f8c000000000006,
+      0x3f8c800000000006,
+      0x3f8d000000000006,
+      0x3f8d800000000006,
+      0x3f8e000000000006,
+      0x3f8e000000000006,
+      0x3f8e800000000006,
+      0x3f8e800000000006,
+      0x3f8f000000000006,
+      0x3f8f800000000006,
+      0x3f8f800000000006,
+      0x3f90000000000005,
+      0x3f92000000000006,
+      0x3f92800000000006,
+      0x3f93000000000006,
+      0x3f93000000000006,
+      0x3f93800000000006,
+      0x3f94000000000006,
+      0x3f94000000000006,
+      0x3f94800000000006,
+      0x3f94800000000006,
+      0x3f94800000000006,
+      0x3f95000000000006,
+      0x3f95800000000006,
+      0x3f95800000000006,
+      0x3f96000000000006,
+      0x3f96800000000006,
+      0x3f96800000000006,
+      0x3f97000000000006,
+      0x3f97000000000006,
+      0x3f97800000000006,
+      0x3f97800000000006,
+      0x3f98000000000006,
+      0x3f98000000000006,
+      0x3f98800000000006,
+      0x3f99000000000006,
+      0x3f99800000000006,
+      0x3f9a000000000005,
+      0x3f9c000000000006,
+      0x3f9c800000000006,
+      0x3f9d000000000006,
+      0x3f9d800000000006,
+      0x3f9e000000000005,
+      0x3fa0000000000005,
+      0x3fa2000000000005,
+      0x3fa4000000000006,
+      0x3fa4800000000006,
+      0x3fa5000000000006,
+      0x3fa5800000000006,
+      0x3fa6000000000005,
+      0x3fa8000000000006,
+      0x3fa8000000000006,
+      0x3fa8800000000006,
+      0x3fa8800000000006,
+      0x3fa9000000000006,
+      0x3fa9800000000006,
+      0x3fa9800000000006,
+      0x3faa000000000006,
+      0x3faa800000000006,
+      0x3faa800000000006,
+      0x3fab000000000006,
+      0x3fab000000000006,
+      0x3fab800000000006,
+      0x3fac000000000005,
+      0x3fae000000000006,
+      0x3fae800000000006,
+      0x3faf000000000006,
+      0x3faf800000000006,
+      0x3fb4000000000005,
+      0x3fb9000000000006,
+      0x3fba800000000006,
+      0x3fbc000000000005,
+      0x3fbe000000000006,
+      0x3fbe800000000006,
+      0x3fbf800000000006
+    };
+
+    SpatialRange r(sids);
+#if 0
+    cout << "\npystare-bug#27-3" << flush;
+    cout << "\nInitialized\n" << flush;
+    cout << "***r.dump()***" << endl << flush;
+    r.dump();
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    r.compress();
+#if 0
+    cout << "\ncompress\n" << flush;
+    cout << "***r.dump()***" << endl << flush;
+    r.dump();
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals compressed = r.toSpatialIntervals();
+#if 0
+    for(int k=0; k<compressed.size(); ++k) {
+      cout << "exp1 "
+	   << FMTX(compressed[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals expanded = expandIntervalsMultiRes(compressed,-1,true);
+#if 0
+    for(int k=0; k<expanded.size(); ++k) {
+      cout << "exp2 "
+	   << FMTX(expanded[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    {
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3fa0000000000004;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      cout << "-----------------" << endl << flush;
+#endif
+    }
+
+    {
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3fa0000000000003;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      cout << "-----------------" << endl << flush;
+#endif      
+    }
+#if 0
+    {
+      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fa7ffffffffffff);
+      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fafffffffffffff);
+    }
+#endif
+    
+    STARE_SpatialIntervals expanded_expected = { // Abuse of the type...
+      0x3f88000000000004,
+      0x3f90000000000004,
+      0x3f98000000000004,
+      0x3fa0000000000004      // Error in bug 27-3: 0x3fa0000000000003
+    };
+    for(int k=0; k<expanded_expected.size(); ++k) {
+      ASSERT_EQUAL(expanded_expected[k],expanded[k]);
+    }
+    
+  }
 
   if(false)
   { // pystare bug#27-1
@@ -166,7 +419,7 @@ void SpatialRange_test () {
 
     r.compress();
 
-#if 1
+#if 0
       cout << "\npystare-bug#27" << flush;
       cout << "\ncompress\n" << flush;
       cout << "***r.dump()***" << endl << flush;
@@ -175,7 +428,7 @@ void SpatialRange_test () {
 #endif
 
       STARE_SpatialIntervals sis = r.toSpatialIntervals();
-      
+#if 0      
       {
 	for(int k=0; k<sis.size(); ++k) {
 	  cout << "sis "
@@ -184,7 +437,8 @@ void SpatialRange_test () {
 	}
 	cout << "-----------------" << endl << flush;
       }
-      
+#endif
+#if 0
       {
 	STARE_SpatialIntervals expanded = expandIntervalsMultiRes(sis,-1,true);
 	for(int k=0; k<expanded.size(); ++k) {
@@ -194,12 +448,14 @@ void SpatialRange_test () {
 	}
 	cout << "-----------------" << endl << flush;
       }
+#endif
   }
 
   
   { // pystare bug#27-2
-
+#if 0
     cout << "-----------------" << endl << flush;
+#endif
     
     STARE_SpatialIntervals compressed = {
       0x22ff8a000000000b,
@@ -254,7 +510,7 @@ void SpatialRange_test () {
     STARE index;
 
     {
-#define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
+      // #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
       STARE_SpatialIntervals sis = {
 	0x3bd7800000000006,  0x3bd9ffffffffffff
@@ -330,8 +586,8 @@ void SpatialRange_test () {
 	lj.setIdFromSciDBLeftJustifiedFormat(si);
 	uint64 si_ = lj.getId();
 	for(int k=0; k<delta; ++k) {
-	  uint64 bareId = lj.bareId();
 #if 0
+	  uint64 bareId = lj.bareId();
 	  cout << k << " " << FMTX(lj.getSciDBLeftJustifiedFormat()) << " " << FMTX(bareId) << " ltn: " << lj.getLocalTriangleNumber() << " " << FMTX(lj.getId()) << " " << FMTX(lj.increment(lj.getId(),levelLo)) << endl << flush;
 #endif
 	  si_ = lj.increment(si_,levelLo); // Note no change in level // Question -- how to put si into a new lj?
