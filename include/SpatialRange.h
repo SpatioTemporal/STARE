@@ -57,9 +57,8 @@ public:
 	//	return intersectp;
 	//}
 
-	bool intersects(STARE_SpatialIntervals sids) { //Done
-		HTMSubTree* temp = new HTMSubTree(sids);
-		return tree->isIntersect(temp->root); //TODO: some parameter conversions need to be taken care of
+	bool intersects(STARE_ArrayIndexSpatialValue siv) { //Done
+		return tree->isContain(siv); //TODO: modify the tree->isIntersect(siv)
 	}
 
 	HstmRange *range;//Should remove and remove any relevant code in SpatialRange_test.cpp
