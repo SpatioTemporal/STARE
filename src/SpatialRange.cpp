@@ -13,25 +13,17 @@
 
 
 SpatialRange::SpatialRange() {
-	//this->range = new HstmRange;
 	tree = new HTMSubTree();
 }
 
 SpatialRange::SpatialRange(STARE_SpatialIntervals intervals) {
-	//this->range = new HstmRange;
-	//this->addSpatialIntervals(intervals);
 	tree = new HTMSubTree(intervals);
 }
 
 SpatialRange::SpatialRange(std::list<STARE_ENCODE> * sids) {
-	//this->range = new HstmRange;
-	//this->addSpatialIntervals(intervals);
 	tree = new HTMSubTree(sids);
 }
 SpatialRange::~SpatialRange() {
-  //if( this->range != NULL ) {
-  //	  delete this->range; // TODO mlr. Um. Dangerous if range is from elsewhere? Maybe use some sort of smart pointer?
-  //}
   if(tree != NULL)
 	delete tree;
 }
@@ -57,60 +49,20 @@ void SpatialRange::addSpatialRange(const SpatialRange& range) {
 // #define DIAG
 //#undef DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
-	/* EmbeddedLevelNameEncoding leftJustified, lj_cleared;
-#ifdef DIAG
-  int count = 0;
-#endif  
-	for(auto i0=intervals.begin(); i0 != intervals.end(); ++i0) {
-#ifdef DIAG
-    cout << "sr::adsi count = " << ++count << endl << flush;
-#endif
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(*i0);
-		uint64 a         = leftJustified.getId(), b = a;
-    int    a_level   = leftJustified.getLevel();
-    lj_cleared       = leftJustified.clearDeeperThanLevel(a_level);
-    uint64 a_cleared = lj_cleared.getId();
-		auto i1 = (i0+1);
-#ifdef DIAG
-		cout << "sr::addsi i0: 0x"
-			 << setw(16) << setfill('0') << hex << (*i0);
-		if( i1 != intervals.end() ) {		
-			cout << " i1: 0x" << setw(16) << setfill('0') << hex << (*i1);
-		}
-		cout << dec << endl << flush;
-#endif
-		// ORIG 2019-1212 MLR		if( i1 <= intervals.end() ) {
-		if( i1 != intervals.end() ) {
-			if(terminatorp(*i1)) {
-				leftJustified.setIdFromSciDBLeftJustifiedFormat(*i1);
-				b = leftJustified.getId();
-				++i0; // Skip to next
-			}
-		}
-
-#ifdef DIAG
-		cout << "sr::addsi "
-			 << setw(16) << setfill('0') << hex << a << " "
-			 << setw(20) << dec << a << " "
-			 << setw(16) << setfill('0') << hex << b << " "
-			 << setw(20) << dec << b << " "
-			 << endl << flush;
-#endif
-		// old this->range->addRange(a,b);
-		this->range->addRange(a_cleared,b);
-#ifdef DIAG
-    cout << "sr::addsi addRange done" << endl << flush;    
-		cout << "sr::addsi nr = " << this->range->range->nranges() << endl << flush;
-#endif
-	}*/
 	if(!intervals.empty()){
         int size = intervals.size();
         unsigned long long curSID = 0;
+		std::cout<<"Safe!" <<endl;
+		for (int i = 0; i < size; i++){
+			std::cout << "Value " << i << ": " << intervals[i] << endl;
+		}
         tree->root->isLeaf = false;//start to insert
         for (int i = 0; i < size; i++){
             curSID = intervals[i];
             tree->addSTAREID(curSID);
         }
+		tree->printTree();
+		std::cout<<"Done!" << endl;
     }
     else{
         std::cout << "Input Error: The list of STARE values is empty!";
@@ -187,47 +139,11 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
-	/*
-	// cout << endl << flush << "**sr_intersect**" << endl << flush;
-	HstmRange *range = new HstmRange(a.range->range->RangeFromIntersection(b.range->range,compress)); // NOTE mlr Probably about the safest way to inst. SpatialRange.
-// #define DIAG
-#ifdef DIAG
-	KeyPair kp; 
-    range->reset(); 
-    range->getNext(kp);
-	cout << "sr_i range,r->r,nr " << range << " " << range->range << " " << range->range->nranges() << " : "
-			<< setw(16) << setfill('0') << hex << kp.lo << " "
-			<< setw(16) << setfill('0') << hex << kp.hi << " "
-			<< dec
-			<< endl << flush;
-	EmbeddedLevelNameEncoding leftJustified;
-	leftJustified.setId(kp.lo); 
-    cout << "kp.lo lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
-	leftJustified.setId(kp.hi); cout << "kp.hi lj " << setw(16) << setfill('0') << hex << leftJustified.getSciDBLeftJustifiedFormat() << endl << flush;
-	cout << " r-r-my_los " << hex << range->range->my_los << endl << flush;
-	cout << dec;
-#endif
-	SpatialRange *sr = new SpatialRange(range);
-
-#ifdef DIAG
-	cout << "sr-r          " << hex << sr->range << endl << flush;
-	cout << "sr-r-r        " << hex << sr->range->range << endl << flush;
-	cout << "sr-r-r-my_los " << hex << sr->range->range->my_los << endl << flush;
-#endif
-	return sr;
-
-//	return SpatialRange(range);
-*/
-	/*if(a == NULL || b == NULL){
-        std::cout << "Error (sr_intersect): input is NULL!";
-		return NULL;
-	}*/
-	return NULL;
-	/*std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
+	std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
 	SpatialRange *result = new SpatialRange(temp);
 	temp->clear();
 	delete temp;
-	return result;*/
+	return result;
 }
 
 

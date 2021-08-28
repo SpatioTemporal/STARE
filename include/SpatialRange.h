@@ -41,9 +41,11 @@ public:
 	//}
 
 	bool contains(STARE_ArrayIndexSpatialValue siv) { //Done
-		std::cout << "Contains\n";
-		return true;
 		return tree->isContain(siv);
+	}
+
+	void print(){
+		tree->printTree();
 	}
 
 	//bool intersects(STARE_ArrayIndexSpatialValue siv) {
@@ -80,11 +82,9 @@ public:
 	//Mike suggested to remove these functions
 	void reset() { 
 		//range->reset(); 
-		std::cout << "Reset called!";
 		} // range not null?
 	void purge() { 
 		//range->purge(); 
-		tree->printTree();
 		} // what if range null?
 	void defrag() { 
 		//range->range->defrag(); 
