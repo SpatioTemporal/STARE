@@ -70,9 +70,9 @@ public:
     int                 getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result);
     
 //private:
-    HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level);
+    HTMSubTreeNode*     createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, STARE_ENCODE level);
     // Helper functions
-    STARE_ENCODE        getSTARELEVELCode(STARE_ENCODE key, int level);
+    STARE_ENCODE        getSTARELEVELCode(STARE_ENCODE key, STARE_ENCODE level);
     HTMSubTreeNode*     getHighestRoot(HTMSubTreeNode* Ins_root);
     HTMSubTreeNode*     getPotentialBranch(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b);
     void                tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNode*> *path);
@@ -104,6 +104,7 @@ void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2();
 void HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1();
 void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify();
 void HTMSubTree_test_isContain();
+void HTMSubTree_test_getAllLeaves();
 void HTMSubTree_test_isIntersect();
 /* ========== <Timer class> =========== */
 class timer

@@ -32,14 +32,14 @@ class HTMSubTreeNode{
 public:
     // Contructors
     HTMSubTreeNode();    
-    HTMSubTreeNode(STARE_ENCODE _key, bool _isLeaf, int _level, int _count);
+    HTMSubTreeNode(STARE_ENCODE _key, bool _isLeaf, STARE_ENCODE _level, int _count);
 
     // Destructors
     ~HTMSubTreeNode();
 
     // Attributes
     STARE_ENCODE key;            // STARE Encode
-    int level;          // 0 <= level <= 27, (0 is the highest level)
+    STARE_ENCODE level;          // 0 <= level <= 27, (0 is the highest level)
                         //      Tree Hierachical level (node coverage)
     bool isLeaf;        // True or False
     int count;          // Total number of children
@@ -51,6 +51,6 @@ public:
     STARE_ENCODE keys[MAX_NUM_CHILD];
 
 private:
-    STARE_ENCODE genSTARELEVELCode(STARE_ENCODE key, unsigned int level, unsigned int pos);
+    STARE_ENCODE genSTARELEVELCode(STARE_ENCODE key, STARE_ENCODE level, unsigned int pos);
 };
 #endif /* INCLUDE_HTMSUBTREENODE_H_ */

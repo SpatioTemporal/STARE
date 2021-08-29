@@ -39,6 +39,7 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
 HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids){
     if(sids != NULL){
         root = new HTMSubTreeNode();
+        root->isLeaf = false;//start to insert
         std::list<STARE_ENCODE>::iterator it;
         unsigned long long curSID = 0;
         for (it = sids->begin(); it != sids->end(); it++){
@@ -52,7 +53,7 @@ HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids){
 
 void HTMSubTree::addSTAREID(STARE_ENCODE key){
     HTMSubTreeNode* curNode = root;
-    unsigned long long level = key & 0x000000000000001f;
+    STARE_ENCODE level = key & 0x000000000000001f;
     STARE_ENCODE curCode = 0;
     std::list<HTMSubTreeNode*> *path = new std::list<HTMSubTreeNode*>();
     //path->push_back(curNode); // we don't group leaves in the level 0
@@ -156,7 +157,7 @@ void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNod
     }
 }
 
-HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, int level){
+HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, STARE_ArrayIndexSpatialValue code, STARE_ENCODE level){
     if(level >= 0 and level < 28){
         int pos = code >> (5 + (27 - level) * 2);
         if(current->children[pos] == NULL){    
@@ -174,7 +175,7 @@ HTMSubTreeNode* HTMSubTree::createChildNode(HTMSubTreeNode* current, STARE_Array
     }
 }
 
-STARE_ENCODE HTMSubTree::getSTARELEVELCode(STARE_ENCODE key, int level){
+STARE_ENCODE HTMSubTree::getSTARELEVELCode(STARE_ENCODE key, STARE_ENCODE level){
     if (level == 0){
         return (key & 0x3800000000000000);
     }
@@ -544,7 +545,7 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENC
                     result->push_back(*temp);
                 }
                 else
-                    printFromNode(sub_root->children[i]);
+                    getAllLeaves(sub_root->children[i], result);
             }
         }
         return 1;
@@ -566,7 +567,7 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>*
                 if(sub_root->children[i]->isLeaf)//Add leaf
                     result->push_back(sub_root->children[i]->key);
                 else
-                    printFromNode(sub_root->children[i]);
+                    getAllLeaves(sub_root->children[i], result);
             }
         }
         return 1;

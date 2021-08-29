@@ -28,14 +28,17 @@ SpatialRange::~SpatialRange() {
 	delete tree;
 }
 
-void SpatialRange::addSpatialRange(const SpatialRange& range) {
+void SpatialRange::addSpatialRange(const SpatialRange& r) {
 	//this->range->addRange(range.range);
 	std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
-	if(tree->getAllLeaves(range.tree->root, temp)){
-        std::list<STARE_ENCODE>::iterator it;
-        for (it = temp->begin(); it != temp->end(); ++it){
-            tree->addSTAREID(*it);
-        }
+	if(tree->getAllLeaves(r.tree->root, temp)){
+		if((temp != NULL) && (temp->size() > 0)){
+			tree->root->isLeaf = false;//start to insert
+			std::list<STARE_ENCODE>::iterator it;
+			for (it = temp->begin(); it != temp->end(); ++it){
+				tree->addSTAREID(*it);
+			}
+		}
 	}
 	temp->clear();
 	delete temp;
@@ -133,12 +136,10 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
-	std::cout << "sr_intersect..." << endl;
 	std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
 	SpatialRange *result = new SpatialRange(temp);
 	temp->clear();
 	delete temp;
-	std::cout << "sr_intersect...done" << endl;
 	return result;
 }
 
