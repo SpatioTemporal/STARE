@@ -85,6 +85,7 @@ public:
 		} // range not null?
 	void purge() { 
 		//range->purge(); 
+		print();
 		} // what if range null?
 	void defrag() { 
 		//range->range->defrag(); 

@@ -52,17 +52,11 @@ void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	if(!intervals.empty()){
         int size = intervals.size();
         unsigned long long curSID = 0;
-		std::cout<<"Safe!" <<endl;
-		for (int i = 0; i < size; i++){
-			std::cout << "Value " << i << ": " << intervals[i] << endl;
-		}
         tree->root->isLeaf = false;//start to insert
         for (int i = 0; i < size; i++){
             curSID = intervals[i];
             tree->addSTAREID(curSID);
         }
-		tree->printTree();
-		std::cout<<"Done!" << endl;
     }
     else{
         std::cout << "Input Error: The list of STARE values is empty!";
@@ -139,10 +133,12 @@ STARE_SpatialIntervals SpatialRange::toSpatialIntervals() {
  */
 // SpatialRange sr_intersect(const SpatialRange&a, const SpatialRange& b, bool compress) {
 SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress) {
+	std::cout << "sr_intersect..." << endl;
 	std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
 	SpatialRange *result = new SpatialRange(temp);
 	temp->clear();
 	delete temp;
+	std::cout << "sr_intersect...done" << endl;
 	return result;
 }
 

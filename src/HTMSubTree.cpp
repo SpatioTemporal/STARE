@@ -284,7 +284,6 @@ bool HTMSubTree::isContain(STARE_ArrayIndexSpatialValue siv){ //return if siv is
         return result; //siv is not contained in the tree
     
     result = rec_isContain(sub_root, siv);
-    
     return result;
 }
 
@@ -297,12 +296,12 @@ bool HTMSubTree::rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatial
         return check_Contain(sub_root->key, siv);
     }
     else{//Both sub_root is Non-Leaf nodes
-        unsigned long long level_r = sub_root->key & 0x000000000000001f;
+        unsigned long long level_r = sub_root->level;
         unsigned long long level_siv = siv & 0x000000000000001f;
-        if(level_siv <= level_r)//siv's coverage is larger (or equal) than sub_root's coverage
+        if(level_siv < level_r)//siv's coverage is larger (or equal) than sub_root's coverage
             return false;
         else{ // level_siv > level_r: siv's coverage is smaller than sub_root's coverage
-            STARE_ENCODE code_sid_adjust = getSTARELEVELCode(siv, level_r + 1);
+            STARE_ENCODE code_sid_adjust = getSTARELEVELCode(siv, level_r);
             int loop = MAX_NUM_CHILD_II;
             if (sub_root->level == 0)
                 loop = MAX_NUM_CHILD;

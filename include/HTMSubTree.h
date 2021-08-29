@@ -103,6 +103,8 @@ void HTMSubTree_vs_SpatialRange_Intersect_MOD05_1();
 void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2();
 void HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1();
 void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify();
+void HTMSubTree_test_isContain();
+void HTMSubTree_test_isIntersect();
 /* ========== <Timer class> =========== */
 class timer
 {
