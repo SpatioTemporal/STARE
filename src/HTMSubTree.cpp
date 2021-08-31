@@ -23,7 +23,7 @@ HTMSubTree::HTMSubTree(char* sidecar){
 HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
     if(!sids.empty()){
         int size = sids.size();
-        unsigned long long curSID = 0;
+        STARE_ENCODE curSID = 0;
         root = new HTMSubTreeNode();
         root->isLeaf = false;//start to insert
         for (int i = 0; i < size; i++){
@@ -41,7 +41,7 @@ HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids){
         root = new HTMSubTreeNode();
         root->isLeaf = false;//start to insert
         std::list<STARE_ENCODE>::iterator it;
-        unsigned long long curSID = 0;
+        STARE_ENCODE curSID = 0;
         for (it = sids->begin(); it != sids->end(); it++){
             addSTAREID(*it);
         }
@@ -79,7 +79,7 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         path->push_back(curNode);
                     }
                     else if(i == level){ //Set the level for the key
-                        temp->key = temp->key | ((unsigned long long)level);
+                        temp->key = temp->key | ((STARE_ENCODE)level);
                         //temp->key = key; // ---- This can be faster ----
                         if(!path->empty())
                             path->pop_back();
@@ -107,7 +107,7 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         }
                         curNode->children[j]->isLeaf = true;
                         curNode->children[j]->count = 0;
-                        curNode->children[j]->key = curNode->children[j]->key | ((unsigned long long)level);
+                        curNode->children[j]->key = curNode->children[j]->key | ((STARE_ENCODE)level);
                         //curNode->children[j]->key = key; // ---- This can be faster ----
                         if(!path->empty())
                             path->pop_back();
@@ -148,7 +148,7 @@ void HTMSubTree::tryGroupLeaves(HTMSubTreeNode* curNode, std::list<HTMSubTreeNod
         curNode->isLeaf = true;
         curNode->count = 0;
         if(curNode->level > 0)
-            curNode->key = curNode->key | ((unsigned long long)(curNode->level - 1));
+            curNode->key = curNode->key | ((STARE_ENCODE)(curNode->level - 1));
         if(!path->empty()){
             HTMSubTreeNode* temp = path->back();
             path->pop_back();
@@ -297,8 +297,8 @@ bool HTMSubTree::rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatial
         return check_Contain(sub_root->key, siv);
     }
     else{//Both sub_root is Non-Leaf nodes
-        unsigned long long level_r = sub_root->level;
-        unsigned long long level_siv = siv & 0x000000000000001f;
+        STARE_ENCODE level_r = sub_root->level;
+        STARE_ENCODE level_siv = siv & 0x000000000000001f;
         if(level_siv < level_r)//siv's coverage is larger (or equal) than sub_root's coverage
             return false;
         else{ // level_siv > level_r: siv's coverage is smaller than sub_root's coverage
@@ -320,8 +320,8 @@ bool HTMSubTree::rec_isContain(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatial
 
 //Check if STARE_ID_b is contained in STARE_ID_a
 bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
-    unsigned long long level_a = key_a & 0x000000000000001f;
-    unsigned long long level_b = key_b & 0x000000000000001f;
+    STARE_ENCODE level_a = key_a & 0x000000000000001f;
+    STARE_ENCODE level_b = key_b & 0x000000000000001f;
     if(level_b < level_a)//b's coverage is larger than a's coverage
         return false;
     else {// level_b >= level_a: b's coverage is smaller than a's coverage
@@ -376,8 +376,8 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_FullJoin): input is NULL!";
         return 0;
     }
-    unsigned long long level_a = root_a->key & 0x000000000000001f;
-    unsigned long long level_b = root_b->key & 0x000000000000001f;
+    STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
+    STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
     if(level_a != level_b){
         std::cout << "Error (rec_FullJoin): levels are different in rec_FullJoin!";
         return 0;
@@ -468,8 +468,8 @@ int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_LeftJoin): input is NULL!";
         return 0;
     }
-    unsigned long long level_a = root_a->key & 0x000000000000001f;
-    unsigned long long level_b = root_b->key & 0x000000000000001f;
+    STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
+    STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
     if(level_a > level_b){
         std::cout << "Error (rec_LeftJoin): level_a is larger level_b!";
         return 0;
@@ -554,6 +554,7 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENC
 }
 
 int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result){
+    std::cout << "getAllLeaves: start ..." << endl;
     if(sub_root != NULL){
         int loop = MAX_NUM_CHILD_II;
         if(sub_root->level == 0)

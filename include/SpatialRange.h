@@ -63,7 +63,7 @@ public:
 		return tree->isContain(siv); //TODO: modify the tree->isIntersect(siv)
 	}
 
-	HstmRange *range;//Should remove and remove any relevant code in SpatialRange_test.cpp
+	//HstmRange *range;//Should remove and remove any relevant code in SpatialRange_test.cpp
 	HTMSubTree *tree;
 
     std::list<list<STARE_ENCODE>>* leftJoin(SpatialRange* sp);

@@ -125,6 +125,7 @@ void HRML_LowLevelDiagnostic(int64 siv, int64 term)
 
 void SpatialRange_test () {
 
+
   // #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
 
@@ -506,7 +507,7 @@ void SpatialRange_test () {
      lon1 = numpy.array([-60, 60, 60, -60], dtype=numpy.double)
      hull1 = pystare.to_hull_range_from_latlon(lat1, lon1, resolution1)
     */
-
+/*
     STARE index;
 
     {
@@ -744,9 +745,9 @@ void SpatialRange_test () {
     }
 
     
-    
+*/    
   }
-  
+/* 
   {
 #define NCSIVS 7
     uint64 coalesce_sivs[NCSIVS] = {
@@ -817,7 +818,7 @@ void SpatialRange_test () {
     // exit(1);
     
   }
-
+*/
   {
     DIAGOUT("1000 ");
     int sivlen = 1000;
@@ -948,7 +949,7 @@ void SpatialRange_test () {
     ASSERT_EQUAL(sis_cleared[0],sis_out[0]);
     ASSERT_EQUAL(sis_cleared[1],sis_out[1]);
   }
-
+/*
   if(true) {
     // TODO Fix the following to use the new 0/1 variables defined above.
 
@@ -1027,8 +1028,8 @@ void SpatialRange_test () {
 #undef SISOUT
 
   }
-
-
+*/
+/*
   if(true) {
     // TODO Fix the following to use the new 0/1 variables defined above.
     // #define DIAG
@@ -1102,7 +1103,8 @@ void SpatialRange_test () {
 
     delete deltaRange;
   }
-
+*/
+/*
   DIAGOUT(500500);  
 
   // TODO Write many more tests & consider edge cases.
@@ -1189,7 +1191,7 @@ void SpatialRange_test () {
     ASSERT_EQUAL(0x0000400000000007,result[2]);
     ASSERT_EQUAL(0x0000600000000008,result[3]);
   }
-
+*/
   DIAGOUT(600);
 
   if(false) {

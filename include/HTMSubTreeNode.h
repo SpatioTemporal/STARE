@@ -8,11 +8,15 @@
 #include <string>
 #include <vector>
 
+#include "General.h"
+#include "SpatialGeneral.h"
+
 //TODO: These types should be combined with STARE.h 
 //  (i.e., Key == STARE_ENCODE == STARE_ArrayIndexSpatialValue)
 //  int64 and uint64 are defined in SpatialGeneral.h
 //typedef unsigned long long Key;      // STARE Encode - 64 bits    
-typedef unsigned long long STARE_ENCODE;     
+//typedef unsigned long long STARE_ENCODE;
+typedef uint64 STARE_ENCODE;     
 
 int const MAX_NUM_CHILD = 8;  // 8 children in the first level, and 4 children in other levels.
 int const MAX_NUM_CHILD_II = 4;

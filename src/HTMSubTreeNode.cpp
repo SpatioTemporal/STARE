@@ -46,7 +46,7 @@ HTMSubTreeNode::HTMSubTreeNode(STARE_ENCODE _key, bool _isLeaf, STARE_ENCODE _le
 STARE_ENCODE HTMSubTreeNode::genSTARELEVELCode(STARE_ENCODE key, STARE_ENCODE level, unsigned int pos){
     STARE_ENCODE result = 0;
     pos = pos % 8;
-    STARE_ENCODE temp = ((unsigned long long)pos);
+    STARE_ENCODE temp = ((STARE_ENCODE)pos);
     if (level == 0){        
         result = temp << (5 + 27 * 2);
         return result;

@@ -31,6 +31,7 @@ SpatialRange::~SpatialRange() {
 void SpatialRange::addSpatialRange(const SpatialRange& r) {
 	//this->range->addRange(range.range);
 	std::list<STARE_ENCODE> * temp = new std::list<STARE_ENCODE>();
+	std::cout << "addSpatialRange: start ..." << endl;
 	if(tree->getAllLeaves(r.tree->root, temp)){
 		if((temp != NULL) && (temp->size() > 0)){
 			tree->root->isLeaf = false;//start to insert
@@ -54,7 +55,7 @@ void SpatialRange::addSpatialRange(const SpatialRange& r) {
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	if(!intervals.empty()){
         int size = intervals.size();
-        unsigned long long curSID = 0;
+        STARE_ENCODE curSID = 0;
         tree->root->isLeaf = false;//start to insert
         for (int i = 0; i < size; i++){
             curSID = intervals[i];
