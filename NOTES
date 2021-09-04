@@ -1,5 +1,9 @@
 
-* 2021-0821 Version 1.2.0
+* 2021-0903 Version 1.2.1b
+
+CMake build/install improvement.
+
+* 2021-0821 Version 1.2.0b
 
 Added reverse and forward resolutions to fromJulianUTC and fromJulianTAI. Added default values to
 their declarations. Many changes to tests and generated a few bugs. Found overflow/underflow issue
