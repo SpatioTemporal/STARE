@@ -101,4 +101,4 @@ install(FILES STARE.h
   VarStr.h
   VarStr.hpp
   VarStr.hxx 
-  ../external/erfa-single-file/erfa.h DESTINATION include)
+  ../external/erfa-single-file/erfa.h DESTINATION include/STARE)
