@@ -41,8 +41,8 @@ message( "1010: ${STARE_LINK_LIBS}\n" )
 # include_directories(${CMAKE_SOURCE_DIR}/include)
 # link_directories(${CMAKE_BINARY_DIR}/src)
 
-# target_link_libraries(tests PRIVATE STARE)
-target_link_libraries(tests PUBLIC ${STARE_LINK_LIBS})
+target_link_libraries(tests PRIVATE STARE::STARE)
+# target_link_libraries(tests PUBLIC ${STARE_LINK_LIBS})
 
 target_include_directories(tests
   PUBLIC ${CUTE_INCLUDE_DIR}
