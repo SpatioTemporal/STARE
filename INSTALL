@@ -3,6 +3,13 @@
 
 Notes on installation.
 
+NEW: Conda Forge
+
+  STARE will soon be available on https://Conda-Forge.org, installable as follows (starting with linux).
+
+  conda install -c conda-forge stare
+
+
 Dependencies:
 
 1. STARE library

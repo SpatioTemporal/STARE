@@ -4,6 +4,9 @@
  *
  *  Created on: Apr 20, 2016
  *      Author: mrilee
+ *
+ *  Copyright (C) 2021 Rilee Systems Technologies LLC
+ *
  */
 
 #ifndef INCLUDE_HSTMINDEX_H_
