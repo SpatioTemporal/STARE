@@ -1,9 +1,21 @@
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.18)
 
-project(STARE)
+project(STARE VERSION 1.2.2)
+
+#+ mlr 2021-0907
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
+    NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+endif ()
+if (DEFINED STARE_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS "${STARE_SHARED_LIBS}")
+endif ()
+#- mlr 2021-0907
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
+option(STARE_BUILD_APPS "Build bundled STARE apps." OFF )
 
 if(DEFINED ENV{CUTE_INCLUDE_DIR})
     set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
@@ -73,17 +85,19 @@ include_directories(${ERFA_DIR} )
 include_directories(${PROJECT_SOURCE_DIR}/include )
 add_subdirectory(${PROJECT_SOURCE_DIR}/include )
 
-if(BUILD_TESTING)
-  message( "Adding tests...\n" )
-  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
-endif()
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+if(STARE_BUILD_APPS)
+   add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
 
 #file(GLOB SOURCES "/src/")
 #add_library( STARE STATIC ${SOURCES} )
+
+if(BUILD_TESTING)
+  message( "Adding tests...\n" )
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
+endif()
 
 # Read the version number from a file.
 

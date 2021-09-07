@@ -34,9 +34,38 @@ set (
   ../external/erfa-single-file/erfa.c )
   
 # TODO Trouble with VarStr.hpp
-# Var.Str.C is a kluge because I don't know how to get CMake to handle the hpp files correctly.
+# Var.Str.cpp is a kluge because I don't know how to get CMake to handle the hpp files correctly.
 # INTERFACE May be what works: http://stackoverflow.com/questions/5957134/how-to-setup-cmake-to-generate-header-only-projects
 
-add_library( STARE STATIC ${STARE_SrcFiles} )
+# add_library( STARE STATIC ${STARE_SrcFiles} )
 
-install(TARGETS STARE DESTINATION lib)
+add_library( STARE ${STARE_SrcFiles} )
+add_library( STARE::STARE ALIAS STARE )
+set_target_properties(STARE PROPERTIES
+			    VERSION ${STARE_VERSION}
+			    SOVERSION ${STARE_VERSION_MAJOR}
+			    POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+
+include(GenerateExportHeader)
+generate_export_header(STARE EXPORT_FILE_NAME include/STARE/export.h)
+target_compile_definitions(
+	STARE PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:STARE_STATIC_DEFINE>")
+
+target_include_directories(
+	STARE
+	PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/STARE>"
+	PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+	)
+	
+target_compile_features(STARE PUBLIC cxx_std_11)
+
+
+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
+option(STARE_INCLUDE_PACKAGING "Include packaging rules for STARE" "${is_top_level}")
+if(STARE_INCLUDE_PACKAGING)
+	add_subdirectory(packaging)
+endif ()
+
+
+# install(TARGETS STARE DESTINATION lib)
