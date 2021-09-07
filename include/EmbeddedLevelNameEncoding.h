@@ -3,6 +3,9 @@
  *
  *  Created on: Jan 29, 2016
  *      Author: mrilee
+ *
+ *  Copyright (C) 2021 Rilee Systems Technologies LLC
+ *
  */
 
 #ifndef INCLUDE_EMBEDDEDLEVELNAMEENCODING_H_
