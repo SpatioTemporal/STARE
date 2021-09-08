@@ -1,17 +1,23 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(STARE VERSION 1.2.2)
+project(STARE VERSION 1.2.3
+	      DESCRIPTION  "SpatioTemporal Adaptive Resolution Encoding for combining diverse geodata."
+	      HOMEPAGE_URL "https://github.com/SpatioTemporal/STARE")
 
-#+ mlr 2021-0907
+#+ mlr 2021-0907 TODO Revise
 if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
     NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
-  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-  set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+  set(CMAKE_CXX_VISIBILITY_PRESET default)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN NO)
 endif ()
 if (DEFINED STARE_SHARED_LIBS)
     set(BUILD_SHARED_LIBS "${STARE_SHARED_LIBS}")
 endif ()
+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
+option(STARE_INCLUDE_PACKAGING "Include packaging rules for STARE" "${is_top_level}")
+
 #- mlr 2021-0907
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
@@ -78,29 +84,7 @@ else()
      message(FATAL_ERROR " Platform ${CMAKE_SYSTEM_NAME} not handled.")
 endif()
 
-#add_subdirectory is used when the subdirectory has its own CMakeLists.txt
-# Otherwise, include_directories is used to access files in the directory
-# include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
-include_directories(${ERFA_DIR} )
-include_directories(${PROJECT_SOURCE_DIR}/include )
-add_subdirectory(${PROJECT_SOURCE_DIR}/include )
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-if(STARE_BUILD_APPS)
-   add_subdirectory(${PROJECT_SOURCE_DIR}/app)
-endif()
-add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
-
-#file(GLOB SOURCES "/src/")
-#add_library( STARE STATIC ${SOURCES} )
-
-if(BUILD_TESTING)
-  message( "Adding tests...\n" )
-  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
-endif()
-
 # Read the version number from a file.
-
 # Modified from 'file(STRING "VERSION" VERSION) so that the tar ball name
 # does not contain a trailing ';' jhrg 5/11/20
 file(READ "VERSION" ver)
@@ -126,6 +110,37 @@ string(REGEX MATCH "([0-9]*)\\.?([0-9]*)\\.?([0-9]*)\\.?.*" VERSION_PARTS ${VERS
 set(VERSION_MAJOR ${CMAKE_MATCH_1})
 set(VERSION_MINOR ${CMAKE_MATCH_2})
 set(VERSION_PATCH ${CMAKE_MATCH_3})
+if( NOT( "${VERSION}" EQUAL "${CMAKE_PROJECT_VERSION}") )
+message( "Warning: Project version (${CMAKE_PROJECT_VERSION}) differs from source code (${VERSION}).\n" )
+endif()
+
+
+#add_subdirectory is used when the subdirectory has its own CMakeLists.txt
+# Otherwise, include_directories is used to access files in the directory
+# include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
+include_directories(${ERFA_DIR} )
+include_directories(${PROJECT_SOURCE_DIR}/include )
+add_subdirectory(${PROJECT_SOURCE_DIR}/include )
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+if(STARE_BUILD_APPS)
+   add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+endif()
+add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
+
+#file(GLOB SOURCES "/src/")
+#add_library( STARE STATIC ${SOURCES} )
+
+if(BUILD_TESTING)
+  message( "Adding tests...\n" )
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
+endif()
+
+#+ mlr 2021-0907
+if(STARE_INCLUDE_PACKAGING)
+  add_subdirectory(packaging)
+endif ()
+#- mlr
 
 # quit()
 

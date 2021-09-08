@@ -59,13 +59,6 @@ target_include_directories(
 	
 target_compile_features(STARE PUBLIC cxx_std_11)
 
-
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
-option(STARE_INCLUDE_PACKAGING "Include packaging rules for STARE" "${is_top_level}")
-
-if(STARE_INCLUDE_PACKAGING)
-  add_subdirectory(packaging)
-else()
-  install(TARGETS STARE DESTINATION lib)
-endif ()
-
+# if(not STARE_INCLUDE_PACKAGING)
+#   install(TARGETS STARE DESTINATION lib)
+# endif()

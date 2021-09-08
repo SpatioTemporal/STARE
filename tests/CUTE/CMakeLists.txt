@@ -29,13 +29,11 @@ set_property(TARGET tests PROPERTY POSITION_INDEPENDENT_CODE 1 )
 
 target_link_directories(tests PUBLIC ${CMAKE_BINARY_DIR}/src)
 
-if(BUILD_SHARED_LIBS)
-  set( STARE_LINK_LIBS "libSTARE${CMAKE_SHARED_LIBRARY_SUFFIX}" )
-else()
-  set( STARE_LINK_LIBS "${CMAKE_BINARY_DIR}/src/libSTARE.a" )
-endif()
-
-message( "1010: ${STARE_LINK_LIBS}\n" )
+# if(BUILD_SHARED_LIBS)
+#   set( STARE_LINK_LIBS "libSTARE${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+# else()
+#   set( STARE_LINK_LIBS "${CMAKE_BINARY_DIR}/src/libSTARE.a" )
+# endif()
 
 # SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # include_directories(${CMAKE_SOURCE_DIR}/include)
