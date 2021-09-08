@@ -42,9 +42,9 @@ set (
 add_library( STARE ${STARE_SrcFiles} )
 add_library( STARE::STARE ALIAS STARE )
 set_target_properties(STARE PROPERTIES
-			    VERSION ${STARE_VERSION}
-			    SOVERSION ${STARE_VERSION_MAJOR}
-			    POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+			    VERSION "${STARE_VERSION}"
+			    SOVERSION "${STARE_VERSION_MAJOR}"
+			    POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
 
 include(GenerateExportHeader)
 generate_export_header(STARE EXPORT_FILE_NAME include/STARE/export.h)
