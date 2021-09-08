@@ -1,6 +1,13 @@
 
+* 2021-0907 Version 1.2.3b
 
-* 2021-0903 Version 1.2.2b
+Improved CMake configuration for building both shared and static versions.
+
+Following:
+
+https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
+
+* 2021-0906 Version 1.2.2b
 
 Documentation improvements.
 
