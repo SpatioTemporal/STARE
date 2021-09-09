@@ -21,6 +21,7 @@ option(STARE_INCLUDE_PACKAGING "Include packaging rules for STARE" "${is_top_lev
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
 option(STARE_BUILD_APPS "Build bundled STARE apps." OFF )
+option(STARE_INSTALL_LIBDIR "Destination of libs." "lib")
 
 if(DEFINED ENV{CUTE_INCLUDE_DIR})
     set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
