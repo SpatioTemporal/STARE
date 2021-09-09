@@ -2,15 +2,16 @@
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-if (NOT DEFINED STARE_INSTALL_CMAKEDIR)
-   set(STARE_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/STARE"
-       CACHE STRING "Path to STARE CMake files")
-endif ()
 
 if (NOT DEFINED STARE_INSTALL_LIBDIR)
    set(STARE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}"
        CACHE STRING "Path to library files")
 endif()
+
+if (NOT DEFINED STARE_INSTALL_CMAKEDIR)
+   set(STARE_INSTALL_CMAKEDIR "${STARE_INSTALL_LIBDIR}/cmake/STARE"
+       CACHE STRING "Path to STARE CMake files")
+endif ()
 
 # message( "STARE_INSTALL_CMAKEDIR: ${STARE_INSTALL_CMAKEDIR}" )
 # message( "STARE_INSTALL_LIBDIR:   ${STARE_INSTALL_LIBDIR}" )
