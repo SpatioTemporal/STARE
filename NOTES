@@ -1,4 +1,9 @@
 
+* 2021-0909 Version 1.2.4b
+
+Improved CMake configuration for building both shared and static
+versions. Working around GNUInstallDirs.
+
 * 2021-0907 Version 1.2.3b
 
 Improved CMake configuration for building both shared and static versions.
