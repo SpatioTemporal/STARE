@@ -1714,6 +1714,25 @@ void STARE_test() {
 		// TODO Operation that checks equality of two SpatialRanges.
 
 	}
+
+/**
+   https://github.com/SpatioTemporal/STARE/issues/99
+ */
+// void Bug99()
+	{
+
+	  STARE index;
+
+	  STARE_ArrayIndexSpatialValue problem_sid = 4485585228861014020; // 0x3e40000000000004
+	  LatLonDegrees64 latlon = index.LatLonDegreesFromValue(problem_sid);
+
+	  cout << "sid 0x" << setw(16) << setfill('0') << hex << problem_sid << dec
+	       << ", latlon=( " << latlon.lat << ", " << latlon.lon << " ) "
+	       << endl << flush;
+  
+	  FAIL();
+	}
+	
 	// FAIL();
 }
 

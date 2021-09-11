@@ -16,6 +16,7 @@
 
 #include "SpatialVector.h"
 #include "SpatialException.h"
+#include <iomanip>
 
 //==============================================================
 //
@@ -141,17 +142,35 @@ SpatialVector::getLatLonDegrees(float64 &lat, float64 &lon) {
 		float64 cd = cos(lat);
 		lat /= gPr;
 
+		float64 L =  sqrt( X*X + Y*Y + Z*Z );
+
+		/*
+		std::cout << std::setprecision(16) 
+			  << " cd,geps: " << cd << " " << gEpsilon << std::endl
+			  << " X,Y,Z,L: " << X << " " << Y << " " << " " << Z << " " << L  << std::endl
+		          << " gPr:     " << gPr << std::endl
+			  << std::flush
+			  << " mu:      " << (X/cd) << std::endl
+			  << " acs(mu): " << acos(X/cd) << std::endl
+			  << " acs(mu): " << acos(std::max(-1.0,std::min(1.0,(X/cd)))) << std::endl
+			  << " acs(mu): " << acos(X/(L*cd)) << std::endl
+			  << std::flush;
+		*/
+
 		if(cd>gEpsilon || cd<-gEpsilon) {
 			if(Y>gEpsilon || Y<-gEpsilon) {
 //				if(abs(X) < 1.0e-7) {
 //					std::cout << 1000 << " x_,X,cd,X/cd: " << x_ << "," << X  << "," << cd << "," << X/cd << std::endl << std::flush;
 //				}
-				float64 mu = X/cd; // Note, we normalized above so this should be within [-1,1] to within machine error.
+			  // The following didn't work on Ubuntu. MLR 2021-0910-1
+			  // float64 mu = X/cd; // Note, we normalized above so this should be within [-1,1] to within machine error.
+			  //
+			        float64 mu = std::max(-1.0,std::min(1.0,(X/cd))); // Mea culpa. MLR 2021-0910-1
 				if( abs(mu) > 1 ) {
 					lon = (X < 0.0 ? 180.0 : 0.0);
 				} else {
 					if (Y < 0.0) {
-						lon = 360 - acos(mu)/gPr;
+						lon = 360.0 - acos(mu)/gPr;
 					} else {
 						lon = acos(mu)/gPr;
 					}
