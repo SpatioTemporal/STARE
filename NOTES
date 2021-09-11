@@ -1,4 +1,9 @@
 
+* 2021-0910 Version 1.2.5
+
+Bug 99. acos(1) was going to NaN due to round off. Coerced the argument
+of acos to be in [-1,1].
+
 * 2021-0909 Version 1.2.4b
 
 Improved CMake configuration for building both shared and static
