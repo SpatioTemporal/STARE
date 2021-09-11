@@ -1726,11 +1726,17 @@ void STARE_test() {
 	  STARE_ArrayIndexSpatialValue problem_sid = 4485585228861014020; // 0x3e40000000000004
 	  LatLonDegrees64 latlon = index.LatLonDegreesFromValue(problem_sid);
 
+	  // cout << setprecision(16) << latlon.lat << endl << flush;
+	  ASSERT_EQUAL(0,latlon.lon);
+	  ASSERT_LESS(abs(35.26438961791519-latlon.lat),1.0e-14); // TODO Analyze this
+
+	  /*
 	  cout << "sid 0x" << setw(16) << setfill('0') << hex << problem_sid << dec
 	       << ", latlon=( " << latlon.lat << ", " << latlon.lon << " ) "
 	       << endl << flush;
+	  */
   
-	  FAIL();
+	  // FAIL();
 	}
 	
 	// FAIL();
