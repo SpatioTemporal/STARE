@@ -106,6 +106,9 @@ void HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify();
 void HTMSubTree_test_isContain();
 void HTMSubTree_test_getAllLeaves();
 void HTMSubTree_test_isIntersect();
+void HTMSubTree_test_leftJoin();
+void HTMSubTree_test_innerJoin();
+void HTMSubTree_test_fullJoin();
 /* ========== <Timer class> =========== */
 class timer
 {

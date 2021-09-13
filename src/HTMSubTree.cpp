@@ -83,7 +83,7 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         //temp->key = key; // ---- This can be faster ----
                         if(!path->empty())
                             path->pop_back();
-                        tryGroupLeaves(curNode, path);
+                        tryGroupLeaves(curNode, path);//TODO: add a flag to call this function
                         path->clear();
                         delete path;
                         return;
