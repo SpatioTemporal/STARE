@@ -260,7 +260,6 @@ bool HTMSubTree::rec_isIntersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b)
         STARE_ENCODE res_key = root_a->key;
         if (root_b->isLeaf)
             res_key = root_b->key;
-        //result->push_back(res_key); //add key of a leaf
         return true; // found an overlapping leaf
     }
     else{//Both root_a and root_b are Non-Leaf nodes
@@ -335,9 +334,6 @@ bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
 std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
-    //HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
-    //sub_root: the potential branch from root
-    //sub_Ins_root and sub_root have the same level. 
     if (root == NULL) {
         std::cout << "NULL input!";
         return NULL; 
@@ -354,7 +350,7 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
     HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
-    if (sub_root == NULL | sub_Ins_root == NULL) 
+    if (sub_root == NULL || sub_Ins_root == NULL) 
         return NULL; 
     if(rec_InnerJoin(sub_root, sub_Ins_root, result)) return result;
     return NULL;
@@ -380,9 +376,6 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_FullJoin): input is NULL!";
         return 0;
     }
-    //TODO: root->key only keeps level if the node is a leaf.
-    //STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
-    //STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
     if(root_a->level != root_b->level){
         std::cout << "Error (rec_FullJoin): levels are different in rec_FullJoin!";
         return 0;
@@ -420,7 +413,7 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
                 getAllLeaves(root_a->children[i], result);
             }
             if ((root_a->children[i] != NULL) && (root_b->children[i]) != NULL){
-                if(!rec_InnerJoin(root_a->children[i], root_b->children[i], result)) 
+                if(!rec_FullJoin(root_a->children[i], root_b->children[i], result)) 
                     return 0;//Stop if any error
             }          
         }
@@ -473,10 +466,6 @@ int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_LeftJoin): input is NULL!";
         return 0;
     }
-    //STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
-    //STARE_ENCODE level_a = root_a->level;
-    //STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
-    //STARE_ENCODE level_b = root_b->level;
     if(root_a->level > root_b->level){
         std::cout << "Error (rec_LeftJoin): level_a is larger level_b!";
         return 0;
@@ -561,7 +550,6 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENC
 }
 
 int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result){
-    //std::cout << "getAllLeaves: start ..." << endl;
     if(sub_root != NULL){
         int loop = MAX_NUM_CHILD_II;
         if(sub_root->level == 0)

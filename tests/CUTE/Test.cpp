@@ -4295,7 +4295,7 @@ void runSuite(int argc, char const *argv[]){
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
 	cute::suite s;
   //s.push_back(CUTE(HTMSubTree_test_leftJoin));
-  s.push_back(CUTE(HTMSubTree_test_innerJoin));
+  //s.push_back(CUTE(HTMSubTree_test_innerJoin));
   s.push_back(CUTE(HTMSubTree_test_fullJoin));
   //s.push_back(CUTE(HTMSubTree_test_getAllLeaves));
   //s.push_back(CUTE(HTMSubTree_test_isContain));
