@@ -335,12 +335,16 @@ bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
 std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
+    //HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
+    //sub_root: the potential branch from root
+    //sub_Ins_root and sub_root have the same level. 
     if (root == NULL) {
         std::cout << "NULL input!";
         return NULL; 
     }
     if (sub_Ins_root == NULL){
-        if (getAllLeaves(root, result)) return result;
+        if (getAllLeaves(root, result)) 
+            return result;
         return NULL;
     }
     if(rec_LeftJoin(root, sub_Ins_root, result)) return result;
@@ -376,9 +380,10 @@ int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_FullJoin): input is NULL!";
         return 0;
     }
-    STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
-    STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
-    if(level_a != level_b){
+    //TODO: root->key only keeps level if the node is a leaf.
+    //STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
+    //STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
+    if(root_a->level != root_b->level){
         std::cout << "Error (rec_FullJoin): levels are different in rec_FullJoin!";
         return 0;
     }
@@ -468,16 +473,18 @@ int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
         std::cout << "Error (rec_LeftJoin): input is NULL!";
         return 0;
     }
-    STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
-    STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
-    if(level_a > level_b){
+    //STARE_ENCODE level_a = root_a->key & 0x000000000000001f;
+    //STARE_ENCODE level_a = root_a->level;
+    //STARE_ENCODE level_b = root_b->key & 0x000000000000001f;
+    //STARE_ENCODE level_b = root_b->level;
+    if(root_a->level > root_b->level){
         std::cout << "Error (rec_LeftJoin): level_a is larger level_b!";
         return 0;
     }
     int loop = MAX_NUM_CHILD_II;
     if (root_a->level == 0)
         loop = MAX_NUM_CHILD;
-    if(level_a == level_b){
+    if(root_a->level == root_b->level){
         if(root_a->isLeaf){//get all leaves of b and add to a tuple of root_a.
             std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE> ();
             res->push_back(root_a->key);
@@ -512,7 +519,7 @@ int HTMSubTree::rec_LeftJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std
     }
     else{//level_a < level_b (root_a covers root_b)
         for(int i = 0; i < loop; i++){
-            STARE_ENCODE sid_b_adjust = getSTARELEVELCode(root_b->key, i + 1);
+            STARE_ENCODE sid_b_adjust = getSTARELEVELCode(root_b->key, root_a->level);
             if(root_a->children[i] != NULL){
                 if(root_a->keys[i] != sid_b_adjust){
                     //Stop if getting any error
@@ -554,7 +561,7 @@ int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<list<STARE_ENC
 }
 
 int HTMSubTree::getAllLeaves(HTMSubTreeNode * sub_root, std::list<STARE_ENCODE>* result){
-    std::cout << "getAllLeaves: start ..." << endl;
+    //std::cout << "getAllLeaves: start ..." << endl;
     if(sub_root != NULL){
         int loop = MAX_NUM_CHILD_II;
         if(sub_root->level == 0)
