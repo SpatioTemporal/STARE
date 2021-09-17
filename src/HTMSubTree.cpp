@@ -3,9 +3,6 @@
 
 HTMSubTree::HTMSubTree(){
     root = new HTMSubTreeNode();
-    //for (int64 i = 0; i < MAX_NUM_CHILD; i++){
-    //    root[i] = new HTMSubTreeNodeEntry(i);
-    //}
 }
 
 HTMSubTree::~HTMSubTree(){
@@ -330,6 +327,60 @@ bool HTMSubTree::check_Contain(STARE_ENCODE key_a, STARE_ENCODE key_b){
             return true;
         return false;
     }
+}
+
+bool HTMSubTree::isIntersect(STARE_ArrayIndexSpatialValue siv){ //return if siv is intersected with HTMSubTree
+    bool result = false;
+    HTMSubTreeNode* sub_root = getHighestRoot(root);            // sub_root: the highest root of a given tree.
+    if (sub_root == NULL)
+        return result; //siv is not contained in the tree
+    
+    result = rec_isIntersect(sub_root, siv);
+    return result;
+}
+
+bool HTMSubTree::rec_isIntersect(HTMSubTreeNode* sub_root, STARE_ArrayIndexSpatialValue siv){
+    if(sub_root == NULL){
+        std::cout << "Input Error (rec_isIntersect): The input is NULL!";
+        return false;
+    }
+    if(sub_root->isLeaf){
+        return check_Intersect(sub_root->key, siv);
+    }
+    else{//Both sub_root is Non-Leaf nodes
+        STARE_ENCODE level_r = sub_root->level;
+        STARE_ENCODE level_siv = siv & 0x000000000000001f;
+        if(level_siv < level_r)//siv's coverage is larger (or equal) than sub_root's coverage
+            return true;        // --> there at least one leaf in sub_root -> true
+        else{ // level_siv > level_r: siv's coverage is smaller than sub_root's coverage
+            STARE_ENCODE code_sid_adjust = getSTARELEVELCode(siv, level_r);
+            int loop = MAX_NUM_CHILD_II;
+            if (sub_root->level == 0)
+                loop = MAX_NUM_CHILD;
+            
+            for (int i = 0; i < loop; i++){
+                if((sub_root->keys[i] == code_sid_adjust) && (sub_root->children[i] != NULL)){
+                    bool result = rec_isIntersect(sub_root->children[i], siv);
+                    return result; //return the result from the only one potential child that may intersect with siv
+                }                
+            }
+            return false; //Cannot find any potential child.    
+        }
+    }
+}
+
+//Check if STARE_ID_b is intersected with STARE_ID_a
+bool HTMSubTree::check_Intersect(STARE_ENCODE key_a, STARE_ENCODE key_b){
+    STARE_ENCODE level_a = key_a & 0x000000000000001f;
+    STARE_ENCODE level_b = key_b & 0x000000000000001f;
+    STARE_ENCODE level_s = level_a;
+    if(level_b < level_a)
+        level_s = level_b;
+    STARE_ENCODE sid_a_adjust = getSTARELEVELCode(key_a, level_s);
+    STARE_ENCODE sid_b_adjust = getSTARELEVELCode(key_b, level_s);
+    if(sid_a_adjust == sid_b_adjust)
+        return true;
+    return false;
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
