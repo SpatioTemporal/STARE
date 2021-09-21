@@ -211,10 +211,16 @@ int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, st
         return -1;
     }
     if((root_a->isLeaf)  || (root_b->isLeaf)){
-        STARE_ENCODE res_key = root_a->key;
+        HTMSubTreeNode* sel_root = root_b;//root_a is leaf, add all leaves of root_b
         if (root_b->isLeaf)
-            res_key = root_b->key;
-        result->push_back(res_key); //add key of a leaf
+            sel_root = root_a;//root_b is leaf, add all leaves of root_a
+        std::list<STARE_ENCODE> * res = new std::list<STARE_ENCODE> ();
+        if(!getAllLeaves(sel_root, res)) 
+            return 0;
+        std::list<STARE_ENCODE>::iterator it;
+        for (it = res->begin(); it != res->end(); ++it)
+            result->push_back(*it);
+        delete res;
         return 1;
     }
     else{//Both root_a and root_b are Non-Leaf nodes
