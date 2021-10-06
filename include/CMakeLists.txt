@@ -71,6 +71,8 @@ install(FILES STARE.h
   HtmRangeMultiLevelIterator.h
   Htmio.h
   HstmRange.h
+  HTMSubTreeNode.h
+  HTMSubTree.h
   KeyPair.h
   NameEncoding.h
   RangeConvex.h
