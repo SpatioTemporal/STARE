@@ -4311,7 +4311,7 @@ void runSuite(int argc, char const *argv[]){
   //s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_VNP03DNB_1));
   //s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_small_verify));
   //s.push_back(CUTE(HTMSubTree_vs_SpatialRange_Intersect_MOD05_2_verify));
-	/*s.push_back(CUTE(precisionTest));
+	s.push_back(CUTE(precisionTest));
 	s.push_back(CUTE(lookupID));
 	s.push_back(CUTE(pointById));
 	s.push_back(CUTE(idByName));
@@ -4371,11 +4371,11 @@ void runSuite(int argc, char const *argv[]){
     s.push_back(CUTE(AdaptSpatialResolutionEstimates_test));
 
     s.push_back(CUTE(SpatialPolygon_test));
-    s.push_back(CUTE(SpatialRange_test));
+    //s.push_back(CUTE(SpatialRange_test));
 
     s.push_back(CUTE(SpatioTemporalUsage_test));
 
-	//	s.push_back(CUTE(testRange));*/
+	//	s.push_back(CUTE(testRange));
 
 	if(false) { // Lots of diagnostic output in the following.
 		s.push_back(CUTE(testRange));
