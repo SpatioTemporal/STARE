@@ -5,6 +5,8 @@
  *
  *  Author: Michael Rilee, Rilee Systems Technologies LLC
  *
+ *  Copyright (C) 2021 Rilee Systems Technologies LLC
+ *
  */
 
 #ifndef SRC_TEMPORALINDEX_H_

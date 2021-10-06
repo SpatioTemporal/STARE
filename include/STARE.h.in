@@ -12,6 +12,8 @@
 #ifndef INCLUDE_STARE_H_
 #define INCLUDE_STARE_H_
 
+#include "export.h"
+
 #include "General.h"
 #include "HstmRange.h"
 #include "SpatialGeneral.h"

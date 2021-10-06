@@ -3,6 +3,8 @@
  *
  *  Created on: Apr 10, 2017
  *      Author: mrilee
+ *
+ *  Copyright (C) 2021 Rilee Systems Technologies LLC
  */
 
 #include "TemporalIndex.h"
