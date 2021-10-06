@@ -24,10 +24,17 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ## INSTALL
   Please see the INSTALL file for more information about dependences and installation.
 
+  STARE will soon be available on https://Conda-Forge.org, installable as follows (starting with linux).
+  ```
+  conda install -c conda-forge stare
+  ```
+
 ## GITHUB
   STARE is made available at https://github.com/SpatioTemporal/STARE
   
   A Python API is at https://github.com/SpatioTemporal/pystare
+
+  STAREPandas is a pandas DataFrame pendant to GeoPandas at https://github.com/SpatioTemporal/STAREPandas
 
   A growing number of examples are available at https://github.com/SpatioTemporal/STARE-Cookbooks
   

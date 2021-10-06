@@ -1,9 +1,27 @@
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.18)
 
-project(STARE)
+project(STARE VERSION 1.2.5
+	      DESCRIPTION  "SpatioTemporal Adaptive Resolution Encoding for combining diverse geodata."
+	      HOMEPAGE_URL "https://github.com/SpatioTemporal/STARE")
+
+#+ mlr 2021-0907 TODO Revise
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
+    NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+  set(CMAKE_CXX_VISIBILITY_PRESET default)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN NO)
+endif ()
+
+option(BUILD_SHARED_LIBS "Build dynamic STARE library." ON )
+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
+option(STARE_INCLUDE_PACKAGING "Include packaging rules for STARE" "${is_top_level}")
+
+#- mlr 2021-0907
 
 option(CUTE_INCLUDE_DIR "Location of the CUTE headers." ON )
+option(STARE_BUILD_APPS "Build bundled STARE apps." OFF )
+option(STARE_INSTALL_LIBDIR "Destination of libs." "lib")
 
 if(DEFINED ENV{CUTE_INCLUDE_DIR})
     set( CUTE_INCLUDE_DIR $ENV{CUTE_INCLUDE_DIR} )
@@ -17,6 +35,10 @@ endif()
 set ( ERFA_DIR ${PROJECT_SOURCE_DIR}/external/erfa-single-file )
 
 message("\n------------ Running cmake for project STARE ------------\n")
+
+if(BUILD_SHARED_LIBS)
+  message(" Building shared object library.")
+endif()
 
 # Intentionally fail to test. set( CUTE_INCLUDE_DIR "/dev/none")
 if(EXISTS "${CUTE_INCLUDE_DIR}")
@@ -43,18 +65,18 @@ if( NOT DEFINED OPTFLAGS )
     set(C_OPT_FLAGS   "$ENV{OPTFLAGS}")
     set(CXX_OPT_FLAGS "$ENV{OPTFLAGS}")
   else()
-    message( "Setting C_OPT_FLAGS, CXX_OPT_FLAGS to -O3 by default.\n" )
+    message( " Setting C_OPT_FLAGS, CXX_OPT_FLAGS to -O3 by default.\n" )
     set(C_OPT_FLAGS "-O3")
     set(CXX_OPT_FLAGS "-O3")
   endif()
 else()
-  message( "Setting C_OPT_FLAGS, CXX_OPT_FLAGS to OPTFLAGS='${OPTFLAGS}'.\n" )
+  message( " Setting C_OPT_FLAGS, CXX_OPT_FLAGS to OPTFLAGS='${OPTFLAGS}'.\n" )
   set(C_OPT_FLAGS   "${OPTFLAGS}")
   set(CXX_OPT_FLAGS "${OPTFLAGS}")
 endif()
-message("Optimization settings.")
-message("C_OPT_FLAGS:  " ${C_OPT_FLAGS})
-message("CXX_OPT_FLAGS " ${CXX_OPT_FLAGS} "\n")
+message(" Optimization settings.")
+message(" C_OPT_FLAGS:  " ${C_OPT_FLAGS})
+message(" CXX_OPT_FLAGS " ${CXX_OPT_FLAGS} "\n")
  
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
      set(CMAKE_C_FLAGS "-g ${C_OPT_FLAGS} -Wall -D_BOOL_EXISTS -UDIAGNOSE -fPIC ${CMAKE_C_FLAGS}")
@@ -66,27 +88,7 @@ else()
      message(FATAL_ERROR " Platform ${CMAKE_SYSTEM_NAME} not handled.")
 endif()
 
-#add_subdirectory is used when the subdirectory has its own CMakeLists.txt
-# Otherwise, include_directories is used to access files in the directory
-# include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
-include_directories(${ERFA_DIR} )
-include_directories(${PROJECT_SOURCE_DIR}/include )
-add_subdirectory(${PROJECT_SOURCE_DIR}/include )
-
-if(BUILD_TESTING)
-  message( "Adding tests...\n" )
-  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
-endif()
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-add_subdirectory(${PROJECT_SOURCE_DIR}/app)
-add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
-
-#file(GLOB SOURCES "/src/")
-#add_library( STARE STATIC ${SOURCES} )
-
 # Read the version number from a file.
-
 # Modified from 'file(STRING "VERSION" VERSION) so that the tar ball name
 # does not contain a trailing ';' jhrg 5/11/20
 file(READ "VERSION" ver)
@@ -112,6 +114,37 @@ string(REGEX MATCH "([0-9]*)\\.?([0-9]*)\\.?([0-9]*)\\.?.*" VERSION_PARTS ${VERS
 set(VERSION_MAJOR ${CMAKE_MATCH_1})
 set(VERSION_MINOR ${CMAKE_MATCH_2})
 set(VERSION_PATCH ${CMAKE_MATCH_3})
+if( NOT( "${VERSION}" EQUAL "${CMAKE_PROJECT_VERSION}") )
+message( "Warning: Project version (${CMAKE_PROJECT_VERSION}) differs from source code (${VERSION}).\n" )
+endif()
+
+
+#add_subdirectory is used when the subdirectory has its own CMakeLists.txt
+# Otherwise, include_directories is used to access files in the directory
+# include_directories( ${PROJECT_SOURCE_DIR}/include /usr/include )
+include_directories(${ERFA_DIR} )
+include_directories(${PROJECT_SOURCE_DIR}/include )
+add_subdirectory(${PROJECT_SOURCE_DIR}/include )
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+if(STARE_BUILD_APPS)
+   add_subdirectory(${PROJECT_SOURCE_DIR}/app)
+endif()
+add_subdirectory(${PROJECT_SOURCE_DIR}/documentation )
+
+#file(GLOB SOURCES "/src/")
+#add_library( STARE STATIC ${SOURCES} )
+
+if(BUILD_TESTING)
+  message( "\n Adding tests...\n" )
+  add_subdirectory(${PROJECT_SOURCE_DIR}/tests/CUTE)  
+endif()
+
+#+ mlr 2021-0907
+if(STARE_INCLUDE_PACKAGING)
+  add_subdirectory(packaging)
+endif ()
+#- mlr
 
 # quit()
 
