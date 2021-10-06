@@ -20,8 +20,15 @@ SpatialRange::SpatialRange(STARE_SpatialIntervals intervals) {
 	tree = new HTMSubTree(intervals);
 }
 
+SpatialRange::SpatialRange(STARE_SpatialIntervals intervals, bool isGroupLeaves) {
+	tree = new HTMSubTree(intervals, isGroupLeaves);
+}
+
 SpatialRange::SpatialRange(std::list<STARE_ENCODE> * sids) {
 	tree = new HTMSubTree(sids);
+}
+SpatialRange::SpatialRange(std::list<STARE_ENCODE> * sids, bool isGroupLeaves) {
+	tree = new HTMSubTree(sids, isGroupLeaves);
 }
 SpatialRange::~SpatialRange() {
   if(tree != NULL)
@@ -53,6 +60,22 @@ void SpatialRange::addSpatialRange(const SpatialRange& r) {
 //#undef DIAG
 void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals) {
 	if(!intervals.empty()){
+        int size = intervals.size();
+        STARE_ENCODE curSID = 0;
+        tree->root->isLeaf = false;//start to insert
+        for (int i = 0; i < size; i++){
+            curSID = intervals[i];
+            tree->addSTAREID(curSID);
+        }
+    }
+    else{
+        std::cout << "Input Error: The list of STARE values is empty!";
+    }
+}
+
+void SpatialRange::addSpatialIntervals(STARE_SpatialIntervals intervals, bool _isGroupLeaves) {
+	if(!intervals.empty()){
+		tree->isGroupLeaves = _isGroupLeaves;
         int size = intervals.size();
         STARE_ENCODE curSID = 0;
         tree->root->isLeaf = false;//start to insert
@@ -146,7 +169,13 @@ SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool co
 	delete temp;
 	return result;
 }
-
+SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress, bool _isGroupLeaves) {
+	std::list<STARE_ENCODE> *temp = a.tree->intersect(b.tree->root);
+	SpatialRange *result = new SpatialRange(temp, _isGroupLeaves);
+	temp->clear();
+	delete temp;
+	return result;
+}
 
 std::list<list<STARE_ENCODE>>* SpatialRange::leftJoin(SpatialRange* sp){
 	return tree->leftJoin(sp->tree->root);

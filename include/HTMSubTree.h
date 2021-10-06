@@ -24,13 +24,19 @@ public:
     HTMSubTree();    
     HTMSubTree(char* sidecar);//Load HTMSubTree from sidecar file
     HTMSubTree(STARE_SpatialIntervals sids);//Load HTMSubTree from list of STARE values
+    HTMSubTree(STARE_SpatialIntervals sids, bool _isGroupLeaves);//Load HTMSubTree from list of STARE values
     HTMSubTree(std::list<STARE_ENCODE> *sids);
+     HTMSubTree(std::list<STARE_ENCODE> *sids, bool _isGroupLeaves);
 
     // Destructors
     ~HTMSubTree();
 
     // Attributes
     HTMSubTreeNode* root;
+    bool multipleResolution = true; //true (default value): allow multiple resolution in the tree
+                                    //false: allow only one resolution in the tree
+    bool isGroupLeaves = true;// true: allow tryGroupLeaves to run
+                                //false: don't allow tryGroupLeaves to run
     
     // Methods
     bool isIntersect(HTMSubTreeNode* Ins_root); // return if there is any overlapping

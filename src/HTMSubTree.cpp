@@ -3,6 +3,8 @@
 
 HTMSubTree::HTMSubTree(){
     root = new HTMSubTreeNode();
+    multipleResolution = true;
+    isGroupLeaves = true;
 }
 
 HTMSubTree::~HTMSubTree(){
@@ -19,6 +21,25 @@ HTMSubTree::HTMSubTree(char* sidecar){
 
 HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
     if(!sids.empty()){
+        multipleResolution = true;
+        isGroupLeaves = true;
+        int size = sids.size();
+        STARE_ENCODE curSID = 0;
+        root = new HTMSubTreeNode();
+        root->isLeaf = false;//start to insert
+        for (int i = 0; i < size; i++){
+            curSID = sids[i];
+            addSTAREID(curSID);
+        }
+    }
+    else{
+        std::cout << "Input Error: The list of STARE values is empty!";
+    }
+}
+HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids, bool _isGroupLeaves){
+    if(!sids.empty()){
+        multipleResolution = true;
+        isGroupLeaves = _isGroupLeaves;
         int size = sids.size();
         STARE_ENCODE curSID = 0;
         root = new HTMSubTreeNode();
@@ -35,6 +56,25 @@ HTMSubTree::HTMSubTree(STARE_SpatialIntervals sids){
 
 HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids){
     if(sids != NULL){
+        multipleResolution = true;
+        isGroupLeaves = true;
+        root = new HTMSubTreeNode();
+        root->isLeaf = false;//start to insert
+        std::list<STARE_ENCODE>::iterator it;
+        STARE_ENCODE curSID = 0;
+        for (it = sids->begin(); it != sids->end(); it++){
+            addSTAREID(*it);
+        }
+    }
+    else{
+        std::cout << "Input Error: The list of STARE values is empty!";
+    }
+}
+
+HTMSubTree::HTMSubTree(std::list<STARE_ENCODE> * sids, bool _isGroupLeaves){
+    if(sids != NULL){
+        multipleResolution = true;
+        isGroupLeaves = _isGroupLeaves;
         root = new HTMSubTreeNode();
         root->isLeaf = false;//start to insert
         std::list<STARE_ENCODE>::iterator it;
@@ -73,14 +113,16 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                     if(i < level){
                         temp->isLeaf = false;//Continue to go further
                         curNode = temp;
-                        path->push_back(curNode);
+                        if(isGroupLeaves) path->push_back(curNode);
                     }
                     else if(i == level){ //Set the level for the key
                         temp->key = temp->key | ((STARE_ENCODE)level);
                         //temp->key = key; // ---- This can be faster ----
-                        if(!path->empty())
-                            path->pop_back();
-                        tryGroupLeaves(curNode, path);//TODO: add a flag to call this function
+                        if(isGroupLeaves) {
+                            if(!path->empty())
+                                path->pop_back();
+                            tryGroupLeaves(curNode, path);
+                        }
                         path->clear();
                         delete path;
                         return;
@@ -106,9 +148,11 @@ void HTMSubTree::addSTAREID(STARE_ENCODE key){
                         curNode->children[j]->count = 0;
                         curNode->children[j]->key = curNode->children[j]->key | ((STARE_ENCODE)level);
                         //curNode->children[j]->key = key; // ---- This can be faster ----
-                        if(!path->empty())
-                            path->pop_back();
-                        tryGroupLeaves(curNode, path);
+                        if(isGroupLeaves) {
+                            if(!path->empty())
+                                path->pop_back();
+                            tryGroupLeaves(curNode, path);
+                        }
                         path->clear();
                         delete path;
                         return;

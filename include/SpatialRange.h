@@ -22,11 +22,14 @@ class SpatialRange {
 public:
 	SpatialRange(); 
 	SpatialRange(STARE_SpatialIntervals intervals); 
+	SpatialRange(STARE_SpatialIntervals intervals, bool isGroupLeaves); 
 	SpatialRange(HTMSubTree *tree){ this->tree = tree;} 
 	SpatialRange(std::list<STARE_ENCODE> *sids);
+	SpatialRange(std::list<STARE_ENCODE> *sids, bool isGroupLeaves);
 	virtual ~SpatialRange(); 
 
 	void addSpatialIntervals(STARE_SpatialIntervals intervals);
+	void addSpatialIntervals(STARE_SpatialIntervals intervals, bool _isGroupLeaves);
 	void addSpatialRange(const SpatialRange& r);
 
 	STARE_SpatialIntervals toSpatialIntervals();
@@ -110,7 +113,7 @@ public:
 	}
 };
 
-SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);
+SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false, bool isGroupLeaves=true);
 
 inline SpatialRange* operator& ( const SpatialRange& a,  const SpatialRange& b) {
 	return sr_intersect(a,b);
