@@ -3,6 +3,13 @@
 
 Notes on installation.
 
+NEW: Conda Forge
+
+  STARE will soon be available on https://Conda-Forge.org, installable as follows (starting with linux).
+
+  conda install -c conda-forge stare
+
+
 Dependencies:
 
 1. STARE library
@@ -41,6 +48,9 @@ mkdir build; cd build
 cmake -DCMAKE_INSTALL_PREFIX:PATH=< install_path > .. 
 make test
 make install
+
+# libSTARE.a will be added to ${CMAKE_INSTALL_PREFIX}/lib
+# Header files will be added to ${CMAKE_INSTALL_PREFIX}/include/STARE
 
 # Optimization flags may be set via an environment variable OPTFLAGS or via
 # the cmake invocation as

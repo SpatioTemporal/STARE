@@ -61,7 +61,7 @@ set (
 install(FILES STARE.h
   BitField.h
   BitShiftNameEncoding.h
-  CMakeLists.txt
+#  CMakeLists.txt
   Convexio.h
   EmbeddedLevelNameEncoding.h
   General.h
@@ -71,6 +71,8 @@ install(FILES STARE.h
   HtmRangeMultiLevelIterator.h
   Htmio.h
   HstmRange.h
+  HTMSubTreeNode.h
+  HTMSubTree.h
   KeyPair.h
   NameEncoding.h
   RangeConvex.h
@@ -103,4 +105,5 @@ install(FILES STARE.h
   VarStr.h
   VarStr.hpp
   VarStr.hxx 
-  ../external/erfa-single-file/erfa.h DESTINATION include)
+  ../external/erfa-single-file/erfa.h DESTINATION include/STARE)
+

@@ -1,5 +1,31 @@
 
-* 2021-0821 Version 1.2.0
+* 2021-0910 Version 1.2.5
+
+Bug 99. acos(1) was going to NaN due to round off. Coerced the argument
+of acos to be in [-1,1].
+
+* 2021-0909 Version 1.2.4b
+
+Improved CMake configuration for building both shared and static
+versions. Working around GNUInstallDirs.
+
+* 2021-0907 Version 1.2.3b
+
+Improved CMake configuration for building both shared and static versions.
+
+Following:
+
+https://alexreinking.com/blog/building-a-dual-shared-and-static-library-with-cmake.html
+
+* 2021-0906 Version 1.2.2b
+
+Documentation improvements.
+
+* 2021-0903 Version 1.2.1b
+
+CMake build/install improvement.
+
+* 2021-0821 Version 1.2.0b
 
 Added reverse and forward resolutions to fromJulianUTC and fromJulianTAI. Added default values to
 their declarations. Many changes to tests and generated a few bugs. Found overflow/underflow issue
