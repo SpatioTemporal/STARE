@@ -238,9 +238,9 @@ std::list<STARE_ENCODE>* HTMSubTree::intersect(HTMSubTreeNode* Ins_root){
     HTMSubTreeNode* sub_Ins_root = getHighestRoot(Ins_root);            // sub_Ins_root: the highest root of a given tree.
     HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);  //sub_root: the potential branch from root
                                                                         //sub_Ins_root and sub_root have the same level. 
-    if (sub_root == NULL || sub_Ins_root == NULL){
-        std::cout << "No intersection!";
-        return NULL; //There is no intersection
+    if (sub_root == NULL || sub_Ins_root == NULL){//No intersection
+        //std::cout << "No intersection!" << endl;
+        return result; //There is no intersection, return an empty list
     }
     rec_intersect(sub_root, sub_Ins_root, result);
     return result;
@@ -251,7 +251,6 @@ int HTMSubTree::rec_intersect(HTMSubTreeNode* root_a, HTMSubTreeNode* root_b, st
     STARE_ENCODE key_a = root_a->key & 0x3fffffffffffffe0; //clear level;
     STARE_ENCODE key_b = root_b->key & 0x3fffffffffffffe0;
     if(key_a != key_b || root_a->level != root_b->level) {
-        std::cout << "Input Error (rec_intersect): two sub_roots are not match each other!";
         return -1;
     }
     if((root_a->isLeaf)  || (root_b->isLeaf)){
@@ -442,19 +441,25 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::leftJoin(HTMSubTreeNode* Ins_root){
     if (sub_Ins_root == NULL){
         if (getAllLeaves(root, result)) 
             return result;
-        return NULL;
+        return result;
     }
     if(rec_LeftJoin(root, sub_Ins_root, result)) return result;
-    return NULL;
+    else
+        std::cout << "Error: an Error found in leftJoin!";
+    return result;
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::innerJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
     HTMSubTreeNode *sub_Ins_root = getHighestRoot(Ins_root);
     HTMSubTreeNode* sub_root = getPotentialBranch(root, sub_Ins_root);
     if (sub_root == NULL || sub_Ins_root == NULL) 
-        return NULL; 
-    if(rec_InnerJoin(sub_root, sub_Ins_root, result)) return result;
-    return NULL;
+        return result; //Return an empty list instead of NULL
+    if(rec_InnerJoin(sub_root, sub_Ins_root, result))
+        return result;
+    else{
+        std::cout << "Error (innerJoin): an Error found in innerJoin!";
+        return result; //Return an empty list instead of NULL
+    }
 }
 std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTreeNode* Ins_root){
     std::list<list<STARE_ENCODE>>* result = new std::list<list<STARE_ENCODE>>();
@@ -468,7 +473,9 @@ std::list<list<STARE_ENCODE>>* HTMSubTree::fullJoin(HTMSubTreeNode* Ins_root){
         return result;
     }
     if(rec_FullJoin(root, Ins_root, result)) return result;
-    return NULL;
+    else
+        std::cout << "Error: an Error found in fullJoin!";
+    return result;
 
 }
 int HTMSubTree::rec_FullJoin(HTMSubTreeNode *root_a, HTMSubTreeNode* root_b, std::list<list<STARE_ENCODE>>* result){
