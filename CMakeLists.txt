@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(STARE VERSION 1.2.5
+project(STARE VERSION 1.2.6
 	      DESCRIPTION  "SpatioTemporal Adaptive Resolution Encoding for combining diverse geodata."
 	      HOMEPAGE_URL "https://github.com/SpatioTemporal/STARE")
 
