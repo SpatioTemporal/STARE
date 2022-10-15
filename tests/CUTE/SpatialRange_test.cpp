@@ -128,7 +128,7 @@ void SpatialRange_test () {
   // #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
 
-  if(true) { // staremaster bug #
+  if(true) { // staremaster bug #107
 
     /*
 tcr-done 2 <class 'numpy.ndarray'> [2305843009213693952 4611686018427387903] ['0x2000000000000000', '0x3fffffffffffffff']
@@ -184,7 +184,7 @@ terminate called after throwing an instance of 'std::bad_alloc'
       STARE_ArrayIndexSpatialValue siv;
       STARE_ArrayIndexSpatialValue term;
 
-      siv = 0x3fa0000000000004;
+      siv = 0x2000000000000000;
       lj.setIdFromSciDBLeftJustifiedFormat(siv);      
       term = lj.getSciDBTerminatorLeftJustifiedFormat();
 #if 0
@@ -201,7 +201,7 @@ terminate called after throwing an instance of 'std::bad_alloc'
       STARE_ArrayIndexSpatialValue siv;
       STARE_ArrayIndexSpatialValue term;
 
-      siv = 0x3fa0000000000003;
+      siv = 0x2000000000000000;
       lj.setIdFromSciDBLeftJustifiedFormat(siv);      
       term = lj.getSciDBTerminatorLeftJustifiedFormat();
 #if 0
@@ -214,22 +214,22 @@ terminate called after throwing an instance of 'std::bad_alloc'
     }
 #if 0
     {
-      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fa7ffffffffffff);
-      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fafffffffffffff);
+      HRML_LowLevelDiagnostic(0x2000000000000000,0x3fffffffffffffff);
     }
 #endif
     
     STARE_SpatialIntervals expanded_expected = { // Abuse of the type...
-      0x3f88000000000004,
-      0x3f90000000000004,
-      0x3f98000000000004,
-      0x3fa0000000000004      // Error in bug 27-3: 0x3fa0000000000003
+      0x2000000000000000,
+      0x2800000000000000,
+      0x3000000000000000,
+      0x3800000000000000
     };
+    
     for(int k=0; k<expanded_expected.size(); ++k) {
       ASSERT_EQUAL(expanded_expected[k],expanded[k]);
     }
     
-  } // staremaster bug # 
+  } // staremaster bug #107
   
   if(true) { // pystare bug#27-3
 

@@ -1365,10 +1365,16 @@ STARE_ArrayIndexSpatialValues expandIntervalsMultiRes(STARE_SpatialIntervals int
 	  // Find the first tNum 0.
 	  int64 delta_to_first = (4 - triangleNumberLo) % 4; // Note that the delta_to_first may exceed number in interval.
 	  int64 number_of_full_parents = (1+delta-delta_to_first)/4;
+	  if( levelLo == 0 ) {
+	    // At the root, there are no parents.
+	    number_of_full_parents = 0;
+	  }
+	  
 	  // uint64 delta_in_last = 1+delta - delta_to_first - 4*number_of_full_parents;
 #if 0
 	  cout << "bareLo, bareHi         " << bareLo << " " << bareHi << endl << flush;
 	  cout << "bareLo, bareHi         " << hex << bareLo << " " << bareHi << dec << endl << flush;
+	  cout << "lvlLo                  " << levelLo << endl << flush;
 	  cout << "triangleNumberLo       " << triangleNumberLo << endl << flush;
 	  cout << "delta_to_first         " << delta_to_first << endl << flush;
 	  cout << "number_of_full_parents " << number_of_full_parents << endl << flush;
