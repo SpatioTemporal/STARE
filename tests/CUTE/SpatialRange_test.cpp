@@ -128,6 +128,109 @@ void SpatialRange_test () {
   // #define FMTX(x) " 0x" << setfill('0') << setw(16) << hex << x << dec
 
 
+  if(true) { // staremaster bug #
+
+    /*
+tcr-done 2 <class 'numpy.ndarray'> [2305843009213693952 4611686018427387903] ['0x2000000000000000', '0x3fffffffffffffff']
+tcr-done ['0x2000000000000000', '0x3fffffffffffffff']
+terminate called after throwing an instance of 'std::bad_alloc'
+     */
+    
+    string testname="staremaster-bug-";
+
+    STARE_SpatialIntervals sids = {
+      0x2000000000000000, 0x3fffffffffffffff // An interval at the root polyhedron
+    };
+
+    SpatialRange r(sids);
+#if 0
+    cout << testname << flush;
+    cout << "\nInitialized\n" << flush;
+    cout << "***r.dump()***" << endl << flush;
+    r.dump();
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    r.compress();
+#if 0
+    cout << "\ncompress\n" << flush;
+    cout << "***r.dump()***" << endl << flush;
+    r.dump();
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals compressed = r.toSpatialIntervals();
+#if 0
+    for(int k=0; k<compressed.size(); ++k) {
+      cout << "exp1 "
+	   << FMTX(compressed[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+
+    STARE_SpatialIntervals expanded = expandIntervalsMultiRes(compressed,-1,true);
+#if 0
+    for(int k=0; k<expanded.size(); ++k) {
+      cout << "exp2 "
+	   << FMTX(expanded[k])
+	   << endl << flush;
+    }
+    cout << "-----------------" << endl << flush;
+#endif
+    
+    {
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3fa0000000000004;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      cout << "-----------------" << endl << flush;
+#endif
+    }
+
+    {
+      EmbeddedLevelNameEncoding lj;
+      STARE_ArrayIndexSpatialValue siv;
+      STARE_ArrayIndexSpatialValue term;
+
+      siv = 0x3fa0000000000003;
+      lj.setIdFromSciDBLeftJustifiedFormat(siv);      
+      term = lj.getSciDBTerminatorLeftJustifiedFormat();
+#if 0
+      cout << "siv "
+	   << FMTX(siv) << " "
+	   << FMTX(term)
+	   << endl << flush;
+      cout << "-----------------" << endl << flush;
+#endif      
+    }
+#if 0
+    {
+      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fa7ffffffffffff);
+      HRML_LowLevelDiagnostic(0x3fa0000000000004,0x3fafffffffffffff);
+    }
+#endif
+    
+    STARE_SpatialIntervals expanded_expected = { // Abuse of the type...
+      0x3f88000000000004,
+      0x3f90000000000004,
+      0x3f98000000000004,
+      0x3fa0000000000004      // Error in bug 27-3: 0x3fa0000000000003
+    };
+    for(int k=0; k<expanded_expected.size(); ++k) {
+      ASSERT_EQUAL(expanded_expected[k],expanded[k]);
+    }
+    
+  } // staremaster bug # 
+  
   if(true) { // pystare bug#27-3
 
     STARE_SpatialIntervals sids = {
