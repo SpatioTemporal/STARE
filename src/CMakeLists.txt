@@ -59,6 +59,11 @@ target_include_directories(
 	
 target_compile_features(STARE PUBLIC cxx_std_11)
 
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(STARE PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # if(not STARE_INCLUDE_PACKAGING)
 #   install(TARGETS STARE DESTINATION lib)
 # endif()
