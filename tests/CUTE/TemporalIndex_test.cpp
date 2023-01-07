@@ -2720,12 +2720,12 @@ max resolution ms:    1
 	    }
 	  }
 	}
-
+	
 	if( true ) {
 	  double jd1=2459944, jd2=0.5;
-	  tIndex.fromJulianUTC(
-			       );
-
+	  int    forward_resolution=48, reverse_resolution=48;
+	  TemporalIndex tidx = tIndex.fromJulianUTC(jd1,jd2,forward_resolution,reverse_resolution);
+	  cout << "tidx: " << tidx.toStringJulianTAI() << endl << flush;
 	}
 
 	FAIL();
