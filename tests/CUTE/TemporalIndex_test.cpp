@@ -2720,7 +2720,17 @@ max resolution ms:    1
 	    }
 	  }
 	}
+
+	if( true ) {
+	  double jd1=2459944, jd2=0.5;
+	  tIndex.fromJulianUTC(
+			       );
+
+	}
+
+	FAIL();
 	
+
 //	if( true ) {
 //
 //
