@@ -12,35 +12,6 @@
 **
 */
 
-/* Star-independent astrometry parameters */
-typedef struct {
-   double pmt;        /* PM time interval (SSB, Julian years) */
-   double eb[3];      /* SSB to observer (vector, au) */
-   double eh[3];      /* Sun to observer (unit vector) */
-   double em;         /* distance from Sun to observer (au) */
-   double v[3];       /* barycentric observer velocity (vector, c) */
-   double bm1;        /* sqrt(1-|v|^2): reciprocal of Lorenz factor */
-   double bpn[3][3];  /* bias-precession-nutation matrix */
-   double along;      /* longitude + s' + dERA(DUT) (radians) */
-   double phi;        /* geodetic latitude (radians) */
-   double xpl;        /* polar motion xp wrt local meridian (radians) */
-   double ypl;        /* polar motion yp wrt local meridian (radians) */
-   double sphi;       /* sine of geodetic latitude */
-   double cphi;       /* cosine of geodetic latitude */
-   double diurab;     /* magnitude of diurnal aberration vector */
-   double eral;       /* "local" Earth rotation angle (radians) */
-   double refa;       /* refraction constant A (radians) */
-   double refb;       /* refraction constant B (radians) */
-} eraASTROM;
-/* (Vectors eb, eh, em and v are all with respect to BCRS axes.) */
-
-/* Body parameters for light deflection */
-typedef struct {
-   double bm;         /* mass of the body (solar masses) */
-   double dl;         /* deflection limiter (radians^2/2) */
-   double pv[2][3];   /* barycentric PV of the body (au, au/day) */
-} eraLDBODY;
-
 /* Pi */
 #define ERFA_DPI (3.141592653589793238462643)
 
@@ -125,7 +96,8 @@ typedef struct {
 #define ERFA_DINT(A) ((A)<0.0?ceil(A):floor(A))
 
 /* ERFA_DNINT(A) - round to nearest whole number (double) */
-#define ERFA_DNINT(A) ((A)<0.0?ceil((A)-0.5):floor((A)+0.5))
+#define ERFA_DNINT(A) (fabs(A)<0.5?0.0\
+                                :((A)<0.0?ceil((A)-0.5):floor((A)+0.5)))
 
 /* ERFA_DSIGN(A,B) - magnitude of A with sign of B (double) */
 #define ERFA_DSIGN(A,B) ((B)<0.0?-fabs(A):fabs(A))
@@ -145,6 +117,35 @@ typedef struct {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Star-independent astrometry parameters */
+typedef struct {
+   double pmt;        /* PM time interval (SSB, Julian years) */
+   double eb[3];      /* SSB to observer (vector, au) */
+   double eh[3];      /* Sun to observer (unit vector) */
+   double em;         /* distance from Sun to observer (au) */
+   double v[3];       /* barycentric observer velocity (vector, c) */
+   double bm1;        /* sqrt(1-|v|^2): reciprocal of Lorenz factor */
+   double bpn[3][3];  /* bias-precession-nutation matrix */
+   double along;      /* longitude + s' + dERA(DUT) (radians) */
+   double phi;        /* geodetic latitude (radians) */
+   double xpl;        /* polar motion xp wrt local meridian (radians) */
+   double ypl;        /* polar motion yp wrt local meridian (radians) */
+   double sphi;       /* sine of geodetic latitude */
+   double cphi;       /* cosine of geodetic latitude */
+   double diurab;     /* magnitude of diurnal aberration vector */
+   double eral;       /* "local" Earth rotation angle (radians) */
+   double refa;       /* refraction constant A (radians) */
+   double refb;       /* refraction constant B (radians) */
+} eraASTROM;
+/* (Vectors eb, eh, em and v are all with respect to BCRS axes.) */
+
+/* Body parameters for light deflection */
+typedef struct {
+   double bm;         /* mass of the body (solar masses) */
+   double dl;         /* deflection limiter (radians^2/2) */
+   double pv[2][3];   /* barycentric PV of the body (au, au/day) */
+} eraLDBODY;
 
 /* Astronomy/Calendars */
 int eraCal2jd(int iy, int im, int id, double *djm0, double *djm);
@@ -195,6 +196,13 @@ int eraApio13(double utc1, double utc2, double dut1,
               double elong, double phi, double hm, double xp, double yp,
               double phpa, double tc, double rh, double wl,
               eraASTROM *astrom);
+void eraAtcc13(double rc, double dc,
+               double pr, double pd, double px, double rv,
+               double date1, double date2,
+               double *ra, double *da);
+void eraAtccq(double rc, double dc,
+              double pr, double pd, double px, double rv,
+              eraASTROM *astrom, double *ra, double *da);
 void eraAtci13(double rc, double dc,
                double pr, double pd, double px, double rv,
                double date1, double date2,
@@ -264,6 +272,7 @@ void eraRefco(double phpa, double tc, double rh, double wl,
 /* Astronomy/Ephemerides */
 int eraEpv00(double date1, double date2,
              double pvh[2][3], double pvb[2][3]);
+void eraMoon98(double date1, double date2, double pv[2][3]);
 int eraPlan94(double date1, double date2, int np, double pv[2][3]);
 
 /* Astronomy/FundamentalArgs */
@@ -417,10 +426,28 @@ int eraStarpv(double ra, double dec,
               double pv[2][3]);
 
 /* Astronomy/StarCatalogs */
+
+void eraFk425(double r1950, double d1950,
+              double dr1950, double dd1950,
+              double p1950, double v1950,
+              double *r2000, double *d2000,
+              double *dr2000, double *dd2000,
+              double *p2000, double *v2000);
+void eraFk45z(double r1950, double d1950, double bepoch,
+              double *r2000, double *d2000);
+void eraFk524(double r2000, double d2000,
+              double dr2000, double dd2000,
+              double p2000, double v2000,
+              double *r1950, double *d1950,
+              double *dr1950, double *dd1950,
+              double *p1950, double *v1950);
 void eraFk52h(double r5, double d5,
               double dr5, double dd5, double px5, double rv5,
               double *rh, double *dh,
               double *drh, double *ddh, double *pxh, double *rvh);
+void eraFk54z(double r2000, double d2000, double bepoch,
+              double *r1950, double *d1950,
+              double *dr1950, double *dd1950);
 void eraFk5hip(double r5h[3][3], double s5h[3]);
 void eraFk5hz(double r5, double d5, double date1, double date2,
               double *rh, double *dh);
@@ -594,69 +621,106 @@ void eraSxpv(double s, double pv[2][3], double spv[2][3]);
 
 #ifdef __cplusplus
 }
-#endif	//Closes "extern C"
+#endif
+#endif
 
-#endif	//ERFAHDEF
+#ifndef _ERFA_EXTRA_H
+#define _ERFA_EXTRA_H
 
-/*----------------------------------------------------------------------
-**  
-**  
-**  Copyright (C) 2013-2019, NumFOCUS Foundation.
-**  All rights reserved.
-**  
-**  This library is derived, with permission, from the International
-**  Astronomical Union's "Standards of Fundamental Astronomy" library,
-**  available from http://www.iausofa.org.
-**  
-**  The ERFA version is intended to retain identical functionality to
-**  the SOFA library, but made distinct through different function and
-**  file names, as set out in the SOFA license conditions.  The SOFA
-**  original has a role as a reference standard for the IAU and IERS,
-**  and consequently redistribution is permitted only in its unaltered
-**  state.  The ERFA version is not subject to this restriction and
-**  therefore can be included in distributions which do not support the
-**  concept of "read only" software.
-**  
-**  Although the intent is to replicate the SOFA API (other than
-**  replacement of prefix names) and results (with the exception of
-**  bugs;  any that are discovered will be fixed), SOFA is not
-**  responsible for any errors found in this version of the library.
-**  
-**  If you wish to acknowledge the SOFA heritage, please acknowledge
-**  that you are using a library derived from SOFA, rather than SOFA
-**  itself.
-**  
-**  
-**  TERMS AND CONDITIONS
-**  
-**  Redistribution and use in source and binary forms, with or without
-**  modification, are permitted provided that the following conditions
-**  are met:
-**  
-**  1 Redistributions of source code must retain the above copyright
-**    notice, this list of conditions and the following disclaimer.
-**  
-**  2 Redistributions in binary form must reproduce the above copyright
-**    notice, this list of conditions and the following disclaimer in
-**    the documentation and/or other materials provided with the
-**    distribution.
-**  
-**  3 Neither the name of the Standards Of Fundamental Astronomy Board,
-**    the International Astronomical Union nor the names of its
-**    contributors may be used to endorse or promote products derived
-**    from this software without specific prior written permission.
-**  
-**  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-**  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-**  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-**  FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
-**  COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-**  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-**  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-**  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-**  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-**  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-**  POSSIBILITY OF SUCH DAMAGE.
-**  
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+  /* MLR 2023-0107
+     Since we're short-circuiting the build process, define the package version here.
+  */
+#define PACKAGE_VERSION "2.0.0"
+#define PACKAGE_VERSION_MAJOR 2
+#define PACKAGE_VERSION_MINOR 0
+#define PACKAGE_VERSION_MICRO 0
+#define SOFA_VERSION "20210512"
+/* #define DBL_EPSILON */
+#ifdef __cplusplus
+#include <cfloat>
+#else
+#include "float.h"
+#endif
+
+/*
+** Returns the package version
+** as defined in configure.ac
+** in string format
 */
+const char* eraVersion(void);
+
+/*
+** Returns the package major version
+** as defined in configure.ac
+** as integer
+*/
+int eraVersionMajor(void);
+
+/*
+** Returns the package minor version
+** as defined in configure.ac
+** as integer
+*/
+int eraVersionMinor(void);
+
+/*
+** Returns the package micro version
+** as defined in configure.ac
+** as integer
+*/
+int eraVersionMicro(void);
+
+/*
+** Returns the orresponding SOFA version
+** as defined in configure.ac
+** in string format
+*/
+const char* eraSofaVersion(void);
+
+
+/*
+** Get and set leap seconds (not supported by SOFA; EXPERIMENTAL)
+*/
+
+typedef struct {
+   int iyear, month;
+   double delat;
+} eraLEAPSECOND;
+
+int eraGetLeapSeconds(eraLEAPSECOND **leapseconds);
+void eraSetLeapSeconds(eraLEAPSECOND *leapseconds, int count);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+#ifndef _ERFA_DAT_EXTRA_H
+#define _ERFA_DAT_EXTRA_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+  
+
+/*
+**  Get the leap second table, initializing it to the built-in version
+**  if necessary.
+**
+**  This function is for internal use in dat.c only and should
+**  not be used elsewhere.
+*/
+int eraDatini(const eraLEAPSECOND *builtin, int n_builtin,
+              eraLEAPSECOND **leapseconds);
+
+
+#ifdef __cplusplus
+}
+#endif
+  
+#endif

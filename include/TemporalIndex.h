@@ -38,6 +38,12 @@
 using namespace std;
 // namespace std {
 
+static int erfa_status = 0; // 0 = ok, +1 = dubious year (beyond ERFA trustworthy domain), -1 = bad date, ...)
+
+void clear_erfa_status();
+void update_erfa_status(int erfa_return);
+int  get_erfa_status();
+
 class TemporalWordFormat : virtual public TemporalWordFormat1 {
 public:
 
@@ -591,16 +597,16 @@ public:
 	TemporalIndex& setZero();
 	TemporalIndex& setEOY(int64_t CE, int64_t year);
 
-	void           toJulianUTC   ( double& utc1, double& utc2)const ;
-        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
+	void           toJulianUTC   ( double& utc1, double& utc2) const ;
+        TemporalIndex& fromJulianUTC ( double  utc1, double  utc2, int forward_resolution=48, int reverse_resolution=48, int type=1);
 
 	void           toJulianTAI   ( double& d1, double& d2) const;
-	TemporalIndex& fromJulianTAI ( double  d1, double  d2, int forward_resolution=48, int reverse_resolution=48, int type=1  );
+        TemporalIndex& fromJulianTAI ( double  d1, double  d2, int forward_resolution=48, int reverse_resolution=48, int type=1);
 
 
 	void toFormattedJulianTAI(
-			int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
-			);
+				  int& year, int& month, int& day, int& hour, int& minute, int& second, int& ms
+				  );
 	/**
 	 * Set using a TAI date.
 	 */
