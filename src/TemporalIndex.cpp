@@ -939,9 +939,7 @@ void TemporalIndex::toJulianTAI(double& d1, double& d2) const {
 	double d0_1, d0_2;
 
     int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
-    if (not_ok_1 == 1) {
-      throw SpatialException("In TemporalIndex::toJulianTAI, eraD2dtf(...) failure.");
-    }
+    update_erfa_status(not_ok_1);    
     int64_t milliseconds = this->toInt64MillisecondsFractionOfYear();
     double  days         = ((double) milliseconds) / 86400000.0;
     d1 = d0_1; d2 = d0_2 + days;
@@ -1027,23 +1025,23 @@ int64_t TemporalIndex::toInt64MillisecondsFractionOfYear() const {
  * Use Julian days.
  */
 int64_t TemporalIndex::toInt64MillisecondsFractionOfYearJ() const {
-	int64_t _year = this->get_year(), CE = this->get_BeforeAfterStartBit();
-	if( CE < 1 ) { _year = 1 - _year; }
-	// Get the beginning of the year
-	double d0_1, d0_2;
+  int64_t _year = this->get_year(), CE = this->get_BeforeAfterStartBit();
+  if( CE < 1 ) { _year = 1 - _year; }
+  // Get the beginning of the year
+  double d0_1, d0_2;
 
-    int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
-    if (not_ok_1 == 1)
-        throw SpatialException("In TemporalIndex::toInt64MillisecondsFractionOfYearJ, eraD2dtf(...) failure.");
-
-//	// Get the current date
-//	int64_t milliseconds = toInt64MillisecondsFractionOfYear();
-	double d1, d2;
-	this->toJulianTAI(d1, d2);
-	double delta = (d1+d2) - (d0_1+d0_2); // Find difference d-d0
-	// return (int64_t) (delta * 86400000.0); // Convert to milliseconds
-	return rint(delta * 86400000.0); // Convert to milliseconds
+  int not_ok_1 = eraDtf2d( TimeStandard, _year, 1, 1, 0, 0, 0, &d0_1, &d0_2 );
+  update_erfa_status(not_ok_1);
+    
+  //	// Get the current date
+  //	int64_t milliseconds = toInt64MillisecondsFractionOfYear();
+  double d1, d2;
+  this->toJulianTAI(d1, d2);
+  double delta = (d1+d2) - (d0_1+d0_2); // Find difference d-d0
+  // return (int64_t) (delta * 86400000.0); // Convert to milliseconds
+  return rint(delta * 86400000.0); // Convert to milliseconds
 }
+
 /**
    Convert the (already stored) temporal index value to milliseconds.
 
