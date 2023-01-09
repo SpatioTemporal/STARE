@@ -1,4 +1,9 @@
 
+* 2023-0107-2301-50-EST
+
+Updated ERFA to 2.0.0. Had to define several version macro symbols by hand. Also
+added header files to get DBL_EPSILON definition.
+
 * 2019-1217-1615-10-EST
 
 DartConfiguration.tcl in cmake-build directory has options concerning the build.

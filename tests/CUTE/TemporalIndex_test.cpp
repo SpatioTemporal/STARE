@@ -2721,6 +2721,39 @@ max resolution ms:    1
 	  }
 	}
 	
+	if( true ) {
+	  /*
+	    Bug 111. fromJulianUTC throws exception for dubious year returned by ERFA.
+	    Added a static erfa_status static variable in TemporalIndex.h. Return
+	    codes from ERFA routines are stored there. Accessor and clearing functions
+	    are defined for users to check. Exceptions are no logner raised for ERFA
+	    non-nominal return codes.
+	  */
+	  {
+	    double jd1=2459944, jd2=0.5;
+	    int    forward_resolution=48, reverse_resolution=48;
+	    clear_erfa_status();
+	    ASSERT_EQUAL(0,get_erfa_status());
+	    TemporalIndex tidx = tIndex.fromJulianUTC(jd1,jd2,forward_resolution,reverse_resolution);
+	    // cout << "tidx: " << tidx.toStringJulianTAI() << endl << flush;
+	    ASSERT_EQUAL(0,get_erfa_status());
+	  }
+
+	  {
+	    double jd1=2459944+100*365.0, jd2=0.5; // 100 years beyond the original value used for bug 111.
+	    int    forward_resolution=48, reverse_resolution=48;
+	    clear_erfa_status();
+	    ASSERT_EQUAL(0,get_erfa_status());
+	    TemporalIndex tidx = tIndex.fromJulianUTC(jd1,jd2,forward_resolution,reverse_resolution);
+	    // cout << "tidx: " << tidx.toStringJulianTAI() << endl << flush;
+	    ASSERT_EQUAL(1,get_erfa_status());
+	  }
+
+	}
+
+        //	FAIL();
+	
+
 //	if( true ) {
 //
 //

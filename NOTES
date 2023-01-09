@@ -1,4 +1,12 @@
 
+* 2023-0107 Version 1.2.7
+
+Bug 111. fromJulianUTC throws exception for dubious year returned by ERFA.
+Added a static erfa_status static variable in TemporalIndex.h. Return
+codes from ERFA routines are stored there. Accessor and clearing functions
+are defined for users to check. Exceptions are no longer raised for ERFA
+non-nominal return codes. Updated ERFA and added a unit test.
+
 * 2022-1015 Version 1.2.6
 
 Bug 107. expandIntervalsMultiRes was trying to concatenate faces of
