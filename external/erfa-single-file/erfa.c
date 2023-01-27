@@ -26499,7 +26499,7 @@ static void t_leap_seconds(int *status)
   }
 }
 
-int main(int argc, char *argv[])
+int main_test(int argc, char *argv[])
 {
    int status;
 
