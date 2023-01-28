@@ -1,4 +1,8 @@
 
+* 2023-0127 Version 1.2.8
+
+Bug 113. ERFA had a main function, which led to linking error. Renamed to main_test.
+
 * 2023-0107 Version 1.2.7
 
 Bug 111. fromJulianUTC throws exception for dubious year returned by ERFA.
