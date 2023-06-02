@@ -1,4 +1,21 @@
 
+* 2023-0127 Version 1.2.8
+
+Bug 113. ERFA had a main function, which led to linking error. Renamed to main_test.
+
+* 2023-0107 Version 1.2.7
+
+Bug 111. fromJulianUTC throws exception for dubious year returned by ERFA.
+Added a static erfa_status static variable in TemporalIndex.h. Return
+codes from ERFA routines are stored there. Accessor and clearing functions
+are defined for users to check. Exceptions are no longer raised for ERFA
+non-nominal return codes. Updated ERFA and added a unit test.
+
+* 2022-1015 Version 1.2.6
+
+Bug 107. expandIntervalsMultiRes was trying to concatenate faces of
+the root polyhedra, leading to a runaway loop and runaway memory use.
+
 * 2021-0910 Version 1.2.5
 
 Bug 99. acos(1) was going to NaN due to round off. Coerced the argument

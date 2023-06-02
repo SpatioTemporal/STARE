@@ -24,7 +24,7 @@ Michael Lee Rilee, RSTLLC, mike@rilee.net, 240-481-3254
 ## INSTALL
   Please see the INSTALL file for more information about dependences and installation.
 
-  STARE will soon be available on https://Conda-Forge.org, installable as follows (starting with linux).
+  STARE is available on https://Conda-Forge.org, installable as follows (starting with linux).
   ```
   conda install -c conda-forge stare
   ```
