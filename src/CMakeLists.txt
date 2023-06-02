@@ -11,6 +11,8 @@ set (
   HtmRangeMultiLevelIterator.cpp
   Htmio.cpp
   HstmRange.cpp
+  HTMSubTreeNode.cpp
+  HTMSubTree.cpp
   NameEncoding.cpp
   RangeConvex.cpp
   SkipList.cpp

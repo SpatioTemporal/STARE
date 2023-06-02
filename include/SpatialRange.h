@@ -12,6 +12,7 @@
 
 #include "STARE.h"
 #include "HstmRange.h"
+#include "HTMSubTree.h"
 
 /**
  * A wrapper for an HstmRange that knows about STARE to provide htm-range-like functions.
@@ -19,52 +20,46 @@
  */
 class SpatialRange {
 public:
-	SpatialRange();
-	SpatialRange(STARE_SpatialIntervals intervals);
-	SpatialRange(HstmRange *range) { this->range = range; }
-	virtual ~SpatialRange();
+	SpatialRange(); 
+	SpatialRange(STARE_SpatialIntervals intervals); 
+	SpatialRange(STARE_SpatialIntervals intervals, bool isGroupLeaves); 
+	SpatialRange(HTMSubTree *tree){ this->tree = tree;} 
+	SpatialRange(std::list<STARE_ENCODE> *sids);
+	SpatialRange(std::list<STARE_ENCODE> *sids, bool isGroupLeaves);
+	virtual ~SpatialRange(); 
 
 	void addSpatialIntervals(STARE_SpatialIntervals intervals);
+	void addSpatialIntervals(STARE_SpatialIntervals intervals, bool _isGroupLeaves);
 	void addSpatialRange(const SpatialRange& r);
 
 	STARE_SpatialIntervals toSpatialIntervals();
-	int getNextSpatialInterval(STARE_SpatialIntervals &interval);
+	int getNextSpatialInterval(STARE_SpatialIntervals &interval);//Don't need this
 
 	bool contains(STARE_ArrayIndexSpatialValue siv) {
-	  // cout << "sr::c " << flush;
-	  EmbeddedLevelNameEncoding leftJustified;
-	  leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
-	  return range->range->isIn(leftJustified.maskOffLevelBit());
+		return tree->isContain(siv);
+	}
+
+	void print(){
+		tree->printTree();
 	}
 
 	bool intersects(STARE_ArrayIndexSpatialValue siv) {
-		EmbeddedLevelNameEncoding leftJustified;
-		leftJustified.setIdFromSciDBLeftJustifiedFormat(siv);
-		Key lo = leftJustified.maskOffLevelBit();
-		Key hi = lo;
-#if 0
-		KeyPair pr = KeyPair(lo,hi);
-#endif
-		int rstat = range->range->contains(lo,hi);
-		bool intersectp = rstat != 0; // 0:no-intersection;-1:partial;1:full.
-		return intersectp;
+		return tree->isIntersect(siv);
 	}
 
-	HstmRange *range;
+	HTMSubTree *tree;
 
-	/////////// private: Maybe? ////////////
+    std::list<list<STARE_ENCODE>>* leftJoin(SpatialRange* sp);
+    std::list<list<STARE_ENCODE>>* innerJoin(SpatialRange* sp);
+    std::list<list<STARE_ENCODE>>* fullJoin(SpatialRange* sp);
 
-	// Maybe inherit these?
-	// TODO Note the int in the following is a return code, not an index.
-	int  getNext(KeyPair &kp) {
-		int istat = range->getNext(kp);
-//		cout << "<istat=" << istat << ">" << flush;
-		return istat;
-	};
-	void reset() { range->reset(); } // range not null?
-	void purge() { range->purge(); } // what if range null?
-	void defrag() { range->range->defrag(); } // Defragment intervals without changing resolution
-	void compress() { range->range->CompressionPass(); } // Defragment and coarsen resolution where possible
+	//Mike suggested to remove these functions
+	int  getNext(KeyPair &kp) {}
+	void reset() {}
+	void purge() { print();	} 
+	void defrag() {} 
+	void compress() {}
+	//////////////////////////////////////////////
 
 #define FMTX(x) " 0x" << setw(16) << hex << x << dec	
 	void dump() {
@@ -118,11 +113,10 @@ public:
 	}
 };
 
-SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false);
+SpatialRange* sr_intersect(const SpatialRange& a, const SpatialRange& b, bool compress = false, bool isGroupLeaves=true);
 
 inline SpatialRange* operator& ( const SpatialRange& a,  const SpatialRange& b) {
 	return sr_intersect(a,b);
-	// return new SpatialRange(new HstmRange(a.range->range->RangeFromIntersection(b.range->range))); // NOTE mlr Probably about the safest way to inst. SpatialRange.
 }
 void SpatialRange_test();
 

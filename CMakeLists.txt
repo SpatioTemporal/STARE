@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.16)
 
 project(STARE VERSION 1.2.8
 	      DESCRIPTION  "SpatioTemporal Adaptive Resolution Encoding for combining diverse geodata."

@@ -13,6 +13,8 @@ set (
   ${CMAKE_CURRENT_SOURCE_DIR}/HtmRangeMultiLevelIterator.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Htmio.h
   ${CMAKE_CURRENT_SOURCE_DIR}/HstmRange.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/HTMSubTreeNode.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/HTMSubTree.h
   ${CMAKE_CURRENT_SOURCE_DIR}/NameEncoding.h
   ${CMAKE_CURRENT_SOURCE_DIR}/PySTARE.h
   ${CMAKE_CURRENT_SOURCE_DIR}/RangeConvex.h
@@ -69,6 +71,8 @@ install(FILES STARE.h
   HtmRangeMultiLevelIterator.h
   Htmio.h
   HstmRange.h
+  HTMSubTreeNode.h
+  HTMSubTree.h
   KeyPair.h
   NameEncoding.h
   RangeConvex.h
